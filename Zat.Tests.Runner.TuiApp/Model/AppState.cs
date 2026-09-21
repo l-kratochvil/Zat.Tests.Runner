@@ -10,4 +10,6 @@ internal record AppState(
     [property: JsonPropertyName("ideVersion")]
     string? IdeVersion,
     [property: JsonPropertyName("testedHwAssemblyType")]
-    TestedHwAssemblyType? TestedHwAssemblyType);
+    TestedHwAssemblyType? TestedHwAssemblyType,
+    [property: JsonPropertyName("isTestLinkReportingEnabled")]
+    bool? IsTestLinkReportingEnabled);

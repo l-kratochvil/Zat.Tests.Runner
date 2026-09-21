@@ -18,6 +18,13 @@ internal class TestConfigStore(AppStateStore appStateStore)
     public bool IsRuntimeTest
         => this.SelectedTestEntities.Any(x => x.TestType is TestType.RuntimeTest);
 
+    public bool? IsTestLinkReportingEnabled
+    {
+        get => appStateStore.Current.IsTestLinkReportingEnabled;
+        set => appStateStore.Update(
+            current => current with { IsTestLinkReportingEnabled = value });
+    }
+
     public string? RuntimeVersion
     {
         get => appStateStore.Current.RuntimeVersion;

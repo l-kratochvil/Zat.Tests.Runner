@@ -18,6 +18,7 @@ internal sealed class HomeScreen(
     TestSuitesSelectionScreen testEntitiesFromTestsuitesPromptScreen,
     TestCasesSelectionScreen testEntitiesFromTestCasesPromptScreen,
     HwAssemblyTypeSelectionScreen hwAssemblyTypeSelectionScreen,
+    EnableTestLinkReportingPromptScreen enableTestLinkReportingPromptScreen,
     RunTestScreen runTestScreen)
     : ScreenBase(homeScreen, exitScreen, settingsScreen)
 {
@@ -92,6 +93,7 @@ internal sealed class HomeScreen(
 
     private IEnumerable<Choice<IScreen>> GetChoices()
     {
+        // Runtime version choice
         yield return new Choice<IScreen>(
             value: runtimeVersionPromptScreen,
             displayText: Resources.RuntimeVersion_ChoiceText,
@@ -102,20 +104,7 @@ internal sealed class HomeScreen(
             yield break;
         }
 
-        if (Choice.InitChoice<IScreen>(
-                ideVersionPromptScreen,
-                Resources.IdeVersion_ChoiceText,
-                testConfigStore.IdeVersion)
-            .TryGetValue(out var ideVersionChoice))
-        {
-            yield return ideVersionChoice;
-        }
-
-        if (testConfigStore.IdeVersion is null)
-        {
-            yield break;
-        }
-
+        // Test suites selection choice
         if (Choice.InitChoice<IScreen>(
                 testEntitiesFromTestsuitesPromptScreen,
                 Resources.SelectTestSuites_ChoiceText,
@@ -125,6 +114,7 @@ internal sealed class HomeScreen(
             yield return selectTestSuiteChoice;
         }
 
+        // Test cases selection choice
         if (Choice.InitChoice<IScreen>(
                 testEntitiesFromTestCasesPromptScreen,
                 Resources.SelectTestCases_ChoiceText,
@@ -139,6 +129,7 @@ internal sealed class HomeScreen(
             yield break;
         }
 
+        // HW assembly type selection choice
         if (Choice.InitChoice<IScreen>(
                 hwAssemblyTypeSelectionScreen,
                 Resources.SelectHwAssemblyType_ChoiceText,
@@ -158,6 +149,43 @@ internal sealed class HomeScreen(
             yield break;
         }
 
+        // Enable Test Link reporting choice
+        if (Choice.InitChoice<IScreen>(
+                enableTestLinkReportingPromptScreen,
+                Resources.EnableTestLinkReporting_PromptText,
+                testConfigStore.IsTestLinkReportingEnabled?.ToString())
+            .TryGetValue(out var enableTestLinkReportingPromptScreenChoice))
+        {
+            yield return enableTestLinkReportingPromptScreenChoice;
+        }
+
+        if (testConfigStore.IsTestLinkReportingEnabled is null)
+        {
+            yield break;
+        }
+
+        if (testConfigStore.IsTestLinkReportingEnabled.HasValue &&
+            testConfigStore.IsTestLinkReportingEnabled.Value)
+        {
+            // IDE version choice
+            if (Choice.InitChoice<IScreen>(
+                    ideVersionPromptScreen,
+                    Resources.IdeVersion_ChoiceText,
+                    testConfigStore.IdeVersion)
+                .TryGetValue(out var ideVersionChoice))
+            {
+                yield return ideVersionChoice;
+            }
+
+            if (testConfigStore.IdeVersion is null)
+            {
+                yield break;
+            }
+
+            // TODO: Optional release dates of tested installations (RT, IDE)?
+        }
+
+        // Validation of required configuration values
         if (string.IsNullOrEmpty(testConfigStore.IdeVersion) ||
             string.IsNullOrEmpty(testConfigStore.RuntimeVersion) ||
             !testConfigStore.SelectedTestEntities.Any())

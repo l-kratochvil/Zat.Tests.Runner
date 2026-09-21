@@ -7,7 +7,7 @@ using Spectre.Console;
 using Zat.Tests.Runner.TuiApp.Stores;
 using Zat.Z2xxTests.Common;
 
-internal class TestCasesSelectionScreen(
+internal class HwAssemblyTypeSelectionScreen(
     TestConfigStore testConfigStore,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,

@@ -79,6 +79,15 @@ namespace Zat.Tests.Runner.TuiApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Send result to TestLink?.
+        /// </summary>
+        public static string EnableTestLinkReporting_PromptText {
+            get {
+                return ResourceManager.GetString("EnableTestLinkReporting_PromptText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Enter IDE install folder path: .
         /// </summary>
         public static string EnterIdeInstallFolderPath_PromptText {
@@ -156,6 +165,15 @@ namespace Zat.Tests.Runner.TuiApp.Properties {
         public static string NoRuntimesFoundUnderIdeInstallFolder_Message {
             get {
                 return ResourceManager.GetString("NoRuntimesFoundUnderIdeInstallFolder_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to n.
+        /// </summary>
+        public static string NoShorten {
+            get {
+                return ResourceManager.GetString("NoShorten", resourceCulture);
             }
         }
         
@@ -615,6 +633,15 @@ namespace Zat.Tests.Runner.TuiApp.Properties {
         public static string Unselected {
             get {
                 return ResourceManager.GetString("Unselected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to y.
+        /// </summary>
+        public static string YesShorten {
+            get {
+                return ResourceManager.GetString("YesShorten", resourceCulture);
             }
         }
     }

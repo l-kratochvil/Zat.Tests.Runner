@@ -303,4 +303,13 @@
   <data name="SelectHwAssemblyType_ChoiceText" xml:space="preserve">
     <value>Select tested HW assembly type</value>
   </data>
+  <data name="EnableTestLinkReporting_PromptText" xml:space="preserve">
+    <value>Send result to TestLink?</value>
+  </data>
+  <data name="YesShorten" xml:space="preserve">
+    <value>y</value>
+  </data>
+  <data name="NoShorten" xml:space="preserve">
+    <value>n</value>
+  </data>
 </root>

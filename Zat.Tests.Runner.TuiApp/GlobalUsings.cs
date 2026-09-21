@@ -7,6 +7,7 @@ global using DevKit.Core.Extensions.Functional;
 global using Spectre.Console;
 
 global using Zat.Tests.Runner.Common.Extensions;
+global using Zat.Tests.Runner.TuiApp.Extensions;
 global using Zat.Tests.Runner.TuiApp.Properties;
 global using Zat.Tests.Runner.TuiApp.Utils;
 

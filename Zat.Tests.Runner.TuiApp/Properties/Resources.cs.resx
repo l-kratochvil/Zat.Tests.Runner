@@ -303,4 +303,13 @@
   <data name="SelectHwAssemblyType_ChoiceText" xml:space="preserve">
     <value>Vyber typ testované HW sestavy</value>
   </data>
+  <data name="EnableTestLinkReporting_PromptText" xml:space="preserve">
+    <value>Odeslat výsledek to TestLinku?</value>
+  </data>
+  <data name="YesShorten" xml:space="preserve">
+    <value>a</value>
+  </data>
+  <data name="NoShorten" xml:space="preserve">
+    <value>n</value>
+  </data>
 </root>

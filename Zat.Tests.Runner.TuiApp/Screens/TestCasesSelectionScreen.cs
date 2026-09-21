@@ -10,7 +10,7 @@ using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.TuiApp.Extensions;
 using Zat.Tests.Runner.TuiApp.Stores;
 
-internal class HwAssemblyTypeSelectionScreen(
+internal class TestCasesSelectionScreen(
     TestConfigStore testConfigStore,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,

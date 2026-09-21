@@ -26,7 +26,8 @@ internal class AppStateStore : IJsonPersistanceStore<AppState>
         => new(
             RuntimeVersion: null,
             IdeVersion: null,
-            TestedHwAssemblyType: null);
+            TestedHwAssemblyType: null,
+            IsTestLinkReportingEnabled: null);
 
     /// <inheritdoc/>
     public void Update(Func<AppState, AppState> updator)
