@@ -1,0 +1,24 @@
+@* Rerenders the component whenever the underlying collection changes. *@
+@using System.Collections.Specialized
+
+@implements IDisposable
+
+@ChildContent
+
+@code {
+    [Parameter, EditorRequired]
+    public required INotifyCollectionChanged Collection { get; set; }
+
+    [Parameter, EditorRequired]
+    public required RenderFragment ChildContent { get; set; }
+
+    protected override void OnInitialized()
+        => this.Collection.CollectionChanged += OnCollectionChanged;
+    
+    void IDisposable.Dispose()
+        => this.Collection.CollectionChanged -= OnCollectionChanged;
+
+    private void OnCollectionChanged(
+        object? sender, NotifyCollectionChangedEventArgs e)
+        => StateHasChanged();
+}
