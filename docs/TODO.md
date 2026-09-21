@@ -5,10 +5,12 @@
 - Vyrešit issues
 - Dokončit TestLinkApi
 - Zautomatizování kroků testera - základní
-- Vyřešit Deploy
+- Rework BindingSelect
 - TestDiscovery: Nahradit store za Fluxor
+- Vytvořit viewmodely pro features (viz TestConfigurationViewModel)
+- Vyřešit Deploy
 - Kompletní code-review + refactor celé projektu WebApp (včetně testů) a docs
-- Lokalizace textů napříč aplikacemi
+- Lokalizace textů
 - Vylepšení vzhledu
 
 ## MidPrio
@@ -27,6 +29,10 @@
 
 ## HiPrio - Detaily
 
+### Issues
+
+1. Testy se z assembly nenačítají - [viz link](https://claude.ai/share/2111234d-351e-4c9b-93c9-846f62da3015)
+
 ### Dokončit TestLinkApi
 
 - ITestLinkApiClient.Config.Default: API key musí být secret!
@@ -34,9 +40,41 @@
 - Přejmenovat ITestLinkApiClient: ITestLinkApi? ITestLink?
 - Nutno refaktorovat a vyřešit warningy
 
-### Issues
+### Rework BindingSelect
 
-1. Testy se z assembly nenačítají - [viz link](https://claude.ai/share/2111234d-351e-4c9b-93c9-846f62da3015)
+- Z kolekce options (Offered) se vytvoří TextValueItem { string DisplayText, Value }
+- Offered se prejmenuje na Options
+- Bude mít volitelný param, pomocí kterého blokuje z dat získat display text pro option selectu: Pokud nebuď poskytnut, tak se display text získá Value.ToString()
+- Zbavit se pak TestStationLabels: TestConfiguration.razor předá BindingSelect kolekci KeyValueItem (sestavenou na viewmodelu)
+- Options budou IEnumerable:
+  - Pokud budou dodané options typu INotifyCollectionChanged, tak budou rerenderovat uvnitř ObservableCollection komponenty
+
+### Lokalizace textů
+
+- Použít nějaký balíček, nebo vytvořit vlastní?
+- V user settings se nastaví jazyk a podle něho se aplikace lokalizuje
+- Použít oficiální doporučené řešení IStringLocalizer
+
+```cs
+  class Localization // DI služba
+  {
+    private Dictionary<EntryKey, string> texts;
+    private Dictionary<EntryKey, string> formats;
+
+    enum Language { En, Cs } // Nastaví se v settings (settings bude mít 2 kategorie: a. Global (sdílené pro všechny uživatele; např nastav je test prostředí); b. User
+
+    enum Text { TextA, TextB }
+    enum Format { FormatorA, FormatorB }
+
+    string this[Text text]
+      => texts[new EntryKey(Language, Text);
+
+    string this[Format text]
+      => formats[new EntryKey(Language, Text);
+
+    record EntryKey(Language, Text);
+}
+```
 
 ### Zautomatizování kroků testera - základní
 
