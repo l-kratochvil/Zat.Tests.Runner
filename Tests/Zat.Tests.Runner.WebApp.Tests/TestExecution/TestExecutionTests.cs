@@ -7,12 +7,14 @@ using Fluxor;
 using Microsoft.Extensions.DependencyInjection;
 
 using Moq;
+
 using NUnit.Framework;
 
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Services;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
+
 using TestExecutionComponent = Zat.Tests.Runner.WebApp.Features.TestExecution.Components.TestExecution;
 
 /// <summary>
@@ -65,7 +67,7 @@ public class TestExecutionTests : Bunit.TestContext
         this.GivenARunnableConfiguration();
 
         // When:
-        IRenderedComponent<TestExecutionComponent> component =
+        var component =
             this.RenderComponent<TestExecutionComponent>();
 
         // Then:
@@ -80,7 +82,7 @@ public class TestExecutionTests : Bunit.TestContext
         // Given:
         this.GivenARunnableConfiguration();
 
-        IRenderedComponent<TestExecutionComponent> component =
+        var component =
             this.RenderComponent<TestExecutionComponent>();
 
         // When:
@@ -103,7 +105,7 @@ public class TestExecutionTests : Bunit.TestContext
         this.testSelection = new TestDiscoveryState([]);
 
         // When:
-        IRenderedComponent<TestExecutionComponent> component =
+        var component =
             this.RenderComponent<TestExecutionComponent>();
 
         // Then:
@@ -124,7 +126,7 @@ public class TestExecutionTests : Bunit.TestContext
         this.GivenSelectedTestCase(TestType.ApplicationTest);
 
         // When:
-        IRenderedComponent<TestExecutionComponent> component =
+        var component =
             this.RenderComponent<TestExecutionComponent>();
 
         // Then:
@@ -142,7 +144,7 @@ public class TestExecutionTests : Bunit.TestContext
         this.GivenARunnableConfiguration();
 
         // When:
-        IRenderedComponent<TestExecutionComponent> component =
+        var component =
             this.RenderComponent<TestExecutionComponent>();
 
         // Then:

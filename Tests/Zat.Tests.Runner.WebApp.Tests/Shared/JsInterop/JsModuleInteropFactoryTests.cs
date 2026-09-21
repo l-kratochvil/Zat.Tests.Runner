@@ -1,8 +1,11 @@
 namespace Zat.Tests.Runner.WebApp.Tests.Shared.JsInterop;
 
 using Bunit;
+
 using Microsoft.Extensions.Logging.Abstractions;
+
 using NUnit.Framework;
+
 using Zat.Tests.Runner.WebApp.Shared.JsInterop;
 
 [TestFixture]
@@ -28,8 +31,8 @@ public class JsModuleInteropFactoryTests
     public async Task Create__WhenTheCreatedWrapperIsCalled__ThenShouldReachTheModuleAtTheGivenPath()
     {
         // Given:
-        BunitJSModuleInterop givenModule = this.jsInterop.SetupModule(ModulePath);
-        JSRuntimeInvocationHandler givenFunction = givenModule.SetupVoid(GivenFunction, _ => true).SetVoidResult();
+        var givenModule = this.jsInterop.SetupModule(ModulePath);
+        var givenFunction = givenModule.SetupVoid(GivenFunction, _ => true).SetVoidResult();
 
         // When:
         await this.unit.Create(ModulePath).InvokeVoidSafeAsync(GivenFunction);
@@ -46,7 +49,7 @@ public class JsModuleInteropFactoryTests
         // released take the module away from the others.
 
         // When:
-        JsModuleInterop result = this.unit.Create(ModulePath);
+        var result = this.unit.Create(ModulePath);
 
         // Then:
         Assert.That(this.unit.Create(ModulePath), Is.Not.SameAs(result));

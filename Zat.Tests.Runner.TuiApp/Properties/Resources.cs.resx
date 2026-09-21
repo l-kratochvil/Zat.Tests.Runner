@@ -174,9 +174,6 @@
   <data name="Home_CommandText" xml:space="preserve">
     <value>Domů</value>
   </data>
-  <data name="SelectTestStation_ChoiceText" xml:space="preserve">
-    <value>Vyber testovací stanici</value>
-  </data>
   <data name="TestRunReport_TestsNotRun_SectionHeader" xml:space="preserve">
     <value>Nespuštěné testy</value>
   </data>
@@ -299,5 +296,11 @@
   </data>
   <data name="ExitApp" xml:space="preserve">
     <value>Ukončit aplikaci</value>
+  </data>
+  <data name="PressSpaceToSelectItem" xml:space="preserve">
+    <value>Stiskni [blue]&lt;space&gt;[/] pro výběr položky, [green]&lt;enter&gt;[/] pro potvrzení</value>
+  </data>
+  <data name="SelectHwAssemblyType_ChoiceText" xml:space="preserve">
+    <value>Vyber typ testované HW sestavy</value>
   </data>
 </root>

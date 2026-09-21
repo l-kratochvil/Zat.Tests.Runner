@@ -69,7 +69,7 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
 
     /// <inheritdoc/>
     public Task<Zat.Tests.Runner.Common.TestRunResult> RunTestAsync(
-        IEnumerable<TestEntity> testsToRun, CancellationToken cancellationToken = default)
+        IEnumerable<TestEntity> testRunEntities, CancellationToken cancellationToken = default)
     {
         if (!this.runner.IsTestLoaded)
         {
@@ -80,7 +80,7 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
         // (Multiple <test> elements directly under <filter> would be combined with AND.)
         var testFilterNode = new TNode("filter");
         var orNode = testFilterNode.AddElement("or");
-        foreach (var testEntity in testsToRun)
+        foreach (var testEntity in testRunEntities)
         {
             orNode.AddElement("test", testEntity.ExecutionPath);
         }

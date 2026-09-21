@@ -23,7 +23,10 @@ internal class AppStateStore : IJsonPersistanceStore<AppState>
             model => new AppStateStore().Visit(x => x.Update(model)));
 
     private static AppState CreateDefaultAppState()
-        => new(RuntimeVersion: null, IdeVersion: null, TestStation: null);
+        => new(
+            RuntimeVersion: null,
+            IdeVersion: null,
+            TestedHwAssemblyType: null);
 
     /// <inheritdoc/>
     public void Update(Func<AppState, AppState> updator)

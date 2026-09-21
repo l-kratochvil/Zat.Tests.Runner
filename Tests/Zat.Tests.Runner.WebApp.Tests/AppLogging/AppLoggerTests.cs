@@ -1,7 +1,9 @@
 namespace Zat.Tests.Runner.WebApp.Tests.AppLogging;
 
 using Moq;
+
 using NUnit.Framework;
+
 using Zat.Tests.Runner.WebApp.Features.AppLogging.Models;
 using Zat.Tests.Runner.WebApp.Features.AppLogging.Services;
 using Zat.Tests.Runner.WebApp.Shared.Logging;
@@ -51,7 +53,7 @@ public class AppLoggerTests
         this.unit.Log(givenSeverity, givenMessage);
 
         // Then:
-        LogEntry entry = this.appendedEntries.Single();
+        var entry = this.appendedEntries.Single();
         using (Assert.EnterMultipleScope())
         {
             Assert.That(entry.Severity, Is.EqualTo(givenSeverity));
@@ -88,7 +90,7 @@ public class AppLoggerTests
     public void Source__WhenTheLoggerWasCreated__ThenShouldReturnTheSourceItIsBoundTo()
     {
         // When:
-        string result = this.unit.Source;
+        var result = this.unit.Source;
 
         // Then:
         Assert.That(result, Is.EqualTo(GivenSource));

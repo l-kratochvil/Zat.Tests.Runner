@@ -15,11 +15,11 @@
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.9" />
 		<PackageReference Include="NUnit" Version="4.1.0" />
 		<PackageReference Include="NUnit.Engine" Version="3.18.3" />
-		<PackageReference Include="StreamJsonRpc" Version="2.21.10" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\DevKit.Core\DevKit.Core\DevKit.Core.csproj" />
+		<ProjectReference Include="..\Zat.Tests.Runner.Common.Net\Zat.Tests.Runner.Common.Net.csproj" />
 		<ProjectReference Include="..\Zat.Tests.Runner.Common\Zat.Tests.Runner.Common.csproj" />
 	</ItemGroup>
 

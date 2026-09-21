@@ -1,7 +1,9 @@
 namespace Zat.Tests.Runner.WebApp.Tests.AppLogging;
 
 using Moq;
+
 using NUnit.Framework;
+
 using Zat.Tests.Runner.WebApp.Features.AppLogging.Models;
 using Zat.Tests.Runner.WebApp.Features.AppLogging.Services;
 using Zat.Tests.Runner.WebApp.Shared.Logging;
@@ -29,7 +31,7 @@ public class AppLoggerHubTests
         this.unit = new AppLoggerHub([], givenCapacity);
 
         // When:
-        for (int i = 1; i <= givenEntryCount; i++)
+        for (var i = 1; i <= givenEntryCount; i++)
         {
             this.unit.Append(CreateEntry($"entry {i}"));
         }
@@ -70,7 +72,7 @@ public class AppLoggerHubTests
     public void Append__WhenSinkIsRegistered__ThenShouldHandTheEntryToIt()
     {
         // Given:
-        LogEntry givenEntry = CreateEntry("mirrored");
+        var givenEntry = CreateEntry("mirrored");
 
         // When:
         this.unit.Append(givenEntry);
@@ -104,7 +106,7 @@ public class AppLoggerHubTests
         this.unit.ReportFailure(givenFailureMessage);
 
         // Then:
-        LogEntry failure = this.unit.GetEntries().Single();
+        var failure = this.unit.GetEntries().Single();
         using (Assert.EnterMultipleScope())
         {
             Assert.That(failure.Severity, Is.EqualTo(LogSeverity.Error));
@@ -133,7 +135,7 @@ public class AppLoggerHubTests
         this.sinkMock.Raise(sink => sink.Failed += null, givenFailureMessage);
 
         // Then:
-        LogEntry failure = this.unit.GetEntries().Single();
+        var failure = this.unit.GetEntries().Single();
         using (Assert.EnterMultipleScope())
         {
             Assert.That(failure.Severity, Is.EqualTo(LogSeverity.Error));

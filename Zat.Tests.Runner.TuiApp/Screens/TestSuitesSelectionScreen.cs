@@ -7,7 +7,7 @@ using Zat.Tests.Runner.TuiApp.Extensions;
 using Zat.Tests.Runner.TuiApp.Stores;
 
 internal class TestSuitesSelectionScreen(
-    TestRunStore testRunStore,
+    TestConfigStore testConfigStore,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
@@ -21,12 +21,12 @@ internal class TestSuitesSelectionScreen(
         {
             Main = ct =>
             {
-                var testSuites = testRunStore.LoadedTestSuites.ToArray();
+                var testSuites = testConfigStore.LoadedTestSuites.ToArray();
 
                 var prompt = new MultiSelectionPrompt<TestEntity>(TestEntityEqualityComparer)
                     .Title("# Select test suites: ")
-                    .MoreChoicesText("[grey](Move up and down to reveal more)[/]")
-                    .InstructionsText("[grey](Press [blue]<space>[/] to select an item, [green]<enter>[/] to accept)[/]")
+                    .MoreChoicesText($"[grey]({Resources.MoveUpAndDownToReveal_HelpText})[/]")
+                    .InstructionsText($"[grey]({Resources.PressSpaceToSelectItem})[/]")
                     .PageSize(10)
                     .NotRequired()
                     .UseConverter(x => x.Name);
@@ -36,7 +36,7 @@ internal class TestSuitesSelectionScreen(
                     prompt.AddChoiceGroup(testsuite, testsuite.TestFixtures);
                 }
 
-                testRunStore
+                testConfigStore
                     .SelectedTestEntities
                     .ForEach(entity => prompt.Select(entity));
 
@@ -44,7 +44,7 @@ internal class TestSuitesSelectionScreen(
                     prompt,
                     selectedTestSuites =>
                     {
-                        testRunStore.SelectedTestEntities = [..selectedTestSuites];
+                        testConfigStore.SelectedTestEntities = [..selectedTestSuites];
                         return new RenderOutput();
                     },
                     ct);

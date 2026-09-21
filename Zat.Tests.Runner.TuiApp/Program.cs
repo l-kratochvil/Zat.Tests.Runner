@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 
+using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.TuiApp;
 using Zat.Tests.Runner.TuiApp.Application.DependencyInjection;
 

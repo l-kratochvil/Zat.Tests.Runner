@@ -29,6 +29,7 @@
   <Project Path="Zat.Tests.Runner.WebApp/Zat.Tests.Runner.WebApp.csproj">
     <BuildDependency Project="Zat.Tests.Runner.NUnitTestRunnerProxy/Zat.Tests.Runner.NUnitTestRunnerProxy.csproj" />
   </Project>
+  <Project Path="Zat.Tests.Runner.Common.Net/Zat.Tests.Runner.Common.Net.csproj" Id="f757f6df-f5db-46f2-b6e5-cda6a145a2a7" />
   <Project Path="Zat.Tests.Runner.Common/Zat.Tests.Runner.Common.csproj" />
   <Project Path="Zat.Tests.Runner.NUnitTestRunnerProxy/Zat.Tests.Runner.NUnitTestRunnerProxy.csproj" />
   <Project Path="Zat.Z2xxTests.Common/Zat.Z2xxTests.Common.csproj" />

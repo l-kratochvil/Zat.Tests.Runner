@@ -28,6 +28,7 @@
     <!-- DevKit.Core lives in a sibling clone, see docs/ADR/ADR-0001-initial.md (section 7). -->
     <ProjectReference Include="..\..\DevKit.Core\DevKit.Core\DevKit.Core.csproj" />
     <ProjectReference Include="..\..\DevKit.Mvvm\DevKit.Mvvm\DevKit.Mvvm.csproj" />
+    <ProjectReference Include="..\Zat.Tests.Runner.Common.Net\Zat.Tests.Runner.Common.Net.csproj" />
     <ProjectReference Include="..\Zat.Tests.Runner.Common\Zat.Tests.Runner.Common.csproj" />
     <ProjectReference Include="..\Zat.Z2xxTests.Common\Zat.Z2xxTests.Common.csproj" />
   </ItemGroup>

@@ -87,7 +87,7 @@ public class AppSettingsStoreTests
         // told about them.
         await this.unit.UpdateAsync(settings => settings with { IdeInstallFolderPath = @"D:\Ide" });
 
-        AppSettingsStore restarted = this.CreateStore();
+        var restarted = this.CreateStore();
 
         // When:
         await restarted.StartAsync(CancellationToken.None);

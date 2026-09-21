@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using Zat.Tests.Runner.TuiApp.Stores;
 
 internal partial class RuntimeVersionPromptScreen(
-    TestRunConfigStore testRunConfigStore,
+    TestConfigStore testRunConfigStore,
     AppUserSettingsStore appUserSettingsStore,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,

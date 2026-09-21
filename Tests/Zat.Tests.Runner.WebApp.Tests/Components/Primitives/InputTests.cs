@@ -32,7 +32,7 @@ public class InputTests : Bunit.TestContext
     public void Render__WhenAValueIsGiven__ThenShouldShowIt()
     {
         // When:
-        IRenderedComponent<Input<string>> component = this.RenderInput(GivenVersion);
+        var component = this.RenderInput(GivenVersion);
 
         // Then:
         Assert.That(component.Find(InputSelector).GetAttribute("value"), Is.EqualTo(GivenVersion));
@@ -44,7 +44,7 @@ public class InputTests : Bunit.TestContext
         // Given:
         string? told = null;
 
-        IRenderedComponent<Input<string>> component = this.RenderInput(
+        var component = this.RenderInput(
             value: null,
             parameters => parameters.Add(input => input.ValueChanged, edited => told = edited));
 
@@ -61,7 +61,7 @@ public class InputTests : Bunit.TestContext
         // Given:
         int? told = null;
 
-        IRenderedComponent<Input<int>> component = this.RenderComponent<Input<int>>(
+        var component = this.RenderComponent<Input<int>>(
             parameters => parameters
                 .Add(input => input.Value, 0)
                 .Add(input => input.ValueChanged, edited => told = edited));
@@ -79,7 +79,7 @@ public class InputTests : Bunit.TestContext
         // Given:
         var told = false;
 
-        IRenderedComponent<Input<string>> component = this.RenderInput(
+        var component = this.RenderInput(
             GivenVersion,
             parameters => parameters
                 .Add(input => input.Validator, NothingIsEverRight)
@@ -96,7 +96,7 @@ public class InputTests : Bunit.TestContext
     public void Edit__WhenTheValidatorFindsAnError__ThenShouldStillSayWhatIsWrongWithIt()
     {
         // Given:
-        IRenderedComponent<Input<string>> component = this.RenderInput(
+        var component = this.RenderInput(
             GivenVersion,
             parameters => parameters.Add(input => input.Validator, NothingIsEverRight));
 
@@ -115,7 +115,7 @@ public class InputTests : Bunit.TestContext
         // Given:
         string? told = null;
 
-        IRenderedComponent<Input<string>> component = this.RenderInput(
+        var component = this.RenderInput(
             GivenVersion,
             parameters => parameters
                 .Add(input => input.Validator, NothingIsEverRight)
@@ -135,7 +135,7 @@ public class InputTests : Bunit.TestContext
         // Given:
         string? told = null;
 
-        IRenderedComponent<Input<string>> component = this.RenderInput(
+        var component = this.RenderInput(
             value: null,
             parameters => parameters
                 .Add(input => input.Validator, SomethingIsWorthKnowing)
@@ -154,7 +154,7 @@ public class InputTests : Bunit.TestContext
     public void Render__WhenTheValueGivenIsAlreadyWrong__ThenShouldSaySoBeforeAnyEdit()
     {
         // When:
-        IRenderedComponent<Input<string>> component = this.RenderInput(
+        var component = this.RenderInput(
             GivenVersion,
             parameters => parameters.Add(input => input.Validator, NothingIsEverRight));
 
@@ -168,7 +168,7 @@ public class InputTests : Bunit.TestContext
         // Given:
         string? told = null;
 
-        IRenderedComponent<Input<string>> component = this.RenderInput(
+        var component = this.RenderInput(
             value: null,
             parameters => parameters
                 .Add(input => input.BindingEvent, BindingEvent.OnInput)

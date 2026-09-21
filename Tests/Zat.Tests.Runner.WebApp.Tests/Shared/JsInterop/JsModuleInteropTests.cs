@@ -1,10 +1,14 @@
 namespace Zat.Tests.Runner.WebApp.Tests.Shared.JsInterop;
 
 using Bunit;
+
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
+
 using Moq;
+
 using NUnit.Framework;
+
 using Zat.Tests.Runner.WebApp.Shared.JsInterop;
 
 [TestFixture]
@@ -29,9 +33,9 @@ public class JsModuleInteropTests
     public async Task InvokeVoidSafeAsync__WhenTheFunctionSucceeds__ThenShouldInvokeItOnTheModule()
     {
         // Given:
-        BunitJSModuleInterop givenModule = this.jsInterop.SetupModule(ModulePath);
-        JSRuntimeInvocationHandler givenFunction = givenModule.SetupVoid(GivenFunction, _ => true).SetVoidResult();
-        JsModuleInterop unit = this.CreateUnit();
+        var givenModule = this.jsInterop.SetupModule(ModulePath);
+        var givenFunction = givenModule.SetupVoid(GivenFunction, _ => true).SetVoidResult();
+        var unit = this.CreateUnit();
 
         // When:
         await unit.InvokeVoidSafeAsync(GivenFunction, "argument");
@@ -44,7 +48,7 @@ public class JsModuleInteropTests
     public void InvokeVoidSafeAsync__WhenTheFunctionFails__ThenShouldNotThrow()
     {
         // Given:
-        JsModuleInterop unit = this.CreateUnitWithFailingFunction(new InvalidOperationException("boom"));
+        var unit = this.CreateUnitWithFailingFunction(new InvalidOperationException("boom"));
 
         // When / Then:
         Assert.That(async () => await unit.InvokeVoidSafeAsync(GivenFunction), Throws.Nothing);
@@ -54,7 +58,7 @@ public class JsModuleInteropTests
     public async Task InvokeVoidSafeAsync__WhenTheFunctionFails__ThenShouldReportItToTheLoggingPipeline()
     {
         // Given:
-        JsModuleInterop unit = this.CreateUnitWithFailingFunction(new InvalidOperationException("boom"));
+        var unit = this.CreateUnitWithFailingFunction(new InvalidOperationException("boom"));
 
         // When:
         await unit.InvokeVoidSafeAsync(GivenFunction);
@@ -68,7 +72,7 @@ public class JsModuleInteropTests
     {
         // Given:
         // The module is never set up, so importing it fails the way a missing .razor.js would.
-        JsModuleInterop unit = this.CreateUnit();
+        var unit = this.CreateUnit();
 
         // When / Then:
         Assert.That(async () => await unit.InvokeVoidSafeAsync(GivenFunction), Throws.Nothing);
@@ -81,7 +85,7 @@ public class JsModuleInteropTests
     public async Task InvokeVoidSafeAsync__WhenTheImportFailedBefore__ThenShouldNotImportAgain()
     {
         // Given:
-        JsModuleInterop unit = this.CreateUnit();
+        var unit = this.CreateUnit();
         await unit.InvokeVoidSafeAsync(GivenFunction);
 
         // When:
@@ -93,10 +97,11 @@ public class JsModuleInteropTests
 
     [Test]
     public async Task InvokeVoidSafeAsync__WhenTheBrowserIsAlreadyGone__ThenShouldStaySilent(
-        [ValueSource(nameof(BrowserGoneExceptions))] Exception givenException)
+        [ValueSource(nameof(BrowserGoneExceptions))]
+        Exception givenException)
     {
         // Given:
-        JsModuleInterop unit = this.CreateUnitWithFailingFunction(givenException);
+        var unit = this.CreateUnitWithFailingFunction(givenException);
 
         // When:
         await unit.InvokeVoidSafeAsync(GivenFunction);
@@ -107,10 +112,11 @@ public class JsModuleInteropTests
 
     [Test]
     public void InvokeVoidSafeAsync__WhenTheBrowserIsAlreadyGone__ThenShouldNotThrow(
-        [ValueSource(nameof(BrowserGoneExceptions))] Exception givenException)
+        [ValueSource(nameof(BrowserGoneExceptions))]
+        Exception givenException)
     {
         // Given:
-        JsModuleInterop unit = this.CreateUnitWithFailingFunction(givenException);
+        var unit = this.CreateUnitWithFailingFunction(givenException);
 
         // When / Then:
         Assert.That(async () => await unit.InvokeVoidSafeAsync(GivenFunction), Throws.Nothing);
@@ -120,7 +126,7 @@ public class JsModuleInteropTests
     public void DisposeAsync__WhenNoCallWasEverMade__ThenShouldNotTouchTheBrowser()
     {
         // Given:
-        JsModuleInterop unit = this.CreateUnit();
+        var unit = this.CreateUnit();
 
         // When:
         Assert.That(async () => await unit.DisposeAsync(), Throws.Nothing);
@@ -133,7 +139,7 @@ public class JsModuleInteropTests
     public async Task DisposeAsync__WhenTheImportFailed__ThenShouldNotThrowAndNotReportAgain()
     {
         // Given:
-        JsModuleInterop unit = this.CreateUnit();
+        var unit = this.CreateUnit();
         await unit.InvokeVoidSafeAsync(GivenFunction);
         this.loggerMock.Reset();
 
@@ -153,7 +159,7 @@ public class JsModuleInteropTests
 
     private JsModuleInterop CreateUnitWithFailingFunction(Exception exception)
     {
-        BunitJSModuleInterop module = this.jsInterop.SetupModule(ModulePath);
+        var module = this.jsInterop.SetupModule(ModulePath);
         module.SetupVoid(GivenFunction, _ => true).SetException(exception);
 
         return this.CreateUnit();

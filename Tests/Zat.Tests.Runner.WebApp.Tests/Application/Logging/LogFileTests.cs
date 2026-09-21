@@ -1,6 +1,7 @@
 namespace Zat.Tests.Runner.WebApp.Tests.Application.Logging;
 
 using NUnit.Framework;
+
 using Zat.Tests.Runner.WebApp.Application.Logging;
 
 [TestFixture]
@@ -31,7 +32,7 @@ public class LogFileTests
         var givenTimestamp = new DateTimeOffset(2026, 8, 27, 23, 59, 59, TimeSpan.Zero);
 
         // When:
-        string result = LogFile.GetPath(this.directoryPath, givenTimestamp);
+        var result = LogFile.GetPath(this.directoryPath, givenTimestamp);
 
         // Then:
         Assert.That(Path.GetFileName(result), Is.EqualTo("2026-08-27.log"));
@@ -41,7 +42,7 @@ public class LogFileTests
     public void Enumerate__WhenTheDirectoryDoesNotExist__ThenShouldReturnNothing()
     {
         // When:
-        IEnumerable<string> result = LogFile.Enumerate(Path.Combine(this.directoryPath, "missing"));
+        var result = LogFile.Enumerate(Path.Combine(this.directoryPath, "missing"));
 
         // Then:
         Assert.That(result, Is.Empty);
@@ -55,7 +56,7 @@ public class LogFileTests
         this.CreateFiles("2026-08-26.log", "2026-08-27.log", "2026-08-27.log2", "notes.log", "2026-08-27.txt");
 
         // When:
-        IEnumerable<string> result = LogFile.Enumerate(this.directoryPath);
+        var result = LogFile.Enumerate(this.directoryPath);
 
         // Then:
         Assert.That(
@@ -70,7 +71,7 @@ public class LogFileTests
         this.CreateFiles("2026-08-26.log", "2026-09-01.log", "2025-12-31.log");
 
         // When:
-        IEnumerable<string> result = LogFile.Enumerate(this.directoryPath);
+        var result = LogFile.Enumerate(this.directoryPath);
 
         // Then:
         Assert.That(
@@ -130,7 +131,7 @@ public class LogFileTests
 
     private void CreateFiles(params string[] fileNames)
     {
-        foreach (string fileName in fileNames)
+        foreach (var fileName in fileNames)
         {
             File.WriteAllText(Path.Combine(this.directoryPath, fileName), string.Empty);
         }

@@ -57,7 +57,7 @@ public class BindingInputTests : Bunit.TestContext
         this.viewModel.Text = GivenVersion;
 
         // When:
-        IRenderedComponent<BindingInput<EditedViewModel, string?>> component = this.RenderTextInput();
+        var component = this.RenderTextInput();
 
         // Then:
         Assert.That(component.Find(InputSelector).GetAttribute("value"), Is.EqualTo(GivenVersion));
@@ -67,7 +67,7 @@ public class BindingInputTests : Bunit.TestContext
     public void Edit__WhenTheTesterHasFinishedTyping__ThenShouldWriteItToTheViewModel()
     {
         // Given:
-        IRenderedComponent<BindingInput<EditedViewModel, string?>> component = this.RenderTextInput();
+        var component = this.RenderTextInput();
 
         // When:
         component.Find(InputSelector).Change(GivenVersion);
@@ -86,7 +86,7 @@ public class BindingInputTests : Bunit.TestContext
         // Given:
         string? told = null;
 
-        IRenderedComponent<BindingInput<EditedViewModel, string?>> component = this.RenderTextInput(
+        var component = this.RenderTextInput(
             parameters => parameters.Add(input => input.OnChange, value => told = value));
 
         // When:
@@ -104,7 +104,7 @@ public class BindingInputTests : Bunit.TestContext
         // leaving it there would show the tester a value the view model does not hold.
         this.viewModel.Number = 7;
 
-        IRenderedComponent<BindingInput<EditedViewModel, int>> component =
+        var component =
             this.RenderComponent<BindingInput<EditedViewModel, int>>(
                 parameters => parameters
                     .AddCascadingValue(this.viewModel)
@@ -125,7 +125,7 @@ public class BindingInputTests : Bunit.TestContext
     public void Edit__WhenTheBindingEventIsOnInput__ThenShouldWriteWhileTheTesterIsStillTyping()
     {
         // Given:
-        IRenderedComponent<BindingInput<EditedViewModel, string?>> component = this.RenderTextInput(
+        var component = this.RenderTextInput(
             parameters => parameters.Add(input => input.BindingEvent, BindingEvent.OnInput));
 
         // When:
@@ -139,7 +139,7 @@ public class BindingInputTests : Bunit.TestContext
     public void Edit__WhenTheBindingEventIsLeftUnset__ThenShouldNotListenWhileTheTesterIsStillTyping()
     {
         // Given:
-        IRenderedComponent<BindingInput<EditedViewModel, string?>> component = this.RenderTextInput();
+        var component = this.RenderTextInput();
 
         // When / Then:
         // Nothing is listening for the keystroke at all, which is what an edit heard only once it
@@ -158,7 +158,7 @@ public class BindingInputTests : Bunit.TestContext
             new Validity([new Validity.Issue(nameof(EditedViewModel.Text), GivenMessage)]));
 
         // When:
-        IRenderedComponent<BindingInput<EditedViewModel, string?>> component = this.RenderTextInput();
+        var component = this.RenderTextInput();
 
         // Then:
         Assert.That(component.Find(MessageSelector).TextContent.Trim(), Is.EqualTo(GivenMessage));
@@ -201,7 +201,7 @@ public class BindingInputTests : Bunit.TestContext
         // back to showing it is the view model saying the property moved all the same.
         RefusingViewModel refusing = new() { Name = GivenLetters };
 
-        IRenderedComponent<BindingInput<RefusingViewModel, string>> component =
+        var component =
             this.RenderComponent<BindingInput<RefusingViewModel, string>>(
                 parameters => parameters
                     .AddCascadingValue(refusing)

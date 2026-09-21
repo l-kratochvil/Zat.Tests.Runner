@@ -2,6 +2,7 @@ namespace Zat.Tests.Runner.TuiApp;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -16,15 +17,13 @@ internal class App
 {
     public static async Task RunAsync(IHost host)
     {
-        File.Delete(Paths.Files.TestRunnerConfig); // Clean up config file from previous run, if exists
-
         try
         {
             var nunitTestRunnerProxy = host.Services.GetRequiredService<INUnitTestRunnerProxy>();
-            var testRunStore = host.Services.GetRequiredService<TestRunStore>();
+            var testConfigStore = host.Services.GetRequiredService<TestConfigStore>();
 
             // testRunStore.LoadedTestSuites = await nunitTestRunnerProxy.LoadTestAssemblyAsync(Paths.Files.TestAssemblyFilePath);
-            testRunStore.LoadedTestSuites
+            testConfigStore.LoadedTestSuites
                 = await nunitTestRunnerProxy.LoadTestAssemblyAsync(
                     @"c:\Users\l-kratochvil\source\repos\Zat.Tests.Runner\Tests\NUnitTestAssembly.Net481\bin\Debug\net481\NUnitTestAssembly.Net481.dll");
 
@@ -36,13 +35,16 @@ internal class App
 
             WriteLine("Při běhu aplikace Zat.Tests.Runner se vyskytla chyba:"); // TODO: Localize text
             WriteException(ex);
+#if DEBUG
+            if (Debugger.IsAttached)
+            {
+                throw;
+            }
+#endif
+
             WriteLine("Aplikaci ukončíte libovolnou klávesou..."); // TODO: Localize text
 
             AnsiConsole.Console.Input.ReadKey(true);
-        }
-        finally
-        {
-            File.Delete(Paths.Files.TestRunnerConfig); // Clean up config file from previous run, if exists
         }
     }
 

@@ -7,6 +7,7 @@ using Fluxor;
 using Microsoft.Extensions.DependencyInjection;
 
 using Moq;
+
 using NUnit.Framework;
 
 using Zat.Tests.Runner.WebApp.Components.Primitives;
@@ -46,7 +47,7 @@ public class BindingSelectTests : Bunit.TestContext
         this.viewModel.Shading = Shade.Green;
 
         // When:
-        IRenderedComponent<BindingSelect<EditedViewModel, Shade?>> component = this.RenderSelect();
+        var component = this.RenderSelect();
 
         // Then:
         // The place among the offered values is the one name every value has, so it is what the
@@ -61,7 +62,7 @@ public class BindingSelectTests : Bunit.TestContext
         this.viewModel.Shading = null;
 
         // When:
-        IRenderedComponent<BindingSelect<EditedViewModel, Shade?>> component = this.RenderSelect();
+        var component = this.RenderSelect();
 
         // Then:
         Assert.That(component.FindAll(OptionSelector)[0].HasAttribute("selected"), Is.True);
@@ -71,7 +72,7 @@ public class BindingSelectTests : Bunit.TestContext
     public void Choose__WhenAnOfferedValueIsChosen__ThenShouldWriteTheValueAndNotItsPlace()
     {
         // Given:
-        IRenderedComponent<BindingSelect<EditedViewModel, Shade?>> component = this.RenderSelect();
+        var component = this.RenderSelect();
 
         // When:
         component.Find(SelectSelector).Change("1");
@@ -86,7 +87,7 @@ public class BindingSelectTests : Bunit.TestContext
         // Given:
         this.viewModel.Shading = Shade.Green;
 
-        IRenderedComponent<BindingSelect<EditedViewModel, Shade?>> component = this.RenderSelect();
+        var component = this.RenderSelect();
 
         // When:
         component.Find(SelectSelector).Change(string.Empty);
@@ -99,7 +100,7 @@ public class BindingSelectTests : Bunit.TestContext
     public void Render__WhenNoOptionLabelIsGiven__ThenShouldLetTheValueSpeakForItself()
     {
         // When:
-        IRenderedComponent<BindingSelect<EditedViewModel, Shade?>> component = this.RenderSelect();
+        var component = this.RenderSelect();
 
         // Then:
         Assert.That(
@@ -111,7 +112,7 @@ public class BindingSelectTests : Bunit.TestContext
     public void Render__WhenAnOptionLabelIsGiven__ThenShouldNameTheOfferedValuesWithIt()
     {
         // When:
-        IRenderedComponent<BindingSelect<EditedViewModel, Shade?>> component = this.RenderSelect(
+        var component = this.RenderSelect(
             parameters => parameters.Add(
                 select => select.OptionLabel, shade => $"shade of {shade}"));
 

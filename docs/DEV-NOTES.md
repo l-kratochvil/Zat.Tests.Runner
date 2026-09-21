@@ -55,26 +55,14 @@
 
 ## Zat.Tests.Runner.TuiApp
 
-### RunTestScreen
-
-- DÁT POZOR NA!: Pokud se při běhu testu zavolá command (například Back), TAK MUSÍ DOJÍT K UKONČENÍ TESTU!: RunTestScreen bude IAsyncDisposable a v MainRenderer se currentScreen disposne
-- NUnitTestRunnerProxy: Při ct cancelled se musí zavolat runner.Stop(true)
-
 ### HomeScreen
 
 - Možnosti:
   - Runtime - verze: volitelné půjde zadat datum
   - IDE - verze: volitelné bude zadat datum
-  - Testovací entity (test. sady, test. případy)
-  - (Testovací hardware sestavy)
   - Dotaz: Odeslat výsledek do TestLinku?
-  - Dotaz: Spustit test?
-- Rozšíří se choices:
-  1. Když bude nějaká navolena test entita mít TestType.RuntimeTests, tak se zobrazí možnost pro výběr testovací sestavy:
-     - Implementovat s AI
-     - Uloží se do TestRunStore
-  2. Před možností spuštění testu se vypíše možnost pro zobrazení preconditions (z TL) navolenych sad:
-  - Screen implementuje AI
+- Rozšířit choices:
+  - Před možností spuštění testu se vypíše možnost pro zobrazení preconditions (z TL) navolenych sad:
   - Formátování textu: Od H2 a další nadpisy se bude další text tabbovat (odsazovat)
 
 ### Spectre.Console

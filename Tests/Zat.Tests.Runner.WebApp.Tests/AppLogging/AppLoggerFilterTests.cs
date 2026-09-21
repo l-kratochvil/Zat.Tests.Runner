@@ -1,6 +1,7 @@
 namespace Zat.Tests.Runner.WebApp.Tests.AppLogging;
 
 using NUnit.Framework;
+
 using Zat.Tests.Runner.WebApp.Features.AppLogging.Components;
 using Zat.Tests.Runner.WebApp.Features.AppLogging.Models;
 using Zat.Tests.Runner.WebApp.Shared.Logging;
@@ -34,7 +35,7 @@ public class AppLoggerFilterTests
         string givenSource)
     {
         // When:
-        bool result = this.unit.IsSelected(givenSource);
+        var result = this.unit.IsSelected(givenSource);
 
         // Then:
         Assert.That(result, Is.True);
@@ -47,7 +48,7 @@ public class AppLoggerFilterTests
         LogSeverity givenSeverity, string givenSource)
     {
         // Given:
-        LogEntry givenEntry = CreateEntry(givenSeverity, givenSource);
+        var givenEntry = CreateEntry(givenSeverity, givenSource);
 
         // When:
         return this.unit.Matches(givenEntry);
@@ -60,11 +61,11 @@ public class AppLoggerFilterTests
         LogSeverity givenSeverity)
     {
         // Given:
-        LogEntry givenEntry = CreateEntry(givenSeverity, LogSources.App);
+        var givenEntry = CreateEntry(givenSeverity, LogSources.App);
         this.unit.SetSelected(givenSeverity, selected: false);
 
         // When:
-        bool result = this.unit.Matches(givenEntry);
+        var result = this.unit.Matches(givenEntry);
 
         // Then:
         Assert.That(result, Is.False);
@@ -74,12 +75,12 @@ public class AppLoggerFilterTests
     public void Matches__WhenSeverityIsSelectedAgain__ThenShouldShowEntriesOfThatSeverity()
     {
         // Given:
-        LogEntry givenEntry = CreateEntry(LogSeverity.Info, LogSources.TestRun);
+        var givenEntry = CreateEntry(LogSeverity.Info, LogSources.TestRun);
         this.unit.SetSelected(LogSeverity.Info, selected: false);
         this.unit.SetSelected(LogSeverity.Info, selected: true);
 
         // When:
-        bool result = this.unit.Matches(givenEntry);
+        var result = this.unit.Matches(givenEntry);
 
         // Then:
         Assert.That(result, Is.True);
@@ -92,7 +93,7 @@ public class AppLoggerFilterTests
         string givenDeselectedSource, string givenEntrySource)
     {
         // Given:
-        LogEntry givenEntry = CreateEntry(LogSeverity.Info, givenEntrySource);
+        var givenEntry = CreateEntry(LogSeverity.Info, givenEntrySource);
         this.unit.SetSelected(givenDeselectedSource, selected: false);
 
         // When:
@@ -113,7 +114,7 @@ public class AppLoggerFilterTests
         this.unit.SetSelected(LogSeverity.Warning, selected: false);
 
         // When:
-        IEnumerable<LogEntry> result = this.unit.Apply(givenEntries);
+        var result = this.unit.Apply(givenEntries);
 
         // Then:
         Assert.That(result.Select(entry => entry.Message), Is.EqualTo(expectedMessages));

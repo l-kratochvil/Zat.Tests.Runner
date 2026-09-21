@@ -1,6 +1,7 @@
 namespace Zat.Tests.Runner.WebApp.Tests.TestDiscovery;
 
 using NUnit.Framework;
+
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.WebApp.Features.TestDiscovery.Components;
 
@@ -39,7 +40,7 @@ public class TestExplorerViewModelTests
     public void Toggle__WhenASelectedFixtureIsToggledAgain__ThenShouldClearEveryTestCaseUnderIt()
     {
         // Given:
-        TestTreeNodeData givenFixture = this.FindNode(GivenFirstFixturePath);
+        var givenFixture = this.FindNode(GivenFirstFixturePath);
         givenFixture.Toggle();
 
         // When:
@@ -80,7 +81,7 @@ public class TestExplorerViewModelTests
     public void CheckState__WhenTheLastSelectedTestCaseIsCleared__ThenShouldClearTheGroupsAboveIt()
     {
         // Given:
-        TestTreeNodeData givenTestCase = this.FindNode(GivenFirstCasePath);
+        var givenTestCase = this.FindNode(GivenFirstCasePath);
         givenTestCase.Toggle();
 
         // When:

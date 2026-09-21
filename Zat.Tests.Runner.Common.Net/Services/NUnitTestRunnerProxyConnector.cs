@@ -1,4 +1,4 @@
-namespace Zat.Tests.Runner.TuiApp;
+namespace Zat.Tests.Runner.Common.Net.Services;
 
 using System;
 using System.Diagnostics;
@@ -16,7 +16,7 @@ using Zat.Tests.Runner.Common.Services;
 /// named pipe and exposes a strongly-typed <see cref="INUnitTestRunnerProxy"/>. Disposing tears the connection
 /// down and stops the server process.
 /// </summary>
-internal sealed class NUnitTestRunnerProxyConnector : IAsyncDisposable
+public sealed class NUnitTestRunnerProxyConnector : IAsyncDisposable
 {
     // The server and its .NET Framework dependencies are copied here by the build (Exchange output).
     private const string ServerRelativePath = @"Zat.Tests.Runner.NUnitTestRunnerProxy\Zat.Tests.Runner.NUnitTestRunnerProxy.exe";

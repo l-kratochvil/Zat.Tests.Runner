@@ -1,7 +1,9 @@
 namespace Zat.Tests.Runner.WebApp.Tests.AppLogging;
 
 using Moq;
+
 using NUnit.Framework;
+
 using Zat.Tests.Runner.WebApp.Features.AppLogging.Models;
 using Zat.Tests.Runner.WebApp.Features.AppLogging.Services;
 using Zat.Tests.Runner.WebApp.Shared.Logging;
@@ -27,7 +29,7 @@ public class AppLoggerFactoryTests
         string givenSource)
     {
         // When:
-        IAppLogger result = this.unit.CreateLogger(givenSource);
+        var result = this.unit.CreateLogger(givenSource);
 
         // Then:
         return result.Source;
@@ -37,7 +39,7 @@ public class AppLoggerFactoryTests
     public void CreateLogger__WhenTheCreatedLoggerLogs__ThenShouldAppendIntoTheSharedHub()
     {
         // Given:
-        IAppLogger givenLogger = this.unit.CreateLogger(LogSources.TestLink);
+        var givenLogger = this.unit.CreateLogger(LogSources.TestLink);
 
         // When:
         givenLogger.Error("unreachable");

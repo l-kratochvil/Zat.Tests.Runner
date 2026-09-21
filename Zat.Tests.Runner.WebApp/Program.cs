@@ -1,7 +1,7 @@
+using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.WebApp.Application.DependencyInjection;
 using Zat.Tests.Runner.WebApp.Application.Logging;
 using Zat.Tests.Runner.WebApp.Components;
-using Zat.Tests.Runner.WebApp.Shared.NUnitTestRunner;
 
 var builder = WebApplication.CreateBuilder(args);
 

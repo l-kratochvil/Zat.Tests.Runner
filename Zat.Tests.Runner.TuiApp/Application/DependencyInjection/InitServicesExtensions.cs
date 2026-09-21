@@ -2,7 +2,7 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-
+using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.Common.Services;
 using Zat.Tests.Runner.TuiApp.Common;
 using Zat.Tests.Runner.TuiApp.TestLinkApi;
@@ -17,6 +17,8 @@ internal static class InitServicesExtensions
                 services => services
                     .AddSingleton(AppSystemConfig.CreateDefault())
                     .AddSingleton<ITestLinkApiClient, TestLinkApiClient>()
-                    .AddSingleton(nunitTestRunnerProxy));
+                    .AddSingleton(nunitTestRunnerProxy)
+                    .AddSingleton<ITestRunnerBridgeConnector, TestRunnerBridgeConnector>()
+                    .AddSingleton<ITestRunnerEngine, TestRunnerEngine>());
     }
 }

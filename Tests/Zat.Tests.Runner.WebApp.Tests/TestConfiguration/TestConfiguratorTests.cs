@@ -17,7 +17,7 @@ using Zat.Tests.Runner.WebApp.Shared.Stores.AppSettings;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
 
-using TestConfiguratorComponent = Zat.Tests.Runner.WebApp.Features.TestConfiguration.Components.TestConfigurator;
+using TestConfigurationComponent = Zat.Tests.Runner.WebApp.Features.TestConfiguration.Components.TestConfiguration;
 
 /// <summary>
 /// What the configurator asks for, which is the part of it that is not simply bound to a field.
@@ -39,9 +39,6 @@ public class TestConfiguratorTests : Bunit.TestContext
     private TestDiscoveryState testSelection = new([]);
     private TestConfigurationState configuration = new();
 
-    private InstalledRuntimeVersions installedRuntimeVersions =
-        new(["7", "6"], IsInstallFolderReadable: true);
-
     private Mock<IAppSettingsStore> appSettingsStore;
     private Mock<ITestDiscoveryStore> testDiscoveryStore;
     private Mock<IDispatcher> dispatcher;
@@ -60,18 +57,13 @@ public class TestConfiguratorTests : Bunit.TestContext
             .SetupGet(store => store.Current)
             .Returns(new AppSettingsState(@"C:\Ide"));
 
-        var runtimeVersions = new Mock<IInstalledRuntimeVersionsProvider>();
-        runtimeVersions.Setup(provider => provider.Read()).Returns(() => this.installedRuntimeVersions);
-
         this.dispatcher = new Mock<IDispatcher>();
 
         this.Services.AddSingleton(configurationState.Object);
         this.Services.AddSingleton(this.testDiscoveryStore.Object);
         this.Services.AddSingleton(this.appSettingsStore.Object);
-        this.Services.AddSingleton(runtimeVersions.Object);
         this.Services.AddSingleton(this.dispatcher.Object);
         this.Services.AddSingleton(new Mock<IActionSubscriber>().Object);
-        this.Services.AddSingleton<ITestConfigurationValidator, TestConfigurationValidator>();
     }
 
     [TearDown]
@@ -82,7 +74,7 @@ public class TestConfiguratorTests : Bunit.TestContext
     public void Render__WhenTheConfiguratorIsShown__ThenShouldOfferTheInstalledRuntimeVersions()
     {
         // When:
-        IRenderedComponent<TestConfiguratorComponent> component = this.RenderConfigurator();
+        var component = this.RenderConfigurator();
 
         // Then:
         // The versions plus the empty choice standing for none of them.
@@ -98,7 +90,7 @@ public class TestConfiguratorTests : Bunit.TestContext
         this.GivenSelectedTestCase(TestType.ApplicationTest);
 
         // When:
-        IRenderedComponent<TestConfiguratorComponent> component = this.RenderConfigurator();
+        var component = this.RenderConfigurator();
 
         // Then:
         Assert.That(component.FindAll(TestStationSelector), Is.Empty);
@@ -111,7 +103,7 @@ public class TestConfiguratorTests : Bunit.TestContext
         this.GivenSelectedTestCase(TestType.RuntimeTest);
 
         // When:
-        IRenderedComponent<TestConfiguratorComponent> component = this.RenderConfigurator();
+        var component = this.RenderConfigurator();
 
         // Then:
         Assert.That(component.FindAll(TestStationSelector), Has.Exactly(1).Items);
@@ -121,7 +113,7 @@ public class TestConfiguratorTests : Bunit.TestContext
     public void Render__WhenTheResultDoesNotGoToTestLink__ThenShouldNotAskForTheIdeVersion()
     {
         // When:
-        IRenderedComponent<TestConfiguratorComponent> component = this.RenderConfigurator();
+        var component = this.RenderConfigurator();
 
         // Then:
         Assert.That(component.FindAll(IdeVersionSelector), Is.Empty);
@@ -133,7 +125,7 @@ public class TestConfiguratorTests : Bunit.TestContext
         // Given:
         // The version is what the result is filed under, so it is asked for exactly when there is
         // somewhere to file it.
-        IRenderedComponent<TestConfiguratorComponent> component = this.RenderConfigurator();
+        var component = this.RenderConfigurator();
 
         // When:
         component.Find(TestLinkSelector).Change(true);
@@ -146,7 +138,7 @@ public class TestConfiguratorTests : Bunit.TestContext
     public void OnTestLinkDisabled__WhenTheResultIsNotToGoToTestLinkAfterAll__ThenShouldStopAsking()
     {
         // Given:
-        IRenderedComponent<TestConfiguratorComponent> component = this.RenderConfigurator();
+        var component = this.RenderConfigurator();
         component.Find(TestLinkSelector).Change(true);
 
         // When:
@@ -160,7 +152,7 @@ public class TestConfiguratorTests : Bunit.TestContext
     public void OnIdeVersionTyped__WhenWhatWasTypedIsNotAVersion__ThenShouldSaySo()
     {
         // Given:
-        IRenderedComponent<TestConfiguratorComponent> component = this.RenderConfigurator();
+        var component = this.RenderConfigurator();
         component.Find(TestLinkSelector).Change(true);
 
         // When:
@@ -174,10 +166,9 @@ public class TestConfiguratorTests : Bunit.TestContext
     public void OnAppSettingsChanged__WhenTheInstallFolderMoves__ThenShouldOfferWhatIsInstalledThere()
     {
         // Given:
-        IRenderedComponent<TestConfiguratorComponent> component = this.RenderConfigurator();
+        var component = this.RenderConfigurator();
 
         // When:
-        this.installedRuntimeVersions = new InstalledRuntimeVersions(["9"], IsInstallFolderReadable: true);
         this.RaiseAppSettingsChanged(component);
 
         // Then:
@@ -195,10 +186,9 @@ public class TestConfiguratorTests : Bunit.TestContext
         // the machine, while the combo box shows nothing chosen.
         this.configuration = new TestConfigurationState() with { RuntimeVersion = "6" };
 
-        IRenderedComponent<TestConfiguratorComponent> component = this.RenderConfigurator();
+        var component = this.RenderConfigurator();
 
         // When:
-        this.installedRuntimeVersions = new InstalledRuntimeVersions(["9"], IsInstallFolderReadable: true);
         this.RaiseAppSettingsChanged(component);
 
         // Then:
@@ -214,10 +204,9 @@ public class TestConfiguratorTests : Bunit.TestContext
         // Given:
         this.configuration = new TestConfigurationState() with { RuntimeVersion = "6" };
 
-        IRenderedComponent<TestConfiguratorComponent> component = this.RenderConfigurator();
+        var component = this.RenderConfigurator();
 
         // When:
-        this.installedRuntimeVersions = new InstalledRuntimeVersions(["6"], IsInstallFolderReadable: true);
         this.RaiseAppSettingsChanged(component);
 
         // Then:
@@ -247,7 +236,7 @@ public class TestConfiguratorTests : Bunit.TestContext
         // Given:
         // The run needs a runtime version and nothing else while no runtime test is selected, so
         // choosing one is what makes this configuration runnable.
-        IRenderedComponent<TestConfiguratorComponent> component = this.RenderConfigurator();
+        var component = this.RenderConfigurator();
 
         // When:
         component.Find(RuntimeVersionSelector).Change("6");
@@ -264,7 +253,7 @@ public class TestConfiguratorTests : Bunit.TestContext
         // configuration that was runnable a moment ago is not any more.
         this.configuration = new TestConfigurationState() with { RuntimeVersion = "6" };
 
-        IRenderedComponent<TestConfiguratorComponent> component = this.RenderConfigurator();
+        var component = this.RenderConfigurator();
         this.dispatcher.Invocations.Clear();
 
         // When:
@@ -275,19 +264,19 @@ public class TestConfiguratorTests : Bunit.TestContext
         this.dispatcher.Verify(d => d.Dispatch(It.Is<DataChangedAction>(action => !action.IsValid)));
     }
 
-    private IRenderedComponent<TestConfiguratorComponent> RenderConfigurator()
-        => this.RenderComponent<TestConfiguratorComponent>();
+    private IRenderedComponent<TestConfigurationComponent> RenderConfigurator()
+        => this.RenderComponent<TestConfigurationComponent>();
 
     // The settings are one instance shared by everyone connected, so they announce a change on the
     // thread of whoever made it rather than on this circuit's.
-    private void RaiseAppSettingsChanged(IRenderedComponent<TestConfiguratorComponent> component)
+    private void RaiseAppSettingsChanged(IRenderedComponent<TestConfigurationComponent> component)
     {
         this.appSettingsStore.Raise(store => store.Changed += null);
 
         component.WaitForState(() => true);
     }
 
-    private void RaiseTestSelectionChanged(IRenderedComponent<TestConfiguratorComponent> component)
+    private void RaiseTestSelectionChanged(IRenderedComponent<TestConfigurationComponent> component)
     {
         this.testDiscoveryStore.Raise(store => store.Changed += null);
 

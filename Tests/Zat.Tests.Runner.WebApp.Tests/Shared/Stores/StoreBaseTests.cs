@@ -1,6 +1,7 @@
 namespace Zat.Tests.Runner.WebApp.Tests.Shared.Stores;
 
 using NUnit.Framework;
+
 using Zat.Tests.Runner.WebApp.Shared.Stores;
 
 [TestFixture]
@@ -28,10 +29,10 @@ public class StoreBaseTests
         // The default state is built on first use rather than in the constructor, which must not
         // turn into building a new one on every read: callers compare what they hold to what the
         // store holds.
-        TestState firstRead = this.unit.Current;
+        var firstRead = this.unit.Current;
 
         // When:
-        TestState secondRead = this.unit.Current;
+        var secondRead = this.unit.Current;
 
         // Then:
         Assert.That(secondRead, Is.SameAs(firstRead));
@@ -54,7 +55,7 @@ public class StoreBaseTests
     public async Task UpdateAsync__WhenTheStateIsChanged__ThenShouldSaySo()
     {
         // Given:
-        int changedCount = 0;
+        var changedCount = 0;
         this.unit.Changed += () => changedCount++;
 
         // When:

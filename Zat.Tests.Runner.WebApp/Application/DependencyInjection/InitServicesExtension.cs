@@ -3,14 +3,16 @@ namespace Zat.Tests.Runner.WebApp.Application.DependencyInjection;
 using Fluxor;
 using Fluxor.Persist.Middleware;
 using Fluxor.Persist.Storage;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
+
+using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.WebApp.Application.Paths;
 using Zat.Tests.Runner.WebApp.Shared.JsInterop;
-using Zat.Tests.Runner.WebApp.Shared.NUnitTestRunner;
 using Zat.Tests.Runner.WebApp.Shared.Stores;
+using Zat.Tests.Runner.WebApp.Shared.Stores.NUnitTestRunner;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
-using Zat.Tests.Runner.WebApp.Shared.TestRunnerBridge;
 
 /// <summary>
 /// Registration of services shared across features.
@@ -35,6 +37,7 @@ public static class InitServicesExtension
                 .AddSingleton<BrowserLogger>()
                 .AddSingleton<IAppPathsProvider, AppPathsProvider>()
                 .AddSingleton<ITestRunnerBridgeConnector, TestRunnerBridgeConnector>()
+                .AddSingleton<ITestRunnerEngine, TestRunnerEngine>()
                 .InitFluxor()
                 .InitNUnitTestRunner();
 

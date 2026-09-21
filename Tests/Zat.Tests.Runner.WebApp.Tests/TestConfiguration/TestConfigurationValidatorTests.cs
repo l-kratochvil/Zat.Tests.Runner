@@ -23,7 +23,7 @@ public class TestConfigurationValidatorTests
     public void Validate__WhenEverythingAskedForIsThere__ThenShouldFindNothingWrong()
     {
         // Given:
-        TestConfigurationSource source = Source() with
+        var source = Source() with
         {
             IsTestLinkEnabled = true,
             IdeVersionText = "6.1.4",
@@ -70,7 +70,7 @@ public class TestConfigurationValidatorTests
     {
         // Given:
         // Unknown stands for a station nobody chose, so it must not pass for one that was.
-        TestConfigurationSource source = Source() with
+        var source = Source() with
         {
             IsRuntimeTestSelected = true,
             TestedHwAssembly = givenStation,
@@ -102,7 +102,7 @@ public class TestConfigurationValidatorTests
         // Given:
         // A version left over from when TestLink was on is kept rather than thrown away, so it has
         // to be allowed to sit there unused.
-        TestConfigurationSource source = Source() with
+        var source = Source() with
         {
             IsTestLinkEnabled = false,
             IdeVersionText = "not a version",
@@ -154,7 +154,7 @@ public class TestConfigurationValidatorTests
         // Given:
         // Empty text is both missing and malformed; saying both would put two messages under one
         // field, of which only the first is any use.
-        TestConfigurationSource source = Source() with
+        var source = Source() with
         {
             IsTestLinkEnabled = true,
             IdeVersionText = string.Empty,

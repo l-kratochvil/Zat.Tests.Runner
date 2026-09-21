@@ -38,7 +38,7 @@ public class PropertyGridRowTests : Bunit.TestContext
         // identifier for them to agree on.
 
         // When:
-        IRenderedComponent<PropertyGrid> component = this.RenderRowInGrid(Validity.Valid);
+        var component = this.RenderRowInGrid(Validity.Valid);
 
         // Then:
         Assert.Multiple(() =>
@@ -67,7 +67,7 @@ public class PropertyGridRowTests : Bunit.TestContext
         var validity = new Validity([new Validity.Issue(GivenFieldName, GivenMessage)]);
 
         // When:
-        IRenderedComponent<PropertyGrid> component = this.RenderRowInGrid(validity);
+        var component = this.RenderRowInGrid(validity);
 
         // Then:
         Assert.Multiple(() =>
@@ -85,7 +85,7 @@ public class PropertyGridRowTests : Bunit.TestContext
             [new Validity.Issue(GivenFieldName, GivenMessage, Validity.Severity.Warning)]);
 
         // When:
-        IRenderedComponent<PropertyGrid> component = this.RenderRowInGrid(validity);
+        var component = this.RenderRowInGrid(validity);
 
         // Then:
         Assert.Multiple(() =>
@@ -99,7 +99,7 @@ public class PropertyGridRowTests : Bunit.TestContext
     public void Render__WhenNothingIsWrong__ThenShouldShowNoMessage()
     {
         // When:
-        IRenderedComponent<PropertyGrid> component = this.RenderRowInGrid(Validity.Valid);
+        var component = this.RenderRowInGrid(Validity.Valid);
 
         // Then:
         Assert.That(component.FindAll(MessageSelector), Is.Empty);

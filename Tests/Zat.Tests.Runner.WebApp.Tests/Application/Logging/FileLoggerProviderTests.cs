@@ -1,10 +1,14 @@
 namespace Zat.Tests.Runner.WebApp.Tests.Application.Logging;
 
 using System.Text.RegularExpressions;
+
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
 using Moq;
+
 using NUnit.Framework;
+
 using Zat.Tests.Runner.WebApp.Application.Logging;
 using Zat.Tests.Runner.WebApp.Application.Paths;
 
@@ -44,7 +48,7 @@ public class FileLoggerProviderTests
         this.LogAndFlush(logger => logger.LogInformation("{Message}", givenMessage));
 
         // Then:
-        string[] lines = this.ReadTodaysFile();
+        var lines = this.ReadTodaysFile();
         Assert.That(
             lines.Single(),
             Does.Match(
@@ -87,7 +91,7 @@ public class FileLoggerProviderTests
             logger.LogInformation("{Message}\n{Detail}", "Test run finished.", "line 1\nline 2"));
 
         // Then:
-        string[] lines = this.ReadTodaysFile();
+        var lines = this.ReadTodaysFile();
         using (Assert.EnterMultipleScope())
         {
             Assert.That(lines, Has.Length.EqualTo(expectedLines.Length));
@@ -107,7 +111,7 @@ public class FileLoggerProviderTests
         this.LogAndFlush(logger => logger.LogError(givenException, "{Message}", "failed"));
 
         // Then:
-        string[] lines = this.ReadTodaysFile();
+        var lines = this.ReadTodaysFile();
         using (Assert.EnterMultipleScope())
         {
             Assert.That(lines[0], Does.EndWith("failed"));
@@ -164,7 +168,7 @@ public class FileLoggerProviderTests
         this.LogAndFlush(logger => logger.LogInformation("{Message}", "later"));
 
         // Then:
-        string[] lines = this.ReadTodaysFile();
+        var lines = this.ReadTodaysFile();
         using (Assert.EnterMultipleScope())
         {
             Assert.That(lines[0], Is.EqualTo(givenExistingLine));
@@ -176,10 +180,10 @@ public class FileLoggerProviderTests
     public void CreateLogger__WhenTheSameCategoryIsAskedForTwice__ThenShouldReturnTheSameLogger()
     {
         // Given:
-        using FileLoggerProvider unit = this.CreateUnit();
+        using var unit = this.CreateUnit();
 
         // When:
-        ILogger result = unit.CreateLogger(GivenCategory);
+        var result = unit.CreateLogger(GivenCategory);
 
         // Then:
         Assert.That(result, Is.SameAs(unit.CreateLogger(GivenCategory)));
@@ -195,7 +199,7 @@ public class FileLoggerProviderTests
         string[] givenOldFileNames =
             ["2020-01-01.log", "2020-01-02.log", "2020-01-03.log", "2020-01-04.log", "2020-01-05.log"];
 
-        foreach (string fileName in givenOldFileNames)
+        foreach (var fileName in givenOldFileNames)
         {
             File.WriteAllText(Path.Combine(this.directoryPath, fileName), string.Empty);
         }
@@ -220,7 +224,7 @@ public class FileLoggerProviderTests
     {
         // Given:
         // The logger factory and the container both dispose the provider.
-        FileLoggerProvider unit = this.CreateUnit();
+        var unit = this.CreateUnit();
         unit.CreateLogger(GivenCategory).LogInformation("{Message}", "message");
 
         // When:
@@ -234,7 +238,7 @@ public class FileLoggerProviderTests
     {
         var paths = new Mock<IAppPathsProvider>();
         paths.SetupGet(provider => provider.Directories)
-             .Returns(new AppDirectoryPaths(logsPath, logsPath));
+            .Returns(new AppDirectoryPaths(logsPath, logsPath));
 
         return paths.Object;
     }
@@ -255,7 +259,7 @@ public class FileLoggerProviderTests
     /// </summary>
     private void LogAndFlush(Action<ILogger> log, int retainedFileCount = 5)
     {
-        using FileLoggerProvider unit = this.CreateUnit(retainedFileCount);
+        using var unit = this.CreateUnit(retainedFileCount);
         log(unit.CreateLogger(GivenCategory));
     }
 

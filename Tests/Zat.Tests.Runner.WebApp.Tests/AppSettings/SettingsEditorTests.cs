@@ -72,7 +72,7 @@ public class SettingsEditorTests : Bunit.TestContext
     public void Render__WhenNothingWasChanged__ThenShouldNotOfferToSave()
     {
         // When:
-        IRenderedComponent<SettingsEditorComponent> component = this.RenderEditor();
+        var component = this.RenderEditor();
 
         // Then:
         Assert.That(component.Find(SaveSelector).HasAttribute("disabled"), Is.True);
@@ -82,7 +82,7 @@ public class SettingsEditorTests : Bunit.TestContext
     public void Input__WhenTheInstallFolderCannotBeReached__ThenShouldRefuseToSaveIt()
     {
         // Given:
-        IRenderedComponent<SettingsEditorComponent> component = this.RenderEditor();
+        var component = this.RenderEditor();
 
         // When:
         component.Find(InstallFolderSelector).Input(UnreachableFolderPath);
@@ -103,7 +103,7 @@ public class SettingsEditorTests : Bunit.TestContext
             .Setup(reader => reader.ReadSubFolderNames(ReachableFolderPath))
             .Returns<string>(static _ => []);
 
-        IRenderedComponent<SettingsEditorComponent> component = this.RenderEditor();
+        var component = this.RenderEditor();
 
         // When:
         component.Find(InstallFolderSelector).Input(ReachableFolderPath);
@@ -120,7 +120,7 @@ public class SettingsEditorTests : Bunit.TestContext
     public void Save__WhenTheSettingsWereWritten__ThenShouldSaySoUntilTheValueChangesAgain()
     {
         // Given:
-        IRenderedComponent<SettingsEditorComponent> component = this.RenderEditor();
+        var component = this.RenderEditor();
         component.Find(InstallFolderSelector).Input(ReachableFolderPath);
 
         // When:
@@ -148,7 +148,7 @@ public class SettingsEditorTests : Bunit.TestContext
 
         this.settingsFilePath = Path.Combine(this.folderPath, "blocking-file", "settings.json");
 
-        IRenderedComponent<SettingsEditorComponent> component = this.RenderEditor();
+        var component = this.RenderEditor();
         component.Find(InstallFolderSelector).Input(ReachableFolderPath);
 
         // When:

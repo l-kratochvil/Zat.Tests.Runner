@@ -35,8 +35,8 @@ public class InitPathsExtensionsTests
     public void InitAppPaths__WhenTheApplicationDataPathIsConfigured__ThenShouldDeriveTheDirectoriesFromIt()
     {
         // When:
-        using ServiceProvider provider = this.BuildProvider(this.dataPath);
-        IAppPathsProvider result = provider.GetRequiredService<IAppPathsProvider>();
+        using var provider = this.BuildProvider(this.dataPath);
+        var result = provider.GetRequiredService<IAppPathsProvider>();
 
         // Then:
         using (Assert.EnterMultipleScope())
@@ -50,8 +50,8 @@ public class InitPathsExtensionsTests
     public void InitAppPaths__WhenTheApplicationDataPathIsConfigured__ThenShouldDeriveTheFilesFromIt()
     {
         // When:
-        using ServiceProvider provider = this.BuildProvider(this.dataPath);
-        IAppPathsProvider result = provider.GetRequiredService<IAppPathsProvider>();
+        using var provider = this.BuildProvider(this.dataPath);
+        var result = provider.GetRequiredService<IAppPathsProvider>();
 
         // Then:
         Assert.That(result.Files.UserSettings, Is.EqualTo(Path.Combine(this.dataPath, "user-settings.json")));
@@ -63,7 +63,7 @@ public class InitPathsExtensionsTests
         // Given:
         // Where the application writes is answered by configuration alone, so a missing section is
         // a broken installation rather than something to guess around.
-        using ServiceProvider provider = this.BuildProvider(configuredDataPath: null);
+        using var provider = this.BuildProvider(configuredDataPath: null);
 
         // Then:
         Assert.That(
@@ -75,13 +75,13 @@ public class InitPathsExtensionsTests
     public void InitAppPaths__WhenTheApplicationDataPathNamesAnEnvironmentVariable__ThenShouldExpandIt()
     {
         // Given:
-        string expectedPath = Path.Combine(
+        var expectedPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "Elsewhere");
 
         // When:
-        using ServiceProvider provider = this.BuildProvider(@"%LOCALAPPDATA%\Elsewhere");
-        IAppPathsProvider result = provider.GetRequiredService<IAppPathsProvider>();
+        using var provider = this.BuildProvider(@"%LOCALAPPDATA%\Elsewhere");
+        var result = provider.GetRequiredService<IAppPathsProvider>();
 
         // Then:
         Assert.That(result.Directories.AppData, Is.EqualTo(expectedPath));
@@ -91,8 +91,8 @@ public class InitPathsExtensionsTests
     public void InitAppPaths__WhenThePathsAreRead__ThenShouldCreateNothingOnDisk()
     {
         // When:
-        using ServiceProvider provider = this.BuildProvider(this.dataPath);
-        IAppPathsProvider paths = provider.GetRequiredService<IAppPathsProvider>();
+        using var provider = this.BuildProvider(this.dataPath);
+        var paths = provider.GetRequiredService<IAppPathsProvider>();
         _ = paths.Directories.Logs;
         _ = paths.Files.UserSettings;
 
@@ -104,8 +104,8 @@ public class InitPathsExtensionsTests
     public void InitAppPaths__WhenTheServicesAreInitialised__ThenShouldCreateTheDirectories()
     {
         // Given:
-        using ServiceProvider provider = this.BuildProvider(this.dataPath);
-        IAppPathsProvider paths = provider.GetRequiredService<IAppPathsProvider>();
+        using var provider = this.BuildProvider(this.dataPath);
+        var paths = provider.GetRequiredService<IAppPathsProvider>();
 
         // When:
         provider.InitInitializableServices(this.services);
@@ -124,7 +124,7 @@ public class InitPathsExtensionsTests
         // Given:
         // One registration is all the paths need: what asks for initialisation says so by
         // implementing it, see InitDependencyInjectionExtensions.
-        using ServiceProvider provider = this.BuildProvider(this.dataPath);
+        using var provider = this.BuildProvider(this.dataPath);
 
         // Then:
         Assert.That(
@@ -145,10 +145,10 @@ public class InitPathsExtensionsTests
         var givenServices = new ServiceCollection();
         givenServices.AddSingleton(givenConfiguration);
 
-        using ServiceProvider provider = givenServices.BuildServiceProvider();
+        using var provider = givenServices.BuildServiceProvider();
 
         // When:
-        IAppPathsProvider result = provider.GetRequiredService<IAppPathsProvider>();
+        var result = provider.GetRequiredService<IAppPathsProvider>();
 
         // Then:
         Assert.That(
@@ -206,11 +206,11 @@ public class InitPathsExtensionsTests
 
     private static async Task StartHostAsync(Dictionary<string, string?> configuration)
     {
-        HostApplicationBuilder builder = Host.CreateEmptyApplicationBuilder(settings: null);
+        var builder = Host.CreateEmptyApplicationBuilder(settings: null);
         builder.Configuration.AddInMemoryCollection(configuration);
         builder.Services.InitAppPaths();
 
-        using IHost host = builder.Build();
+        using var host = builder.Build();
         await host.StartAsync();
         await host.StopAsync();
     }

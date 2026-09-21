@@ -33,16 +33,16 @@ public class InitLoggingExtensionsTests
     public void InitFileLogger__WhenTheLoggingSectionIsConfigured__ThenShouldBindTheOptions()
     {
         // Given:
-        string givenPath = Path.Combine(this.dataPath, "elsewhere");
+        var givenPath = Path.Combine(this.dataPath, "elsewhere");
 
         // When:
-        using ServiceProvider provider = BuildProvider(new Dictionary<string, string?>
+        using var provider = BuildProvider(new Dictionary<string, string?>
         {
             ["App:LocalAppDataPath"] = this.dataPath,
             ["Logging:File:Path"] = givenPath,
             ["Logging:File:RetainedFileCount"] = "3",
         });
-        FileLoggerOptions result = provider.GetRequiredService<IOptions<FileLoggerOptions>>().Value;
+        var result = provider.GetRequiredService<IOptions<FileLoggerOptions>>().Value;
 
         // Then:
         using (Assert.EnterMultipleScope())
@@ -56,9 +56,9 @@ public class InitLoggingExtensionsTests
     public void InitFileLogger__WhenTheLoggingSectionIsSilent__ThenShouldKeepTheRetainedFileCount()
     {
         // When:
-        using ServiceProvider provider = BuildProvider(
+        using var provider = BuildProvider(
             new Dictionary<string, string?> { ["App:LocalAppDataPath"] = this.dataPath });
-        FileLoggerOptions result = provider.GetRequiredService<IOptions<FileLoggerOptions>>().Value;
+        var result = provider.GetRequiredService<IOptions<FileLoggerOptions>>().Value;
 
         // Then:
         Assert.That(result.RetainedFileCount, Is.EqualTo(5));
@@ -68,7 +68,7 @@ public class InitLoggingExtensionsTests
     public void InitFileLogger__WhenNoLogPathIsConfigured__ThenShouldWriteUnderTheApplicationDataRoot()
     {
         // Given:
-        string expectedPath = Path.Combine(this.dataPath, "logs");
+        var expectedPath = Path.Combine(this.dataPath, "logs");
 
         // When:
         WriteOneEntry(new Dictionary<string, string?> { ["App:LocalAppDataPath"] = this.dataPath });
@@ -81,7 +81,7 @@ public class InitLoggingExtensionsTests
     public void InitFileLogger__WhenTheLoggingSectionNamesALogPath__ThenShouldWriteThere()
     {
         // Given:
-        string expectedPath = Path.Combine(this.dataPath, "elsewhere");
+        var expectedPath = Path.Combine(this.dataPath, "elsewhere");
 
         // When:
         WriteOneEntry(new Dictionary<string, string?>
@@ -104,7 +104,7 @@ public class InitLoggingExtensionsTests
     /// <param name="configuration">Configuration the container is built from.</param>
     private static void WriteOneEntry(Dictionary<string, string?> configuration)
     {
-        using ServiceProvider provider = BuildProvider(configuration);
+        using var provider = BuildProvider(configuration);
 
         provider
             .GetRequiredService<ILoggerFactory>()

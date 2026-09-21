@@ -10,16 +10,13 @@ using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.TuiApp.Extensions;
 using Zat.Tests.Runner.TuiApp.Stores;
 
-internal class TestCasesSelectionScreen(
-    TestRunStore testRunStore,
+internal class HwAssemblyTypeSelectionScreen(
+    TestConfigStore testConfigStore,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
     : ScreenBase(homeScreen, exitScreen, settingsScreen)
 {
-    // TODO: Localize
-    private const string InstructionsText = "[grey](Press [blue]<space>[/] to select an item, [green]<enter>[/] to accept)[/]";
-
     private static readonly EqualityComparer<TestEntity> TestEntityEqualityComparer = TestEntity.CreateEqualityComparerByName();
 
     /// <inheritdoc/>
@@ -28,16 +25,16 @@ internal class TestCasesSelectionScreen(
         {
             Main = ct =>
             {
-                var testSuites = testRunStore.LoadedTestSuites;
+                var testSuites = testConfigStore.LoadedTestSuites;
                 var prompt = new MultiSelectionPrompt<TestSuiteEntity>(TestEntityEqualityComparer)
                     .Title("# Select testsuites to select testcases from: ")
                     .MoreChoicesText($"[grey]({Resources.MoveUpAndDownToReveal_HelpText})[/]")
-                    .InstructionsText(InstructionsText)
+                    .InstructionsText($"[grey]({Resources.PressSpaceToSelectItem})[/]")
                     .PageSize(10)
                     .AddChoices(testSuites)
                     .UseConverter(x => x.Name);
 
-                testRunStore
+                testConfigStore
                     .SelectedTestEntities
                     .OfType<TestSuiteEntity>()
                     .ForEach(entity => prompt.Select(entity));
@@ -47,7 +44,7 @@ internal class TestCasesSelectionScreen(
                     selectedTestSuites => new RenderOutput(
                         NextScreen: new SelectTestCasesScreen(
                             testSuites: selectedTestSuites,
-                            testRunStore: testRunStore,
+                            testConfigStore: testConfigStore,
                             homeScreen: this.HomeScreenLazy,
                             exitScreen: this.ExitScreenLazy,
                             settingsScreen: this.SettingsScreenLazy)),
@@ -57,7 +54,7 @@ internal class TestCasesSelectionScreen(
 
     private class SelectTestCasesScreen(
         IEnumerable<TestSuiteEntity> testSuites,
-        TestRunStore testRunStore,
+        TestConfigStore testConfigStore,
         Lazy<HomeScreen> homeScreen,
         Lazy<ExitScreen> exitScreen,
         Lazy<SettingsScreen> settingsScreen)
@@ -72,7 +69,7 @@ internal class TestCasesSelectionScreen(
                     var prompt = new MultiSelectionPrompt<TestEntity>(TestEntityEqualityComparer)
                         .Title("# Select test cases: ")
                         .MoreChoicesText($"[grey]({Resources.MoveUpAndDownToReveal_HelpText})[/]")
-                        .InstructionsText(InstructionsText)
+                        .InstructionsText($"[grey]({Resources.PressSpaceToSelectItem})[/]")
                         .NotRequired()
                         .PageSize(10)
                         .UseConverter(x => (x as TestCaseEntity)?.Id ?? x.Name);
@@ -82,15 +79,15 @@ internal class TestCasesSelectionScreen(
                         prompt.AddChoiceGroup(testFixture, testFixture.TestCases.OrderBy(x => x.Id));
                     }
 
-                    testRunStore.SelectedTestEntities.ForEach(entity => prompt.Select(entity));
+                    testConfigStore.SelectedTestEntities.ForEach(entity => prompt.Select(entity));
 
                     return await ShowPromptAsync(
                         prompt,
                         selectedTestCases =>
                         {
-                            testRunStore.SelectedTestEntities =
+                            testConfigStore.SelectedTestEntities =
                             [
-                                ..testRunStore.SelectedTestEntities
+                                ..testConfigStore.SelectedTestEntities
                                     .Where(currentEntity => selectedTestCases.Any(currentEntity.Equals))
                                     .Union(selectedTestCases)
                             ];

@@ -1,8 +1,11 @@
 namespace Zat.Tests.Runner.WebApp.Tests.AppLogging;
 
 using Microsoft.Extensions.Logging;
+
 using Moq;
+
 using NUnit.Framework;
+
 using Zat.Tests.Runner.WebApp.Features.AppLogging.Models;
 using Zat.Tests.Runner.WebApp.Features.AppLogging.Services;
 using Zat.Tests.Runner.WebApp.Shared.Logging;
@@ -59,7 +62,7 @@ public class DiagnosticsLoggerSinkTests
     public void GetCategory__WhenAskedForASource__ThenShouldPrefixItSoThatTheApplicationFiltersMatch()
     {
         // When:
-        string result = DiagnosticsLoggerSink.GetCategory(LogSources.TestRun);
+        var result = DiagnosticsLoggerSink.GetCategory(LogSources.TestRun);
 
         // Then:
         Assert.That(result, Is.EqualTo(DiagnosticsLoggerSink.CategoryPrefix + LogSources.TestRun));

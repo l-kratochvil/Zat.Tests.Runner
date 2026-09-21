@@ -19,7 +19,7 @@ internal static class InitScreensExtensions
                 .AddSingleton<RuntimeVersionPromptScreen>()
                 .AddSingleton<TestSuitesSelectionScreen>()
                 .AddSingleton<TestCasesSelectionScreen>()
-                .AddSingleton<TestStationSelectionScreen>()
+                .AddSingleton<HwAssemblyTypeSelectionScreen>()
                 .AddSingleton(static provider => new Lazy<HomeScreen>(provider.GetRequiredService<HomeScreen>))
                 .AddSingleton(static provider => new Lazy<ExitScreen>(provider.GetRequiredService<ExitScreen>))
                 .AddSingleton(static provider => new Lazy<SettingsScreen>(provider.GetRequiredService<SettingsScreen>))

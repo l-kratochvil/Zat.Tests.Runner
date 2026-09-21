@@ -7,6 +7,7 @@ using Fluxor;
 using Microsoft.Extensions.DependencyInjection;
 
 using Moq;
+
 using NUnit.Framework;
 
 using Zat.Tests.Runner.WebApp.Components.Primitives;
@@ -40,7 +41,7 @@ public class BindingCheckboxTests : Bunit.TestContext
         this.viewModel.IsEnabled = givenTick;
 
         // When:
-        IRenderedComponent<BindingCheckbox<EditedViewModel>> component = this.RenderCheckbox();
+        var component = this.RenderCheckbox();
 
         // Then:
         Assert.That(
@@ -51,7 +52,7 @@ public class BindingCheckboxTests : Bunit.TestContext
     public void Edit__WhenTheTesterTicksIt__ThenShouldWriteItToTheViewModel()
     {
         // Given:
-        IRenderedComponent<BindingCheckbox<EditedViewModel>> component = this.RenderCheckbox();
+        var component = this.RenderCheckbox();
 
         // When:
         component.Find(CheckboxSelector).Change(true);
@@ -66,7 +67,7 @@ public class BindingCheckboxTests : Bunit.TestContext
         // Given:
         bool? told = null;
 
-        IRenderedComponent<BindingCheckbox<EditedViewModel>> component = this.RenderCheckbox(
+        var component = this.RenderCheckbox(
             parameters => parameters.Add(checkbox => checkbox.OnChange, value => told = value));
 
         // When:
@@ -80,7 +81,7 @@ public class BindingCheckboxTests : Bunit.TestContext
     public void Edit__WhenTheBindingEventIsOnInput__ThenShouldWriteTheTickAsItIsMade()
     {
         // Given:
-        IRenderedComponent<BindingCheckbox<EditedViewModel>> component = this.RenderCheckbox(
+        var component = this.RenderCheckbox(
             parameters => parameters.Add(checkbox => checkbox.BindingEvent, BindingEvent.OnInput));
 
         // When:

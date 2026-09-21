@@ -7,20 +7,19 @@ using WindowsInput.Native;
 
 using Zat.Tests.Runner.Common;
 using Zat.Tests.Runner.Common.Model;
-using Zat.Tests.Runner.Common.Services;
+using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.TuiApp.Common;
 using Zat.Tests.Runner.TuiApp.Stores;
+using Zat.Z2xxTests.Common.Model;
 
 internal class RunTestScreen(
-    TestRunStore testRunStore,
-    INUnitTestRunnerProxy nunitTestRunnerProxy,
+    TestConfigStore testConfigStore,
+    ITestRunnerEngine testRunnerEngine,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
     : ScreenBase(homeScreen, exitScreen, settingsScreen)
 {
-    private CancellationTokenSource? testRunCts;
-
     /// <inheritdoc/>
     protected override Configuration Config { get; init; } = new()
     {
@@ -37,7 +36,7 @@ internal class RunTestScreen(
             new ActionCommand(
                 Key: VirtualKeyCode.F2,
                 Text: Resources.StopTest_CommandText,
-                Action: () => this.testRunCts?.Cancel())
+                Action: testRunnerEngine.StopTestRun)
         ];
 
     /// <inheritdoc/>
@@ -56,21 +55,18 @@ internal class RunTestScreen(
                     .AddColumn(string.Empty)
                     .AddColumn(string.Empty);
 
-                this.testRunCts = new CancellationTokenSource();
-
-                // TODO: Save TestRunConfigStore state to XML
-                var runTestTask = nunitTestRunnerProxy.RunTestAsync(
-                    testRunStore.SelectedTestEntities,
-                    this.testRunCts.Token);
+                var runTestTask = testRunnerEngine.RunTestAsync(
+                    testConfigStore.SelectedTestEntities, new TestConfig(
+                        testedRuntimeVersion: testConfigStore.RuntimeVersion,
+                        testedHwAssemblyType: testConfigStore.TestedHwAssemblyType,
+                        isDebug: testConfigStore.IsDebug));
 
                 var promptResult = await ShowLiveDataAsync(
                     table,
                     state,
                     async (table, data, ctx, ct) =>
                     {
-                        while (!ct.IsCancellationRequested &&
-                               !this.testRunCts.IsCancellationRequested &&
-                               !runTestTask.IsCompleted)
+                        while (!ct.IsCancellationRequested && !runTestTask.IsCompleted)
                         {
                             // TODO: Show test logs?
                             table.Rows.Clear();
@@ -85,7 +81,7 @@ internal class RunTestScreen(
 
                 if (promptResult is InterruptedShowPrompt interuptedShowPrompt)
                 {
-                    await this.testRunCts.CancelAsync();
+                    testRunnerEngine.StopTestRun();
                     return interuptedShowPrompt;
                 }
 

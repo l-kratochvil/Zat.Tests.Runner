@@ -44,7 +44,7 @@ public class ValidityTests
         Validity unit = new([givenProblem, new Validity.Issue(AnotherField, "Write it as x.y.")]);
 
         // When:
-        Validity narrowed = unit.For(GivenField);
+        var narrowed = unit.For(GivenField);
 
         // Then:
         Assert.That(narrowed.Issues, Is.EqualTo(new[] { givenProblem }));

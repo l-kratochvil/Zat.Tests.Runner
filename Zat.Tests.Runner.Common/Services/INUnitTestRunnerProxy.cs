@@ -13,12 +13,14 @@ using Zat.Tests.Runner.Common.Model;
 public interface INUnitTestRunnerProxy
 {
     /// <summary>Loads the test assembly and returns its discovered test tree.</summary>
-    Task<TestSuiteEntity[]> LoadTestAssemblyAsync(string assemblyDllPath, CancellationToken cancellationToken = default);
+    Task<TestSuiteEntity[]> LoadTestAssemblyAsync(
+        string assemblyDllPath, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Runs the supplied test entities. Cancelling <paramref name="cancellationToken"/> forcibly aborts the run.
     /// </summary>
-    Task<TestRunResult> RunTestAsync(IEnumerable<TestEntity> testsToRun, CancellationToken cancellationToken = default);
+    Task<TestRunResult> RunTestAsync(
+        IEnumerable<TestEntity> testRunEntities, CancellationToken cancellationToken = default);
 
     /// <summary>Indicates whether a test assembly is currently loaded.</summary>
     Task<bool> GetIsAssemblyLoadedAsync(CancellationToken cancellationToken = default);

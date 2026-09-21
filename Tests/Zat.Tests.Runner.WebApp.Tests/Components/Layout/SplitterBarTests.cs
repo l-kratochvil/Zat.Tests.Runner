@@ -1,10 +1,13 @@
 namespace Zat.Tests.Runner.WebApp.Tests.Components.Layout;
 
 using Bunit;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+
 using NUnit.Framework;
+
 using Zat.Tests.Runner.WebApp.Components.Layout;
 using Zat.Tests.Runner.WebApp.Shared.JsInterop;
 
@@ -49,18 +52,18 @@ public class SplitterBarTests : Bunit.TestContext
     public void OnAfterRenderAsync__WhenTheComponentIsFirstRendered__ThenShouldInitializeTheJsModuleWithTheHandleAndOptions()
     {
         // Given:
-        JSRuntimeInvocationHandler initialize = this.SetupVoidFunction(InitializeFunction);
+        var initialize = this.SetupVoidFunction(InitializeFunction);
 
         // When:
-        IRenderedComponent<SplitterBar> component = this.RenderSplitterBar();
+        var component = this.RenderSplitterBar();
 
         // Then:
         Assert.That(initialize.Invocations[InitializeFunction], Has.Count.EqualTo(1));
 
-        JSRuntimeInvocation invocation = initialize.Invocations[InitializeFunction][0];
+        var invocation = initialize.Invocations[InitializeFunction][0];
         invocation.Arguments[HandleArgumentIndex].ShouldBeElementReferenceTo(component.Find(HandleSelector));
 
-        object options = invocation.Arguments[OptionsArgumentIndex]!;
+        var options = invocation.Arguments[OptionsArgumentIndex]!;
         using (Assert.EnterMultipleScope())
         {
             Assert.That(GetProperty(options, nameof(SplitterBar.CssVariable)), Is.EqualTo(GivenCssVariable));
@@ -76,8 +79,8 @@ public class SplitterBarTests : Bunit.TestContext
     public void OnAfterRenderAsync__WhenTheComponentIsRerendered__ThenShouldInitializeTheJsModuleOnlyOnce()
     {
         // Given:
-        JSRuntimeInvocationHandler initialize = this.SetupVoidFunction(InitializeFunction);
-        IRenderedComponent<SplitterBar> component = this.RenderSplitterBar();
+        var initialize = this.SetupVoidFunction(InitializeFunction);
+        var component = this.RenderSplitterBar();
 
         // When:
         component.SetParametersAndRender(parameters => parameters.Add(p => p.Label, GivenLabel));
@@ -91,8 +94,8 @@ public class SplitterBarTests : Bunit.TestContext
     {
         // Given:
         this.SetupVoidFunction(InitializeFunction);
-        JSRuntimeInvocationHandler dispose = this.SetupVoidFunction(DisposeFunction);
-        IRenderedComponent<SplitterBar> component = this.RenderSplitterBar();
+        var dispose = this.SetupVoidFunction(DisposeFunction);
+        var component = this.RenderSplitterBar();
 
         // When:
         await component.Instance.DisposeAsync();

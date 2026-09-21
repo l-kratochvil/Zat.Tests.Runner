@@ -187,6 +187,15 @@ namespace Zat.Tests.Runner.TuiApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Press [blue]&lt;space&gt;[/] to select an item, [green]&lt;enter&gt;[/] to accept.
+        /// </summary>
+        public static string PressSpaceToSelectItem {
+            get {
+                return ResourceManager.GetString("PressSpaceToSelectItem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Run test.
         /// </summary>
         public static string RunTest_ChoiceText {
@@ -232,20 +241,20 @@ namespace Zat.Tests.Runner.TuiApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Select tested HW assembly type.
+        /// </summary>
+        public static string SelectHwAssemblyType_ChoiceText {
+            get {
+                return ResourceManager.GetString("SelectHwAssemblyType_ChoiceText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Select test cases.
         /// </summary>
         public static string SelectTestCases_ChoiceText {
             get {
                 return ResourceManager.GetString("SelectTestCases_ChoiceText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Select test station.
-        /// </summary>
-        public static string SelectTestStation_ChoiceText {
-            get {
-                return ResourceManager.GetString("SelectTestStation_ChoiceText", resourceCulture);
             }
         }
         

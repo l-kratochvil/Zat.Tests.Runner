@@ -3,7 +3,6 @@
 ## HiPrio
 
 - Vyrešit issues
-- Zbavit se IInstalledRuntimeVersionsProvider, InstalledRuntimeVersionsProvider, InstalledRuntimeVersions
 - Zautomatizování kroků testera - základní
 - Vyřešit Deploy
 - TestDiscovery: Nahradit store za Fluxor
@@ -13,17 +12,15 @@
 
 ## MidPrio
 
-- Zrušit ukládání výsledků do souboru: Řeší se už v Zat.Z200Tests a je to redundatní operace
 - Update nuget balíčků solutionu
 - Refactor TestDiscovery feature
 - Rozšíření testů pro komponenty DataContext, BinindgInput, BindingSelect, BindingCheckbox
-- Změna "Main" v menu na ikonku "home".
 - Playwright/vitest E2E tests
 
 ## LoPrio
 
+- Změna "Main" v menu na ikonku "home".
 - Vypisování manuálních předpokladů (získá se z TL)?
-- Nahradit konfigurační soubor za API řešení
 - Email notifikace (po dokončení testu)
 - Zautomatizování kroků testera - pokročilé?
 
@@ -59,12 +56,6 @@
 
 ## MidPrio - Detaily
 
-### Změna "Main" v menu na ikonku "home"
-
-- Použít toto řešení:
-  - balíčky: a. Blazicons (některé sady nejsou free), b. MudBlazor
-  - css: a. Bootstrap Icons; b. Font Awesome (některé sady nejsou free)
-
 ### Rozšíření testů pro komponenty DataContext, BinindgInput, BindingSelect, BindingCheckbox
 
 - Rozšířit o testy:
@@ -80,24 +71,11 @@
 
 ## LoPrio - Detaily
 
-### Nahradit konfigurační soubor za API řešení
+### Změna "Main" v menu na ikonku "home"
 
-- Runner se s testem spojí např. pomocí RPC
-- Dalším řešením by mohlo být předávání konfigurace skrze argumenty NUnit runneru:
-  - Aktuálně se předává konfigurace skrze xml soubor
-  - Vyčítat z argumentů NUnit
-  - Při spuštění skze NUNit console by byl předán argument obsahující hodnotu RunTime
-  - Pokud by nebyl argument definován (v přápadě spouštění skrze VS test adapter), tak by byla hodnota načtena z TestSettings
-  - 26.10.22: Feature pro předávání custom argumentů není zatím vyvinuta. Měla by být být obsažena ve verzi 4.0, která je hotová ze 47%
-  - 5.12.22: NUnit-console verze 4.0 je stále na 47%
-  - 12.1.23: NUnit-console verze 4.0 se dostala na 50%
-  - 3.2.23: NUnit-console verze 4.0 je stále na 50%
-  - 28.2.23: NUnit-console verze 4.0 je stále na 50%. Samotné NUnit 4.0 (engine) má 93%. Až bude vývoj hotov, tak by mohl jít vývoj console o něco rychleji.
-  - 14.7.23: Stále stejné ...
-  - 30.11.23: Stále stejné ...
-  - [1](https://github.com/nunit/nunit-console/issues/148)
-  - [2](https://github.com/nunit/nunit-console/milestone/12)
-  - [3](https://github.com/nunit/nunit/milestone/38)
+- Použít toto řešení:
+  - balíčky: a. Blazicons (některé sady nejsou free), b. MudBlazor
+  - css: a. Bootstrap Icons; b. Font Awesome (některé sady nejsou free)
 
 ### Zautomatizování kroků testera - pokročilé
 

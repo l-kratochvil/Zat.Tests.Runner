@@ -74,7 +74,7 @@ public class InitServicesExtensionTests
         Type[] expectedTypes = [typeof(DiagnosticsLoggerSink)];
 
         // When:
-        IEnumerable<Type> result = this.unit.GetServices<IAppLoggerSink>().Select(sink => sink.GetType());
+        var result = this.unit.GetServices<IAppLoggerSink>().Select(sink => sink.GetType());
 
         // Then:
         Assert.That(result, Is.EqualTo(expectedTypes));
@@ -89,7 +89,7 @@ public class InitServicesExtensionTests
         Type[] expectedTypes = [typeof(AppSettingsStore)];
 
         // When:
-        IEnumerable<Type> result = this.unit.GetServices<IHostedService>().Select(service => service.GetType());
+        var result = this.unit.GetServices<IHostedService>().Select(service => service.GetType());
 
         // Then:
         Assert.That(result, Is.EqualTo(expectedTypes));
@@ -107,7 +107,7 @@ public class InitServicesExtensionTests
         this.unit.Dispose();
 
         // Then:
-        string content = File.ReadAllText(LogFile.GetPath(this.logsDirectoryPath, DateTimeOffset.Now));
+        var content = File.ReadAllText(LogFile.GetPath(this.logsDirectoryPath, DateTimeOffset.Now));
         Assert.That(content, Does.Contain(DiagnosticsLoggerSink.GetCategory(LogSources.App)).And.Contains(givenMessage));
     }
 
@@ -118,12 +118,12 @@ public class InitServicesExtensionTests
         // A file where the logs directory should be, so that the provider cannot write anything.
         // A silently broken log file is the worst way for a log to fail, so it has to surface in
         // the panel.
-        string givenBlockedPath = Path.Combine(Path.GetTempPath(), $"applogging-di-blocked-{Guid.NewGuid():N}");
+        var givenBlockedPath = Path.Combine(Path.GetTempPath(), $"applogging-di-blocked-{Guid.NewGuid():N}");
         File.WriteAllText(givenBlockedPath, string.Empty);
 
         try
         {
-            ServiceProvider provider = BuildProvider(givenBlockedPath);
+            var provider = BuildProvider(givenBlockedPath);
             var loggerHub = provider.GetRequiredService<IAppLoggerHub>();
 
             // When:
@@ -153,7 +153,7 @@ public class InitServicesExtensionTests
         givenServices.InitSharedServices();
 
         // Then:
-        ServiceDescriptor result = givenServices.Single(
+        var result = givenServices.Single(
             descriptor => descriptor.ServiceType == typeof(IJsModuleInteropFactory));
 
         using (Assert.EnterMultipleScope())

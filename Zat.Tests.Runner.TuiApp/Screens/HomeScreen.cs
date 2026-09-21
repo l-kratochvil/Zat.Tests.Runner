@@ -6,10 +6,10 @@ using System.Collections.Generic;
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.TuiApp.Common;
 using Zat.Tests.Runner.TuiApp.Stores;
+using Zat.Z2xxTests.Common;
 
 internal sealed class HomeScreen(
-    TestRunStore testRunStore,
-    TestRunConfigStore testRunConfigStore,
+    TestConfigStore testConfigStore,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen,
@@ -17,7 +17,7 @@ internal sealed class HomeScreen(
     IdeVersionPromptScreen ideVersionPromptScreen,
     TestSuitesSelectionScreen testEntitiesFromTestsuitesPromptScreen,
     TestCasesSelectionScreen testEntitiesFromTestCasesPromptScreen,
-    TestStationSelectionScreen testStationSelectionScreen,
+    HwAssemblyTypeSelectionScreen hwAssemblyTypeSelectionScreen,
     RunTestScreen runTestScreen)
     : ScreenBase(homeScreen, exitScreen, settingsScreen)
 {
@@ -50,9 +50,9 @@ internal sealed class HomeScreen(
             },
             Info = () =>
             {
-                var testFixtures = testRunStore
+                var testFixtures = testConfigStore
                     .SelectedTestEntities.OfType<TestFixtureEntity>().ToArray();
-                var testCases = testRunStore
+                var testCases = testConfigStore
                     .SelectedTestEntities.OfType<TestCaseEntity>().ToArray();
 
                 TestEntity[] testEntities = [];
@@ -95,9 +95,9 @@ internal sealed class HomeScreen(
         yield return new Choice<IScreen>(
             value: runtimeVersionPromptScreen,
             displayText: Resources.RuntimeVersion_ChoiceText,
-            displayValue: testRunConfigStore.RuntimeVersion);
+            displayValue: testConfigStore.RuntimeVersion);
 
-        if (testRunConfigStore.RuntimeVersion is null)
+        if (testConfigStore.RuntimeVersion is null)
         {
             yield break;
         }
@@ -105,13 +105,13 @@ internal sealed class HomeScreen(
         if (Choice.InitChoice<IScreen>(
                 ideVersionPromptScreen,
                 Resources.IdeVersion_ChoiceText,
-                testRunStore.IdeVersion)
+                testConfigStore.IdeVersion)
             .TryGetValue(out var ideVersionChoice))
         {
             yield return ideVersionChoice;
         }
 
-        if (testRunStore.IdeVersion is null)
+        if (testConfigStore.IdeVersion is null)
         {
             yield break;
         }
@@ -134,30 +134,33 @@ internal sealed class HomeScreen(
             yield return selectTestCasesChoice;
         }
 
-        if (!testRunStore.SelectedTestEntities.Any())
+        if (!testConfigStore.SelectedTestEntities.Any())
         {
             yield break;
         }
 
-        var runtimeTestEntitySelected = testRunStore.SelectedTestEntities.Any(x => x.TestType is TestType.RuntimeTest);
         if (Choice.InitChoice<IScreen>(
-                testStationSelectionScreen,
-                Resources.SelectTestStation_ChoiceText,
-                testRunConfigStore.TestStation,
-                () => runtimeTestEntitySelected)
-            .TryGetValue(out var selectTestStationChoice))
+                hwAssemblyTypeSelectionScreen,
+                Resources.SelectHwAssemblyType_ChoiceText,
+                testConfigStore.TestedHwAssemblyType.ToString(),
+                () => testConfigStore.IsRuntimeTest)
+            .TryGetValue(out var selectHwAssemblyTypeChoice))
         {
-            yield return selectTestStationChoice;
+            yield return selectHwAssemblyTypeChoice;
         }
 
-        if (runtimeTestEntitySelected && string.IsNullOrEmpty(testRunConfigStore.TestStation))
+        if (testConfigStore is
+            {
+                IsRuntimeTest: true,
+                TestedHwAssemblyType: null or TestedHwAssemblyType.Unknown
+            })
         {
             yield break;
         }
 
-        if (string.IsNullOrEmpty(testRunStore.IdeVersion) ||
-            string.IsNullOrEmpty(testRunConfigStore.RuntimeVersion) ||
-            !testRunStore.SelectedTestEntities.Any())
+        if (string.IsNullOrEmpty(testConfigStore.IdeVersion) ||
+            string.IsNullOrEmpty(testConfigStore.RuntimeVersion) ||
+            !testConfigStore.SelectedTestEntities.Any())
         {
             throw new InvalidOperationException("Invalid config (some required values are missing)");
         }

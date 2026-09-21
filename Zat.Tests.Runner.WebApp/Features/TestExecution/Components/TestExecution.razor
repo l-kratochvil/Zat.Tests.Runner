@@ -1,12 +1,9 @@
 @* Feature: TestExecution — "the user can execute a test". *@
 
 @using CommunityToolkit.Mvvm.Input
-
 @using DevKit.Mvvm.ViewModel.Commands;
-
 @using Fluxor;
-
-@using Zat.Tests.Runner.Common.Services;
+@using Zat.Tests.Runner.Common.Net.Services
 @using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration
 @using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery
 
@@ -31,7 +28,7 @@
     private CancellationTokenSource? testRunCts;
 
     [Inject]
-    private INUnitTestRunnerProxy NUnitTestRunnerProxy { get; set; } = null!; 
+    private ITestRunnerEngine TestRunnerEngine { get; set; } = null!;
 
     [Inject]
     private IState<TestConfigurationState> TestConfigurationState { get; set; } = null!;
@@ -45,28 +42,26 @@
     private ExtendedCommand StopTestCommand
         => field ??= new ExtendedCommand(
                 command: new RelayCommand(
-                    () => 
-                    { 
-                        this.testRunCts?.Cancel();
-                        this.isRunning = false;
-                    },
-                canExecute: () => this.isRunning),
+                    execute: this.TestRunnerEngine.StopTestRun,
+                    canExecute: () => this.isRunning),
             "Stop");
-    
+
     private ExtendedCommand StartTestCommand
         => field ??= new ExtendedCommand(
                 command: new AsyncRelayCommand(
                     async () => 
-                    { 
+                    {
+                        throw new NotImplementedException("TODO (see comments)");
+
                         this.testRunCts = new CancellationTokenSource();
 
                         // TODO: 
                         // Start (using var) RPC server (see NUnitTestRunnerProxy.Program)
                         // Use registred mockable service
 
-                        await this.NUnitTestRunnerProxy.RunTestAsync(
+                        await this.TestRunnerEngine.RunTestAsync(
                             this.TestDiscoveryStore.Current.SelectedTestCases,
-                            this.testRunCts.Token);
+                            null); // TODO
 
                             // TODO: Report result:
                             // - The report feature should handle testlink reporting and showing it in the UI

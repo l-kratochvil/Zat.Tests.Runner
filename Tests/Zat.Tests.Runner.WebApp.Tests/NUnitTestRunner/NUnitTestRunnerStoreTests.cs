@@ -7,7 +7,7 @@ using NUnit.Framework;
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Services;
 using Zat.Tests.Runner.WebApp.Shared.Logging;
-using Zat.Tests.Runner.WebApp.Shared.NUnitTestRunner;
+using Zat.Tests.Runner.WebApp.Shared.Stores.NUnitTestRunner;
 
 [TestFixture]
 public class NUnitTestRunnerStoreTests

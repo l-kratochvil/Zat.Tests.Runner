@@ -25,7 +25,7 @@ public class InitDependencyInjectionExtensionsTests
         var services = new ServiceCollection();
         services.AddSingleton<IService, Service>();
 
-        using ServiceProvider provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
 
         // When:
         provider.InitInitializableServices(services);
@@ -42,7 +42,7 @@ public class InitDependencyInjectionExtensionsTests
         services.AddSingleton<Service>();
         services.AddSingleton<IService>(provider => provider.GetRequiredService<Service>());
 
-        using ServiceProvider provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
 
         // When:
         provider.InitInitializableServices(services);
@@ -60,7 +60,7 @@ public class InitDependencyInjectionExtensionsTests
         var services = new ServiceCollection();
         services.AddSingleton<PlainService>();
 
-        using ServiceProvider provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
 
         // When:
         provider.InitInitializableServices(services);
@@ -78,7 +78,7 @@ public class InitDependencyInjectionExtensionsTests
         var services = new ServiceCollection();
         services.AddLogging();
 
-        using ServiceProvider provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
 
         // Then:
         Assert.That(() => provider.InitInitializableServices(services), Throws.Nothing);
@@ -93,7 +93,7 @@ public class InitDependencyInjectionExtensionsTests
         var services = new ServiceCollection();
         services.AddScoped<IService, Service>();
 
-        using ServiceProvider provider = services.BuildServiceProvider();
+        using var provider = services.BuildServiceProvider();
 
         // Then:
         Assert.That(() => provider.InitInitializableServices(services), Throws.Nothing);

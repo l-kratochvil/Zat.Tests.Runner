@@ -1,4 +1,4 @@
-namespace Zat.Tests.Runner.WebApp.Shared.NUnitTestRunner;
+namespace Zat.Tests.Runner.WebApp.Shared.Stores.NUnitTestRunner;
 
 using Zat.Tests.Runner.Common.Model;
 
