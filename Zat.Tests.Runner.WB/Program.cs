@@ -133,7 +133,8 @@ void SaveTestResults(
             testcaseApiId,
             result.testPlanId,
             resultStatus,
-            platformId: testPlatform.id, // Platforma musí být přidána do testovacího plánu. Pokud není potřeba specifikovat platformu, tak stačí zadat prázdný string do argument platfromName
+            platformId: testPlatform
+                .id, // Platforma musí být přidána do testovacího plánu. Pokud není potřeba specifikovat platformu, tak stačí zadat prázdný string do argument platfromName
             overwrite: false,
             notes: result.notes,
             buildId: testBuild.id);
