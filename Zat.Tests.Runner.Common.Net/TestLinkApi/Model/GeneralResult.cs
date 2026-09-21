@@ -1,4 +1,4 @@
-﻿namespace Zat.Tests.Runner.TuiApp.TestLinkApi.Types;
+﻿namespace Zat.Tests.Runner.Common.Net.TestLinkApi.Model;
 
 /// <summary>
 ///  returned when creating new TestProjects, TestCases, projects etc

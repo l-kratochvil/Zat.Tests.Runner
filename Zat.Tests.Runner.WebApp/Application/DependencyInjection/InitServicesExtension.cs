@@ -38,6 +38,7 @@ public static class InitServicesExtension
                 .AddSingleton<IAppPathsProvider, AppPathsProvider>()
                 .AddSingleton<ITestRunnerBridgeConnector, TestRunnerBridgeConnector>()
                 .AddSingleton<ITestRunnerEngine, TestRunnerEngine>()
+                .InitTestLink()
                 .InitFluxor()
                 .InitNUnitTestRunner();
 
@@ -79,5 +80,10 @@ public static class InitServicesExtension
                         }))
                 .AddScoped<IStringStateStorage, LocalStringStateStorage>()
                 .AddScoped<IStoreHandler, JsonStoreHandler>();
+
+        private IServiceCollection InitTestLink()
+            => services
+                .AddSingleton<ITestLinkApiClient, TestLinkApiClient>()
+                .AddSingleton(_ => ITestLinkApiClient.Config.Default);
     }
 }

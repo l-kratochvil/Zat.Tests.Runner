@@ -3,6 +3,7 @@
 ## HiPrio
 
 - Vyrešit issues
+- Dokončit TestLinkApi
 - Zautomatizování kroků testera - základní
 - Vyřešit Deploy
 - TestDiscovery: Nahradit store za Fluxor
@@ -25,6 +26,13 @@
 - Zautomatizování kroků testera - pokročilé?
 
 ## HiPrio - Detaily
+
+### Dokončit TestLinkApi
+
+- ITestLinkApiClient.Config.Default: API key musí být secret!
+- Nešlo by použít klasické NET RPC namísto CookComputing.XmlRpc?
+- Přejmenovat ITestLinkApiClient: ITestLinkApi? ITestLink?
+- Nutno refaktorovat a vyřešit warningy
 
 ### Issues
 

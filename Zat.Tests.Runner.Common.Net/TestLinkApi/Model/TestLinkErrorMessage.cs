@@ -1,4 +1,4 @@
-﻿namespace Zat.Tests.Runner.TuiApp.TestLinkApi.Types;
+﻿namespace Zat.Tests.Runner.Common.Net.TestLinkApi.Model;
 
 /// <summary>
 /// package an the error message returned by the API

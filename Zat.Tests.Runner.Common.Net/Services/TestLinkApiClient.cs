@@ -1,28 +1,29 @@
-﻿namespace Zat.Tests.Runner.TuiApp.TestLinkApi;
+﻿namespace Zat.Tests.Runner.Common.Net.Services;
 
 using System.Net;
 
 using CookComputing.XmlRpc;
 
-using Zat.Tests.Runner.TuiApp.TestLinkApi.Types;
+using Zat.Tests.Runner.Common.Net.TestLinkApi;
+using Zat.Tests.Runner.Common.Net.TestLinkApi.Model;
 
 // TODO: Review method summaries
-internal class TestLinkApiClient : ITestLinkApiClient
+public class TestLinkApiClient : ITestLinkApiClient
 {
     private readonly string devkey;
 
-    private readonly IXmlRpcProxy proxy;
+    private readonly ITestLinkXmlRpcProxy proxy;
 
     /// <summary>
     /// </summary>
     /// <param name="apiKey">TestLink API key as provided by testlink.</param>
     /// <param name="xmlRpcServerUrl">URL of testlink XML RPC server. Something like: http://localhost/testlink/lib/api/xmlrpc.php</param>
     /// <param name="loggingEnabled">Enable capture of lastRequest and lastResponse for debugging.</param>
-    public TestLinkApiClient(AppSystemConfig appSystemConfig)
+    public TestLinkApiClient(ITestLinkApiClient.Config config)
     {
-        var apiKey = appSystemConfig.TestLinkConfig.ApiKey;
-        var xmlRpcServerUrl = appSystemConfig.TestLinkConfig.XmlRpcServerUrl;
-        var loggingEnabled = appSystemConfig.TestLinkConfig.LoggingEnabled;
+        var apiKey = config.ApiKey;
+        var xmlRpcServerUrl = config.XmlRpcServerUrl;
+        var loggingEnabled = config.LoggingEnabled;
 
         if (string.IsNullOrEmpty(apiKey))
         {
@@ -36,7 +37,7 @@ internal class TestLinkApiClient : ITestLinkApiClient
             throw new TestLinkApiException($"TestLink XML RPC server URL wasn't provided. Provided devkey: {this.devkey}");
         }
 
-        this.proxy = XmlRpcProxyGen.Create<IXmlRpcProxy>();
+        this.proxy = XmlRpcProxyGen.Create<ITestLinkXmlRpcProxy>();
         this.proxy.Url = xmlRpcServerUrl;
         ServicePointManager.ServerCertificateValidationCallback += (_, _, _, _) => true;
 
@@ -125,7 +126,7 @@ internal class TestLinkApiClient : ITestLinkApiClient
     /// <returns>A list (may be empty)</returns>
     public Build[] GetBuildsForTestPlan(int testPlanId)
     {
-        var response = this.proxy.getBuildsForTestPlan(this.devkey, testPlanId);
+        var response = this.proxy.GetBuildsForTestPlan(this.devkey, testPlanId);
 
         CheckErrorMessage(response);
 
@@ -155,7 +156,7 @@ internal class TestLinkApiClient : ITestLinkApiClient
         //    return TestLinkData.ToGeneralResult(data);
         //return null;
 
-        var response = this.proxy.createBuild(this.devkey, testPlanId, buildName, buildNotes);
+        var response = this.proxy.CreateBuild(this.devkey, testPlanId, buildName, buildNotes);
 
         CheckErrorMessage(response);
 
@@ -195,14 +196,14 @@ internal class TestLinkApiClient : ITestLinkApiClient
                 if (bugId == 0)
                 {
                     return buildId == 0
-                        ? this.proxy.reportTCResult(this.devkey, testCaseId, testplanid, status, platformName, overwrite, notes, guess)
-                        : this.proxy.reportTCResult(this.devkey, testCaseId, testplanid, status, platformName, overwrite, notes, guess, 0,
+                        ? this.proxy.ReportTCResult(this.devkey, testCaseId, testplanid, status, platformName, overwrite, notes, guess)
+                        : this.proxy.ReportTCResult(this.devkey, testCaseId, testplanid, status, platformName, overwrite, notes, guess, 0,
                             buildId);
                 }
 
                 return buildId == 0
-                    ? this.proxy.reportTCResult(this.devkey, testCaseId, testplanid, status, platformName, overwrite, notes, guess, bugId)
-                    : this.proxy.reportTCResult(this.devkey, testCaseId, testplanid, status, platformName, overwrite, notes, guess, bugId,
+                    ? this.proxy.ReportTCResult(this.devkey, testCaseId, testplanid, status, platformName, overwrite, notes, guess, bugId)
+                    : this.proxy.ReportTCResult(this.devkey, testCaseId, testplanid, status, platformName, overwrite, notes, guess, bugId,
                         buildId);
             }
 
@@ -214,13 +215,13 @@ internal class TestLinkApiClient : ITestLinkApiClient
             if (bugId == 0)
             {
                 return buildId == 0
-                    ? this.proxy.reportTCResult(this.devkey, testCaseId, testplanid, status, platformId, overwrite, notes, guess)
-                    : this.proxy.reportTCResult(this.devkey, testCaseId, testplanid, status, platformId, overwrite, notes, guess, 0, buildId);
+                    ? this.proxy.ReportTCResult(this.devkey, testCaseId, testplanid, status, platformId, overwrite, notes, guess)
+                    : this.proxy.ReportTCResult(this.devkey, testCaseId, testplanid, status, platformId, overwrite, notes, guess, 0, buildId);
             }
 
             return buildId == 0
-                ? this.proxy.reportTCResult(this.devkey, testCaseId, testplanid, status, platformId, overwrite, notes, guess, bugId)
-                : this.proxy.reportTCResult(this.devkey, testCaseId, testplanid, status, platformId, overwrite, notes, guess, bugId, buildId);
+                ? this.proxy.ReportTCResult(this.devkey, testCaseId, testplanid, status, platformId, overwrite, notes, guess, bugId)
+                : this.proxy.ReportTCResult(this.devkey, testCaseId, testplanid, status, platformId, overwrite, notes, guess, bugId, buildId);
         }
 
         var response = GetResponse();
@@ -263,7 +264,7 @@ internal class TestLinkApiClient : ITestLinkApiClient
             base64String = string.Empty;
         }
 
-        var response = this.proxy.uploadExecutionAttachment(this.devkey, executionId, filename, fileType, base64String, title, description);
+        var response = this.proxy.UploadExecutionAttachment(this.devkey, executionId, filename, fileType, base64String, title, description);
 
         CheckErrorMessage(response);
 
@@ -280,7 +281,7 @@ internal class TestLinkApiClient : ITestLinkApiClient
     /// <returns>A list of Test Cases</returns>
     public TestCaseFromTestSuite[] GetTestCasesForTestSuite(int testSuiteId, bool deep)
     {
-        var response = this.proxy.getTestCasesForTestSuite(this.devkey, testSuiteId, deep, "full");
+        var response = this.proxy.GetTestCasesForTestSuite(this.devkey, testSuiteId, deep, "full");
         if (response is string && (string)response == string.Empty) // equals null return
         {
             return [];
@@ -303,7 +304,7 @@ internal class TestLinkApiClient : ITestLinkApiClient
     /// <returns>a list of testplan platforms</returns>
     public TestPlatform[] GetTestPlanPlatforms(int testplanid)
     {
-        var response = this.proxy.getTestPlanPlatforms(this.devkey, testplanid);
+        var response = this.proxy.GetTestPlanPlatforms(this.devkey, testplanid);
 
         // 3041 means no platforms are assigned for this testplan
         return CheckErrorMessage(response, 3041)
@@ -320,7 +321,7 @@ internal class TestLinkApiClient : ITestLinkApiClient
     /// <returns></returns>
     public TestSuite[] GetFirstLevelTestSuitesForTestProject(int testProjectId)
     {
-        var response = this.proxy.getFirstLevelTestSuitesForTestProject(this.devkey, testProjectId);
+        var response = this.proxy.GetFirstLevelTestSuitesForTestProject(this.devkey, testProjectId);
         var errors = DecodeErrors(response);
 
         // 7008 means project has no test suites
@@ -335,7 +336,7 @@ internal class TestLinkApiClient : ITestLinkApiClient
     /// <inheritdoc/>
     public TestSuite[] GetTestSuitesForTestSuite(int testSuiteId)
     {
-        var response = this.proxy.getTestSuitesForTestSuite(this.devkey, testSuiteId);
+        var response = this.proxy.GetTestSuitesForTestSuite(this.devkey, testSuiteId);
         // Testlink returns an empty string if a test suite has no child test suites
         if (response is string)
         {
@@ -355,7 +356,7 @@ internal class TestLinkApiClient : ITestLinkApiClient
     /// <returns></returns>
     public TestSuite? GetTestSuiteById(int id)
     {
-        var response = this.proxy.getTestSuiteByID(this.devkey, id);
+        var response = this.proxy.GetTestSuiteByID(this.devkey, id);
         return CheckErrorMessage(response, 8000) ? null : XmlRpcStructConvertors.ToTestSuite((XmlRpcStruct)response);
     }
 
@@ -363,13 +364,13 @@ internal class TestLinkApiClient : ITestLinkApiClient
     /// Executes basic ping
     /// </summary>
     /// <returns></returns>
-    public string SayHello() => this.proxy.sayHello();
+    public string SayHello() => this.proxy.SayHello();
 
     /// <summary>
     /// Gets info about the API
     /// </summary>
     /// <returns></returns>
-    public string About() => this.proxy.about();
+    public string About() => this.proxy.About();
 
     /// <summary>
     /// Checks if the developer key exists
@@ -378,7 +379,7 @@ internal class TestLinkApiClient : ITestLinkApiClient
     /// <returns>true if key exists</returns>
     public bool CheckDevKeyExists(string devkey)
     {
-        var response = this.proxy.checkDevKey(devkey);
+        var response = this.proxy.CheckDevKey(devkey);
 
         CheckErrorMessage(response);
 
@@ -392,7 +393,7 @@ internal class TestLinkApiClient : ITestLinkApiClient
     /// <returns></returns>
     public bool CheckUserExists(string username)
     {
-        var response = this.proxy.doesUserExist(this.devkey, username);
+        var response = this.proxy.DoesUserExist(this.devkey, username);
         return CheckErrorMessage(response, 10000) ? false : (bool)response;
     }
 }

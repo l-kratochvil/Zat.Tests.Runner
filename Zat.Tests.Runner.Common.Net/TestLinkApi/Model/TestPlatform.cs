@@ -1,4 +1,4 @@
-﻿namespace Zat.Tests.Runner.TuiApp.TestLinkApi.Types;
+﻿namespace Zat.Tests.Runner.Common.Net.TestLinkApi.Model;
 
 /// <summary>
 /// Represents a platform against which a test result can be recorded

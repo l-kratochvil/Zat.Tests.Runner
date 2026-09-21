@@ -3,7 +3,7 @@ namespace Zat.Tests.Runner.TuiApp.Tests;
 // TOOD: Remove this reference (only NUnitRunnerProxy should know about NUnit)
 using NUnit.Framework;
 
-using Zat.Tests.Runner.TuiApp.TestLinkApi;
+using Runner.Common.Net.TestLinkApi;
 
 using static Zat.Tests.Runner.TuiApp.Common.InternalTypes;
 
