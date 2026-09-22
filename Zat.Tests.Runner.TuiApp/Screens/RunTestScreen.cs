@@ -13,7 +13,6 @@ using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.TuiApp.Common;
 using Zat.Tests.Runner.TuiApp.Stores;
-using Zat.Z2xxTests.Common.Model;
 
 internal class RunTestScreen(
     TestConfigStore testConfigStore,
@@ -97,10 +96,13 @@ internal class RunTestScreen(
                                 var handledTestResult = this.handledTestResults[i];
 
                                 sb.AppendLine(string.Empty);
-                                sb.AppendLine(TextUtils.SafeFormat(
-                                    Resources.TestResultHeader_Format,
-                                    i + 1,
-                                    handledTestResult.StartTime));
+                                sb.AppendLine(
+                                    $"[bold underline aqua]{TextUtils
+                                        .SafeFormat(
+                                            Resources.TestResultHeader_Format,
+                                            i + 1,
+                                            handledTestResult.StartTime)
+                                        .EscapeMarkup()}[/]");
 
                                 var testResult = handledTestResult.Result;
                                 RenderNotRunSection(sb, testResult);
@@ -224,7 +226,6 @@ internal class RunTestScreen(
     {
         var summary = result.Summary;
 
-        sb.AppendLine();
         sb.AppendLine($"[aqua]{Resources.TestRunReport_Summary_SectionHeader.EscapeMarkup()}[/]");
 
         sb.AppendLine(

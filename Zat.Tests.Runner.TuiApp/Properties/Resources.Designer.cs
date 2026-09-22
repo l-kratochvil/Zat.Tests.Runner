@@ -412,7 +412,7 @@ namespace Zat.Tests.Runner.TuiApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Test result {0} ({1}).
+        ///   Looks up a localized string similar to Test result #{0} ({1}).
         /// </summary>
         public static string TestResultHeader_Format {
             get {

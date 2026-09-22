@@ -352,6 +352,6 @@
     <value>Must be in a date format</value>
   </data>
   <data name="TestResultHeader_Format" xml:space="preserve">
-    <value>Test result {0} ({1})</value>
+    <value>Test result #{0} ({1})</value>
   </data>
 </root>

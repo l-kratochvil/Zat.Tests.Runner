@@ -352,6 +352,6 @@
     <value>Musí být ve formátu data</value>
   </data>
   <data name="TestResultHeader_Format" xml:space="preserve">
-    <value>Výsledek testu {0} ({1})</value>
+    <value>Výsledek testu #{0} ({1})</value>
   </data>
 </root>
