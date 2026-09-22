@@ -15,7 +15,7 @@ internal class TestConfigStore(AppStateStore appStateStore)
 
     public bool IsDebug { get; set; } = false;
 
-    public bool IsRuntimeTest
+    public bool RuntimeTestEntitiesSelected
         => this.SelectedTestEntities.Any(x => x.TestType is TestType.RuntimeTest);
 
     public bool? IsTestLinkReportingEnabled
@@ -32,6 +32,13 @@ internal class TestConfigStore(AppStateStore appStateStore)
             current => current with { RuntimeVersion = value });
     }
 
+    public string? RuntimeReleaseDate
+    {
+        get => appStateStore.Current.RuntimeReleaseDate;
+        set => appStateStore.Update(
+            current => current with { RuntimeReleaseDate = value });
+    }
+
     public string? IdeVersion
     {
         get => appStateStore.Current.IdeVersion;
@@ -39,10 +46,17 @@ internal class TestConfigStore(AppStateStore appStateStore)
             current => current with { IdeVersion = value });
     }
 
-    public TestedHwAssemblyType? TestedHwAssemblyType
+    public string? IdeReleaseDate
     {
-        get => appStateStore.Current.TestedHwAssemblyType;
+        get => appStateStore.Current.IdeReleaseDate;
         set => appStateStore.Update(
-            current => current with { TestedHwAssemblyType = value });
+            current => current with { IdeReleaseDate = value });
+    }
+
+    public TestedHwAssemblyType[]? HwAssemblyTypes
+    {
+        get => appStateStore.Current.HwAssemblyTypes;
+        set => appStateStore.Update(
+            current => current with { HwAssemblyTypes = value });
     }
 }

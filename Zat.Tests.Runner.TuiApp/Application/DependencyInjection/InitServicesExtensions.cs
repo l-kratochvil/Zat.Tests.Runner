@@ -18,6 +18,7 @@ internal static class InitServicesExtensions
                     .AddSingleton(_ => ITestLinkApiClient.Config.Default)
                     .AddSingleton(nunitTestRunnerProxy)
                     .AddSingleton<ITestRunnerBridgeConnector, TestRunnerBridgeConnector>()
+                    .AddSingleton<ITestResultHandler, TestLinkResultHandler>()
                     .AddSingleton<ITestRunnerEngine, TestRunnerEngine>());
     }
 }

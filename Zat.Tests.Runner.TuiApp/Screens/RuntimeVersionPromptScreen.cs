@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using Zat.Tests.Runner.TuiApp.Stores;
 
 internal partial class RuntimeVersionPromptScreen(
-    TestConfigStore testRunConfigStore,
+    TestConfigStore testConfigStore,
     AppUserSettingsStore appUserSettingsStore,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
@@ -28,16 +28,16 @@ internal partial class RuntimeVersionPromptScreen(
                 }
 
                 var prompt = new SelectionPrompt<string>()
-                    .Title("Select runtime version:")
+                    .Title(Resources.SelectRuntimeVersion_PromptText.AsPromptTitle())
                     .PageSize(10)
-                    .MoreChoicesText("[grey](Move up and down to reveal more choices)[/]")
+                    .MoreChoicesText(SharedTexts.MoreChoicesHelpText)
                     .AddChoices(installedRuntimeVersions);
 
                 return ShowPromptAsync(
                     prompt,
                     version =>
                     {
-                        testRunConfigStore.RuntimeVersion = version;
+                        testConfigStore.RuntimeVersion = version;
                         return RenderOutput.Default;
                     },
                     ct);

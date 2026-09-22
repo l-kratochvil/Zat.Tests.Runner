@@ -17,8 +17,10 @@ internal sealed class HomeScreen(
     IdeVersionPromptScreen ideVersionPromptScreen,
     TestSuitesSelectionScreen testEntitiesFromTestsuitesPromptScreen,
     TestCasesSelectionScreen testEntitiesFromTestCasesPromptScreen,
-    HwAssemblyTypeSelectionScreen hwAssemblyTypeSelectionScreen,
+    HwAssemblyTypesSelectionScreen hwAssemblyTypesSelectionScreen,
     EnableTestLinkReportingPromptScreen enableTestLinkReportingPromptScreen,
+    RuntimeReleaseDatePromptScreen runtimeReleaseDatePromptScreen,
+    IdeReleaseDatePromptScreen ideReleaseDatePromptScreen,
     RunTestScreen runTestScreen)
     : ScreenBase(homeScreen, exitScreen, settingsScreen)
 {
@@ -39,7 +41,7 @@ internal sealed class HomeScreen(
                 var prompt = new SelectionPrompt<Choice<IScreen>>()
                     .Title(string.Empty) // The console is buggy if no title is set
                     .PageSize(10)
-                    .MoreChoicesText($"[grey]({Resources.MoveUpAndDownToReveal_HelpText})[/]")
+                    .MoreChoicesText(SharedTexts.MoreChoicesHelpText)
                     .AddChoices(choices)
                     .UseConverter(choice => choice.Text)
                     .HighlightStyle(new Style(foreground: Color.Aqua, decoration: Spectre.Console.Decoration.Bold));
@@ -93,6 +95,7 @@ internal sealed class HomeScreen(
 
     private IEnumerable<Choice<IScreen>> GetChoices()
     {
+        // TODO: Runtime version should be optional (PDP tests can be run without runtime version)
         // Runtime version choice
         yield return new Choice<IScreen>(
             value: runtimeVersionPromptScreen,
@@ -131,33 +134,37 @@ internal sealed class HomeScreen(
 
         // HW assembly type selection choice
         if (Choice.InitChoice<IScreen>(
-                hwAssemblyTypeSelectionScreen,
-                Resources.SelectHwAssemblyType_ChoiceText,
-                testConfigStore.TestedHwAssemblyType.ToString(),
-                () => testConfigStore.IsRuntimeTest)
-            .TryGetValue(out var selectHwAssemblyTypeChoice))
+                hwAssemblyTypesSelectionScreen,
+                Resources.HwAssemblyTypes_ChoiceText,
+                testConfigStore.HwAssemblyTypes is null ? null : string.Join(", ", testConfigStore.HwAssemblyTypes),
+                () => testConfigStore.RuntimeTestEntitiesSelected)
+            .TryGetValue(out var selectHwAssemblyTypesChoice))
         {
-            yield return selectHwAssemblyTypeChoice;
+            yield return selectHwAssemblyTypesChoice;
         }
 
-        if (testConfigStore is
-            {
-                IsRuntimeTest: true,
-                TestedHwAssemblyType: null or TestedHwAssemblyType.Unknown
-            })
+        if (testConfigStore.HwAssemblyTypes is null &&
+            testConfigStore.RuntimeTestEntitiesSelected)
         {
             yield break;
         }
 
         // Enable Test Link reporting choice
+#pragma warning disable SA1118 // Parameter should not span multiple lines
         if (Choice.InitChoice<IScreen>(
                 enableTestLinkReportingPromptScreen,
                 Resources.EnableTestLinkReporting_PromptText,
-                testConfigStore.IsTestLinkReportingEnabled?.ToString())
+                testConfigStore.IsTestLinkReportingEnabled switch
+                {
+                    true => Resources.Yes,
+                    false => Resources.No,
+                    null => null,
+                })
             .TryGetValue(out var enableTestLinkReportingPromptScreenChoice))
         {
             yield return enableTestLinkReportingPromptScreenChoice;
         }
+#pragma warning restore SA1118 // Parameter should not span multiple lines
 
         if (testConfigStore.IsTestLinkReportingEnabled is null)
         {
@@ -177,12 +184,28 @@ internal sealed class HomeScreen(
                 yield return ideVersionChoice;
             }
 
+            if (Choice.InitChoice<IScreen>(
+                    ideReleaseDatePromptScreen,
+                    Resources.IdeReleaseDate_ChoiceText,
+                    testConfigStore.IdeReleaseDate)
+                .TryGetValue(out var ideReleaseDateChoice))
+            {
+                yield return ideReleaseDateChoice;
+            }
+
+            if (Choice.InitChoice<IScreen>(
+                    runtimeReleaseDatePromptScreen,
+                    Resources.RuntimeReleaseDate_ChoiceText,
+                    testConfigStore.RuntimeReleaseDate)
+                .TryGetValue(out var runtimeReleaseDateChoice))
+            {
+                yield return runtimeReleaseDateChoice;
+            }
+
             if (testConfigStore.IdeVersion is null)
             {
                 yield break;
             }
-
-            // TODO: Optional release dates of tested installations (RT, IDE)?
         }
 
         // Validation of required configuration values
@@ -190,7 +213,7 @@ internal sealed class HomeScreen(
             string.IsNullOrEmpty(testConfigStore.RuntimeVersion) ||
             !testConfigStore.SelectedTestEntities.Any())
         {
-            throw new InvalidOperationException("Invalid config (some required values are missing)");
+            throw new InvalidOperationException("Invalid configuration (some required values are missing)");
         }
 
         yield return new Choice<IScreen>(

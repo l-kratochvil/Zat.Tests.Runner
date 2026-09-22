@@ -165,7 +165,7 @@
   <data name="ElapsedTime" xml:space="preserve">
     <value>Elapsed time</value>
   </data>
-  <data name="EnterIdeIVersion_PromptText" xml:space="preserve">
+  <data name="EnterIdeVersion_PromptText" xml:space="preserve">
     <value>Enter IDE version: </value>
   </data>
   <data name="EnterIdeInstallFolderPath_PromptText" xml:space="preserve">
@@ -300,16 +300,58 @@
   <data name="PressSpaceToSelectItem" xml:space="preserve">
     <value>Press [blue]&lt;space&gt;[/] to select an item, [green]&lt;enter&gt;[/] to accept</value>
   </data>
-  <data name="SelectHwAssemblyType_ChoiceText" xml:space="preserve">
-    <value>Select tested HW assembly type</value>
-  </data>
   <data name="EnableTestLinkReporting_PromptText" xml:space="preserve">
-    <value>Send result to TestLink?</value>
+    <value>Report result to TestLink</value>
   </data>
   <data name="YesShorten" xml:space="preserve">
     <value>y</value>
   </data>
   <data name="NoShorten" xml:space="preserve">
     <value>n</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="SelectHwAssemblyType_PromptText" xml:space="preserve">
+    <value>Select HW assembly types</value>
+  </data>
+  <data name="SelectRuntimeVersion_PromptText" xml:space="preserve">
+    <value>Select runtime version</value>
+  </data>
+  <data name="SelectTestSuites_PromptText" xml:space="preserve">
+    <value>Select testsuites</value>
+  </data>
+  <data name="SelectTestCases_PromptText" xml:space="preserve">
+    <value>Select test cases</value>
+  </data>
+  <data name="SelectTestSuitesToSelectTestCases_PromptText" xml:space="preserve">
+    <value>Select testsuites to select testcases from</value>
+  </data>
+  <data name="EnterIdeReleaseDate_PromptText" xml:space="preserve">
+    <value>Enter IDE release date:</value>
+  </data>
+  <data name="EnterRuntimeReleaseDate_PromptText" xml:space="preserve">
+    <value>Enter runtime release date:</value>
+  </data>
+  <data name="IdeReleaseDate_ChoiceText" xml:space="preserve">
+    <value>IDE release date</value>
+  </data>
+  <data name="RuntimeReleaseDate_ChoiceText" xml:space="preserve">
+    <value>Runtim release date</value>
+  </data>
+  <data name="HwAssemblyTypes_ChoiceText" xml:space="preserve">
+    <value>HW assembly types</value>
+  </data>
+  <data name="ValueRequired" xml:space="preserve">
+    <value>Value required</value>
+  </data>
+  <data name="MustBeDateFormat" xml:space="preserve">
+    <value>Must be in a date format</value>
+  </data>
+  <data name="TestResultHeader_Format" xml:space="preserve">
+    <value>Test result {0} ({1})</value>
   </data>
 </root>

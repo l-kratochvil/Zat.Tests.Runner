@@ -24,9 +24,9 @@ internal class TestSuitesSelectionScreen(
                 var testSuites = testConfigStore.LoadedTestSuites.ToArray();
 
                 var prompt = new MultiSelectionPrompt<TestEntity>(TestEntityEqualityComparer)
-                    .Title("# Select test suites: ")
-                    .MoreChoicesText($"[grey]({Resources.MoveUpAndDownToReveal_HelpText})[/]")
-                    .InstructionsText($"[grey]({Resources.PressSpaceToSelectItem})[/]")
+                    .Title(Resources.SelectTestSuites_PromptText.AsPromptTitle())
+                    .MoreChoicesText(SharedTexts.MoreChoicesHelpText)
+                    .InstructionsText(SharedTexts.InstructionsHelpText)
                     .PageSize(10)
                     .NotRequired()
                     .UseConverter(x => x.Name);

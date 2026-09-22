@@ -7,7 +7,7 @@ using Spectre.Console;
 using Zat.Tests.Runner.TuiApp.Stores;
 using Zat.Z2xxTests.Common;
 
-internal class HwAssemblyTypeSelectionScreen(
+internal class HwAssemblyTypesSelectionScreen(
     TestConfigStore testConfigStore,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
@@ -20,17 +20,18 @@ internal class HwAssemblyTypeSelectionScreen(
         {
             Main = ct =>
             {
-                var prompt = new SelectionPrompt<TestedHwAssemblyType>()
-                    .Title("# Select testsuites to select testcases from: ")
-                    .MoreChoicesText($"[grey]({Resources.MoveUpAndDownToReveal_HelpText})[/]")
+                var prompt = new MultiSelectionPrompt<TestedHwAssemblyType>()
+                    .Title(Resources.HwAssemblyTypes_ChoiceText.AsPromptTitle())
+                    .MoreChoicesText(SharedTexts.MoreChoicesHelpText)
                     .PageSize(10)
+                    .InstructionsText(SharedTexts.InstructionsHelpText)
                     .AddChoices(Enum.GetValues<TestedHwAssemblyType>());
 
                 return ShowPromptAsync(
                     prompt,
                     selectedHwAssemblyType =>
                     {
-                        testConfigStore.TestedHwAssemblyType = selectedHwAssemblyType;
+                        testConfigStore.HwAssemblyTypes = [..selectedHwAssemblyType];
                         return RenderOutput.Default;
                     },
                     ct);

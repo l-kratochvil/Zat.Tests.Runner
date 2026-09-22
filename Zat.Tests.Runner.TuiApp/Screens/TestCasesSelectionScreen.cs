@@ -27,9 +27,9 @@ internal class TestCasesSelectionScreen(
             {
                 var testSuites = testConfigStore.LoadedTestSuites;
                 var prompt = new MultiSelectionPrompt<TestSuiteEntity>(TestEntityEqualityComparer)
-                    .Title("# Select testsuites to select testcases from: ")
-                    .MoreChoicesText($"[grey]({Resources.MoveUpAndDownToReveal_HelpText})[/]")
-                    .InstructionsText($"[grey]({Resources.PressSpaceToSelectItem})[/]")
+                    .Title(Resources.SelectTestSuitesToSelectTestCases_PromptText.AsPromptTitle())
+                    .MoreChoicesText(SharedTexts.MoreChoicesHelpText)
+                    .InstructionsText(SharedTexts.InstructionsHelpText)
                     .PageSize(10)
                     .AddChoices(testSuites)
                     .UseConverter(x => x.Name);
@@ -67,9 +67,9 @@ internal class TestCasesSelectionScreen(
                 Main = async ct =>
                 {
                     var prompt = new MultiSelectionPrompt<TestEntity>(TestEntityEqualityComparer)
-                        .Title("# Select test cases: ")
-                        .MoreChoicesText($"[grey]({Resources.MoveUpAndDownToReveal_HelpText})[/]")
-                        .InstructionsText($"[grey]({Resources.PressSpaceToSelectItem})[/]")
+                        .Title(Resources.SelectTestSuites_PromptText.AsPromptTitle())
+                        .MoreChoicesText(SharedTexts.MoreChoicesHelpText)
+                        .InstructionsText(SharedTexts.InstructionsHelpText)
                         .NotRequired()
                         .PageSize(10)
                         .UseConverter(x => (x as TestCaseEntity)?.Id ?? x.Name);

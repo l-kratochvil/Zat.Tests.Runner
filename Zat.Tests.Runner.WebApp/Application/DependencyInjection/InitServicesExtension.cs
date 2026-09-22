@@ -9,6 +9,7 @@ using Microsoft.JSInterop;
 
 using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.WebApp.Application.Paths;
+using Zat.Tests.Runner.WebApp.Features.TestResultReporting.Services;
 using Zat.Tests.Runner.WebApp.Shared.JsInterop;
 using Zat.Tests.Runner.WebApp.Shared.Stores;
 using Zat.Tests.Runner.WebApp.Shared.Stores.NUnitTestRunner;
@@ -33,14 +34,14 @@ public static class InitServicesExtension
         public IServiceCollection InitSharedServices()
             => services
                 .InitAppOptions()
+                .InitFluxor()
+                .InitTestLink()
+                .InitNUnitTestRunner()
+                .InitTestRunnerEngine()
                 .AddScoped<IJsModuleInteropFactory, JsModuleInteropFactory>()
                 .AddSingleton<BrowserLogger>()
                 .AddSingleton<IAppPathsProvider, AppPathsProvider>()
-                .AddSingleton<ITestRunnerBridgeConnector, TestRunnerBridgeConnector>()
-                .AddSingleton<ITestRunnerEngine, TestRunnerEngine>()
-                .InitTestLink()
-                .InitFluxor()
-                .InitNUnitTestRunner();
+                .AddSingleton<ITestRunnerBridgeConnector, TestRunnerBridgeConnector>();
 
         public IServiceCollection InitAppOptions()
         {
@@ -85,5 +86,11 @@ public static class InitServicesExtension
             => services
                 .AddSingleton<ITestLinkApiClient, TestLinkApiClient>()
                 .AddSingleton(_ => ITestLinkApiClient.Config.Default);
+
+        private IServiceCollection InitTestRunnerEngine()
+            => services
+                .AddSingleton<ITestRunnerEngine, TestRunnerEngine>()
+                .AddSingleton<ITestResultHandler, TestLinkResultHandler>()
+                .AddScoped<ITestResultHandler, TestResultHandler>();
     }
 }

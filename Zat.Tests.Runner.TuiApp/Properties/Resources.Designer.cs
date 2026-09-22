@@ -79,7 +79,7 @@ namespace Zat.Tests.Runner.TuiApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Send result to TestLink?.
+        ///   Looks up a localized string similar to Report result to TestLink.
         /// </summary>
         public static string EnableTestLinkReporting_PromptText {
             get {
@@ -97,11 +97,29 @@ namespace Zat.Tests.Runner.TuiApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Enter IDE release date:.
+        /// </summary>
+        public static string EnterIdeReleaseDate_PromptText {
+            get {
+                return ResourceManager.GetString("EnterIdeReleaseDate_PromptText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Enter IDE version: .
         /// </summary>
-        public static string EnterIdeIVersion_PromptText {
+        public static string EnterIdeVersion_PromptText {
             get {
-                return ResourceManager.GetString("EnterIdeIVersion_PromptText", resourceCulture);
+                return ResourceManager.GetString("EnterIdeVersion_PromptText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter runtime release date:.
+        /// </summary>
+        public static string EnterRuntimeReleaseDate_PromptText {
+            get {
+                return ResourceManager.GetString("EnterRuntimeReleaseDate_PromptText", resourceCulture);
             }
         }
         
@@ -133,11 +151,29 @@ namespace Zat.Tests.Runner.TuiApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to HW assembly types.
+        /// </summary>
+        public static string HwAssemblyTypes_ChoiceText {
+            get {
+                return ResourceManager.GetString("HwAssemblyTypes_ChoiceText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to IDE install folder path: .
         /// </summary>
         public static string IdeInstallFolderPath_ChoiceText {
             get {
                 return ResourceManager.GetString("IdeInstallFolderPath_ChoiceText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to IDE release date.
+        /// </summary>
+        public static string IdeReleaseDate_ChoiceText {
+            get {
+                return ResourceManager.GetString("IdeReleaseDate_ChoiceText", resourceCulture);
             }
         }
         
@@ -156,6 +192,24 @@ namespace Zat.Tests.Runner.TuiApp.Properties {
         public static string MoveUpAndDownToReveal_HelpText {
             get {
                 return ResourceManager.GetString("MoveUpAndDownToReveal_HelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Must be in a date format.
+        /// </summary>
+        public static string MustBeDateFormat {
+            get {
+                return ResourceManager.GetString("MustBeDateFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No.
+        /// </summary>
+        public static string No {
+            get {
+                return ResourceManager.GetString("No", resourceCulture);
             }
         }
         
@@ -223,6 +277,15 @@ namespace Zat.Tests.Runner.TuiApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Runtim release date.
+        /// </summary>
+        public static string RuntimeReleaseDate_ChoiceText {
+            get {
+                return ResourceManager.GetString("RuntimeReleaseDate_ChoiceText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Runtime version.
         /// </summary>
         public static string RuntimeVersion_ChoiceText {
@@ -259,11 +322,20 @@ namespace Zat.Tests.Runner.TuiApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Select tested HW assembly type.
+        ///   Looks up a localized string similar to Select HW assembly types.
         /// </summary>
-        public static string SelectHwAssemblyType_ChoiceText {
+        public static string SelectHwAssemblyType_PromptText {
             get {
-                return ResourceManager.GetString("SelectHwAssemblyType_ChoiceText", resourceCulture);
+                return ResourceManager.GetString("SelectHwAssemblyType_PromptText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select runtime version.
+        /// </summary>
+        public static string SelectRuntimeVersion_PromptText {
+            get {
+                return ResourceManager.GetString("SelectRuntimeVersion_PromptText", resourceCulture);
             }
         }
         
@@ -277,11 +349,38 @@ namespace Zat.Tests.Runner.TuiApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Select test cases.
+        /// </summary>
+        public static string SelectTestCases_PromptText {
+            get {
+                return ResourceManager.GetString("SelectTestCases_PromptText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Select test suites.
         /// </summary>
         public static string SelectTestSuites_ChoiceText {
             get {
                 return ResourceManager.GetString("SelectTestSuites_ChoiceText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select testsuites.
+        /// </summary>
+        public static string SelectTestSuites_PromptText {
+            get {
+                return ResourceManager.GetString("SelectTestSuites_PromptText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select testsuites to select testcases from.
+        /// </summary>
+        public static string SelectTestSuitesToSelectTestCases_PromptText {
+            get {
+                return ResourceManager.GetString("SelectTestSuitesToSelectTestCases_PromptText", resourceCulture);
             }
         }
         
@@ -309,6 +408,15 @@ namespace Zat.Tests.Runner.TuiApp.Properties {
         public static string TestEntities {
             get {
                 return ResourceManager.GetString("TestEntities", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Test result {0} ({1}).
+        /// </summary>
+        public static string TestResultHeader_Format {
+            get {
+                return ResourceManager.GetString("TestResultHeader_Format", resourceCulture);
             }
         }
         
@@ -633,6 +741,24 @@ namespace Zat.Tests.Runner.TuiApp.Properties {
         public static string Unselected {
             get {
                 return ResourceManager.GetString("Unselected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Value required.
+        /// </summary>
+        public static string ValueRequired {
+            get {
+                return ResourceManager.GetString("ValueRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Yes.
+        /// </summary>
+        public static string Yes {
+            get {
+                return ResourceManager.GetString("Yes", resourceCulture);
             }
         }
         

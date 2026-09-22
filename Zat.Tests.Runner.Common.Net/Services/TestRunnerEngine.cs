@@ -5,11 +5,13 @@ using System.Collections.Generic;
 using Zat.Tests.Runner.Common;
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Services;
+using Zat.Z2xxTests.Common;
 using Zat.Z2xxTests.Common.Model;
 
 public class TestRunnerEngine(
     ITestRunnerBridgeConnector testRunnerBridgeConnector,
-    INUnitTestRunnerProxy nunitTestRunnerProxy)
+    INUnitTestRunnerProxy nunitTestRunnerProxy,
+    IEnumerable<ITestResultHandler> testResultHandlers)
     : ITestRunnerEngine
 {
     private CancellationTokenSource? runTestCts;
@@ -20,9 +22,16 @@ public class TestRunnerEngine(
     /// <inheritdoc />
     public async Task<TestRunResult> RunTestAsync(
         IEnumerable<TestEntity> testRunEntities,
-        TestConfig testConfig)
+        string? testedRuntimeVersion,
+        TestedHwAssemblyType[]? testedHwAssemblyTypes,
+        bool isDebug,
+        IEnumerable<ITestResultHandler>? resultHandlers = null)
     {
         using var connection = testRunnerBridgeConnector.Connect(testConfig);
+
+        var finalTestResultHandlers = resultHandlers is not null
+            ? testResultHandlers.Concat(resultHandlers)
+            : testResultHandlers;
 
         this.runTestCts = new CancellationTokenSource();
         this.IsRunning = true;
@@ -32,10 +41,19 @@ public class TestRunnerEngine(
 
         this.IsRunning = false;
 
+        foreach (var handler in finalTestResultHandlers)
+        {
+            handler.Handle(testRunResult);
+        }
+
         return testRunResult;
     }
 
     /// <inheritdoc />
     public void StopTestRun()
         => this.runTestCts?.Cancel();
+
+    /// <inheritdoc />
+    public void RegisterTestResultHandler(ITestResultHandler handler)
+        => testResultHandlers = testResultHandlers.Append(handler);
 }

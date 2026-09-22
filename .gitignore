@@ -45,7 +45,7 @@ Generated\ Files/
 
 # MSTest test Results
 # Named in full rather than with a wildcard: "TestResult*" also swallows source folders that merely
-# start the same way, such as a TestResultInspection feature.
+# start the same way, such as a TestResultReporting feature.
 [Tt]est[Rr]esult/
 [Tt]est[Rr]esults/
 [Bb]uild[Ll]og.*

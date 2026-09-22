@@ -7,9 +7,13 @@ using Zat.Z2xxTests.Common;
 internal record AppState(
     [property: JsonPropertyName("runtimeVersion")]
     string? RuntimeVersion,
+    [property: JsonPropertyName("runtimeReleaseDate")]
+    string? RuntimeReleaseDate,
     [property: JsonPropertyName("ideVersion")]
     string? IdeVersion,
-    [property: JsonPropertyName("testedHwAssemblyType")]
-    TestedHwAssemblyType? TestedHwAssemblyType,
+    [property: JsonPropertyName("ideReleaseDate")]
+    string? IdeReleaseDate,
+    [property: JsonPropertyName("testedHwAssemblyTypes")]
+    TestedHwAssemblyType[]? HwAssemblyTypes,
     [property: JsonPropertyName("isTestLinkReportingEnabled")]
     bool? IsTestLinkReportingEnabled);

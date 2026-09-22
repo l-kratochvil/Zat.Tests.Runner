@@ -2,7 +2,7 @@
 
 using Zat.Tests.Runner.TuiApp.Stores;
 
-internal class IdeVersionPromptScreen(
+internal class IdeReleaseDatePromptScreen(
     TestConfigStore testConfigStore,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
@@ -14,10 +14,10 @@ internal class IdeVersionPromptScreen(
         => new()
         {
             Main = ct => ShowPromptAsync(
-                new TextPrompt<string>(Resources.EnterIdeVersion_PromptText),
-                version =>
+                new TextPrompt<string>(Resources.EnterIdeReleaseDate_PromptText).Validate(Validators.IsDate),
+                date =>
                 {
-                    testConfigStore.IdeVersion = version;
+                    testConfigStore.IdeReleaseDate = date;
                     return new RenderOutput();
                 },
                 ct),

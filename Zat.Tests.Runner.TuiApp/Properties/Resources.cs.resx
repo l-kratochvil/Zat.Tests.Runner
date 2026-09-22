@@ -142,10 +142,10 @@
     <value>Verze IDE</value>
   </data>
   <data name="SelectTestSuites_ChoiceText" xml:space="preserve">
-    <value>Vyber testovací sady</value>
+    <value>Vyberte testovací sady</value>
   </data>
   <data name="SelectTestCases_ChoiceText" xml:space="preserve">
-    <value>Vyber testovací případy</value>
+    <value>Vyberte testovací případy</value>
   </data>
   <data name="RunTest_ChoiceText" xml:space="preserve">
     <value>Spustit test</value>
@@ -165,7 +165,7 @@
   <data name="ElapsedTime" xml:space="preserve">
     <value>Uplynulý čas</value>
   </data>
-  <data name="EnterIdeIVersion_PromptText" xml:space="preserve">
+  <data name="EnterIdeVersion_PromptText" xml:space="preserve">
     <value>Zadejte verzi IDE: </value>
   </data>
   <data name="EnterIdeInstallFolderPath_PromptText" xml:space="preserve">
@@ -300,16 +300,58 @@
   <data name="PressSpaceToSelectItem" xml:space="preserve">
     <value>Stiskni [blue]&lt;space&gt;[/] pro výběr položky, [green]&lt;enter&gt;[/] pro potvrzení</value>
   </data>
-  <data name="SelectHwAssemblyType_ChoiceText" xml:space="preserve">
-    <value>Vyber typ testované HW sestavy</value>
-  </data>
   <data name="EnableTestLinkReporting_PromptText" xml:space="preserve">
-    <value>Odeslat výsledek to TestLinku?</value>
+    <value>Zaznamenat výsledek do TestLinku</value>
   </data>
   <data name="YesShorten" xml:space="preserve">
     <value>a</value>
   </data>
   <data name="NoShorten" xml:space="preserve">
     <value>n</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Ano</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>Ne</value>
+  </data>
+  <data name="SelectHwAssemblyType_PromptText" xml:space="preserve">
+    <value>Vyberte testované HW sestavy</value>
+  </data>
+  <data name="SelectRuntimeVersion_PromptText" xml:space="preserve">
+    <value>Vyberte verzi runtime</value>
+  </data>
+  <data name="SelectTestSuites_PromptText" xml:space="preserve">
+    <value>Vyberte testovací sady</value>
+  </data>
+  <data name="SelectTestCases_PromptText" xml:space="preserve">
+    <value>Vyberte testovací případy</value>
+  </data>
+  <data name="SelectTestSuitesToSelectTestCases_PromptText" xml:space="preserve">
+    <value>Vyberte testovací sady ze kterých budou vybrány testovací případy</value>
+  </data>
+  <data name="EnterIdeReleaseDate_PromptText" xml:space="preserve">
+    <value>Zadejte datum vydání IDE:</value>
+  </data>
+  <data name="EnterRuntimeReleaseDate_PromptText" xml:space="preserve">
+    <value>Zadejte datum vydání runtime:</value>
+  </data>
+  <data name="IdeReleaseDate_ChoiceText" xml:space="preserve">
+    <value>Datum vydání IDE</value>
+  </data>
+  <data name="RuntimeReleaseDate_ChoiceText" xml:space="preserve">
+    <value>Datum vydání runtime</value>
+  </data>
+  <data name="HwAssemblyTypes_ChoiceText" xml:space="preserve">
+    <value>Typy HW sestav</value>
+  </data>
+  <data name="ValueRequired" xml:space="preserve">
+    <value>Hodnota je povinná</value>
+  </data>
+  <data name="MustBeDateFormat" xml:space="preserve">
+    <value>Musí být ve formátu data</value>
+  </data>
+  <data name="TestResultHeader_Format" xml:space="preserve">
+    <value>Výsledek testu {0} ({1})</value>
   </data>
 </root>
