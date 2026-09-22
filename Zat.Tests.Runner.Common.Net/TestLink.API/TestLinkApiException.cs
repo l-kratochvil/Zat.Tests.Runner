@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-namespace Zat.Tests.Runner.Common.Net.TestLinkApi;
+namespace Zat.Tests.Runner.Common.Net.TestLink.API;
 
 using System;
 using System.Collections.Generic;
@@ -38,7 +38,7 @@ public class TestLinkApiException : ApplicationException
     /// <summary>
     /// temporarily stores current errors
     /// </summary>
-    public List<Model.TestLinkErrorMessage> errors;
+    public List<Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestLinkErrorMessage> errors;
 
     /// <summary>
     /// basic Constructor
@@ -64,7 +64,7 @@ public class TestLinkApiException : ApplicationException
     /// constructor that takes a list of error messages
     /// </summary>
     /// <param name="errs"></param>
-    public TestLinkApiException(List<Model.TestLinkErrorMessage> errs)
+    public TestLinkApiException(List<Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestLinkErrorMessage> errs)
         : base("TestLinkApiException: testlink returned error messages. See errors")
     {
         this.errors = errs;
@@ -77,7 +77,7 @@ public class TestLinkApiException : ApplicationException
     /// </summary>
     /// <param name="msg"></param>
     /// <param name="errs"></param>
-    public TestLinkApiException(string msg, List<Model.TestLinkErrorMessage> errs)
+    public TestLinkApiException(string msg, List<Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestLinkErrorMessage> errs)
         : base(msg)
     {
         this.errors = errs;

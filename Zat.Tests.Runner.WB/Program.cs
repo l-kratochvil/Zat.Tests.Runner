@@ -4,13 +4,12 @@ using HtmlAgilityPack;
 
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Net.Services;
-using Zat.Tests.Runner.Common.Net.TestLinkApi.Model;
 
 const string testLinkApiKey = "dc7a17e14a9f1879d38583a38c3a81e8";
 
 const string testLinkUrl = "https://vyvoj.zat.lan/tester/testlink/lib/api/xmlrpc/v1/xmlrpc.php";
 
-var apiClient = new TestLinkApiClient(ITestLinkApiClient.Config.Default);
+var apiClient = new TestLink(ITestLink.Config.Default);
 
 const int productionProjectId = 6302; // TOTO JE ID PRODUKČNÍHO TEST PROJECTU
 const int tempProjectId = 10202;
@@ -23,10 +22,10 @@ var testSuites = GetAllTestSuitesAndTestCases(testProjectId);
 
 Console.WriteLine("DONE");
 
-List<TestSuite> GetAllTestSuitesAndTestCases(int testProjectId)
+List<Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestSuite> GetAllTestSuitesAndTestCases(int testProjectId)
 {
     var testSuitesForTestProject = apiClient.GetFirstLevelTestSuitesForTestProject(testProjectId);
-    var suites = new List<TestSuite>();
+    var suites = new List<Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestSuite>();
 
     foreach (var testSuite in testSuitesForTestProject)
     {
@@ -38,13 +37,13 @@ List<TestSuite> GetAllTestSuitesAndTestCases(int testProjectId)
     return suites;
 }
 
-string GetInformationForTester(TestSuite testSuite)
+string GetInformationForTester(Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestSuite testSuite)
 {
     var text = TransformFromHTMLDocToText(testSuite);
     return GetMatchedTextForTester(text);
 }
 
-string TransformFromHTMLDocToText(TestSuite testSuite)
+string TransformFromHTMLDocToText(Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestSuite testSuite)
 {
     var doc = new HtmlDocument();
     doc.LoadHtml(testSuite._details);
@@ -68,9 +67,9 @@ string GetMatchedTextForTester(string text)
     return userText;
 }
 
-TestSuite GetTestSuitesAndCases(TestSuite testSuite)
+Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestSuite GetTestSuitesAndCases(Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestSuite testSuite)
 {
-    var suite = new TestSuite(
+    var suite = new Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestSuite(
         testSuite._id,
         testSuite._name,
         testSuite._details,
@@ -133,8 +132,7 @@ void SaveTestResults(
             testcaseApiId,
             result.testPlanId,
             resultStatus,
-            platformId: testPlatform
-                .id, // Platforma musí být přidána do testovacího plánu. Pokud není potřeba specifikovat platformu, tak stačí zadat prázdný string do argument platfromName
+            platformId: testPlatform.id, // Platforma musí být přidána do testovacího plánu. Pokud není potřeba specifikovat platformu, tak stačí zadat prázdný string do argument platfromName
             overwrite: false,
             notes: result.notes,
             buildId: testBuild.id);

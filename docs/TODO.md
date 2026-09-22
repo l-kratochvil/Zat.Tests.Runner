@@ -36,9 +36,9 @@
 
 ### Dokončit TestLinkApi
 
-- ITestLinkApiClient.Config.Default: API key musí být secret!
+- ITestLink.Config.Default: API key musí být secret!
 - Nešlo by použít klasické NET RPC namísto CookComputing.XmlRpc?
-- Přejmenovat ITestLinkApiClient: ITestLinkApi? ITestLink?
+- Přejmenovat ITestLink: ITestLinkApi? ITestLink?
 - Nutno refaktorovat a vyřešit warningy
 
 ### Rework BindingSelect

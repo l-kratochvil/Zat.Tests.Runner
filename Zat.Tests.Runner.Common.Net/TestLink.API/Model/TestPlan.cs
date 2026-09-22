@@ -1,4 +1,4 @@
-﻿namespace Zat.Tests.Runner.Common.Net.TestLinkApi.Model;
+﻿namespace Zat.Tests.Runner.Common.Net.TestLink.API.Model;
 
 /// <summary>
 /// represent a test plan

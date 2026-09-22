@@ -1,4 +1,4 @@
-﻿namespace Zat.Tests.Runner.Common.Net.TestLinkApi.Model;
+﻿namespace Zat.Tests.Runner.Common.Net.TestLink.API.Model;
 
 /// <summary>
 ///  represent a single test step in a test case
@@ -34,8 +34,4 @@ public class TestStep
     ///  step number. Starts at 1
     /// </summary>
     public int step_number;
-
-    public TestStep()
-    {
-    }
 }

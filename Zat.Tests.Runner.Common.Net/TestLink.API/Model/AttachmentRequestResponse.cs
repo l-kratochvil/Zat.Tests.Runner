@@ -1,4 +1,4 @@
-﻿namespace Zat.Tests.Runner.Common.Net.TestLinkApi.Model;
+﻿namespace Zat.Tests.Runner.Common.Net.TestLink.API.Model;
 
 /// <summary>
 /// this is returned as a response to an attachment request

@@ -19,7 +19,7 @@ public interface INUnitTestRunnerProxy
     /// <summary>
     /// Runs the supplied test entities. Cancelling <paramref name="cancellationToken"/> forcibly aborts the run.
     /// </summary>
-    Task<TestRunResult> RunTestAsync(
+    Task<ProxyTestResult> RunTestAsync(
         IEnumerable<TestEntity> testRunEntities, CancellationToken cancellationToken = default);
 
     /// <summary>Indicates whether a test assembly is currently loaded.</summary>

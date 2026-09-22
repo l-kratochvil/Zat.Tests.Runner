@@ -3,14 +3,12 @@ namespace Zat.Tests.Runner.TuiApp.Tests;
 // TOOD: Remove this reference (only NUnitRunnerProxy should know about NUnit)
 using NUnit.Framework;
 
-using Runner.Common.Net.TestLinkApi;
-
 using static Zat.Tests.Runner.TuiApp.Common.InternalTypes;
 
 // TODO: Vytvo�it v TL vlastn� projekt pro ��ely testov�n� TestLinkApi
 
 [TestFixture]
-public class TestLinkApiClientTests
+public class TestLinkTests
 {
     private static readonly AppSystemConfig DefaultAppSystemConfig = new(
         TestLinkConfig: new TestLinkConfig(
@@ -38,7 +36,7 @@ public class TestLinkApiClientTests
                 XmlRpcServerUrl = string.Empty,
             },
         };
-        Assert.Throws<TestLinkApiException>(() => _ = new TestLinkApiClient(currentConfig));
+        Assert.Throws<Zat.Tests.Runner.Common.Net.TestLink.API.TestLinkApiException>(() => _ = new TestLinkApiClient(currentConfig));
     }
 
     [TestCase, Order(CtorTestCaseOrderNumber)]
@@ -52,7 +50,7 @@ public class TestLinkApiClientTests
             },
         };
 
-        Assert.Throws<TestLinkApiException>(() => _ = new TestLinkApiClient(currentConfig));
+        Assert.Throws<Zat.Tests.Runner.Common.Net.TestLink.API.TestLinkApiException>(() => _ = new TestLinkApiClient(currentConfig));
     }
 
     [TestCase]

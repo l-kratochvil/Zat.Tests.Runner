@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 
 using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.Common.Services;
+using Zat.Tests.Runner.TuiApp.Services;
 
 internal static class InitServicesExtensions
 {
@@ -14,11 +15,12 @@ internal static class InitServicesExtensions
             INUnitTestRunnerProxy nunitTestRunnerProxy)
             => hostBuilder.ConfigureServices(
                 services => services
-                    .AddSingleton<ITestLinkApiClient, TestLinkApiClient>()
-                    .AddSingleton(_ => ITestLinkApiClient.Config.Default)
+                    .AddSingleton<ITestLink, TestLink>()
+                    .AddSingleton(_ => ITestLink.Config.Default)
                     .AddSingleton(nunitTestRunnerProxy)
                     .AddSingleton<ITestRunnerBridgeConnector, TestRunnerBridgeConnector>()
+                    .AddSingleton<ITestRunnerEngine, TestRunnerEngine>()
                     .AddSingleton<ITestResultHandler, TestLinkResultHandler>()
-                    .AddSingleton<ITestRunnerEngine, TestRunnerEngine>());
+                    .AddSingleton<TestLinkResultHandler.IContext, TestLinkResultHandlerContext>());
     }
 }

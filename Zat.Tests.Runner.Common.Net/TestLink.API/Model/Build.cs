@@ -1,4 +1,4 @@
-﻿namespace Zat.Tests.Runner.Common.Net.TestLinkApi.Model;
+﻿namespace Zat.Tests.Runner.Common.Net.TestLink.API.Model;
 
 /// <summary>
 ///  Build information returned by Testlink

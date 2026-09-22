@@ -61,11 +61,13 @@
 
                         await this.TestRunnerEngine.RunTestAsync(
                             this.TestDiscoveryStore.Current.SelectedTestCases,
-                            null); // TODO
+                            this.TestConfigurationState.Value.RuntimeVersion,
+                            [], // TODO
+                            false); // TODO
 
-                            // TODO: Report result:
-                            // - The report feature should handle testlink reporting and showing it in the UI
-                            // - Maybe it uses fluxor Effect?
+                        // TODO: Report result:
+                        // - The report feature should handle testlink reporting and showing it in the UI
+                        // - Maybe it uses fluxor Effect?
 
                         this.isRunning = true;
                     },

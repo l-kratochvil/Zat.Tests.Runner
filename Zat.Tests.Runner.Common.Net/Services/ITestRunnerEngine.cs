@@ -7,7 +7,7 @@ public interface ITestRunnerEngine
 {
     bool IsRunning { get; }
 
-    Task<TestRunResult[]> RunTestAsync(
+    Task<TestResult[]> RunTestAsync(
         IEnumerable<TestEntity> testRunEntities,
         string? testedRuntimeVersion,
         TestedHwAssemblyType[]? testedHwAssemblyTypes,

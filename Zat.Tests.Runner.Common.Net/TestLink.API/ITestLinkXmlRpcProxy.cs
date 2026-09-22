@@ -1,8 +1,7 @@
 ﻿#pragma warning disable SA1124 // Do not use regions
-namespace Zat.Tests.Runner.Common.Net.TestLinkApi;
+namespace Zat.Tests.Runner.Common.Net.TestLink.API;
 
 using CookComputing.XmlRpc;
-using Zat.Tests.Runner.Common.Net.TestLinkApi.Model;
 
 /// <summary>
 /// the interface mapping required for the XmlRpc api of testlink.
@@ -37,7 +36,7 @@ public interface ITestLinkXmlRpcProxy : IXmlRpcProxy
 
     [XmlRpcMethod("tl.createTestCase", StructParams = true)]
     object CreateTestCase(string devKey, string authorlogin, int testsuiteid, string testcasename, int testprojectid,
-        string summary, TestStep[] steps, string keywords,
+        string summary, Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestStep[] steps, string keywords,
         int order, int checkduplicatedname, string actiononduplicatedname, int executiontype, int importance);
 
     [XmlRpcMethod("tl.addTestCaseToTestPlan", StructParams = true)]

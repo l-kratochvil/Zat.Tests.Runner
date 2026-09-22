@@ -10,6 +10,7 @@ using WindowsInput.Native;
 
 using Zat.Tests.Runner.Common;
 using Zat.Tests.Runner.Common.Model;
+using Zat.Tests.Runner.Common.Net;
 using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.TuiApp.Common;
 using Zat.Tests.Runner.TuiApp.Stores;
@@ -47,7 +48,7 @@ internal class RunTestScreen(
         ];
 
     /// <inheritdoc />
-    void ITestResultHandler.Handle(TestRunResult result)
+    void ITestResultHandler.Handle(TestResult result)
     {
         var oldTestStartTime = this.currentTestStartTime;
         this.currentTestStartTime = DateTime.UtcNow;
@@ -151,7 +152,7 @@ internal class RunTestScreen(
             },
         };
 
-    private static void RenderNotRunSection(StringBuilder sb, TestRunResult result)
+    private static void RenderNotRunSection(StringBuilder sb, ProxyTestResult result)
     {
         var entries = new List<ReportEntry>();
         entries.AddRange(result.IgnoredResults.Select(
@@ -164,7 +165,7 @@ internal class RunTestScreen(
         RenderEntrySection(sb, Resources.TestRunReport_TestsNotRun_SectionHeader, entries, includeStackTrace: false);
     }
 
-    private static void RenderProblemsSection(StringBuilder sb, TestRunResult result)
+    private static void RenderProblemsSection(StringBuilder sb, ProxyTestResult result)
     {
         var entries = new List<ReportEntry>();
         entries.AddRange(result.ErrorResults.Select(
@@ -219,7 +220,7 @@ internal class RunTestScreen(
 
     private static void RenderSummarySection(
         StringBuilder sb,
-        TestRunResult result,
+        ProxyTestResult result,
         DateTime startTimeUtc,
         DateTime endTimeUtc,
         TimeSpan duration)
@@ -289,7 +290,7 @@ internal class RunTestScreen(
     }
 
     private record TestResultHandled(
-        TestRunResult Result,
+        ProxyTestResult Result,
         DateTime StartTime,
         DateTime EndTime,
         TimeSpan Duration);

@@ -68,7 +68,7 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
             cancellationToken);
 
     /// <inheritdoc/>
-    public Task<Zat.Tests.Runner.Common.TestRunResult> RunTestAsync(
+    public Task<Zat.Tests.Runner.Common.ProxyTestResult> RunTestAsync(
         IEnumerable<TestEntity> testRunEntities, CancellationToken cancellationToken = default)
     {
         if (!this.runner.IsTestLoaded)
@@ -115,7 +115,7 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
                         Explicit: buckets.Explicit.Count,
                         Other: buckets.Other.Count);
 
-                    return new Common.TestRunResult(
+                    return new Common.ProxyTestResult(
                         result.ResultState.Status switch
                         {
                             NUnit.Framework.Interfaces.TestStatus.Passed => TestStatus.Passed,

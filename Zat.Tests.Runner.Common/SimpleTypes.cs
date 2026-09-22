@@ -2,7 +2,7 @@
 
 using Zat.Tests.Runner.Common.Model;
 
-public record TestRunResult(
+public record ProxyTestResult(
     TestStatus Status,
     TestRunSummary Summary,
     IgnoredResult[] IgnoredResults,

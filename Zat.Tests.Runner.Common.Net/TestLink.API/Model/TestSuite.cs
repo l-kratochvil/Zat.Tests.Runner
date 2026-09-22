@@ -1,4 +1,4 @@
-﻿namespace Zat.Tests.Runner.Common.Net.TestLinkApi.Model;
+﻿namespace Zat.Tests.Runner.Common.Net.TestLink.API.Model;
 
 using System.Collections.Generic;
 
@@ -63,7 +63,6 @@ public class TestSuite
     {
         this.TestSuites.Add(testSuite);
     }
-
 
     // Add a test case to the suite
     public void AddTestCase(TestCaseFromTestSuite testCase)

@@ -4,8 +4,8 @@ using System.Collections.Generic;
 
 using DevKit.Core.Extensions.Functional;
 
-using Zat.Tests.Runner.Common;
 using Zat.Tests.Runner.Common.Model;
+using Zat.Tests.Runner.Common.Net;
 using Zat.Tests.Runner.Common.Services;
 using Zat.Z2xxTests.Common;
 using Zat.Z2xxTests.Common.Model;
@@ -24,14 +24,14 @@ public class TestRunnerEngine(
     public bool IsRunning { get; set; }
 
     /// <inheritdoc />
-    public async Task<TestRunResult[]> RunTestAsync(
+    public async Task<TestResult[]> RunTestAsync(
         IEnumerable<TestEntity> testRunEntities,
         string? testedRuntimeVersion,
         TestedHwAssemblyType[]? testedHwAssemblyTypes,
         bool isDebug,
         IEnumerable<ITestResultHandler>? resultHandlers = null)
     {
-        var testRunResults = new List<TestRunResult>();
+        var testRunResults = new List<TestResult>();
 
         ITestResultHandler[] finalTestResultHandlers =
         [
@@ -85,7 +85,7 @@ public class TestRunnerEngine(
 
         this.IsRunning = false;
 
-        return [.. testRunResults];
+        return [..testRunResults];
     }
 
     /// <inheritdoc />
@@ -96,7 +96,7 @@ public class TestRunnerEngine(
     public void RegisterTestResultHandler(ITestResultHandler handler)
         => this.testResultHandlers = this.testResultHandlers.Append(handler);
 
-    private async Task<TestRunResult> RunTestsAsync(
+    private async Task<TestResult> RunTestsAsync(
         IEnumerable<TestEntity> testRunEntities,
         TestConfig testConfig,
         ITestResultHandler[] resultHandlers)
@@ -105,8 +105,9 @@ public class TestRunnerEngine(
 
         this.runTestCts = new CancellationTokenSource();
 
-        var testRunResult = await nunitTestRunnerProxy.RunTestAsync(
-            testRunEntities);
+        var testRunResult =
+            (await nunitTestRunnerProxy.RunTestAsync(testRunEntities))
+            .Pipe(x => new TestResult(x, testConfig.TestedHwAssemblyType));
 
         foreach (var handler in resultHandlers)
         {

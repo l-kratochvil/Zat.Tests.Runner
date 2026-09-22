@@ -84,8 +84,8 @@ public static class InitServicesExtension
 
         private IServiceCollection InitTestLink()
             => services
-                .AddSingleton<ITestLinkApiClient, TestLinkApiClient>()
-                .AddSingleton(_ => ITestLinkApiClient.Config.Default);
+                .AddSingleton<ITestLink, TestLink>()
+                .AddSingleton(_ => ITestLink.Config.Default);
 
         private IServiceCollection InitTestRunnerEngine()
             => services

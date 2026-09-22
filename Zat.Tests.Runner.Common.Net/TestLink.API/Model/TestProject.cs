@@ -1,4 +1,4 @@
-﻿namespace Zat.Tests.Runner.Common.Net.TestLinkApi.Model;
+﻿namespace Zat.Tests.Runner.Common.Net.TestLink.API.Model;
 
 using System.Collections.Generic;
 
@@ -61,7 +61,6 @@ public class TestProject
     /// 
     /// </summary>
     public int tc_counter;
-
 
     public List<TestSuite> TestSuites { get; set; } = new List<TestSuite>();
 }

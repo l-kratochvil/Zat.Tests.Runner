@@ -1,4 +1,4 @@
-﻿namespace Zat.Tests.Runner.Common.Net.TestLinkApi;
+﻿namespace Zat.Tests.Runner.Common.Net.TestLink.API;
 
 using System;
 
@@ -6,16 +6,16 @@ using CookComputing.XmlRpc;
 
 public static class XmlRpcStructConvertors
 {
-    internal static Model.TestLinkErrorMessage ToTestLinkErrorMessage(XmlRpcStruct data)
+    internal static Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestLinkErrorMessage ToTestLinkErrorMessage(XmlRpcStruct data)
         => new()
         {
             code = ToInt(data, "code"),
             message = (string)data["message"],
         };
 
-    internal static Model.GeneralResult ToGeneralResult(XmlRpcStruct data)
+    internal static Zat.Tests.Runner.Common.Net.TestLink.API.Model.GeneralResult ToGeneralResult(XmlRpcStruct data)
     {
-        var item = new Model.GeneralResult
+        var item = new Zat.Tests.Runner.Common.Net.TestLink.API.Model.GeneralResult
         {
             operation = (string)data["operation"],
             status = (bool)data["status"],
@@ -40,7 +40,7 @@ public static class XmlRpcStructConvertors
     ///  constructor used by XMLRPC interface on decoding the function return
     /// </summary>
     /// <param name="data">data returned by Testlink</param>
-    internal static Model.AttachmentRequestResponse ToAttachmentRequestResponse(XmlRpcStruct data)
+    internal static Zat.Tests.Runner.Common.Net.TestLink.API.Model.AttachmentRequestResponse ToAttachmentRequestResponse(XmlRpcStruct data)
         => new()
         {
             foreignKeyId = ToInt(data, "fk_id"),
@@ -56,7 +56,7 @@ public static class XmlRpcStructConvertors
     ///  constructor used by XMLRPC interface on decoding the function return
     /// </summary>
     /// <param name="data">data returned by Testlink</param>
-    internal static Model.AdditionalInfo ToAdditionalInfo(XmlRpcStruct data)
+    internal static Zat.Tests.Runner.Common.Net.TestLink.API.Model.AdditionalInfo ToAdditionalInfo(XmlRpcStruct data)
         => new()
         {
             new_name = (string)data["new_name"],
@@ -68,7 +68,7 @@ public static class XmlRpcStructConvertors
             has_duplicate = ToBool(data, "has_duplicate"),
         };
 
-    internal static Model.Build ToBuild(XmlRpcStruct data)
+    internal static Zat.Tests.Runner.Common.Net.TestLink.API.Model.Build ToBuild(XmlRpcStruct data)
         => new()
         {
             id = ToInt(data, "id"),
@@ -79,9 +79,9 @@ public static class XmlRpcStructConvertors
             is_open = ToInt(data, "is_open") == 1,
         };
 
-    internal static Model.TestCaseFromTestSuite ToTestCaseFromTestSuite(XmlRpcStruct data)
+    internal static Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestCaseFromTestSuite ToTestCaseFromTestSuite(XmlRpcStruct data)
     {
-        var item = new Model.TestCaseFromTestSuite
+        var item = new Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestCaseFromTestSuite
         {
             active = int.Parse((string)data["active"]) == 1,
             id = ToInt(data, "id"),
@@ -126,7 +126,7 @@ public static class XmlRpcStructConvertors
     ///  constructor used by the XML Rpc return
     /// </summary>
     /// <param name="data"></param>
-    internal static Model.TestStep ToTestStep(XmlRpcStruct data)
+    internal static Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestStep ToTestStep(XmlRpcStruct data)
         => new()
         {
             id = ToInt(data, "id"),
@@ -141,7 +141,7 @@ public static class XmlRpcStructConvertors
     ///  constructor used by XMLRPC interface on decoding the function return
     /// </summary>
     /// <param name="data">data returned by Testlink</param>
-    internal static Model.TestSuite ToTestSuite(XmlRpcStruct data)
+    internal static Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestSuite ToTestSuite(XmlRpcStruct data)
         => new()
         {
             _name = (string)data["name"],
@@ -155,7 +155,7 @@ public static class XmlRpcStructConvertors
     /// <summary>
     /// </summary>
     /// <param name="data"></param>
-    internal static Model.TestPlatform ToTestPlatform(XmlRpcStruct data)
+    internal static Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestPlatform ToTestPlatform(XmlRpcStruct data)
         => new()
         {
             id = ToInt(data, "id"),

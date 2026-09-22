@@ -8,6 +8,6 @@ public interface ITestResultHandler
     /// <summary>
     /// Handles the test run result.
     /// </summary>
-    /// <param name="testRunResult">The handled <see cref="TestRunResult"/>.</param>
-    void Handle(TestRunResult testRunResult);
+    /// <param name="testResult">The handled <see cref="TestResult"/>.</param>
+    void Handle(TestResult testResult);
 }
