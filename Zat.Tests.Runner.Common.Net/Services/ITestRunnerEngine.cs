@@ -2,13 +2,12 @@
 
 using Zat.Tests.Runner.Common.Model;
 using Zat.Z2xxTests.Common;
-using Zat.Z2xxTests.Common.Model;
 
 public interface ITestRunnerEngine
 {
     bool IsRunning { get; }
 
-    Task<TestRunResult> RunTestAsync(
+    Task<TestRunResult[]> RunTestAsync(
         IEnumerable<TestEntity> testRunEntities,
         string? testedRuntimeVersion,
         TestedHwAssemblyType[]? testedHwAssemblyTypes,
@@ -18,6 +17,4 @@ public interface ITestRunnerEngine
     void StopTestRun();
 
     void RegisterTestResultHandler(ITestResultHandler handler);
-
-    record RunConfig
 }

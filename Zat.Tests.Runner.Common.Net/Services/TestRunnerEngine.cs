@@ -1,5 +1,7 @@
 ﻿namespace Zat.Tests.Runner.Common.Net.Services;
 
+using DevKit.Core.Extensions.Functional;
+
 using System.Collections.Generic;
 
 using Zat.Tests.Runner.Common;
@@ -14,39 +16,76 @@ public class TestRunnerEngine(
     IEnumerable<ITestResultHandler> testResultHandlers)
     : ITestRunnerEngine
 {
+    private IEnumerable<ITestResultHandler> testResultHandlers = testResultHandlers;
+
     private CancellationTokenSource? runTestCts;
 
     /// <inheritdoc />
     public bool IsRunning { get; set; }
 
     /// <inheritdoc />
-    public async Task<TestRunResult> RunTestAsync(
+    public async Task<TestRunResult[]> RunTestAsync(
         IEnumerable<TestEntity> testRunEntities,
         string? testedRuntimeVersion,
         TestedHwAssemblyType[]? testedHwAssemblyTypes,
         bool isDebug,
         IEnumerable<ITestResultHandler>? resultHandlers = null)
     {
-        using var connection = testRunnerBridgeConnector.Connect(testConfig);
+        var testRunResults = new List<TestRunResult>();
 
-        var finalTestResultHandlers = resultHandlers is not null
-            ? testResultHandlers.Concat(resultHandlers)
-            : testResultHandlers;
+        ITestResultHandler[] finalTestResultHandlers =
+        [
+            ..resultHandlers is not null
+                ? this.testResultHandlers.Concat(resultHandlers)
+                : this.testResultHandlers
+        ];
 
-        this.runTestCts = new CancellationTokenSource();
+        var testEntitiesGroupedByType = testRunEntities
+            .GroupBy(x => x.TestType)
+            .ToArray();
+
         this.IsRunning = true;
 
-        var testRunResult = await nunitTestRunnerProxy.RunTestAsync(
-            testRunEntities);
+        // Application tests execution
+        var applicationTestEntities = testEntitiesGroupedByType
+            .FirstOrDefault(x => x.Key is TestType.ApplicationTest)?
+            .ToArray();
+        if (applicationTestEntities is not null)
+        {
+            (await this.RunTestsAsync(
+                    applicationTestEntities,
+                    new TestConfig(
+                        testedRuntimeVersion,
+                        null,
+                        isDebug),
+                    finalTestResultHandlers))
+                .Visit(testRunResults.Add);
+        }
+
+        // Runtime tests execution
+        var runtimeTestEntities = testEntitiesGroupedByType
+            .FirstOrDefault(x => x.Key is TestType.RuntimeTest)?
+            .ToArray();
+        if (runtimeTestEntities is not null)
+        {
+            ArgumentNullException.ThrowIfNull(testedHwAssemblyTypes);
+
+            foreach (var testedHwAssemblyType in testedHwAssemblyTypes)
+            {
+                (await this.RunTestsAsync(
+                        runtimeTestEntities,
+                        new TestConfig(
+                            testedRuntimeVersion,
+                            testedHwAssemblyType,
+                            isDebug),
+                        finalTestResultHandlers))
+                    .Visit(testRunResults.Add);
+            }
+        }
 
         this.IsRunning = false;
 
-        foreach (var handler in finalTestResultHandlers)
-        {
-            handler.Handle(testRunResult);
-        }
-
-        return testRunResult;
+        return [.. testRunResults];
     }
 
     /// <inheritdoc />
@@ -55,5 +94,25 @@ public class TestRunnerEngine(
 
     /// <inheritdoc />
     public void RegisterTestResultHandler(ITestResultHandler handler)
-        => testResultHandlers = testResultHandlers.Append(handler);
+        => this.testResultHandlers = this.testResultHandlers.Append(handler);
+
+    private async Task<TestRunResult> RunTestsAsync(
+        IEnumerable<TestEntity> testRunEntities,
+        TestConfig testConfig,
+        ITestResultHandler[] resultHandlers)
+    {
+        using var connection = testRunnerBridgeConnector.Connect(testConfig);
+
+        this.runTestCts = new CancellationTokenSource();
+
+        var testRunResult = await nunitTestRunnerProxy.RunTestAsync(
+            testRunEntities);
+
+        foreach (var handler in resultHandlers)
+        {
+            handler.Handle(testRunResult);
+        }
+
+        return testRunResult;
+    }
 }
