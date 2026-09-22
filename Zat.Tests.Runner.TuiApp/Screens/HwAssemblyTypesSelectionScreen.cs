@@ -1,8 +1,8 @@
 namespace Zat.Tests.Runner.TuiApp.Screens;
 
-using System;
-
 using Spectre.Console;
+
+using System;
 
 using Zat.Tests.Runner.TuiApp.Stores;
 using Zat.Z2xxTests.Common;
@@ -27,6 +27,10 @@ internal class HwAssemblyTypesSelectionScreen(
                     .InstructionsText(SharedTexts.InstructionsHelpText)
                     .AddChoices(Enum.GetValues<TestedHwAssemblyType>());
 
+                testConfigStore
+                    .HwAssemblyTypes?
+                    .ForEach(entity => prompt.Select(entity));
+
                 return ShowPromptAsync(
                     prompt,
                     selectedHwAssemblyType =>
@@ -34,7 +38,12 @@ internal class HwAssemblyTypesSelectionScreen(
                         testConfigStore.HwAssemblyTypes = [..selectedHwAssemblyType];
                         return RenderOutput.Default;
                     },
-                    ct);
+                    ct,
+                    validator: static selected =>
+                        selected.Contains(TestedHwAssemblyType.HW02_BB1M) &&
+                        selected.Contains(TestedHwAssemblyType.HW02_BB37M)
+                            ? ValidationResult.Error(Resources.SelectingMultipleHw02OptionsNotAllowed)
+                            : ValidationResult.Success());
             },
         };
 }

@@ -143,8 +143,11 @@ internal sealed class HomeScreen(
             yield return selectHwAssemblyTypesChoice;
         }
 
-        if (testConfigStore.HwAssemblyTypes is null &&
-            testConfigStore.RuntimeTestEntitiesSelected)
+        if (testConfigStore is
+            {
+                RuntimeTestEntitiesSelected: true,
+                HwAssemblyTypes: null
+            })
         {
             yield break;
         }
@@ -209,8 +212,7 @@ internal sealed class HomeScreen(
         }
 
         // Validation of required configuration values
-        if (string.IsNullOrEmpty(testConfigStore.IdeVersion) ||
-            string.IsNullOrEmpty(testConfigStore.RuntimeVersion) ||
+        if (string.IsNullOrEmpty(testConfigStore.RuntimeVersion) ||
             !testConfigStore.SelectedTestEntities.Any())
         {
             throw new InvalidOperationException("Invalid configuration (some required values are missing)");

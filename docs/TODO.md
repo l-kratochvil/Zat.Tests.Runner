@@ -5,13 +5,14 @@
 - Vyrešit issues
 - Dokončit TestLinkApi
 - Zautomatizování kroků testera - základní
-- Rework BindingSelect
-- TestDiscovery: Nahradit store za Fluxor
-- Vytvořit viewmodely pro features (viz TestConfigurationViewModel)
-- Vyřešit Deploy
-- Kompletní code-review + refactor celé projektu WebApp (včetně testů) a docs
-- Lokalizace textů
-- Vylepšení vzhledu
+- WebApp:
+    - Rework BindingSelect
+    - TestDiscovery: Nahradit store za Fluxor
+    - Vytvořit viewmodely pro features (viz TestConfigurationViewModel)
+    - Vyřešit Deploy
+    - Kompletní code-review + refactor celé projektu WebApp (včetně testů) a docs
+    - Lokalizace textů
+    - Vylepšení vzhledu
 
 ## MidPrio
 

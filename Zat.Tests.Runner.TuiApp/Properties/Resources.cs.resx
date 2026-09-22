@@ -354,4 +354,7 @@
   <data name="TestResultHeader_Format" xml:space="preserve">
     <value>Výsledek testu #{0} ({1})</value>
   </data>
+  <data name="SelectingMultipleHw02OptionsNotAllowed" xml:space="preserve">
+    <value>Výběr vícero možností HW02 není povoleno</value>
+  </data>
 </root>

@@ -331,6 +331,15 @@ namespace Zat.Tests.Runner.TuiApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Selecting multiple HW02 options is not allowed.
+        /// </summary>
+        public static string SelectingMultipleHw02OptionsNotAllowed {
+            get {
+                return ResourceManager.GetString("SelectingMultipleHw02OptionsNotAllowed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Select runtime version.
         /// </summary>
         public static string SelectRuntimeVersion_PromptText {

@@ -1,8 +1,8 @@
 ﻿namespace Zat.Tests.Runner.Common.Net.Services;
 
-using DevKit.Core.Extensions.Functional;
-
 using System.Collections.Generic;
+
+using DevKit.Core.Extensions.Functional;
 
 using Zat.Tests.Runner.Common;
 using Zat.Tests.Runner.Common.Model;

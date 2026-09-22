@@ -106,12 +106,16 @@ internal abstract class ScreenBase : IScreen
         };
 
     protected static async Task<ShowPromptResult> ShowPromptAsync<T>(
-        IPrompt<T> prompt, Func<T, RenderOutput> onSucces, CancellationToken ct)
-        => await ConsoleUtils.ShowPromptAsync(prompt, ct) switch
-        {
-            (true, { } promptResult) => new CompletedShowPrompt(onSucces(promptResult)),
-            (false, _) => new InterruptedShowPrompt(),
-        };
+        IPrompt<T> prompt,
+        Func<T, RenderOutput> onSucces,
+        CancellationToken ct,
+        Func<T, ValidationResult>? validator = null)
+        => await ConsoleUtils.ShowPromptAsync(prompt, ct, validator)
+            switch
+            {
+                (true, { } promptResult) => new CompletedShowPrompt(onSucces(promptResult)),
+                (false, _) => new InterruptedShowPrompt(),
+            };
 
     private IEnumerable<ICommand> InitCommands()
     {

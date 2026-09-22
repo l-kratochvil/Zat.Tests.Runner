@@ -46,9 +46,10 @@ internal static class ConsoleUtils
     /// <typeparam name="TResult">Type of the result.</typeparam>
     /// <param name="prompt">Prompt to show.</param>
     /// <param name="ct">Cancellation token.</param>
+    /// <param name="validator">Optional validator function to validate the result.</param>
     /// <returns>False if the prompt was not sucessful (interrupted), true otherwise.</returns>
     public static async Task<(bool Completed, TResult? Result)> ShowPromptAsync<TResult>(
-        IPrompt<TResult> prompt, CancellationToken ct)
+        IPrompt<TResult> prompt, CancellationToken ct, Func<TResult, ValidationResult>? validator = null)
     {
         var result = default(TResult?);
 
@@ -56,8 +57,20 @@ internal static class ConsoleUtils
 
         try
         {
-            result = await prompt.ShowAsync(AnsiConsole.Console, ct)
-                     ?? throw new InvalidOperationException("Null prompt returned");
+            var validationResult = ValidationResult.Error();
+
+            while (!validationResult.Successful)
+            {
+                result = await prompt.ShowAsync(AnsiConsole.Console, ct)
+                         ?? throw new InvalidOperationException("Null prompt returned");
+                validationResult = validator?.Invoke(result) ?? ValidationResult.Success();
+
+                if (validationResult.Message is not null)
+                {
+                    MarkupLine($"[red]{validationResult.Message.EscapeMarkup()}[/]");
+                }
+            }
+
             completed = true;
         }
         catch (Exception ex) when (ex is OperationCanceledException ||
