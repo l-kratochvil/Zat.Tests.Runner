@@ -17,4 +17,20 @@ internal static class Validators
 
         return ValidationResult.Success();
     }
+
+    public static ValidationResult IsInt(string? intString)
+    {
+        if (string.IsNullOrWhiteSpace(intString))
+        {
+            return ValidationResult.Error(Resources.ValueRequired);
+        }
+
+        // ReSharper disable once ConvertIfStatementToReturnStatement
+        if (!int.TryParse(intString, out _))
+        {
+            return ValidationResult.Error(Resources.MustBeInteger);
+        }
+
+        return ValidationResult.Success();
+    }
 }

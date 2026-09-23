@@ -15,9 +15,9 @@ internal class EnableDebugModePromptScreen(
         {
             Main = ct => ShowPromptAsync(
                 new ConfirmationPrompt(Resources.EnableDebugMode_PromptText).ConfigureDefaultOptions(),
-                send =>
+                confired =>
                 {
-                    testConfigStore.IsDebugModeEnabled = send;
+                    testConfigStore.IsDebugModeEnabled = confired;
                     return new RenderOutput();
                 },
                 ct),

@@ -33,10 +33,6 @@ public class TestLinkResultHandler(
             TestType.Unknown => throw new InvalidOperationException("Unknown test type"),
             _ => throw new NotSupportedException(testResult.TestType.ToString()),
         };
-        var testPlatform = testLink
-            .GetTestPlanPlatforms(testPlanId)
-            .FirstOrDefault()
-            .CheckIsNotNull($"No platforms found for test plan {testPlanId}");
 
         // TODO: Add "beta" suffix with its version (e.g. beta1, beta2, ...)
         var buildName = $"IDE v{context.IdeVersion}, RT v{context.RuntimeVersion}";
@@ -110,8 +106,7 @@ public class TestLinkResultHandler(
                     testLinkTestCaseId,
                     testPlanId,
                     resultStatus,
-                    platformId: testPlatform
-                        .id, // Platforma musí být přidána do testovacího plánu. Pokud není potřeba specifikovat platformu, tak stačí zadat prázdný string do argument platfromName
+                    platformName: string.Empty,
                     overwrite: false,
                     notes: string.Empty, // TODO: notes: executedTestCase.Notes,
                     buildId: testBuild.id);

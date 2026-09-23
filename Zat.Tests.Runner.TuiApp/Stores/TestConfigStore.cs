@@ -13,13 +13,6 @@ internal class TestConfigStore(AppStateStore appStateStore)
 
     public IEnumerable<TestEntity> SelectedTestEntities { get; set; } = [];
 
-    public bool IsDebugModeEnabled
-    {
-        get => appStateStore.Current.IsDebugModeEnabled ?? false;
-        set => appStateStore.Update(
-            current => current with { IsDebugModeEnabled = value });
-    }
-
     public bool RuntimeTestEntitiesSelected
         => this.SelectedTestEntities.Any(x => x.TestType is TestType.Runtime);
 
@@ -28,6 +21,27 @@ internal class TestConfigStore(AppStateStore appStateStore)
         get => appStateStore.Current.IsTestLinkReportingEnabled;
         set => appStateStore.Update(
             current => current with { IsTestLinkReportingEnabled = value });
+    }
+
+    public bool? IsDebugModeEnabled
+    {
+        get => appStateStore.Current.IsDebugModeEnabled;
+        set => appStateStore.Update(
+            current => current with { IsDebugModeEnabled = value });
+    }
+
+    public bool? IsBetaVersion
+    {
+        get => appStateStore.Current.IsBetaVersion;
+        set => appStateStore.Update(
+            current => current with { IsBetaVersion = value });
+    }
+
+    public string? BetaVersion
+    {
+        get => appStateStore.Current.BetaVersion;
+        set => appStateStore.Update(
+            current => current with { BetaVersion = value });
     }
 
     public string? RuntimeVersion

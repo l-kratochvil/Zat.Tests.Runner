@@ -13,9 +13,18 @@ internal record AppState(
     string? IdeVersion,
     [property: JsonPropertyName("ideReleaseDate")]
     string? IdeReleaseDate,
+    [property: JsonPropertyName("betaVersion")]
+    string? BetaVersion,
     [property: JsonPropertyName("testedHwAssemblyTypes")]
     HwAssemblyType[]? HwAssemblyTypes,
     [property: JsonPropertyName("isTestLinkReportingEnabled")]
     bool? IsTestLinkReportingEnabled,
     [property: JsonPropertyName("isDebugModeEnabled")]
-    bool? IsDebugModeEnabled);
+    bool? IsDebugModeEnabled,
+    [property: JsonPropertyName("isBetaVersion")]
+    bool? IsBetaVersion)
+{
+    public AppState() : this(null, null, null, null, null, null, null, null, null)
+    {
+    }
+}

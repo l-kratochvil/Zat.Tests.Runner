@@ -97,6 +97,15 @@ namespace Zat.Tests.Runner.TuiApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Enter beta version: .
+        /// </summary>
+        public static string EnterBetaVersion_PromptText {
+            get {
+                return ResourceManager.GetString("EnterBetaVersion_PromptText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Enter IDE install folder path: .
         /// </summary>
         public static string EnterIdeInstallFolderPath_PromptText {
@@ -196,6 +205,15 @@ namespace Zat.Tests.Runner.TuiApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Is beta version.
+        /// </summary>
+        public static string IsBetaVersion_PromptText {
+            get {
+                return ResourceManager.GetString("IsBetaVersion_PromptText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Move up and down to reveal more choices.
         /// </summary>
         public static string MoveUpAndDownToReveal_HelpText {
@@ -210,6 +228,15 @@ namespace Zat.Tests.Runner.TuiApp.Properties {
         public static string MustBeDateFormat {
             get {
                 return ResourceManager.GetString("MustBeDateFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Must be an integer.
+        /// </summary>
+        public static string MustBeInteger {
+            get {
+                return ResourceManager.GetString("MustBeInteger", resourceCulture);
             }
         }
         

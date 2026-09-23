@@ -22,6 +22,8 @@ internal sealed class HomeScreen(
     EnableDebugModePromptScreen enableDebugModePromptScreen,
     RuntimeReleaseDatePromptScreen runtimeReleaseDatePromptScreen,
     IdeReleaseDatePromptScreen ideReleaseDatePromptScreen,
+    IsBetaVersionPromptScreen isBetaVersionPromptScreen,
+    BetaVersionPromptScreen betaVersionPromptScreen,
     RunTestScreen runTestScreen)
     : ScreenBase(homeScreen, exitScreen, settingsScreen)
 {
@@ -201,6 +203,27 @@ internal sealed class HomeScreen(
                 .TryGetValue(out var runtimeReleaseDateChoice))
             {
                 yield return runtimeReleaseDateChoice;
+            }
+
+            // Enable is beta version flag choice
+            if (Choice.InitChoice<IScreen>(
+                    isBetaVersionPromptScreen,
+                    Resources.IsBetaVersion_PromptText,
+                    testConfigStore.IsBetaVersion)
+                .TryGetValue(out var isBetaVersionPromptScreenChoice))
+            {
+                yield return isBetaVersionPromptScreenChoice;
+            }
+
+            // Beta version choice
+            if (Choice.InitChoice<IScreen>(
+                    betaVersionPromptScreen,
+                    Resources.BetaVersion_PromptText,
+                    testConfigStore.BetaVersion,
+                    () => testConfigStore.IsBetaVersion ?? false)
+                .TryGetValue(out var betaVersionPromptScreenChoice))
+            {
+                yield return betaVersionPromptScreenChoice;
             }
 
             // REQUIRED: IDE version

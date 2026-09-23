@@ -24,6 +24,8 @@ internal static class InitScreensExtensions
                 .AddSingleton<IdeReleaseDatePromptScreen>()
                 .AddSingleton<RuntimeReleaseDatePromptScreen>()
                 .AddSingleton<EnableDebugModePromptScreen>()
+                .AddSingleton<IsBetaVersionPromptScreen>()
+                .AddSingleton<BetaVersionPromptScreen>()
                 .AddSingleton(static provider => new Lazy<HomeScreen>(provider.GetRequiredService<HomeScreen>))
                 .AddSingleton(static provider => new Lazy<ExitScreen>(provider.GetRequiredService<ExitScreen>))
                 .AddSingleton(static provider => new Lazy<SettingsScreen>(provider.GetRequiredService<SettingsScreen>))

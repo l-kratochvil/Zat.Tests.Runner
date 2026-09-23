@@ -7,6 +7,10 @@
   </PropertyGroup>
 
 	<ItemGroup>
+	  <None Include="Screens\IsBetaVersionPromptScreen.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
 		<PackageReference Include="Spectre.Console" Version="0.49.2-preview.0.44" />
 		<PackageReference Include="InputSimulatorPlus.NetStandard" Version="1.0.8" />

@@ -2,7 +2,7 @@
 
 using Zat.Tests.Runner.TuiApp.Stores;
 
-internal class EnableTestLinkReportingPromptScreen(
+internal class IsBetaVersionPromptScreen(
     TestConfigStore testConfigStore,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
@@ -14,10 +14,10 @@ internal class EnableTestLinkReportingPromptScreen(
         => new()
         {
             Main = ct => ShowPromptAsync(
-                new ConfirmationPrompt(Resources.EnableTestLinkReporting_PromptText).ConfigureDefaultOptions(),
+                new ConfirmationPrompt(Resources.IsBetaVersion_PromptText).ConfigureDefaultOptions(),
                 confired =>
                 {
-                    testConfigStore.IsTestLinkReportingEnabled = confired;
+                    testConfigStore.IsBetaVersion = confired;
                     return new RenderOutput();
                 },
                 ct),

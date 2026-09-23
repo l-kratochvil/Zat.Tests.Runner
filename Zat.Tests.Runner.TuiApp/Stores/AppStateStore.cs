@@ -35,12 +35,5 @@ internal class AppStateStore : IJsonPersistanceStore<AppState>
         => this.jsonPersistanceStore.Update(currentModel);
 
     private static AppState CreateDefaultAppState()
-        => new(
-            RuntimeVersion: null,
-            RuntimeReleaseDate: null,
-            IdeVersion: null,
-            IdeReleaseDate: null,
-            HwAssemblyTypes: null,
-            IsTestLinkReportingEnabled: null,
-            IsDebugModeEnabled: null);
+        => new();
 }

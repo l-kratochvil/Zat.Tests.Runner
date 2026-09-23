@@ -360,4 +360,13 @@
   <data name="SelectingMultipleHw02OptionsNotAllowed" xml:space="preserve">
     <value>Selecting multiple HW02 options is not allowed</value>
   </data>
+  <data name="IsBetaVersion_PromptText" xml:space="preserve">
+    <value>Is beta version</value>
+  </data>
+  <data name="EnterBetaVersion_PromptText" xml:space="preserve">
+    <value>Enter beta version: </value>
+  </data>
+  <data name="MustBeInteger" xml:space="preserve">
+    <value>Must be an integer</value>
+  </data>
 </root>
