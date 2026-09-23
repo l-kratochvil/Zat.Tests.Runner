@@ -5,7 +5,7 @@ using System.Linq;
 using NUnit.Framework;
 
 using Zat.Tests.Runner.WebApp.Features.TestConfiguration.Components;
-using Zat.Tests.Runner.WebApp.Shared.Domain;
+using Zat.Z2xxTests.Common.Model;
 
 [TestFixture]
 public class TestStationLabelsTests
@@ -16,9 +16,9 @@ public class TestStationLabelsTests
         // Given:
         // The labels are written out one by one, so a station added to the domain would otherwise
         // quietly go missing from the configurator.
-        IEnumerable<TestedHwAssemblyType> expected = Enum
-            .GetValues<TestedHwAssemblyType>()
-            .Where(static station => station is not TestedHwAssemblyType.Unknown);
+        IEnumerable<HwAssemblyType> expected = Enum
+            .GetValues<HwAssemblyType>()
+            .Where(static station => station is not HwAssemblyType.Unknown);
 
         // Then:
         Assert.That(TestStationLabels.Offered, Is.EquivalentTo(expected));
@@ -31,7 +31,7 @@ public class TestStationLabelsTests
         // Unknown stands for a station nobody chose, which the empty choice already says.
 
         // Then:
-        Assert.That(TestStationLabels.Offered, Does.Not.Contain(TestedHwAssemblyType.Unknown));
+        Assert.That(TestStationLabels.Offered, Does.Not.Contain(HwAssemblyType.Unknown));
     }
 
     [Test]
@@ -43,11 +43,11 @@ public class TestStationLabelsTests
             Has.All.Not.Empty);
     }
 
-    [TestCase(TestedHwAssemblyType.HW00, "HW00")]
-    [TestCase(TestedHwAssemblyType.HW02_1M, "HW02 - 1M")]
-    [TestCase(TestedHwAssemblyType.HW02_37M, "HW02 - 37M")]
+    [TestCase(HwAssemblyType.HW00, "HW00")]
+    [TestCase(HwAssemblyType.HW02_BB1M, "HW02 - 1M")]
+    [TestCase(HwAssemblyType.HW02_BB37M, "HW02 - 37M")]
     public void For__WhenAStationIsNamed__ThenShouldReadAsItIsWrittenDown(
-        TestedHwAssemblyType givenStation, string expectedLabel)
+        HwAssemblyType givenStation, string expectedLabel)
     {
         // Then:
         Assert.That(TestStationLabels.For(givenStation), Is.EqualTo(expectedLabel));
@@ -61,7 +61,7 @@ public class TestStationLabelsTests
 
         // Then:
         Assert.That(
-            TestStationLabels.For(TestedHwAssemblyType.Unknown),
-            Is.EqualTo(nameof(TestedHwAssemblyType.Unknown)));
+            TestStationLabels.For(HwAssemblyType.Unknown),
+            Is.EqualTo(nameof(HwAssemblyType.Unknown)));
     }
 }

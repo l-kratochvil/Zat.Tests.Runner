@@ -1,43 +1,43 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
-    <!-- The out-of-process NUnit proxy server is launched from this application, so its output
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+		<!-- The out-of-process NUnit proxy server is launched from this application, so its output
          (Exchange) has to sit next to ours. -->
-	  <IncludeNUnitTestRunnerProxyDirOutput>true</IncludeNUnitTestRunnerProxyDirOutput>
-  </PropertyGroup>
+		<IncludeNUnitTestRunnerProxyDirOutput>true</IncludeNUnitTestRunnerProxyDirOutput>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-    <PackageReference Include="FluentValidation" Version="12.1.1" />
-    <PackageReference Include="Fluxor.Blazor.Web" Version="6.11.0" />
-    <PackageReference Include="Fluxor.Blazor.Web.ReduxDevTools" Version="6.11.0" />
-    <PackageReference Include="Fluxor.Persist" Version="3.1.0" />
-    <PackageReference Include="Serilog" Version="4.4.0" />
-    <PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0" />
-    <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
-    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-    <PackageReference Include="Serilog.Sinks.Map" Version="2.0.0" />
-    <PackageReference Include="StreamJsonRpc" Version="2.25.29" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+		<PackageReference Include="FluentValidation" Version="12.1.1" />
+		<PackageReference Include="Fluxor.Blazor.Web" Version="6.11.0" />
+		<PackageReference Include="Fluxor.Blazor.Web.ReduxDevTools" Version="6.11.0" />
+		<PackageReference Include="Fluxor.Persist" Version="3.1.0" />
+		<PackageReference Include="Serilog" Version="4.4.0" />
+		<PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0" />
+		<PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
+		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+		<PackageReference Include="Serilog.Sinks.Map" Version="2.0.0" />
+		<PackageReference Include="StreamJsonRpc" Version="2.25.29" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <!-- DevKit.Core lives in a sibling clone, see docs/ADR/ADR-0001-initial.md (section 7). -->
-    <ProjectReference Include="..\..\DevKit.Core\DevKit.Core\DevKit.Core.csproj" />
-    <ProjectReference Include="..\..\DevKit.Mvvm\DevKit.Mvvm\DevKit.Mvvm.csproj" />
-    <ProjectReference Include="..\Zat.Tests.Runner.Common.Net\Zat.Tests.Runner.Common.Net.csproj" />
-    <ProjectReference Include="..\Zat.Tests.Runner.Common\Zat.Tests.Runner.Common.csproj" />
-    <ProjectReference Include="..\Zat.Z2xxTests.Common\Zat.Z2xxTests.Common.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<!-- DevKit.Core lives in a sibling clone, see docs/ADR/ADR-0001-initial.md (section 7). -->
+		<ProjectReference Include="..\..\DevKit.Core\DevKit.Core\DevKit.Core.csproj" />
+		<ProjectReference Include="..\..\DevKit.Mvvm\DevKit.Mvvm\DevKit.Mvvm.csproj" />
+		<ProjectReference Include="..\Zat.Tests.Runner.Common.Net\Zat.Tests.Runner.Common.Net.csproj" />
+		<ProjectReference Include="..\Zat.Tests.Runner.Common\Zat.Tests.Runner.Common.csproj" />
+		<ProjectReference Include="..\Zat.Z2xxTests.Common\Zat.Z2xxTests.Common.csproj" />
+	</ItemGroup>
 
-  <Target Name="RestoreTypeScriptTooling" BeforeTargets="CompileTypeScript" Condition="!Exists('$(MSBuildProjectDirectory)\node_modules\.bin\tsc.cmd')">
-    <Exec Command="npm install" WorkingDirectory="$(MSBuildProjectDirectory)" />
-  </Target>
+	<Target Name="RestoreTypeScriptTooling" BeforeTargets="CompileTypeScript" Condition="!Exists('$(MSBuildProjectDirectory)\node_modules\.bin\tsc.cmd')">
+		<Exec Command="npm install" WorkingDirectory="$(MSBuildProjectDirectory)" />
+	</Target>
 
-  <!-- Runs on every Build and Rebuild (AssignTargetPaths is part of PrepareForBuild), even when
+	<!-- Runs on every Build and Rebuild (AssignTargetPaths is part of PrepareForBuild), even when
        no C# changed. Deliberately a full, non-incremental tsc run: tsc's incremental cache does
        not notice deleted outputs, so only a full run guarantees every .js exists after each
        build.
@@ -47,20 +47,20 @@
        pipeline to grow beyond tsc without touching this project file. npm run puts
        node_modules/.bin on PATH, so the compiler is still the version pinned in package.json and
        never a globally installed one. -->
-  <Target Name="CompileTypeScript" BeforeTargets="AssignTargetPaths;ResolveJSModuleStaticWebAssets">
-    <Exec Command="npm run build" WorkingDirectory="$(MSBuildProjectDirectory)" />
+	<Target Name="CompileTypeScript" BeforeTargets="AssignTargetPaths;ResolveJSModuleStaticWebAssets">
+		<Exec Command="npm run build" WorkingDirectory="$(MSBuildProjectDirectory)" />
 
-    <!-- On a fresh clone the compiled .js files do not exist yet when MSBuild evaluates its item
+		<!-- On a fresh clone the compiled .js files do not exist yet when MSBuild evaluates its item
          globs, so they would miss this build's static web asset scan. Re-globbing here (at target
          execution time, after tsc ran) hands the freshly generated files to
          ResolveJSModuleStaticWebAssets, which reads @(Content) and @(None) when it executes.
          The shared modules under wwwroot/browser need the same treatment, but as Content: wwwroot
          is what makes them reachable at all, and only a static web asset gets a fingerprint and an
          import map entry. -->
-    <ItemGroup>
-      <None Include="**\*.razor.js;**\*.cshtml.js" Exclude="@(None);@(Content);bin\**;obj\**;node_modules\**;wwwroot\**" />
-      <Content Include="wwwroot\browser\**\*.js" Exclude="@(Content)" />
-    </ItemGroup>
-  </Target>
+		<ItemGroup>
+			<None Include="**\*.razor.js;**\*.cshtml.js" Exclude="@(None);@(Content);bin\**;obj\**;node_modules\**;wwwroot\**" />
+			<Content Include="wwwroot\browser\**\*.js" Exclude="@(Content)" />
+		</ItemGroup>
+	</Target>
 
 </Project>

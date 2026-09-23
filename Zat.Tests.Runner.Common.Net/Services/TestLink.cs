@@ -5,6 +5,7 @@ using System.Net;
 using CookComputing.XmlRpc;
 
 using Zat.Tests.Runner.Common.Net.TestLink.API;
+using Zat.Tests.Runner.Common.Net.TestLink.API.Model;
 
 // TODO: Review method summaries
 public class TestLink : ITestLink
@@ -110,13 +111,13 @@ public class TestLink : ITestLink
         return true; // The errors matched to the expectations
     }
 
-    private static List<Net.TestLink.API.Model.TestLinkErrorMessage> DecodeErrors(object[] messages)
+    private static List<TestLinkErrorMessage> DecodeErrors(object[] messages)
         =>
         [
             .. messages
                 .Cast<XmlRpcStruct>()
                 .Where(message => message.ContainsKey("code") && message.ContainsKey("message"))
-                .Select(Zat.Tests.Runner.Common.Net.TestLink.API.XmlRpcStructConvertors.ToTestLinkErrorMessage)
+                .Select(XmlRpcStructConvertors.ToTestLinkErrorMessage)
         ];
 
     /// <summary>
@@ -124,7 +125,7 @@ public class TestLink : ITestLink
     /// </summary>
     /// <param name="testPlanId">The id of the testplan</param>
     /// <returns>A list (may be empty)</returns>
-    public Net.TestLink.API.Model.Build[] GetBuildsForTestPlan(int testPlanId)
+    public Build[] GetBuildsForTestPlan(int testPlanId)
     {
         var response = this.proxy.GetBuildsForTestPlan(this.devkey, testPlanId);
 
@@ -135,7 +136,7 @@ public class TestLink : ITestLink
             return [];
         }
 
-        return [.. ((object[])response).Cast<XmlRpcStruct>().Select(Zat.Tests.Runner.Common.Net.TestLink.API.XmlRpcStructConvertors.ToBuild)];
+        return [.. ((object[])response).Cast<XmlRpcStruct>().Select(XmlRpcStructConvertors.ToBuild)];
     }
 
     /// <summary>
@@ -145,7 +146,7 @@ public class TestLink : ITestLink
     /// <param name="buildName">name of the build</param>
     /// <param name="buildNotes">notes</param>
     /// <returns>General Result object</returns>
-    public Net.TestLink.API.Model.GeneralResult CreateBuild(int testPlanId, string buildName, string buildNotes)
+    public GeneralResult CreateBuild(int testPlanId, string buildName, string buildNotes)
     {
         // REFACTORED BUT NOT TESTED
 
@@ -160,7 +161,7 @@ public class TestLink : ITestLink
 
         CheckErrorMessage(response);
 
-        return Zat.Tests.Runner.Common.Net.TestLink.API.XmlRpcStructConvertors.ToGeneralResult((XmlRpcStruct)response[0]);
+        return XmlRpcStructConvertors.ToGeneralResult((XmlRpcStruct)response[0]);
     }
 
     /// <summary>
@@ -177,7 +178,7 @@ public class TestLink : ITestLink
     /// <param name="buildId">If not given, then highest build id willl be used</param>
     /// <param name="bugId">Id for a bug if used in conjunction with a defect tracker</param>
     /// <returns></returns>
-    public Net.TestLink.API.Model.GeneralResult UploadTestCaseExecutionResult(
+    public GeneralResult UploadTestCaseExecutionResult(
         int testCaseId,
         int testplanid,
         string status,
@@ -230,11 +231,11 @@ public class TestLink : ITestLink
 
         if (response is not object[] { Length: > 0 } responseList)
         {
-            return new Net.TestLink.API.Model.GeneralResult();
+            return new GeneralResult();
         }
 
         var msg = (XmlRpcStruct)responseList[0];
-        var result = Zat.Tests.Runner.Common.Net.TestLink.API.XmlRpcStructConvertors.ToGeneralResult(msg);
+        var result = XmlRpcStructConvertors.ToGeneralResult(msg);
 
         return result;
     }
@@ -250,7 +251,7 @@ public class TestLink : ITestLink
     /// <param name="fileType">The file type of the Attachment (e.g.: text/plain)</param>
     /// <param name="content">The content (Base64 encoded) of the Attachment</param>
     /// <returns>An AttachmentRequestResponse</returns>
-    public Net.TestLink.API.Model.AttachmentRequestResponse UploadExecutionAttachment(
+    public AttachmentRequestResponse UploadExecutionAttachment(
         int executionId, string filename, string fileType, byte[] content,
         string title = "", string description = "")
     {
@@ -268,7 +269,7 @@ public class TestLink : ITestLink
 
         CheckErrorMessage(response);
 
-        return Zat.Tests.Runner.Common.Net.TestLink.API.XmlRpcStructConvertors.ToAttachmentRequestResponse((XmlRpcStruct)response);
+        return XmlRpcStructConvertors.ToAttachmentRequestResponse((XmlRpcStruct)response);
     }
 
     #region TestCase
@@ -279,7 +280,7 @@ public class TestLink : ITestLink
     /// <param name="testSuiteId">Id of the test suite</param>
     /// <param name="deep">Set the deep flag to false if you only want test cases in the test suite provided and no child test cases.</param>
     /// <returns>A list of Test Cases</returns>
-    public Net.TestLink.API.Model.TestCaseFromTestSuite[] GetTestCasesForTestSuite(int testSuiteId, bool deep)
+    public TestCaseFromTestSuite[] GetTestCasesForTestSuite(int testSuiteId, bool deep)
     {
         var response = this.proxy.GetTestCasesForTestSuite(this.devkey, testSuiteId, deep, "full");
         if (response is string && (string)response == string.Empty) // equals null return
@@ -292,7 +293,7 @@ public class TestLink : ITestLink
         return
         [
             .. ((object[])response).Cast<XmlRpcStruct>()
-            .Select(Zat.Tests.Runner.Common.Net.TestLink.API.XmlRpcStructConvertors.ToTestCaseFromTestSuite)
+            .Select(XmlRpcStructConvertors.ToTestCaseFromTestSuite)
         ];
     }
 
@@ -306,14 +307,14 @@ public class TestLink : ITestLink
     /// <remarks>Throws an exception of type Testlink Exception</remarks>
     /// <param name="testplanid"></param>
     /// <returns>a list of testplan platforms</returns>
-    public Net.TestLink.API.Model.TestPlatform[] GetTestPlanPlatforms(int testplanid)
+    public TestPlatform[] GetTestPlanPlatforms(int testplanid)
     {
         var response = this.proxy.GetTestPlanPlatforms(this.devkey, testplanid);
 
         // 3041 means no platforms are assigned for this testplan
         return CheckErrorMessage(response, 3041)
             ? []
-            : [.. ((object[])response).Cast<XmlRpcStruct>().Select(Zat.Tests.Runner.Common.Net.TestLink.API.XmlRpcStructConvertors.ToTestPlatform)];
+            : [.. ((object[])response).Cast<XmlRpcStruct>().Select(XmlRpcStructConvertors.ToTestPlatform)];
     }
 
     #endregion
@@ -323,7 +324,7 @@ public class TestLink : ITestLink
     /// </summary>
     /// <param name="testProjectId"></param>
     /// <returns></returns>
-    public Net.TestLink.API.Model.TestSuite[] GetFirstLevelTestSuitesForTestProject(int testProjectId)
+    public TestSuite[] GetFirstLevelTestSuitesForTestProject(int testProjectId)
     {
         var response = this.proxy.GetFirstLevelTestSuitesForTestProject(this.devkey, testProjectId);
         var errors = DecodeErrors(response);
@@ -334,11 +335,11 @@ public class TestLink : ITestLink
             CheckErrorMessage(response);
         }
 
-        return [.. response.Cast<XmlRpcStruct>().Select(Zat.Tests.Runner.Common.Net.TestLink.API.XmlRpcStructConvertors.ToTestSuite)];
+        return [.. response.Cast<XmlRpcStruct>().Select(XmlRpcStructConvertors.ToTestSuite)];
     }
 
     /// <inheritdoc/>
-    public Net.TestLink.API.Model.TestSuite[] GetTestSuitesForTestSuite(int testSuiteId)
+    public TestSuite[] GetTestSuitesForTestSuite(int testSuiteId)
     {
         var response = this.proxy.GetTestSuitesForTestSuite(this.devkey, testSuiteId);
         // Testlink returns an empty string if a test suite has no child test suites
@@ -350,7 +351,7 @@ public class TestLink : ITestLink
         // just in case this gets fixed, then this should work.
         return CheckErrorMessage(response, 7008)
             ? []
-            : [.. ((object[])response).Cast<XmlRpcStruct>().Select(Zat.Tests.Runner.Common.Net.TestLink.API.XmlRpcStructConvertors.ToTestSuite)];
+            : [..((object[])response).Cast<XmlRpcStruct>().Select(XmlRpcStructConvertors.ToTestSuite)];
     }
 
     /// <summary>
@@ -358,12 +359,12 @@ public class TestLink : ITestLink
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    public Net.TestLink.API.Model.TestSuite? GetTestSuiteById(int id)
+    public TestSuite? GetTestSuiteById(int id)
     {
         var response = this.proxy.GetTestSuiteByID(this.devkey, id);
         return CheckErrorMessage(response, 8000)
             ? null
-            : Zat.Tests.Runner.Common.Net.TestLink.API.XmlRpcStructConvertors.ToTestSuite((XmlRpcStruct)response);
+            : XmlRpcStructConvertors.ToTestSuite((XmlRpcStruct)response);
     }
 
     /// <summary>
@@ -400,6 +401,6 @@ public class TestLink : ITestLink
     public bool CheckUserExists(string username)
     {
         var response = this.proxy.DoesUserExist(this.devkey, username);
-        return CheckErrorMessage(response, 10000) ? false : (bool)response;
+        return !CheckErrorMessage(response, 10000) && (bool)response;
     }
 }

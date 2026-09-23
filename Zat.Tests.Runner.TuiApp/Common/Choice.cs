@@ -15,6 +15,29 @@ internal class Choice<TValue>(
 internal static class Choice
 {
     public static Maybe<Choice<TChoiceValue>> InitChoice<TChoiceValue>(
+    TChoiceValue choiceValue,
+    string choiceDisplayText,
+    Func<bool>? shouldInitPredicate = null)
+        => InitChoice(
+            choiceValue,
+            choiceDisplayText,
+            default(string),
+            shouldInitPredicate);
+
+    public static Maybe<Choice<TChoiceValue>> InitChoice<TChoiceValue>(
+        TChoiceValue choiceValue,
+        string choiceDisplayText,
+        bool? choiceDisplayValue,
+        Func<bool>? shouldInitPredicate = null)
+            => InitChoice(
+                choiceValue: choiceValue,
+                choiceDisplayText: choiceDisplayText,
+                choiceDisplayValue: choiceDisplayValue.HasValue
+                    ? (choiceDisplayValue.Value ? Resources.Yes : Resources.No)
+                    : null,
+                shouldInitPredicate: shouldInitPredicate);
+
+    public static Maybe<Choice<TChoiceValue>> InitChoice<TChoiceValue>(
         TChoiceValue choiceValue,
         string choiceDisplayText,
         string? choiceDisplayValue,

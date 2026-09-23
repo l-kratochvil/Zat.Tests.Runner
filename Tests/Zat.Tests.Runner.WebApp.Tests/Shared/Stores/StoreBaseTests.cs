@@ -56,7 +56,7 @@ public class StoreBaseTests
     {
         // Given:
         var changedCount = 0;
-        this.unit.Changed += () => changedCount++;
+        this.unit.Changed += _ => changedCount++;
 
         // When:
         await this.unit.UpdateAsync(state => state with { Value = "changed" });

@@ -36,7 +36,7 @@ public interface ITestLinkXmlRpcProxy : IXmlRpcProxy
 
     [XmlRpcMethod("tl.createTestCase", StructParams = true)]
     object CreateTestCase(string devKey, string authorlogin, int testsuiteid, string testcasename, int testprojectid,
-        string summary, Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestStep[] steps, string keywords,
+        string summary, Model.TestStep[] steps, string keywords,
         int order, int checkduplicatedname, string actiononduplicatedname, int executiontype, int importance);
 
     [XmlRpcMethod("tl.addTestCaseToTestPlan", StructParams = true)]

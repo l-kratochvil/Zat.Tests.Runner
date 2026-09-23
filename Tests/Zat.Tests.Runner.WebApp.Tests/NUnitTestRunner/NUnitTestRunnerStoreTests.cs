@@ -6,6 +6,7 @@ using NUnit.Framework;
 
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Services;
+using Zat.Tests.Runner.WebApp.Application.Paths;
 using Zat.Tests.Runner.WebApp.Shared.Logging;
 using Zat.Tests.Runner.WebApp.Shared.Stores.NUnitTestRunner;
 
@@ -27,7 +28,12 @@ public class NUnitTestRunnerStoreTests
             .Setup(factory => factory.CreateLogger(It.IsAny<string>()))
             .Returns(this.loggerMock.Object);
 
-        this.unit = new NUnitTestRunnerStore(this.proxyMock.Object, loggerFactoryMock.Object);
+        var appPathsProviderMock = new Mock<IAppPathsProvider>();
+
+        this.unit = new NUnitTestRunnerStore(
+            this.proxyMock.Object,
+            loggerFactoryMock.Object,
+            appPathsProviderMock.Object);
     }
 
     [Test]
@@ -41,8 +47,13 @@ public class NUnitTestRunnerStoreTests
             .Setup(factory => factory.CreateLogger(It.IsAny<string>()))
             .Returns(this.loggerMock.Object);
 
+        var givenAppPathsProviderMock = new Mock<IAppPathsProvider>();
+
         // When:
-        _ = new NUnitTestRunnerStore(this.proxyMock.Object, givenLoggerFactoryMock.Object);
+        _ = new NUnitTestRunnerStore(
+            this.proxyMock.Object,
+            givenLoggerFactoryMock.Object,
+            givenAppPathsProviderMock.Object);
 
         // Then:
         givenLoggerFactoryMock.Verify(
@@ -133,7 +144,7 @@ public class NUnitTestRunnerStoreTests
     }
 
     private static TestSuiteEntity CreateTestSuite()
-        => new([], TestType.ApplicationTest, name: "Suite", executionPath: "Suite");
+        => new([], TestType.Application, name: "Suite", executionPath: "Suite");
 
     private void SetUpDiscovery(TestSuiteEntity[] testSuites)
         => this.proxyMock

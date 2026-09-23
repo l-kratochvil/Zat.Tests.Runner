@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 using Fluxor;
 
-using Zat.Z2xxTests.Common;
+using Zat.Z2xxTests.Common.Model;
 
 /// <summary>
 /// The test run a tester is putting together, apart from the test selection.
@@ -26,7 +26,7 @@ public record TestConfigurationState(
     bool IsTestLinkReportEnabled,
     Version? IdeVersion,
     string? RuntimeVersion,
-    TestedHwAssemblyType? TestedHwAssembly)
+    HwAssemblyType? TestedHwAssembly)
 {
     public TestConfigurationState()
         : this(false, null, null, null)

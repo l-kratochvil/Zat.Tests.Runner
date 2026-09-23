@@ -8,7 +8,7 @@ using Serilog;
 using Serilog.Core;
 using Serilog.Extensions.Logging;
 using Zat.Tests.Runner.WebApp.Application.Paths;
-using ILogger = Microsoft.Extensions.Logging.ILogger;
+using ILogger = ILogger;
 
 /// <summary>
 /// An <see cref="ILoggerProvider"/> that writes diagnostics to the log file.

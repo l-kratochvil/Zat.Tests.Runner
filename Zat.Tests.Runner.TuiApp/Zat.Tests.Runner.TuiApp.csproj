@@ -17,7 +17,9 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\DevKit.Core\DevKit.Core\DevKit.Core.csproj" />
-		<ProjectReference Include="..\Zat.Tests.Runner.Common.Net\Zat.Tests.Runner.Common.Net.csproj" />
+		<ProjectReference Include="..\Zat.Tests.Runner.Common.Net\Zat.Tests.Runner.Common.Net.csproj">
+			<PrivateAssets>all</PrivateAssets>
+		</ProjectReference>
 		<ProjectReference Include="..\Zat.Tests.Runner.Common\Zat.Tests.Runner.Common.csproj" />
 	</ItemGroup>
 

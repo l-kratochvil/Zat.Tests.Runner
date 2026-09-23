@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 /// </summary>
 /// <remarks>
 /// Shared by every browser because
-/// <see cref="Zat.Tests.Runner.WebApp.Features.AppSettings.Services.AppSettingsStore"/> keeps them in a file on the server.
+/// <see cref="Features.AppSettings.Services.AppSettingsStore"/> keeps them in a file on the server.
 /// </remarks>
 /// <param name="IdeInstallFolderPath">
 /// IDE install folder path.

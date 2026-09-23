@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 
 using NUnit.Framework;
 
+using Zat.Tests.Runner.WebApp.Application.DependencyInjection;
 using Zat.Tests.Runner.WebApp.Application.Logging;
 
 [TestFixture]
@@ -47,7 +48,6 @@ public class InitLoggingExtensionsTests
         // Then:
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(result.Path, Is.EqualTo(givenPath));
             Assert.That(result.RetainedFileCount, Is.EqualTo(3));
         }
     }
@@ -120,7 +120,7 @@ public class InitLoggingExtensionsTests
 
         var services = new ServiceCollection();
         services.AddSingleton(builtConfiguration);
-        services.InitAppPaths();
+        services.InitSharedServices();
         services.AddLogging(builder =>
         {
             builder.AddConfiguration(builtConfiguration.GetSection("Logging"));

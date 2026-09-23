@@ -192,7 +192,9 @@ public class InitServicesExtensionTests
         paths.SetupGet(provider => provider.Directories)
             .Returns(new AppDirectoryPaths(AppData: appDataPath, Logs: appDataPath));
         paths.SetupGet(provider => provider.Files)
-            .Returns(new AppFilePaths(UserSettings: Path.Combine(appDataPath, "user-settings.json")));
+            .Returns(new AppFilePaths(
+                UserSettings: Path.Combine(appDataPath, "user-settings.json"),
+                MainAssemblyDll: Path.Combine(appDataPath, "main-assembly.dll")));
 
         return paths.Object;
     }

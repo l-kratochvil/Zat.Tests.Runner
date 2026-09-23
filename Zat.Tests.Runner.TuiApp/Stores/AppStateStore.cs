@@ -41,5 +41,6 @@ internal class AppStateStore : IJsonPersistanceStore<AppState>
             IdeVersion: null,
             IdeReleaseDate: null,
             HwAssemblyTypes: null,
-            IsTestLinkReportingEnabled: null);
+            IsTestLinkReportingEnabled: null,
+            IsDebugModeEnabled: null);
 }

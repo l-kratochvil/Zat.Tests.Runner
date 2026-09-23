@@ -24,7 +24,7 @@ public static class LogFile
     {
         var fileName = timestamp.ToString(DateFormat, CultureInfo.InvariantCulture) + Extension;
 
-        return System.IO.Path.Combine(directoryPath, fileName);
+        return Path.Combine(directoryPath, fileName);
     }
 
     /// <summary>

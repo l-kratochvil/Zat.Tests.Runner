@@ -208,7 +208,7 @@ public class InitPathsExtensionsTests
     {
         var builder = Host.CreateEmptyApplicationBuilder(settings: null);
         builder.Configuration.AddInMemoryCollection(configuration);
-        builder.Services.InitAppPaths();
+        builder.Services.InitSharedServices();
 
         using var host = builder.Build();
         await host.StartAsync();
@@ -226,7 +226,7 @@ public class InitPathsExtensionsTests
 
         this.services = [];
         this.services.AddSingleton(configuration);
-        this.services.InitAppPaths();
+        this.services.InitSharedServices();
 
         return this.services.BuildServiceProvider();
     }

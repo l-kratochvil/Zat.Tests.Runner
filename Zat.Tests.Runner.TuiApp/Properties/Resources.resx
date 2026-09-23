@@ -303,6 +303,9 @@
   <data name="EnableTestLinkReporting_PromptText" xml:space="preserve">
     <value>Report result to TestLink</value>
   </data>
+  <data name="EnableDebugMode_PromptText" xml:space="preserve">
+    <value>Enable debug mode</value>
+  </data>
   <data name="YesShorten" xml:space="preserve">
     <value>y</value>
   </data>

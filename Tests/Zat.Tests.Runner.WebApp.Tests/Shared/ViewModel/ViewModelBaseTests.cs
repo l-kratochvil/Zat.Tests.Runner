@@ -31,11 +31,11 @@ public class ViewModelBaseTests
         unit.Name = GivenLetters;
 
         // Then:
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(unit.Name, Is.EqualTo(GivenLetters));
             Assert.That(unit.HasErrors, Is.False);
-        });
+        }
     }
 
     [Test]
@@ -63,11 +63,11 @@ public class ViewModelBaseTests
         // Then:
         // What is wrong is said about the edit that was turned down, because that is the thing the
         // tester has to be told about.
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(unit.HasErrors, Is.True);
             Assert.That(unit.GetValidity(nameof(EditedModel.Name))?.Issues, Has.Exactly(1).Items);
-        });
+        }
     }
 
     [Test]
@@ -101,11 +101,11 @@ public class ViewModelBaseTests
         unit.Name = GivenLetters;
 
         // Then:
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(unit.Name, Is.EqualTo(GivenLetters));
             Assert.That(unit.HasErrors, Is.False);
-        });
+        }
     }
 
     [Test]

@@ -13,7 +13,10 @@ using Zat.Tests.Runner.WebApp.Shared.ViewModel;
 /// Written by hand rather than taken from a feature, so that what a control does is read off the
 /// control and not off whatever a real view model makes of the edit on its way in.
 /// </remarks>
-internal sealed class EditedViewModel : INotifyPropertyChanged, INotifyValidityInfo
+internal sealed class EditedViewModel
+    : INotifyPropertyChanged,
+      INotifyValidityInfo,
+      INotifyDataInfo
 {
     private readonly Dictionary<string, Validity> validities = [];
 
@@ -28,6 +31,9 @@ internal sealed class EditedViewModel : INotifyPropertyChanged, INotifyValidityI
 
     /// <inheritdoc/>
     public event Action<bool>? HasErrorsChanged;
+
+    /// <inheritdoc/>
+    public event EventHandler? DataChanged;
 
     /// <summary>
     /// A value a control cannot spell out as text, so that an option has to be named by its place.

@@ -1,9 +1,11 @@
 namespace Zat.Tests.Runner.Common.Net.Services;
 
 using System.Diagnostics;
+using System.Text;
 
-using DevKit.Core.Extensions.Types;
+using DevKit.Core.Extensions;
 
+using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Net;
 
 public class TestLinkResultHandler(
@@ -11,49 +13,116 @@ public class TestLinkResultHandler(
     TestLinkResultHandler.IContext context)
     : ITestResultHandler
 {
+    private const int RuntimeTestsTestPlanId = 9560;
+    private const int ApplicationTestsTestPlanId = 10130;
+
     /// <inheritdoc />
     public void Handle(TestResult testResult)
     {
-        Debug.SafeFail("TODO");
+        Debug.Fail("TODO");
 
-        var testPlatform = testLink.GetTestPlanPlatforms(result.testPlanId).First();
-
-        if (!testLink.GetBuildsForTestPlan(result.testPlanId).Any(x => x.name == build))
+        if (!context.IsTestLinkReportingEnabled)
         {
-            testLink.CreateBuild(result.testPlanId, build, string.Empty);
+            return;
         }
 
-        var testBuild = testLink.GetBuildsForTestPlan(result.testPlanId).First(x => x.name == build);
-
-        // NOTE: testcase/testsuite ID se získá: Specifikace testů >> pravé tl. myši na test. příp. ve stromu
-        var testsuiteTestcases =
-            testLink.GetTestCasesForTestSuite(result.testSuiteId, true);
-
-        var
-            testcase = testsuiteTestcases.First(x
-                => x.external_id == result.testCaseId.ToString()); // 44 je číselná složka z ID ve formátu Z200-XX (Z200-44)
-        var testcaseApiId = testcase.id;
-
-        var resultStatus = result.status switch
+        var testPlanId = testResult.TestType switch
         {
-            TestStatus.Passed => "p",
-            TestStatus.Failed => "f",
-            TestStatus.Skipped => "b",
-            _ => string.Empty,
+            TestType.Runtime => RuntimeTestsTestPlanId,
+            TestType.Application => ApplicationTestsTestPlanId,
+            TestType.Unknown => throw new InvalidOperationException("Unknown test type"),
+            _ => throw new NotSupportedException(testResult.TestType.ToString()),
         };
+        var testPlatform = testLink
+            .GetTestPlanPlatforms(testPlanId)
+            .FirstOrDefault()
+            .CheckIsNotNull($"No platforms found for test plan {testPlanId}");
 
-        var res = testLink.UploadTestCaseExecutionResult(
-            testcaseApiId,
-            result.testPlanId,
-            resultStatus,
-            platformId: testPlatform.id, // Platforma musí být přidána do testovacího plánu. Pokud není potřeba specifikovat platformu, tak stačí zadat prázdný string do argument platfromName
-            overwrite: false,
-            notes: result.notes,
-            buildId: testBuild.id);
+        // TODO: Add "beta" suffix with its version (e.g. beta1, beta2, ...)
+        var buildName = $"IDE v{context.IdeVersion}, RT v{context.RuntimeVersion}";
+
+        if (testResult.TestType == TestType.Runtime)
+        {
+            if (testResult.TestedHwAssemblyType is null)
+            {
+                throw new InvalidOperationException(
+                    $"Result has no {nameof(testResult.TestedHwAssemblyType)} " +
+                    $"but it's required for runtime tests");
+            }
+
+            buildName += $" : {testResult.TestedHwAssemblyType}";
+        }
+
+        if (testLink.GetBuildsForTestPlan(testPlanId).All(x => x.name != buildName))
+        {
+            var buildNotesBuilder = new StringBuilder().AppendLine("# Datum vydání");
+
+            if (!string.IsNullOrEmpty(context.IdeReleaseDate))
+            {
+                buildNotesBuilder.AppendLine($"- IDE: {context.IdeReleaseDate}");
+            }
+
+            if (!string.IsNullOrEmpty(context.RuntimeReleaseDate))
+            {
+                buildNotesBuilder.AppendLine($"- RT: {context.RuntimeReleaseDate}");
+            }
+
+            const string newLine = "\n";
+            var buildNotesHtml = string.Join(
+                string.Empty,
+                buildNotesBuilder
+                    .Replace("\r\n", newLine)
+                    .ToString()
+                    .Split(newLine)
+                    .Select(r => $"<p>{r}</p>"));
+            testLink.CreateBuild(testPlanId, buildName, buildNotesHtml);
+        }
+
+        var testBuild = testLink
+            .GetBuildsForTestPlan(testPlanId)
+            .FirstOrDefault(x => x.name == buildName)
+            .CheckIsNotNull($"Build '{buildName}' for test plan with ID '{testPlanId}' not found");
+
+        // TODO: Get test suite from TestResult (TestSuiteEntity) and their TestLink IDs using TestLink API?
+        var executedTestSuiteIds = Array.Empty<int>();
+        foreach (var executedTestSuiteId in executedTestSuiteIds)
+        {
+            // NOTE: testcase/testsuite ID se získá: Specifikace testů >> pravé tl. myši na test. příp. ve stromu
+            var testsuiteTestcases = testLink.GetTestCasesForTestSuite(executedTestSuiteId, true);
+
+            var executedTestCasesIds = Array.Empty<TestCaseEntity>();
+            foreach (var executedTestCase in executedTestCasesIds)
+            {
+                var testcase = testsuiteTestcases
+                    .FirstOrDefault(x => x.external_id == executedTestCase.Id)
+                    .CheckIsNotNull($"Test case with ID {executedTestCase.Id} not found");
+                var testLinkTestCaseId = testcase.id;
+                var execitedTestCaseStatus = TestStatus.Passed; // TODO: Get actual status from executedTestCase
+                var resultStatus = execitedTestCaseStatus switch
+                {
+                    TestStatus.Passed => "p",
+                    TestStatus.Failed => "f",
+                    TestStatus.Skipped => "b",
+                    _ => string.Empty,
+                };
+
+                var res = testLink.UploadTestCaseExecutionResult(
+                    testLinkTestCaseId,
+                    testPlanId,
+                    resultStatus,
+                    platformId: testPlatform
+                        .id, // Platforma musí být přidána do testovacího plánu. Pokud není potřeba specifikovat platformu, tak stačí zadat prázdný string do argument platfromName
+                    overwrite: false,
+                    notes: string.Empty, // TODO: notes: executedTestCase.Notes,
+                    buildId: testBuild.id);
+            }
+        }
     }
 
     public interface IContext
     {
+        bool IsTestLinkReportingEnabled { get; }
+
         string? IdeVersion { get; }
 
         string? IdeReleaseDate { get; }

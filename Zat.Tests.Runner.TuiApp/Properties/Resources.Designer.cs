@@ -79,6 +79,15 @@ namespace Zat.Tests.Runner.TuiApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Enable debug mode.
+        /// </summary>
+        public static string EnableDebugMode_PromptText {
+            get {
+                return ResourceManager.GetString("EnableDebugMode_PromptText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Report result to TestLink.
         /// </summary>
         public static string EnableTestLinkReporting_PromptText {

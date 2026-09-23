@@ -8,7 +8,6 @@
          test host must run as a 32-bit process; otherwise loading throws
          BadImageFormatException and no tests are discovered. -->
 		<PlatformTarget>x86</PlatformTarget>
-		<IsTestProject>false</IsTestProject>
 	</PropertyGroup>
 	
 	<ItemGroup>

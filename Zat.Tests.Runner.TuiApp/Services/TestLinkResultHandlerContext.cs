@@ -8,6 +8,10 @@ internal class TestLinkResultHandlerContext(
     : TestLinkResultHandler.IContext
 {
     /// <inheritdoc/>
+    public bool IsTestLinkReportingEnabled
+        => testConfigStore.IsTestLinkReportingEnabled ?? false;
+
+    /// <inheritdoc/>
     public string? IdeVersion
         => testConfigStore.IdeVersion;
 

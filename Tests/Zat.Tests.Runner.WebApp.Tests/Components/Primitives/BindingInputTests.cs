@@ -73,11 +73,11 @@ public class BindingInputTests : Bunit.TestContext
         component.Find(InputSelector).Change(GivenVersion);
 
         // Then:
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(this.viewModel.Text, Is.EqualTo(GivenVersion));
             Assert.That(component.Find(InputSelector).GetAttribute("value"), Is.EqualTo(GivenVersion));
-        });
+        }
     }
 
     [Test]
@@ -114,11 +114,11 @@ public class BindingInputTests : Bunit.TestContext
         component.Find(InputSelector).Change("not a number");
 
         // Then:
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(this.viewModel.Number, Is.EqualTo(7));
             Assert.That(component.Find(InputSelector).GetAttribute("value"), Is.EqualTo("7"));
-        });
+        }
     }
 
     [Test]
@@ -211,12 +211,12 @@ public class BindingInputTests : Bunit.TestContext
         component.Find(InputSelector).Change(GivenNonsense);
 
         // Then:
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(refusing.Name, Is.EqualTo(GivenLetters));
             Assert.That(component.Find(InputSelector).GetAttribute("value"), Is.EqualTo(GivenLetters));
             Assert.That(component.Find(MessageSelector).TextContent.Trim(), Is.EqualTo(RefusalMessage));
-        });
+        }
     }
 
     private IRenderedComponent<BindingInput<EditedViewModel, string?>> RenderTextInput(

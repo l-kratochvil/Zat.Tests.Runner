@@ -303,6 +303,9 @@
   <data name="EnableTestLinkReporting_PromptText" xml:space="preserve">
     <value>Zaznamenat výsledek do TestLinku</value>
   </data>
+  <data name="EnableDebugMode_PromptText" xml:space="preserve">
+    <value>Povolit ladicí režim</value>
+  </data>
   <data name="YesShorten" xml:space="preserve">
     <value>a</value>
   </data>

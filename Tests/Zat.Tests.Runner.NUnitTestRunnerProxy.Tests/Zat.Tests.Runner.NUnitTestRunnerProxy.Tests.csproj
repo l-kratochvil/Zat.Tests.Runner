@@ -1,50 +1,43 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net481</TargetFramework>
-    <!-- Zat.Z2xxTests.dll (and other runtime test assemblies) are x86. Because the
+	<PropertyGroup>
+		<TargetFramework>net481</TargetFramework>
+		<!-- Zat.Z2xxTests.dll (and other runtime test assemblies) are x86. Because the
          proxy loads test assemblies in-process (NUnitTestAssemblyRunner), the
          test host must run as a 32-bit process; otherwise loading throws
          BadImageFormatException and no tests are discovered. -->
-    <PlatformTarget>x86</PlatformTarget>
-  </PropertyGroup>
+		<PlatformTarget>x86</PlatformTarget>
+		<IsTestProject>true</IsTestProject>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="NUnit3TestAdapter" Version="3.16.1" />
-    <PackageReference Include="NUnit.Analyzers" Version="4.14.0">
-	    <PrivateAssets>all</PrivateAssets>
-	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\..\DevKit.Core\DevKit.Core\DevKit.Core.csproj" />
+		<ProjectReference Include="..\..\Zat.Tests.Runner.Common\Zat.Tests.Runner.Common.csproj" />
+		<ProjectReference Include="..\..\Zat.Tests.Runner.NUnitTestRunnerProxy\Zat.Tests.Runner.NUnitTestRunnerProxy.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\DevKit.Core\DevKit.Core\DevKit.Core.csproj" />
-    <ProjectReference Include="..\..\Zat.Tests.Runner.NUnitTestRunnerProxy\Zat.Tests.Runner.NUnitTestRunnerProxy.csproj" />
-  </ItemGroup>
-
-  <!--
+	<!--
     Reference the NUnit test-assembly fixtures only to enforce build ordering:
     they must be built (and staged to Exchange) before this project's output is
     assembled. Their assemblies are test data, not compile-time dependencies.
   -->
-  <ItemGroup>
-    <ProjectReference Include="..\NUnitTestAssembly.Net481\NUnitTestAssembly.Net481.csproj">
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <Private>false</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\NUnitTestAssembly.Net461\NUnitTestAssembly.Net461.csproj">
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <Private>false</Private>
-    </ProjectReference>
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\NUnitTestAssembly.Net481\NUnitTestAssembly.Net481.csproj">
+			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+			<Private>false</Private>
+		</ProjectReference>
+		<ProjectReference Include="..\NUnitTestAssembly.Net461\NUnitTestAssembly.Net461.csproj">
+			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+			<Private>false</Private>
+		</ProjectReference>
+	</ItemGroup>
 
-  <!-- Copy the staged NUnit test assemblies into this project's output directory. -->
-  <Target Name="IncludeNUnitTestAssemblies" BeforeTargets="AssignTargetPaths">
-    <ItemGroup>
-      <_NUnitTestAssemblyFile Include="$(NUnitTestAssembliesDir)**\*" />
-      <Content Include="@(_NUnitTestAssemblyFile)" Link="NUnitTestAssemblies\%(_NUnitTestAssemblyFile.RecursiveDir)%(_NUnitTestAssemblyFile.Filename)%(_NUnitTestAssemblyFile.Extension)" CopyToOutputDirectory="Always" />
-    </ItemGroup>
-  </Target>
+	<!-- Copy the staged NUnit test assemblies into this project's output directory. -->
+	<Target Name="IncludeNUnitTestAssemblies" BeforeTargets="AssignTargetPaths">
+		<ItemGroup>
+			<_NUnitTestAssemblyFile Include="$(NUnitTestAssembliesDir)**\*" />
+			<Content Include="@(_NUnitTestAssemblyFile)" Link="NUnitTestAssemblies\%(_NUnitTestAssemblyFile.RecursiveDir)%(_NUnitTestAssemblyFile.Filename)%(_NUnitTestAssemblyFile.Extension)" CopyToOutputDirectory="Always" />
+		</ItemGroup>
+	</Target>
 
 </Project>

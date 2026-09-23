@@ -1,22 +1,24 @@
 namespace Zat.Tests.Runner.Common.Net.Services;
 
+using Zat.Tests.Runner.Common.Net.TestLink.API.Model;
+
 public interface ITestLink
 {
-    Zat.Tests.Runner.Common.Net.TestLink.API.Model.Build[] GetBuildsForTestPlan(int testPlanId);
+    Build[] GetBuildsForTestPlan(int testPlanId);
 
-    public Zat.Tests.Runner.Common.Net.TestLink.API.Model.GeneralResult CreateBuild(int testPlanId, string buildName, string buildNotes);
+    GeneralResult CreateBuild(int testPlanId, string buildName, string buildNotes);
 
-    public Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestSuite[] GetFirstLevelTestSuitesForTestProject(int testProjectId);
+    TestSuite[] GetFirstLevelTestSuitesForTestProject(int testProjectId);
 
-    public Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestCaseFromTestSuite[] GetTestCasesForTestSuite(int testSuiteId, bool deep);
+    TestCaseFromTestSuite[] GetTestCasesForTestSuite(int testSuiteId, bool deep);
 
-    public Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestSuite[] GetTestSuitesForTestSuite(int testSuiteId);
+    TestSuite[] GetTestSuitesForTestSuite(int testSuiteId);
 
-    public Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestSuite? GetTestSuiteById(int id);
+    TestSuite? GetTestSuiteById(int id);
 
-    public Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestPlatform[] GetTestPlanPlatforms(int testPlanId);
+    TestPlatform[] GetTestPlanPlatforms(int testPlanId);
 
-    public Zat.Tests.Runner.Common.Net.TestLink.API.Model.GeneralResult UploadTestCaseExecutionResult(
+    GeneralResult UploadTestCaseExecutionResult(
         int testCaseId,
         int testPlanId,
         string status,

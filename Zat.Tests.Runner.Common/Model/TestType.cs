@@ -3,6 +3,6 @@
 public enum TestType
 {
     Unknown,
-    RuntimeTest,
-    ApplicationTest,
+    Runtime,
+    Application,
 }

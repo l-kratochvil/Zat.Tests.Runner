@@ -2,7 +2,7 @@
 
 using System.Text.Json.Serialization;
 
-using Zat.Z2xxTests.Common;
+using Zat.Z2xxTests.Common.Model;
 
 internal record AppState(
     [property: JsonPropertyName("runtimeVersion")]
@@ -14,6 +14,8 @@ internal record AppState(
     [property: JsonPropertyName("ideReleaseDate")]
     string? IdeReleaseDate,
     [property: JsonPropertyName("testedHwAssemblyTypes")]
-    TestedHwAssemblyType[]? HwAssemblyTypes,
+    HwAssemblyType[]? HwAssemblyTypes,
     [property: JsonPropertyName("isTestLinkReportingEnabled")]
-    bool? IsTestLinkReportingEnabled);
+    bool? IsTestLinkReportingEnabled,
+    [property: JsonPropertyName("isDebugModeEnabled")]
+    bool? IsDebugModeEnabled);

@@ -5,7 +5,7 @@ namespace Zat.Tests.Runner.WebApp.Shared.Logging;
 /// </summary>
 /// <remarks>
 /// This is the tester-facing log. Diagnostics still go through
-/// <see cref="Microsoft.Extensions.Logging.ILogger{TCategoryName}"/>.
+/// <see cref="ILogger{TCategoryName}"/>.
 /// </remarks>
 public interface IAppLogger
 {

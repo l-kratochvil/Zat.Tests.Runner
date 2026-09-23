@@ -1,7 +1,7 @@
 ﻿namespace Zat.Tests.Runner.Common.Net.Services;
 
 using Zat.Tests.Runner.Common.Model;
-using Zat.Z2xxTests.Common;
+using Zat.Z2xxTests.Common.Model;
 
 public interface ITestRunnerEngine
 {
@@ -10,7 +10,7 @@ public interface ITestRunnerEngine
     Task<TestResult[]> RunTestAsync(
         IEnumerable<TestEntity> testRunEntities,
         string? testedRuntimeVersion,
-        TestedHwAssemblyType[]? testedHwAssemblyTypes,
+        HwAssemblyType[]? testedHwAssemblyTypes,
         bool isDebug,
         IEnumerable<ITestResultHandler>? testResultHandlers = null);
 

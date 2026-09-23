@@ -4,6 +4,7 @@ using HtmlAgilityPack;
 
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Net.Services;
+using Zat.Tests.Runner.Common.Net.TestLink.API.Model;
 
 const string testLinkApiKey = "dc7a17e14a9f1879d38583a38c3a81e8";
 
@@ -13,8 +14,9 @@ var apiClient = new TestLink(ITestLink.Config.Default);
 
 const int productionProjectId = 6302; // TOTO JE ID PRODUKČNÍHO TEST PROJECTU
 const int tempProjectId = 10202;
-const int testProjectId = productionProjectId;
+const int testProjectId = tempProjectId;
 
+var projectTestPlanPlatforms = apiClient.GetTestPlanPlatforms(10208);
 var projectTestsuites = apiClient.GetFirstLevelTestSuitesForTestProject(testProjectId);
 var testsuite = apiClient.GetTestSuiteById(9572);
 var info = GetInformationForTester(testsuite);
@@ -22,10 +24,10 @@ var testSuites = GetAllTestSuitesAndTestCases(testProjectId);
 
 Console.WriteLine("DONE");
 
-List<Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestSuite> GetAllTestSuitesAndTestCases(int testProjectId)
+List<TestSuite> GetAllTestSuitesAndTestCases(int testProjectId)
 {
     var testSuitesForTestProject = apiClient.GetFirstLevelTestSuitesForTestProject(testProjectId);
-    var suites = new List<Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestSuite>();
+    var suites = new List<TestSuite>();
 
     foreach (var testSuite in testSuitesForTestProject)
     {
@@ -37,13 +39,13 @@ List<Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestSuite> GetAllTestSuitesA
     return suites;
 }
 
-string GetInformationForTester(Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestSuite testSuite)
+string GetInformationForTester(TestSuite testSuite)
 {
     var text = TransformFromHTMLDocToText(testSuite);
     return GetMatchedTextForTester(text);
 }
 
-string TransformFromHTMLDocToText(Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestSuite testSuite)
+string TransformFromHTMLDocToText(TestSuite testSuite)
 {
     var doc = new HtmlDocument();
     doc.LoadHtml(testSuite._details);
@@ -67,9 +69,9 @@ string GetMatchedTextForTester(string text)
     return userText;
 }
 
-Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestSuite GetTestSuitesAndCases(Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestSuite testSuite)
+TestSuite GetTestSuitesAndCases(TestSuite testSuite)
 {
-    var suite = new Zat.Tests.Runner.Common.Net.TestLink.API.Model.TestSuite(
+    var suite = new TestSuite(
         testSuite._id,
         testSuite._name,
         testSuite._details,

@@ -19,7 +19,7 @@ internal static class Paths
             => FileSystemUtils.CreateDirectoryIfNotExisting(LogsPath);
 
         public static string AutomizedTests
-            => FileSystemUtils.CreateDirectoryIfNotExisting(Zat.Z2xxTests.Common.Paths.Directories.AutomizedTests);
+            => FileSystemUtils.CreateDirectoryIfNotExisting(Z2xxTests.Common.Paths.Directories.AutomizedTests);
     }
 
     public static class Files

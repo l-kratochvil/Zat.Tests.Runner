@@ -15,7 +15,7 @@ using Zat.Tests.Runner.Common.Services;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
 
-using TestExecutionComponent = Zat.Tests.Runner.WebApp.Features.TestExecution.Components.TestExecution;
+using TestExecutionComponent = Features.TestExecution.Components.TestExecution;
 
 /// <summary>
 /// What the button offers and what stops it, which is all it does.
@@ -109,11 +109,11 @@ public class TestExecutionTests : Bunit.TestContext
             this.RenderComponent<TestExecutionComponent>();
 
         // Then:
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(IsDisabled(component), Is.True);
             Assert.That(Reason(component), Does.Contain("Select the tests"));
-        });
+        }
     }
 
     [Test]
@@ -123,18 +123,18 @@ public class TestExecutionTests : Bunit.TestContext
         // What is wrong with it is not said here: the configurator is beside the button and says it
         // field by field.
         this.configuration = new TestConfigurationState { HasErrors = true };
-        this.GivenSelectedTestCase(TestType.ApplicationTest);
+        this.GivenSelectedTestCase(TestType.Application);
 
         // When:
         var component =
             this.RenderComponent<TestExecutionComponent>();
 
         // Then:
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(IsDisabled(component), Is.True);
             Assert.That(Reason(component), Does.Contain("Complete the test configuration"));
-        });
+        }
     }
 
     [Test]
@@ -166,7 +166,7 @@ public class TestExecutionTests : Bunit.TestContext
     private void GivenARunnableConfiguration()
     {
         this.configuration = ConfigurationSaidToBeRunnable();
-        this.GivenSelectedTestCase(TestType.ApplicationTest);
+        this.GivenSelectedTestCase(TestType.Application);
     }
 
     private void GivenSelectedTestCase(TestType testType)

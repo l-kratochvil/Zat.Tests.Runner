@@ -7,7 +7,6 @@ using DevKit.Core.Extensions.Functional;
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Net;
 using Zat.Tests.Runner.Common.Services;
-using Zat.Z2xxTests.Common;
 using Zat.Z2xxTests.Common.Model;
 
 public class TestRunnerEngine(
@@ -27,7 +26,7 @@ public class TestRunnerEngine(
     public async Task<TestResult[]> RunTestAsync(
         IEnumerable<TestEntity> testRunEntities,
         string? testedRuntimeVersion,
-        TestedHwAssemblyType[]? testedHwAssemblyTypes,
+        HwAssemblyType[]? testedHwAssemblyTypes,
         bool isDebug,
         IEnumerable<ITestResultHandler>? resultHandlers = null)
     {
@@ -48,7 +47,7 @@ public class TestRunnerEngine(
 
         // Application tests execution
         var applicationTestEntities = testEntitiesGroupedByType
-            .FirstOrDefault(x => x.Key is TestType.ApplicationTest)?
+            .FirstOrDefault(x => x.Key is TestType.Application)?
             .ToArray();
         if (applicationTestEntities is not null)
         {
@@ -58,13 +57,14 @@ public class TestRunnerEngine(
                         testedRuntimeVersion,
                         null,
                         isDebug),
+                    TestType.Application,
                     finalTestResultHandlers))
                 .Visit(testRunResults.Add);
         }
 
         // Runtime tests execution
         var runtimeTestEntities = testEntitiesGroupedByType
-            .FirstOrDefault(x => x.Key is TestType.RuntimeTest)?
+            .FirstOrDefault(x => x.Key is TestType.Runtime)?
             .ToArray();
         if (runtimeTestEntities is not null)
         {
@@ -78,6 +78,7 @@ public class TestRunnerEngine(
                             testedRuntimeVersion,
                             testedHwAssemblyType,
                             isDebug),
+                        TestType.Runtime,
                         finalTestResultHandlers))
                     .Visit(testRunResults.Add);
             }
@@ -99,6 +100,7 @@ public class TestRunnerEngine(
     private async Task<TestResult> RunTestsAsync(
         IEnumerable<TestEntity> testRunEntities,
         TestConfig testConfig,
+        TestType testType,
         ITestResultHandler[] resultHandlers)
     {
         using var connection = testRunnerBridgeConnector.Connect(testConfig);
@@ -107,7 +109,7 @@ public class TestRunnerEngine(
 
         var testRunResult =
             (await nunitTestRunnerProxy.RunTestAsync(testRunEntities))
-            .Pipe(x => new TestResult(x, testConfig.TestedHwAssemblyType));
+            .Pipe(x => new TestResult(x, testType, testConfig.TestedHwAssemblyType));
 
         foreach (var handler in resultHandlers)
         {

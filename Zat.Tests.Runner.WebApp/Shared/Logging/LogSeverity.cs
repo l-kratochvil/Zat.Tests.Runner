@@ -4,7 +4,7 @@ namespace Zat.Tests.Runner.WebApp.Shared.Logging;
 /// Severity of a log entry.
 /// </summary>
 /// <remarks>
-/// The log has no debug severity; diagnostics use <see cref="Microsoft.Extensions.Logging.ILogger"/>
+/// The log has no debug severity; diagnostics use <see cref="ILogger"/>
 /// instead.
 /// </remarks>
 public enum LogSeverity

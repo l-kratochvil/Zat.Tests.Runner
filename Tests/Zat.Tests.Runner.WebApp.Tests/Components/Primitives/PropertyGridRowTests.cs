@@ -41,13 +41,13 @@ public class PropertyGridRowTests : Bunit.TestContext
         var component = this.RenderRowInGrid(Validity.Valid);
 
         // Then:
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(
                 component.Find($"{RowSelector} .property-grid-row-label").TextContent.Trim(),
                 Is.EqualTo(GivenLabel));
             Assert.That(component.FindAll($"{RowSelector} input"), Has.Exactly(1).Items);
-        });
+        }
     }
 
     [Test]
@@ -70,11 +70,11 @@ public class PropertyGridRowTests : Bunit.TestContext
         var component = this.RenderRowInGrid(validity);
 
         // Then:
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(component.Find(ErrorSelector).TextContent.Trim(), Is.EqualTo(GivenMessage));
             Assert.That(component.FindAll(WarningSelector), Is.Empty);
-        });
+        }
     }
 
     [Test]
@@ -88,11 +88,11 @@ public class PropertyGridRowTests : Bunit.TestContext
         var component = this.RenderRowInGrid(validity);
 
         // Then:
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(component.Find(WarningSelector).TextContent.Trim(), Is.EqualTo(GivenMessage));
             Assert.That(component.FindAll(ErrorSelector), Is.Empty);
-        });
+        }
     }
 
     [Test]
@@ -119,7 +119,6 @@ public class PropertyGridRowTests : Bunit.TestContext
             parameters => parameters.AddChildContent<PropertyGridRow>(
                 row => row
                     .Add(component => component.Label, GivenLabel)
-                    .Add(component => component.Validity, validity)
                     .Add(component => component.ChildContent, input)));
     }
 }

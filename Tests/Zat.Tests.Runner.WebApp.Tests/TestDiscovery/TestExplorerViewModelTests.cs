@@ -180,22 +180,22 @@ public class TestExplorerViewModelTests
                         CreateTestCase(name: "First case", executionPath: GivenFirstCasePath),
                         CreateTestCase(name: "Second case", executionPath: GivenSecondCasePath),
                     ],
-                    TestType.ApplicationTest,
+                    TestType.Application,
                     name: "First fixture",
                     executionPath: GivenFirstFixturePath),
                 new TestFixtureEntity(
                     [CreateTestCase(name: "Third case", executionPath: GivenThirdCasePath)],
-                    TestType.ApplicationTest,
+                    TestType.Application,
                     name: "Second fixture",
                     executionPath: GivenSecondFixturePath),
             ],
-            TestType.ApplicationTest,
+            TestType.Application,
             name: "Suite",
             executionPath: GivenSuitePath);
 
     private static TestCaseEntity CreateTestCase(string name, string executionPath)
         => new(
-            TestType.ApplicationTest,
+            TestType.Application,
             id: executionPath,
             name: name,
             executionPath: executionPath);

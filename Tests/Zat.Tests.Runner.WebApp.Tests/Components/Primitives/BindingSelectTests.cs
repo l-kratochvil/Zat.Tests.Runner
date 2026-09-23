@@ -12,7 +12,7 @@ using NUnit.Framework;
 
 using Zat.Tests.Runner.WebApp.Components.Primitives;
 
-using Shade = Zat.Tests.Runner.WebApp.Tests.Components.Primitives.EditedViewModel.Shade;
+using Shade = EditedViewModel.Shade;
 
 /// <summary>
 /// What is offered, what marks a choice as made and what a choice writes back.

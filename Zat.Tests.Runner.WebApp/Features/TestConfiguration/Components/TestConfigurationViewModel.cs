@@ -12,8 +12,7 @@ using Zat.Tests.Runner.WebApp.Shared.Logging;
 using Zat.Tests.Runner.WebApp.Shared.Stores.AppSettings;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
 using Zat.Tests.Runner.WebApp.Shared.ViewModel;
-
-using Zat.Z2xxTests.Common;
+using Zat.Z2xxTests.Common.Model;
 
 /// <summary>
 /// The test configuration as the configurator shows it: the values being edited, which of them are
@@ -67,7 +66,7 @@ public partial class TestConfigurationViewModel : ViewModelBase, IInitializable
             validator
                 .RuleFor(x => x.TestedHwAssembly)
                 .NotNull()
-                .NotEqual(TestedHwAssemblyType.Unknown)
+                .NotEqual(HwAssemblyType.Unknown)
                 .WithMessage("Tested hardware assembly is required.");
         });
     }
@@ -104,7 +103,7 @@ public partial class TestConfigurationViewModel : ViewModelBase, IInitializable
                 }));
     }
 
-    public TestedHwAssemblyType? TestedHwAssembly
+    public HwAssemblyType? TestedHwAssembly
     {
         get;
         set => this.SetProperty(
@@ -113,7 +112,7 @@ public partial class TestConfigurationViewModel : ViewModelBase, IInitializable
             value => this.dispatcher.Dispatch(
                 new DataChangedAction
                 {
-                    NewTestedHwAssembly = new ValueChange<TestedHwAssemblyType?>(value),
+                    NewTestedHwAssembly = new ValueChange<HwAssemblyType?>(value),
                 }));
     }
 

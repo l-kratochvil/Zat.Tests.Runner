@@ -2,7 +2,7 @@
 
 @using System.Linq
 
-@using Zat.Z2xxTests.Common
+@using Zat.Z2xxTests.Common.Model
 
 @inherits Zat.Tests.Runner.WebApp.Components.MvvmComponentBase<TestConfigurationViewModel>
 
@@ -25,7 +25,7 @@
                     <BindingSelect
                         Class="input-hw-assembly-type"
                         Binding="@(vm => vm.TestedHwAssembly)"
-                        Options="TestStationLabels.Offered.Cast<TestedHwAssemblyType?>()"
+                        Options="TestStationLabels.Offered.Cast<HwAssemblyType?>()"
                         Placeholder="—" />
                 </PropertyGridRow>
             }

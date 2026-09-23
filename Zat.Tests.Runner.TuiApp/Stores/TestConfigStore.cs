@@ -1,7 +1,7 @@
 ﻿namespace Zat.Tests.Runner.TuiApp.Stores;
 
 using Zat.Tests.Runner.Common.Model;
-using Zat.Z2xxTests.Common;
+using Zat.Z2xxTests.Common.Model;
 
 /// <summary>
 /// This is the store for test run config that is used by the running test.
@@ -13,10 +13,15 @@ internal class TestConfigStore(AppStateStore appStateStore)
 
     public IEnumerable<TestEntity> SelectedTestEntities { get; set; } = [];
 
-    public bool IsDebug { get; set; } = false;
+    public bool IsDebugModeEnabled
+    {
+        get => appStateStore.Current.IsDebugModeEnabled ?? false;
+        set => appStateStore.Update(
+            current => current with { IsDebugModeEnabled = value });
+    }
 
     public bool RuntimeTestEntitiesSelected
-        => this.SelectedTestEntities.Any(x => x.TestType is TestType.RuntimeTest);
+        => this.SelectedTestEntities.Any(x => x.TestType is TestType.Runtime);
 
     public bool? IsTestLinkReportingEnabled
     {
@@ -53,7 +58,7 @@ internal class TestConfigStore(AppStateStore appStateStore)
             current => current with { IdeReleaseDate = value });
     }
 
-    public TestedHwAssemblyType[]? HwAssemblyTypes
+    public HwAssemblyType[]? HwAssemblyTypes
     {
         get => appStateStore.Current.HwAssemblyTypes;
         set => appStateStore.Update(

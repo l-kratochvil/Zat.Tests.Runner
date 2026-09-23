@@ -19,6 +19,7 @@ internal sealed class HomeScreen(
     TestCasesSelectionScreen testEntitiesFromTestCasesPromptScreen,
     HwAssemblyTypesSelectionScreen hwAssemblyTypesSelectionScreen,
     EnableTestLinkReportingPromptScreen enableTestLinkReportingPromptScreen,
+    EnableDebugModePromptScreen enableDebugModePromptScreen,
     RuntimeReleaseDatePromptScreen runtimeReleaseDatePromptScreen,
     IdeReleaseDatePromptScreen ideReleaseDatePromptScreen,
     RunTestScreen runTestScreen)
@@ -95,13 +96,14 @@ internal sealed class HomeScreen(
 
     private IEnumerable<Choice<IScreen>> GetChoices()
     {
-        // TODO: Runtime version should be optional (PDP tests can be run without runtime version)
         // Runtime version choice
         yield return new Choice<IScreen>(
             value: runtimeVersionPromptScreen,
             displayText: Resources.RuntimeVersion_ChoiceText,
             displayValue: testConfigStore.RuntimeVersion);
 
+        // TODO: Runtime version should be optional (PDP tests can be run without runtime version)
+        // REQUIRED: Runtime version
         if (testConfigStore.RuntimeVersion is null)
         {
             yield break;
@@ -110,8 +112,7 @@ internal sealed class HomeScreen(
         // Test suites selection choice
         if (Choice.InitChoice<IScreen>(
                 testEntitiesFromTestsuitesPromptScreen,
-                Resources.SelectTestSuites_ChoiceText,
-                null)
+                Resources.SelectTestSuites_ChoiceText)
             .TryGetValue(out var selectTestSuiteChoice))
         {
             yield return selectTestSuiteChoice;
@@ -120,13 +121,13 @@ internal sealed class HomeScreen(
         // Test cases selection choice
         if (Choice.InitChoice<IScreen>(
                 testEntitiesFromTestCasesPromptScreen,
-                Resources.SelectTestCases_ChoiceText,
-                null)
+                Resources.SelectTestCases_ChoiceText)
             .TryGetValue(out var selectTestCasesChoice))
         {
             yield return selectTestCasesChoice;
         }
 
+        // REQUIRED: Test entities selection
         if (!testConfigStore.SelectedTestEntities.Any())
         {
             yield break;
@@ -143,6 +144,7 @@ internal sealed class HomeScreen(
             yield return selectHwAssemblyTypesChoice;
         }
 
+        // REQUIRED: HW assembly type selection when runtime test entities are selected
         if (testConfigStore is
             {
                 RuntimeTestEntitiesSelected: true,
@@ -153,22 +155,16 @@ internal sealed class HomeScreen(
         }
 
         // Enable Test Link reporting choice
-#pragma warning disable SA1118 // Parameter should not span multiple lines
         if (Choice.InitChoice<IScreen>(
                 enableTestLinkReportingPromptScreen,
                 Resources.EnableTestLinkReporting_PromptText,
-                testConfigStore.IsTestLinkReportingEnabled switch
-                {
-                    true => Resources.Yes,
-                    false => Resources.No,
-                    null => null,
-                })
+                testConfigStore.IsTestLinkReportingEnabled)
             .TryGetValue(out var enableTestLinkReportingPromptScreenChoice))
         {
             yield return enableTestLinkReportingPromptScreenChoice;
         }
-#pragma warning restore SA1118 // Parameter should not span multiple lines
 
+        // REQUIRED: Enable TestLink reporting
         if (testConfigStore.IsTestLinkReportingEnabled is null)
         {
             yield break;
@@ -187,6 +183,7 @@ internal sealed class HomeScreen(
                 yield return ideVersionChoice;
             }
 
+            // IDE release date choice
             if (Choice.InitChoice<IScreen>(
                     ideReleaseDatePromptScreen,
                     Resources.IdeReleaseDate_ChoiceText,
@@ -196,6 +193,7 @@ internal sealed class HomeScreen(
                 yield return ideReleaseDateChoice;
             }
 
+            // Runtime release date choice
             if (Choice.InitChoice<IScreen>(
                     runtimeReleaseDatePromptScreen,
                     Resources.RuntimeReleaseDate_ChoiceText,
@@ -205,10 +203,21 @@ internal sealed class HomeScreen(
                 yield return runtimeReleaseDateChoice;
             }
 
+            // REQUIRED: IDE version
             if (testConfigStore.IdeVersion is null)
             {
                 yield break;
             }
+        }
+
+        // Enable debug mode choice
+        if (Choice.InitChoice<IScreen>(
+                enableDebugModePromptScreen,
+                Resources.EnableDebugMode_PromptText,
+                testConfigStore.IsDebugModeEnabled)
+            .TryGetValue(out var enableDebugModePromptScreenChoice))
+        {
+            yield return enableDebugModePromptScreenChoice;
         }
 
         // Validation of required configuration values

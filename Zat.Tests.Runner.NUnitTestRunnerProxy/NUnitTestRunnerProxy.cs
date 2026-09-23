@@ -18,7 +18,7 @@ using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Services;
 
 using TestFilter = NUnit.Framework.Internal.TestFilter;
-using TestStatus = Zat.Tests.Runner.Common.Model.TestStatus;
+using TestStatus = Common.Model.TestStatus;
 
 /// <summary>
 /// Out-of-process NUnit test runner. Hosts the .NET Framework <see cref="ITestAssemblyRunner"/>
@@ -68,7 +68,7 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
             cancellationToken);
 
     /// <inheritdoc/>
-    public Task<Zat.Tests.Runner.Common.ProxyTestResult> RunTestAsync(
+    public Task<Common.ProxyTestResult> RunTestAsync(
         IEnumerable<TestEntity> testRunEntities, CancellationToken cancellationToken = default)
     {
         if (!this.runner.IsTestLoaded)
@@ -241,8 +241,8 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
         {
             // TODO: Určit "je to runtime test" podle atributu (umístěného do Zat.Z2xxTests.Common)
             var testType = x.FullName.ToLower().Contains("runtimetests")
-                ? TestType.RuntimeTest
-                : TestType.ApplicationTest;
+                ? TestType.Runtime
+                : TestType.Application;
             return new TestSuiteEntity(
                 [..CollectTestFixtureEntities(x, testType)],
                 testType,

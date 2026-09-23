@@ -81,7 +81,7 @@ internal class RunTestScreen(
                     testRunEntities: testConfigStore.SelectedTestEntities,
                     testedRuntimeVersion: testConfigStore.RuntimeVersion,
                     testedHwAssemblyTypes: testConfigStore.HwAssemblyTypes,
-                    isDebug: testConfigStore.IsDebug,
+                    isDebug: testConfigStore.IsDebugModeEnabled,
                     testResultHandlers: [this]);
 
                 var promptResult = await ShowLiveDataAsync(

@@ -1,8 +1,10 @@
 ﻿namespace Zat.Tests.Runner.Common.Net;
 
-using Zat.Z2xxTests.Common;
+using Zat.Tests.Runner.Common.Model;
+using Zat.Z2xxTests.Common.Model;
 
 public record TestResult(
     ProxyTestResult ProxyTestResult,
-    TestedHwAssemblyType? TestedHwAssemblyType = null)
+    TestType TestType,
+    HwAssemblyType? TestedHwAssemblyType = null)
     : ProxyTestResult(ProxyTestResult);

@@ -5,7 +5,7 @@ using Spectre.Console;
 using System;
 
 using Zat.Tests.Runner.TuiApp.Stores;
-using Zat.Z2xxTests.Common;
+using Zat.Z2xxTests.Common.Model;
 
 internal class HwAssemblyTypesSelectionScreen(
     TestConfigStore testConfigStore,
@@ -20,12 +20,12 @@ internal class HwAssemblyTypesSelectionScreen(
         {
             Main = ct =>
             {
-                var prompt = new MultiSelectionPrompt<TestedHwAssemblyType>()
+                var prompt = new MultiSelectionPrompt<HwAssemblyType>()
                     .Title(Resources.HwAssemblyTypes_ChoiceText.AsPromptTitle())
                     .MoreChoicesText(SharedTexts.MoreChoicesHelpText)
                     .PageSize(10)
                     .InstructionsText(SharedTexts.InstructionsHelpText)
-                    .AddChoices(Enum.GetValues<TestedHwAssemblyType>());
+                    .AddChoices(Enum.GetValues<HwAssemblyType>());
 
                 testConfigStore
                     .HwAssemblyTypes?
@@ -40,8 +40,8 @@ internal class HwAssemblyTypesSelectionScreen(
                     },
                     ct,
                     validator: static selected =>
-                        selected.Contains(TestedHwAssemblyType.HW02_BB1M) &&
-                        selected.Contains(TestedHwAssemblyType.HW02_BB37M)
+                        selected.Contains(HwAssemblyType.HW02_BB1M) &&
+                        selected.Contains(HwAssemblyType.HW02_BB37M)
                             ? ValidationResult.Error(Resources.SelectingMultipleHw02OptionsNotAllowed)
                             : ValidationResult.Success());
             },

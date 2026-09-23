@@ -1,29 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<IsTestProject>true</IsTestProject>
+	</PropertyGroup>
 
-  <ItemGroup>
-	  <PackageReference Include="bunit" Version="1.35.3" />
-	  <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
-	  <PackageReference Include="Moq" Version="4.20.72" />
-	  <PackageReference Include="NUnit" Version="4.6.1" />
-	  <PackageReference Include="NUnit3TestAdapter" Version="6.2.0" />
-	  <PackageReference Include="NUnit.Analyzers" Version="4.14.0">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-	  </PackageReference>
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="bunit" Version="1.35.3" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\Zat.Tests.Runner.WebApp\Zat.Tests.Runner.WebApp.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\Zat.Tests.Runner.WebApp\Zat.Tests.Runner.WebApp.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <!-- The shipped settings are what the application reads at startup, so they are tested rather
+	<ItemGroup>
+		<!-- The shipped settings are what the application reads at startup, so they are tested rather
          than described a second time here. -->
-    <None Include="..\..\Zat.Tests.Runner.WebApp\appsettings.json" Link="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
+		<None Include="..\..\Zat.Tests.Runner.WebApp\appsettings.json" Link="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
 
 </Project>
