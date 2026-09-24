@@ -3,6 +3,8 @@
 If a doc referenced below is missing or unreadable, proceed using best judgment and note the
 missing file to the user.
 
+Be extremely concise. Sacrefice grammar for the sake of concision.
+
 ## Issue tracker
 
 Read `docs/agents/issue-tracker.md` before creating, reading, commenting on, labelling, or closing

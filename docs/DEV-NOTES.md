@@ -20,9 +20,10 @@
 - Nahradit bootstrap za tailwind: použít [tento balíček](https://github.com/Practical-ASP-NET/Tailwind.Extensions.AspNetCore)
 
 ### Features
+
 - Zaznamenávání průměrného času provádění entity?:
-    - Průměrovaly by se časy testcasů, pro test suite by se vypočítala suma
-    - Bude vyžadovat uložiště (pro začátek pro jednoduchost postačí soubor, ale v budoucnu by se hodila DB)
+  - Průměrovaly by se časy testcasů, pro test suite by se vypočítala suma
+  - Bude vyžadovat uložiště (pro začátek pro jednoduchost postačí soubor, ale v budoucnu by se hodila DB)
 
 #### TestConfiguration
 
