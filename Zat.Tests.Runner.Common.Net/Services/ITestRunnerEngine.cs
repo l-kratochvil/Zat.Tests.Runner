@@ -9,12 +9,15 @@ public interface ITestRunnerEngine
 
     Task<TestResult[]> RunTestAsync(
         IEnumerable<TestEntity> testRunEntities,
-        string? testedRuntimeVersion,
-        HwAssemblyType[]? testedHwAssemblyTypes,
-        bool isDebug,
-        IEnumerable<ITestResultHandler>? testResultHandlers = null);
+        Config config);
 
     void StopTestRun();
 
     void RegisterTestResultHandler(ITestResultHandler handler);
+
+    public record Config(
+        bool IsDebug,
+        string? TestedRuntimeVersion,
+        HwAssemblyType[]? TestedHwAssemblyTypes,
+        IEnumerable<ITestResultHandler>? TestResultHandlers = null);
 }

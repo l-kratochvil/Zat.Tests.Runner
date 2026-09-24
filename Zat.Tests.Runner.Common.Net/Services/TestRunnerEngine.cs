@@ -25,17 +25,14 @@ public class TestRunnerEngine(
     /// <inheritdoc />
     public async Task<TestResult[]> RunTestAsync(
         IEnumerable<TestEntity> testRunEntities,
-        string? testedRuntimeVersion,
-        HwAssemblyType[]? testedHwAssemblyTypes,
-        bool isDebug,
-        IEnumerable<ITestResultHandler>? resultHandlers = null)
+        ITestRunnerEngine.Config config)
     {
         var testRunResults = new List<TestResult>();
 
         ITestResultHandler[] finalTestResultHandlers =
         [
-            ..resultHandlers is not null
-                ? this.testResultHandlers.Concat(resultHandlers)
+            ..config.TestResultHandlers is not null
+                ? this.testResultHandlers.Concat(config.TestResultHandlers)
                 : this.testResultHandlers
         ];
 
@@ -54,9 +51,9 @@ public class TestRunnerEngine(
             (await this.RunTestsAsync(
                     applicationTestEntities,
                     new TestConfig(
-                        testedRuntimeVersion,
+                        config.TestedRuntimeVersion,
                         null,
-                        isDebug),
+                        config.IsDebug),
                     TestType.Application,
                     finalTestResultHandlers))
                 .Visit(testRunResults.Add);
@@ -68,16 +65,16 @@ public class TestRunnerEngine(
             .ToArray();
         if (runtimeTestEntities is not null)
         {
-            ArgumentNullException.ThrowIfNull(testedHwAssemblyTypes);
+            ArgumentNullException.ThrowIfNull(config.TestedHwAssemblyTypes);
 
-            foreach (var testedHwAssemblyType in testedHwAssemblyTypes)
+            foreach (var testedHwAssemblyType in config.TestedHwAssemblyTypes)
             {
                 (await this.RunTestsAsync(
                         runtimeTestEntities,
                         new TestConfig(
-                            testedRuntimeVersion,
+                            config.TestedRuntimeVersion,
                             testedHwAssemblyType,
-                            isDebug),
+                            config.IsDebug),
                         TestType.Runtime,
                         finalTestResultHandlers))
                     .Visit(testRunResults.Add);

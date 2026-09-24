@@ -13,5 +13,7 @@ public class TestResultHandler : ITestResultHandler
     public void Handle(TestResult testResult)
     {
         Debug.SafeFail("TODO");
+
+        // TODO: Update TestResultReporting store to display the new test result
     }
 }

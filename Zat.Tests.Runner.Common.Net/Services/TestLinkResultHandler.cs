@@ -34,8 +34,12 @@ public class TestLinkResultHandler(
             _ => throw new NotSupportedException(testResult.TestType.ToString()),
         };
 
-        // TODO: Add "beta" suffix with its version (e.g. beta1, beta2, ...)
         var buildName = $"IDE v{context.IdeVersion}, RT v{context.RuntimeVersion}";
+
+        if (context.BetaVersion is not null)
+        {
+            buildName += $"(beta{context.BetaVersion})";
+        }
 
         if (testResult.TestType == TestType.Runtime)
         {
@@ -49,34 +53,26 @@ public class TestLinkResultHandler(
             buildName += $" : {testResult.TestedHwAssemblyType}";
         }
 
-        if (testLink.GetBuildsForTestPlan(testPlanId).All(x => x.name != buildName))
+        if (testLink.GetBuildsForTestPlan(testPlanId).All(x => x.Name != buildName))
         {
-            var buildNotesBuilder = new StringBuilder().AppendLine("# Datum vydání");
+            var buildNotes = "# Datum vydání";
 
             if (!string.IsNullOrEmpty(context.IdeReleaseDate))
             {
-                buildNotesBuilder.AppendLine($"- IDE: {context.IdeReleaseDate}");
+                buildNotes += $"<p>- IDE: {context.IdeReleaseDate}</p>";
             }
 
             if (!string.IsNullOrEmpty(context.RuntimeReleaseDate))
             {
-                buildNotesBuilder.AppendLine($"- RT: {context.RuntimeReleaseDate}");
+                buildNotes += $"<p>- RT: {context.RuntimeReleaseDate}</p>";
             }
 
-            const string newLine = "\n";
-            var buildNotesHtml = string.Join(
-                string.Empty,
-                buildNotesBuilder
-                    .Replace("\r\n", newLine)
-                    .ToString()
-                    .Split(newLine)
-                    .Select(r => $"<p>{r}</p>"));
-            testLink.CreateBuild(testPlanId, buildName, buildNotesHtml);
+            testLink.CreateBuild(testPlanId, buildName, buildNotes);
         }
 
         var testBuild = testLink
             .GetBuildsForTestPlan(testPlanId)
-            .FirstOrDefault(x => x.name == buildName)
+            .FirstOrDefault(x => x.Name == buildName)
             .CheckIsNotNull($"Build '{buildName}' for test plan with ID '{testPlanId}' not found");
 
         // TODO: Get test suite from TestResult (TestSuiteEntity) and their TestLink IDs using TestLink API?
@@ -90,9 +86,9 @@ public class TestLinkResultHandler(
             foreach (var executedTestCase in executedTestCasesIds)
             {
                 var testcase = testsuiteTestcases
-                    .FirstOrDefault(x => x.external_id == executedTestCase.Id)
+                    .FirstOrDefault(x => x.External_id == executedTestCase.Id)
                     .CheckIsNotNull($"Test case with ID {executedTestCase.Id} not found");
-                var testLinkTestCaseId = testcase.id;
+                var testLinkTestCaseId = testcase.Id;
                 var execitedTestCaseStatus = TestStatus.Passed; // TODO: Get actual status from executedTestCase
                 var resultStatus = execitedTestCaseStatus switch
                 {
@@ -102,14 +98,14 @@ public class TestLinkResultHandler(
                     _ => string.Empty,
                 };
 
-                var res = testLink.UploadTestCaseExecutionResult(
+                var res = testLink.ReportTestCaseResult(
                     testLinkTestCaseId,
                     testPlanId,
                     resultStatus,
                     platformName: string.Empty,
-                    overwrite: false,
+                    overwrite: true,
                     notes: string.Empty, // TODO: notes: executedTestCase.Notes,
-                    buildId: testBuild.id);
+                    buildId: testBuild.Id);
             }
         }
     }
@@ -125,5 +121,7 @@ public class TestLinkResultHandler(
         string? RuntimeVersion { get; }
 
         string? RuntimeReleaseDate { get; }
+
+        string? BetaVersion { get; }
     }
 }

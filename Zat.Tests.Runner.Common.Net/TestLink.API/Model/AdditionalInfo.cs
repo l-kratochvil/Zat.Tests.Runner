@@ -4,40 +4,18 @@
 /// Additional Info is provided in some cases when objects are created.
 /// <see cref="GeneralResult"/>
 /// </summary>
-public class AdditionalInfo
-{
-    /// <summary>
-    /// external id if used
-    /// </summary>
-    public int external_id; //	"5"	
-
-    /// <summary>
-    /// true if a duplicate exists
-    /// </summary>
-    public bool? has_duplicate;
-
-    /// <summary>
-    /// internal id
-    /// </summary>
-    public int id; //	1313	
-
-    /// <summary>
-    /// extra message, e.g."Created new version 2"	
-    /// </summary>
-    public string msg;
-
-    /// <summary>
-    /// new namee given
-    /// </summary>
-    public string new_name;
-
-    /// <summary>
-    /// true means good
-    /// </summary>
-    public bool status_ok;
-
-    /// <summary>
-    /// version number in test cases
-    /// </summary>
-    public int version_number; //	
-}
+/// <param name="ExternalId">external id if used</param>
+/// <param name="HasDuplicate">true if a duplicate exists</param>
+/// <param name="Id">internal id</param>
+/// <param name="Msg">extra message, e.g."Created new version 2"</param>
+/// <param name="NewName">new namee given</param>
+/// <param name="StatusOk">true means good</param>
+/// <param name="VersionNumber">version number in test cases</param>
+public sealed record AdditionalInfo(
+    int ExternalId,
+    bool? HasDuplicate,
+    int Id,
+    string Msg,
+    string NewName,
+    bool StatusOk,
+    int VersionNumber);

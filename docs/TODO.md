@@ -6,13 +6,13 @@
 - Dokončit TestLinkApi
 - Zautomatizování kroků testera - základní
 - WebApp:
-    - Rework BindingSelect
-    - TestDiscovery: Nahradit store za Fluxor
-    - Vytvořit viewmodely pro features (viz TestConfigurationViewModel)
-    - Vyřešit Deploy
-    - Kompletní code-review + refactor celé projektu WebApp (včetně testů) a docs
-    - Lokalizace textů
-    - Vylepšení vzhledu
+  - Rework BindingSelect
+  - TestDiscovery: Nahradit store za Fluxor
+  - Vytvořit viewmodely pro features (viz TestConfigurationViewModel)
+  - Vyřešit Deploy
+  - Kompletní code-review + refactor celé projektu WebApp (včetně testů) a docs
+  - Lokalizace textů
+  - Vylepšení vzhledu
 
 ## MidPrio
 
@@ -32,13 +32,18 @@
 
 ### Issues
 
-1. Testy se z assembly nenačítají - [viz link](https://claude.ai/share/2111234d-351e-4c9b-93c9-846f62da3015)
+1. Testy se z assembly nenačítají:
+
+- [viz link](https://claude.ai/share/2111234d-351e-4c9b-93c9-846f62da3015)
+- Zkusit nastavit x86 u Zat.Z2xxTests?
 
 ### Dokončit TestLinkApi
 
 - ITestLink.Config.Default: API key musí být secret!
-- Nešlo by použít klasické NET RPC namísto CookComputing.XmlRpc?
-- Přejmenovat ITestLink: ITestLinkApi? ITestLink?
+- Použít jiný balíček než CookComputing?:
+  - Použít Horizon.XmlRpc / TouchSocket.XmlRpc
+  - Použít /code-review -> /implement
+- Přejemnovat TestLink.API namespace
 - Nutno refaktorovat a vyřešit warningy
 
 ### Rework BindingSelect

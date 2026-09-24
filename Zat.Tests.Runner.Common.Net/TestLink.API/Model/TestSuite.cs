@@ -5,59 +5,23 @@ using System.Collections.Generic;
 /// <summary>
 ///  represent a folder in the test specification tree
 /// </summary>
-public class TestSuite
+/// <param name="Id">internal primary key</param>
+/// <param name="Name">name of test suite</param>
+/// <param name="Details">details of test suite</param>
+/// <param name="NodeOrder">sequence id for ordering folders in tree</param>
+/// <param name="NodeTypeId">internal value</param>
+/// <param name="ParentId">foreign key to parent</param>
+public sealed record TestSuite(
+    int Id,
+    string Name,
+    string Details,
+    int NodeOrder,
+    int NodeTypeId,
+    int ParentId)
 {
-    /// <summary>
-    ///  internal primary key
-    /// </summary>
-    public int _id;
+    public List<TestCaseFromTestSuite> TestCases { get; init; } = [];
 
-    /// <summary>
-    ///  name of test suite
-    /// </summary>
-    public string _name;
-
-    /// <summary>
-    ///  details of test suite
-    /// </summary>
-    public string _details;
-
-    /// <summary>
-    ///  sequence id for ordering folders in tree
-    /// </summary>
-    public int _nodeOrder;
-
-    /// <summary>
-    ///  internal value
-    /// </summary>
-    public int _nodeTypeId;
-
-    /// <summary>
-    ///  foreign key to parent
-    /// </summary>
-    public int _parentId;
-
-    public List<TestCaseFromTestSuite> TestCases { get; set; }
-    public List<TestSuite> TestSuites { get; set; }
-
-    public TestSuite()
-    {
-        this.TestCases = new List<TestCaseFromTestSuite>();
-        this.TestSuites = new List<TestSuite>();
-    }
-
-    public TestSuite(int id, string name, string details, int nodeOrder, int nodeTypeId, int parentId)
-    {
-        this._id = id;
-        this._name = name;
-        this._details = details;
-        this._nodeOrder = nodeOrder;
-        this._nodeTypeId = nodeTypeId;
-        this._parentId = parentId;
-
-        this.TestCases = new List<TestCaseFromTestSuite>();
-        this.TestSuites = new List<TestSuite>();
-    }
+    public List<TestSuite> TestSuites { get; init; } = [];
 
     public void AddTestSuite(TestSuite testSuite)
     {

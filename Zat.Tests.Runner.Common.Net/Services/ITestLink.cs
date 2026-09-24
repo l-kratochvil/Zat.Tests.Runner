@@ -8,17 +8,7 @@ public interface ITestLink
 
     GeneralResult CreateBuild(int testPlanId, string buildName, string buildNotes);
 
-    TestSuite[] GetFirstLevelTestSuitesForTestProject(int testProjectId);
-
-    TestCaseFromTestSuite[] GetTestCasesForTestSuite(int testSuiteId, bool deep);
-
-    TestSuite[] GetTestSuitesForTestSuite(int testSuiteId);
-
-    TestSuite? GetTestSuiteById(int id);
-
-    TestPlatform[] GetTestPlanPlatforms(int testPlanId);
-
-    GeneralResult UploadTestCaseExecutionResult(
+    GeneralResult ReportTestCaseResult(
         int testCaseId,
         int testPlanId,
         string status,
@@ -29,6 +19,21 @@ public interface ITestLink
         string notes = "",
         int buildId = 0,
         int bugId = 0);
+
+    // TODO: Is this needed?
+    TestSuite[] GetFirstLevelTestSuitesForTestProject(int testProjectId);
+
+    // TODO: Is this needed?
+    TestCaseFromTestSuite[] GetTestCasesForTestSuite(int testSuiteId, bool deep);
+
+    // TODO: Is this needed?
+    TestSuite[] GetTestSuitesForTestSuite(int testSuiteId);
+
+    // TODO: Is this needed?
+    TestSuite? GetTestSuiteById(int id);
+
+    // TODO: Is this needed?
+    TestPlatform[] GetTestPlanPlatforms(int testPlanId);
 
     public record Config(
         string ApiKey,

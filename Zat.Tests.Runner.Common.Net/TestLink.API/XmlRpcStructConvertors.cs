@@ -1,169 +1,142 @@
 ﻿namespace Zat.Tests.Runner.Common.Net.TestLink.API;
 
-using System;
-
 using CookComputing.XmlRpc;
 
-public static class XmlRpcStructConvertors
+using Zat.Tests.Runner.Common.Net.TestLink.API.Model;
+
+internal static class XmlRpcStructConvertors
 {
-    internal static Model.TestLinkErrorMessage ToTestLinkErrorMessage(XmlRpcStruct data)
-        => new()
-        {
-            code = ToInt(data, "code"),
-            message = (string)data["message"],
-        };
+    public static TestLinkErrorMessage ToTestLinkErrorMessage(XmlRpcStruct data)
+        => new(
+            Code: ToInt(data, "code"),
+            Message: ToString(data, "message"));
 
-    internal static Model.GeneralResult ToGeneralResult(XmlRpcStruct data)
+    public static TestCase ToTestCase(XmlRpcStruct data)
+        => new(
+            Id: ToInt(data, "testcase_id"),
+            Name: ToString(data, "name"),
+            ExternalId: ToInt(data, "tc_external_id"),
+            TestSuiteId: ToInt(data, "testsuite_id"));
+
+    public static GeneralResult ToGeneralResult(XmlRpcStruct data)
     {
-        var item = new Model.GeneralResult
-        {
-            operation = (string)data["operation"],
-            status = (bool)data["status"],
-            id = ToInt(data, "id"),
-            message = (string)data["message"],
-        };
+        var additionalInfo = data.ContainsKey("additionalInfo") && data["additionalInfo"] is XmlRpcStruct additionalInfoData
+            ? ToAdditionalInfo(additionalInfoData)
+            : null;
 
-        if (data.ContainsKey("additionalInfo") &&
-            data["additionalInfo"] is XmlRpcStruct)
-        {
-            item.additionalInfo = ToAdditionalInfo(data["additionalInfo"] as XmlRpcStruct);
-        }
-        else
-        {
-            item.additionalInfo = null;
-        }
-
-        return item;
+        return new GeneralResult(
+            AdditionalInfo: additionalInfo,
+            Id: ToInt(data, "id"),
+            Message: ToString(data, "message"),
+            Operation: ToString(data, "operation"),
+            Status: (bool)data["status"]);
     }
 
     /// <summary>
     ///  constructor used by XMLRPC interface on decoding the function return
     /// </summary>
     /// <param name="data">data returned by Testlink</param>
-    internal static Model.AttachmentRequestResponse ToAttachmentRequestResponse(XmlRpcStruct data)
-        => new()
-        {
-            foreignKeyId = ToInt(data, "fk_id"),
-            linkedTableName = (string)data["fk_table"],
-            title = (string)data["title"],
-            description = (string)data["description"],
-            file_name = (string)data["file_name"],
-            file_type = (string)data["file_type"],
-            size = ToInt(data, "file_size")
-        };
+    public static AttachmentRequestResponse ToAttachmentRequestResponse(XmlRpcStruct data)
+        => new(
+            Description: ToString(data, "description"),
+            File_name: ToString(data, "file_name"),
+            File_type: ToString(data, "file_type"),
+            ForeignKeyId: ToInt(data, "fk_id"),
+            LinkedTableName: ToString(data, "fk_table"),
+            Size: ToInt(data, "file_size"),
+            Title: ToString(data, "title"));
 
     /// <summary>
     ///  constructor used by XMLRPC interface on decoding the function return
     /// </summary>
     /// <param name="data">data returned by Testlink</param>
-    internal static Model.AdditionalInfo ToAdditionalInfo(XmlRpcStruct data)
-        => new()
-        {
-            new_name = (string)data["new_name"],
-            status_ok = ToInt(data, "status_ok") == 1,
-            msg = (string)data["msg"],
-            id = ToInt(data, "id"),
-            external_id = ToInt(data, "external_id"),
-            version_number = ToInt(data, "version_number"),
-            has_duplicate = ToBool(data, "has_duplicate"),
-        };
+    public static AdditionalInfo ToAdditionalInfo(XmlRpcStruct data)
+        => new(
+            ExternalId: ToInt(data, "external_id"),
+            HasDuplicate: ToBool(data, "has_duplicate"),
+            Id: ToInt(data, "id"),
+            Msg: ToString(data, "msg"),
+            NewName: ToString(data, "new_name"),
+            StatusOk: ToInt(data, "status_ok") == 1,
+            VersionNumber: ToInt(data, "version_number"));
 
-    internal static Model.Build ToBuild(XmlRpcStruct data)
-        => new()
-        {
-            id = ToInt(data, "id"),
-            active = ToInt(data, "active") == 1,
-            name = (string)data["name"],
-            notes = (string)data["notes"],
-            testplan_id = ToInt(data, "testplan_id"),
-            is_open = ToInt(data, "is_open") == 1,
-        };
+    public static Build ToBuild(XmlRpcStruct data)
+        => new(
+            Active: ToInt(data, "active") == 1,
+            Id: ToInt(data, "id"),
+            Is_open: ToInt(data, "is_open") == 1,
+            Name: ToString(data, "name"),
+            Notes: ToString(data, "notes"),
+            Testplan_id: ToInt(data, "testplan_id"));
 
-    internal static Model.TestCaseFromTestSuite ToTestCaseFromTestSuite(XmlRpcStruct data)
+    public static TestCaseFromTestSuite ToTestCaseFromTestSuite(XmlRpcStruct data)
     {
-        var item = new Model.TestCaseFromTestSuite
-        {
-            active = int.Parse((string)data["active"]) == 1,
-            id = ToInt(data, "id"),
-            name = (string)data["name"],
-            version = ToInt(data, "version"),
-            tcversion_id = ToInt(data, "tcversion_id"),
-            //steps = (string)data["steps"];
-            //expected_results = (string)data["expected_results"];
-            external_id = (string)data["tc_external_id"],
-            testSuite_id = ToInt(data, "parent_id"),
-            is_open = int.Parse((string)data["is_open"]) == 1,
-            modification_ts = ToDate(data, "modification_ts"),
-            updater_id = ToInt(data, "updater_id"),
-            execution_type = ToInt(data, "execution_type"),
-            summary = (string)data["summary"]
-        };
+        var details = data.ContainsKey("details")
+            ? ToString(data, "details")
+            : string.Empty;
 
-        if (data.ContainsKey("details"))
-        {
-            item.details = (string)data["details"];
-        }
-        else
-        {
-            item.details = string.Empty;
-        }
-
-        item.author_id = ToInt(data, "author_id");
-        item.creation_ts = ToDate(data, "creation_ts");
-        item.importance = ToInt(data, "importance");
-        item.parent_id = ToInt(data, "parent_id");
-        item.node_type_id = ToInt(data, "node_type_id");
-        item.node_order = ToInt(data, "node_order");
-        item.node_table = (string)data["node_table"];
-        item.layout = (string)data["layout"];
-        item.status = ToInt(data, "status");
-        item.preconditions = (string)data["preconditions"];
-
-        return item;
+        return new TestCaseFromTestSuite(
+            Active: int.Parse((string)data["active"]) == 1,
+            Author_id: ToInt(data, "author_id"),
+            Creation_ts: ToDate(data, "creation_ts"),
+            Details: details,
+            Execution_type: ToInt(data, "execution_type"),
+            External_id: ToString(data, "tc_external_id"),
+            Id: ToInt(data, "id"),
+            Importance: ToInt(data, "importance"),
+            Is_open: int.Parse((string)data["is_open"]) == 1,
+            Layout: ToString(data, "layout"),
+            Modification_ts: ToDate(data, "modification_ts"),
+            Name: ToString(data, "name"),
+            Node_order: ToInt(data, "node_order"),
+            Node_table: ToString(data, "node_table"),
+            Node_type_id: ToInt(data, "node_type_id"),
+            Parent_id: ToInt(data, "parent_id"),
+            Preconditions: ToString(data, "preconditions"),
+            Status: ToInt(data, "status"),
+            Summary: ToString(data, "summary"),
+            Tcversion_id: ToInt(data, "tcversion_id"),
+            TestSuite_id: ToInt(data, "parent_id"),
+            Updater_id: ToInt(data, "updater_id"),
+            Version: ToInt(data, "version"));
     }
 
     /// <summary>
     ///  constructor used by the XML Rpc return
     /// </summary>
     /// <param name="data"></param>
-    internal static Model.TestStep ToTestStep(XmlRpcStruct data)
-        => new()
-        {
-            id = ToInt(data, "id"),
-            step_number = ToInt(data, "step_number"),
-            actions = (string)data["actions"],
-            expected_results = (string)data["expected_results"],
-            active = ToInt(data, "active") == 1,
-            execution_type = ToInt(data, "execution_type"),
-        };
+    public static TestStep ToTestStep(XmlRpcStruct data)
+        => new(
+            Actions: ToString(data, "actions"),
+            Active: ToInt(data, "active") == 1,
+            Execution_type: ToInt(data, "execution_type"),
+            Expected_results: ToString(data, "expected_results"),
+            Id: ToInt(data, "id"),
+            Step_number: ToInt(data, "step_number"));
 
     /// <summary>
     ///  constructor used by XMLRPC interface on decoding the function return
     /// </summary>
     /// <param name="data">data returned by Testlink</param>
-    internal static Model.TestSuite ToTestSuite(XmlRpcStruct data)
-        => new()
-        {
-            _name = (string)data["name"],
-            _id = ToInt(data, "id"),
-            _details = (string)data["details"],
-            _parentId = ToInt(data, "parent_id"),
-            _nodeTypeId = ToInt(data, "node_type_id"),
-            _nodeOrder = ToInt(data, "node_order"),
-        };
+    public static TestSuite ToTestSuite(XmlRpcStruct data)
+        => new(
+            Id: ToInt(data, "id"),
+            Name: ToString(data, "name"),
+            Details: ToString(data, "details"),
+            NodeOrder: ToInt(data, "node_order"),
+            NodeTypeId: ToInt(data, "node_type_id"),
+            ParentId: ToInt(data, "parent_id"));
 
     /// <summary>
     /// </summary>
     /// <param name="data"></param>
-    internal static Model.TestPlatform ToTestPlatform(XmlRpcStruct data)
-        => new()
-        {
-            id = ToInt(data, "id"),
-            name = (string)data["name"],
-            notes = (string)data["notes"]
-        };
+    public static TestPlatform ToTestPlatform(XmlRpcStruct data)
+        => new(
+            Id: ToInt(data, "id"),
+            Name: ToString(data, "name"),
+            Notes: ToString(data, "notes"));
 
-    static int ToInt(XmlRpcStruct data, string name)
+    private static int ToInt(XmlRpcStruct data, string name)
     {
         if (!data.ContainsKey(name))
         {
@@ -187,7 +160,7 @@ public static class XmlRpcStructConvertors
         return 0;
     }
 
-    static bool? ToBool(XmlRpcStruct data, string name)
+    private static bool? ToBool(XmlRpcStruct data, string name)
     {
         if (!data.ContainsKey(name))
         {
@@ -204,7 +177,7 @@ public static class XmlRpcStructConvertors
         return result;
     }
 
-    static DateTime ToDate(XmlRpcStruct data, string name)
+    private static DateTime ToDate(XmlRpcStruct data, string name)
     {
         if (data.ContainsKey(name) && DateTime.TryParse((string)data[name], out var n))
         {
@@ -214,7 +187,10 @@ public static class XmlRpcStructConvertors
         return DateTime.MinValue;
     }
 
-    static char ToChar(XmlRpcStruct data, string name)
+    private static string ToString(XmlRpcStruct data, string name)
+        => data.ContainsKey(name) ? (string?)data[name] ?? string.Empty : string.Empty;
+
+    private static char ToChar(XmlRpcStruct data, string name)
     {
         if (!data.ContainsKey(name) || data[name] is not string)
         {

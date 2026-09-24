@@ -60,10 +60,12 @@
                         // Use registred mockable service
 
                         await this.TestRunnerEngine.RunTestAsync(
-                            this.TestDiscoveryStore.Current.SelectedTestCases,
-                            this.TestConfigurationState.Value.RuntimeVersion,
-                            [], // TODO
-                            false); // TODO
+                            testRunEntities: this.TestDiscoveryStore.Current.SelectedTestCases,
+                            config: new ITestRunnerEngine.Config(
+                                IsDebug: false, // TODO
+                                TestedRuntimeVersion: this.TestConfigurationState.Value.RuntimeVersion,
+                                TestedHwAssemblyTypes: [], // TODO
+                                TestResultHandlers: [])); // TODO
 
                         // TODO: Report result:
                         // - The report feature should handle testlink reporting and showing it in the UI

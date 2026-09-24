@@ -3,35 +3,16 @@
 /// <summary>
 ///  Build information returned by Testlink
 /// </summary>
-public class Build
-{
-    /// <summary>
-    ///  true if the build is active
-    /// </summary>
-    public bool active;
-
-    /// <summary>
-    ///  build ID
-    /// </summary>
-    public int id;
-
-    /// <summary>
-    ///  true if the build is currently open
-    /// </summary>
-    public bool is_open;
-
-    /// <summary>
-    ///  build name
-    /// </summary>
-    public string name;
-
-    /// <summary>
-    ///  any build notes
-    /// </summary>
-    public string notes;
-
-    /// <summary>
-    ///  the test plan the build is associated with
-    /// </summary>
-    public int testplan_id;
-}
+/// <param name="Active">true if the build is active</param>
+/// <param name="Id">build ID</param>
+/// <param name="Is_open">true if the build is currently open</param>
+/// <param name="Name">build name</param>
+/// <param name="Notes">any build notes</param>
+/// <param name="Testplan_id">the test plan the build is associated with</param>
+public sealed record Build(
+    bool Active,
+    int Id,
+    bool Is_open,
+    string Name,
+    string Notes,
+    int Testplan_id);

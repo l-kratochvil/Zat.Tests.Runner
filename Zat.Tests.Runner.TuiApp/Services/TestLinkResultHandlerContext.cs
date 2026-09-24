@@ -26,4 +26,8 @@ internal class TestLinkResultHandlerContext(
     /// <inheritdoc/>
     public string? RuntimeReleaseDate
         => testConfigStore.RuntimeReleaseDate;
+
+    /// <inheritdoc/>
+    public string? BetaVersion
+        => testConfigStore.BetaVersion;
 }

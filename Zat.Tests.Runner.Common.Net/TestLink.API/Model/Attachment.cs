@@ -5,12 +5,10 @@ using System;
 /// <summary>
 /// The object returned from Testlinkt when requesting an attachment
 /// </summary>
-public class Attachment
-{
-    public byte[] content;
-    public DateTime date_added;
-    public string file_type;
-    public int id;
-    public string name;
-    public string title;
-}
+public sealed record Attachment(
+    byte[] Content,
+    DateTime Date_added,
+    string File_type,
+    int Id,
+    string Name,
+    string Title);

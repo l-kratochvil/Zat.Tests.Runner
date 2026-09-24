@@ -18,6 +18,7 @@ csharp_style_expression_bodied_accessors = true:silent
 csharp_style_expression_bodied_lambdas = true:silent
 csharp_style_expression_bodied_local_functions = false:silent
 dotnet_diagnostic.SA1118.severity = none
+dotnet_diagnostic.SA1124.severity = none
 [*.{cs,vb}]
 #### Naming styles ####
 

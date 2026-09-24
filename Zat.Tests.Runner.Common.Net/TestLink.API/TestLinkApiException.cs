@@ -38,7 +38,7 @@ public class TestLinkApiException : ApplicationException
     /// <summary>
     /// temporarily stores current errors
     /// </summary>
-    public List<Model.TestLinkErrorMessage> errors;
+    public List<Model.TestLinkErrorMessage> Errors;
 
     /// <summary>
     /// basic Constructor
@@ -67,9 +67,9 @@ public class TestLinkApiException : ApplicationException
     public TestLinkApiException(List<Model.TestLinkErrorMessage> errs)
         : base("TestLinkApiException: testlink returned error messages. See errors")
     {
-        this.errors = errs;
+        this.Errors = errs;
         foreach (var error in errs)
-            this.Data.Add(error.code, error.message);
+            this.Data.Add(error.Code, error.Message);
     }
 
     /// <summary>
@@ -80,9 +80,9 @@ public class TestLinkApiException : ApplicationException
     public TestLinkApiException(string msg, List<Model.TestLinkErrorMessage> errs)
         : base(msg)
     {
-        this.errors = errs;
+        this.Errors = errs;
         foreach (var error in errs)
-            this.Data.Add(error.code, error.message);
+            this.Data.Add(error.Code, error.Message);
     }
 
     /// <summary>

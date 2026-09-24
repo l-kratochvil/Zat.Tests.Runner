@@ -14,13 +14,15 @@ var apiClient = new TestLink(ITestLink.Config.Default);
 
 const int productionProjectId = 6302; // TOTO JE ID PRODUKČNÍHO TEST PROJECTU
 const int tempProjectId = 10202;
-const int testProjectId = tempProjectId;
+const int testProjectId = productionProjectId;
 
-var projectTestPlanPlatforms = apiClient.GetTestPlanPlatforms(10208);
-var projectTestsuites = apiClient.GetFirstLevelTestSuitesForTestProject(testProjectId);
-var testsuite = apiClient.GetTestSuiteById(9572);
-var info = GetInformationForTester(testsuite);
-var testSuites = GetAllTestSuitesAndTestCases(testProjectId);
+var about = apiClient.About();
+var testCase = apiClient.GetTestCaseByExternalId("Z200-240");
+// var projectTestPlanPlatforms = apiClient.GetTestPlanPlatforms(10208);
+// var projectTestsuites = apiClient.GetFirstLevelTestSuitesForTestProject(testProjectId);
+// var testsuite = apiClient.GetTestSuiteById(9572);
+// var info = GetInformationForTester(testsuite);
+// var testSuites = GetAllTestSuitesAndTestCases(testProjectId);
 
 Console.WriteLine("DONE");
 
@@ -48,7 +50,7 @@ string GetInformationForTester(TestSuite testSuite)
 string TransformFromHTMLDocToText(TestSuite testSuite)
 {
     var doc = new HtmlDocument();
-    doc.LoadHtml(testSuite._details);
+    doc.LoadHtml(testSuite.Details);
 
     return HtmlEntity.DeEntitize(doc.DocumentNode.InnerText);
 }
@@ -72,14 +74,14 @@ string GetMatchedTextForTester(string text)
 TestSuite GetTestSuitesAndCases(TestSuite testSuite)
 {
     var suite = new TestSuite(
-        testSuite._id,
-        testSuite._name,
-        testSuite._details,
-        testSuite._nodeOrder,
-        testSuite._nodeTypeId,
-        testSuite._parentId);
-    var tc = apiClient.GetTestCasesForTestSuite(testSuite._id, false);
-    var ts = apiClient.GetTestSuitesForTestSuite(testSuite._id);
+        testSuite.Id,
+        testSuite.Name,
+        testSuite.Details,
+        testSuite.NodeOrder,
+        testSuite.NodeTypeId,
+        testSuite.ParentId);
+    var tc = apiClient.GetTestCasesForTestSuite(testSuite.Id, false);
+    var ts = apiClient.GetTestSuitesForTestSuite(testSuite.Id);
 
     for (var i = 0; i < tc.Length; i++)
     {
@@ -106,12 +108,12 @@ void SaveTestResults(
     {
         var testPlatform = apiClient.GetTestPlanPlatforms(result.testPlanId).First();
 
-        if (!apiClient.GetBuildsForTestPlan(result.testPlanId).Any(x => x.name == build))
+        if (!apiClient.GetBuildsForTestPlan(result.testPlanId).Any(x => x.Name == build))
         {
             apiClient.CreateBuild(result.testPlanId, build, string.Empty);
         }
 
-        var testBuild = apiClient.GetBuildsForTestPlan(result.testPlanId).First(x => x.name == build);
+        var testBuild = apiClient.GetBuildsForTestPlan(result.testPlanId).First(x => x.Name == build);
 
         // NOTE: testcase/testsuite ID se získá: Specifikace testů >> pravé tl. myši na test. příp. ve stromu
         var testsuiteTestcases =
@@ -119,8 +121,8 @@ void SaveTestResults(
 
         var
             testcase = testsuiteTestcases.First(x
-                => x.external_id == result.testCaseId.ToString()); // 44 je číselná složka z ID ve formátu Z200-XX (Z200-44)
-        var testcaseApiId = testcase.id;
+                => x.External_id == result.testCaseId.ToString()); // 44 je číselná složka z ID ve formátu Z200-XX (Z200-44)
+        var testcaseApiId = testcase.Id;
 
         var resultStatus = result.status switch
         {
@@ -130,13 +132,13 @@ void SaveTestResults(
             _ => string.Empty,
         };
 
-        var res = apiClient.UploadTestCaseExecutionResult(
+        var res = apiClient.ReportTestCaseResult(
             testcaseApiId,
             result.testPlanId,
             resultStatus,
-            platformId: testPlatform.id, // Platforma musí být přidána do testovacího plánu. Pokud není potřeba specifikovat platformu, tak stačí zadat prázdný string do argument platfromName
+            platformId: testPlatform.Id, // Platforma musí být přidána do testovacího plánu. Pokud není potřeba specifikovat platformu, tak stačí zadat prázdný string do argument platfromName
             overwrite: false,
             notes: result.notes,
-            buildId: testBuild.id);
+            buildId: testBuild.Id);
     }
 }
