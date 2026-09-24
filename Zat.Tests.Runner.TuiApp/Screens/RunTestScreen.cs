@@ -226,32 +226,30 @@ internal class RunTestScreen(
         DateTime endTimeUtc,
         TimeSpan duration)
     {
-        var summary = result.Summary;
-
         sb.AppendLine($"[aqua]{Resources.TestRunReport_Summary_SectionHeader.EscapeMarkup()}[/]");
 
         sb.AppendLine(
-            $"  {MakeLabel(Resources.TestRunReport_Summary_OverallResult)} {MapStatus(result.Status).EscapeMarkup()}");
+            $"  {MakeLabel(Resources.TestRunReport_Summary_OverallResult)} {MapStatus(result.OverallStatus).EscapeMarkup()}");
 
         sb.AppendLine(
-            $"  {MakeLabel(Resources.TestRunReport_Summary_TestCount)} {summary.Total}" +
-            $", {MakeLabel(Resources.TestRunReport_Summary_Passed)} {summary.Passed}" +
-            $", {MakeLabel(Resources.TestRunReport_Summary_Failed)} {summary.Failed}" +
-            $", {MakeLabel(Resources.TestRunReport_Summary_Warnings)} {summary.Warnings}" +
-            $", {MakeLabel(Resources.TestRunReport_Summary_Inconclusive)} {summary.Inconclusive}" +
-            $", {MakeLabel(Resources.TestRunReport_Summary_Skipped)} {summary.Skipped}");
+            $"  {MakeLabel(Resources.TestRunReport_Summary_TestCount)} {result.TestCaseResults.Length}" +
+            $", {MakeLabel(Resources.TestRunReport_Summary_Passed)} {result.PassedResults}" +
+            $", {MakeLabel(Resources.TestRunReport_Summary_Failed)} {result.FailedResults}" +
+            $", {MakeLabel(Resources.TestRunReport_Summary_Warnings)} {result.WarningResults}" +
+            $", {MakeLabel(Resources.TestRunReport_Summary_Inconclusive)} {result.InconclusiveResults}" +
+            $", {MakeLabel(Resources.TestRunReport_Summary_Skipped)} {result.SkippedResults}");
 
         sb.AppendLine(
             $"    [green]{Resources.TestRunReport_Summary_FailedTests.EscapeMarkup()} -[/]" +
-            $" {MakeLabel(Resources.TestRunReport_Summary_Failures)} {summary.Failures}" +
-            $", {MakeLabel(Resources.TestRunReport_Summary_Errors)} {summary.Errors}" +
-            $", {MakeLabel(Resources.TestRunReport_Summary_Invalid)} {summary.Invalid}");
+            $" {MakeLabel(Resources.TestRunReport_Summary_Failures)} {result.FailureResults}" +
+            $", {MakeLabel(Resources.TestRunReport_Summary_Errors)} {result.ErrorResults}" +
+            $", {MakeLabel(Resources.TestRunReport_Summary_Invalid)} {result.InvalidResults}");
 
         sb.AppendLine(
             $"    [green]{Resources.TestRunReport_Summary_SkippedTests.EscapeMarkup()} -[/]" +
-            $" {MakeLabel(Resources.TestRunReport_Summary_Ignored)} {summary.Ignored}" +
-            $", {MakeLabel(Resources.TestRunReport_Summary_Explicit)} {summary.Explicit}" +
-            $", {MakeLabel(Resources.TestRunReport_Summary_Other)} {summary.Other}");
+            $" {MakeLabel(Resources.TestRunReport_Summary_Ignored)} {result.IgnoredResults}" +
+            $", {MakeLabel(Resources.TestRunReport_Summary_Explicit)} {result.ExplicitResults}" +
+            $", {MakeLabel(Resources.TestRunReport_Summary_Other)} {result.OtherResults}");
 
         sb.AppendLine(
             $"  {MakeLabel(Resources.TestRunReport_Summary_StartTime)} {FormatTimestamp(startTimeUtc)}");
@@ -273,7 +271,7 @@ internal class RunTestScreen(
         => status switch
         {
             TestStatus.Passed => Resources.TestRunReport_Status_Passed,
-            TestStatus.Failed => Resources.TestRunReport_Status_Failed,
+            TestStatus.Failure => Resources.TestRunReport_Status_Failed,
             TestStatus.Skipped => Resources.TestRunReport_Status_Skipped,
             TestStatus.Inconclusive => Resources.TestRunReport_Status_Inconclusive,
             TestStatus.Warning => Resources.TestRunReport_Status_Warning,
@@ -283,7 +281,7 @@ internal class RunTestScreen(
     private record ReportEntry(
         string? Color,
         string Label,
-        UnsuccessfulResult Result);
+        TestCaseResult Result);
 
     private class State
     {

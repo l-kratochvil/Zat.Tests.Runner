@@ -8,6 +8,10 @@ public interface ITestLink
 
     GeneralResult CreateBuild(int testPlanId, string buildName, string buildNotes);
 
+    TestCase GetTestCaseById(int id);
+
+    TestCase GetTestCaseByExternalId(string externalId);
+
     GeneralResult ReportTestCaseResult(
         int testCaseId,
         int testPlanId,

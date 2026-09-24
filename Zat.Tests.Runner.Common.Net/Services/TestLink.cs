@@ -195,17 +195,7 @@ public class TestLink : ITestLink
         return result;
     }
 
-    /// <summary>
-    /// Uploads an attachment for an execution.
-    /// </summary>
-    /// <remarks>The attachment content must be Base64 encoded by the client before sending it.</remarks>
-    /// <param name="executionId"></param>
-    /// <param name="title">The title of the Attachment.</param>
-    /// <param name="description">The description of the Attachment.</param>
-    /// <param name="filename">The file name of the Attachment (e.g.: notes.txt).</param>
-    /// <param name="fileType">The file type of the Attachment (e.g.: text/plain).</param>
-    /// <param name="content">The content (Base64 encoded) of the Attachment.</param>
-    /// <returns>Attachment request response.</returns>
+    /// <inheritdoc />
     public AttachmentRequestResponse UploadExecutionAttachment(
         int executionId,
         string filename,
@@ -231,6 +221,7 @@ public class TestLink : ITestLink
         return XmlRpcStructConvertors.ToAttachmentRequestResponse((XmlRpcStruct)response);
     }
 
+    /// <inheritdoc />
     public TestCase GetTestCaseById(int id)
     {
         var response = this.proxy.GetTestCaseById(this.devkey, id);
@@ -240,20 +231,14 @@ public class TestLink : ITestLink
         return XmlRpcStructConvertors.ToTestCase((XmlRpcStruct)response);
     }
 
-    /// <summary>
-    /// Gets a test case by its external id.
-    /// </summary>
-    /// <param name="externalId">External ID including the prefix.</param>
-    /// <returns>The test case.</returns>
+    /// <inheritdoc />
     public TestCase GetTestCaseByExternalId(string externalId)
     {
         var response = this.proxy.GetTestCaseByExternalId(this.devkey, externalId);
 
         CheckErrorMessage(response);
 
-        var singleData = ((object[])response).First();
-
-        return XmlRpcStructConvertors.ToTestCase((XmlRpcStruct)singleData);
+        return XmlRpcStructConvertors.ToTestCase((XmlRpcStruct)((object[])response).First());
     }
 
     /// <summary>

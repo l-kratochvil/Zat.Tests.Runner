@@ -1,7 +1,6 @@
 namespace Zat.Tests.Runner.Common.Net.Services;
 
 using System.Diagnostics;
-using System.Text;
 
 using DevKit.Core.Extensions;
 
@@ -75,39 +74,33 @@ public class TestLinkResultHandler(
             .FirstOrDefault(x => x.Name == buildName)
             .CheckIsNotNull($"Build '{buildName}' for test plan with ID '{testPlanId}' not found");
 
-        // TODO: Get test suite from TestResult (TestSuiteEntity) and their TestLink IDs using TestLink API?
-        var executedTestSuiteIds = Array.Empty<int>();
-        foreach (var executedTestSuiteId in executedTestSuiteIds)
-        {
-            // NOTE: testcase/testsuite ID se získá: Specifikace testů >> pravé tl. myši na test. příp. ve stromu
-            var testsuiteTestcases = testLink.GetTestCasesForTestSuite(executedTestSuiteId, true);
-
-            var executedTestCasesIds = Array.Empty<TestCaseEntity>();
-            foreach (var executedTestCase in executedTestCasesIds)
+        foreach (var testCaseResult in testResult.TestCaseResults)
             {
-                var testcase = testsuiteTestcases
-                    .FirstOrDefault(x => x.External_id == executedTestCase.Id)
-                    .CheckIsNotNull($"Test case with ID {executedTestCase.Id} not found");
-                var testLinkTestCaseId = testcase.Id;
-                var execitedTestCaseStatus = TestStatus.Passed; // TODO: Get actual status from executedTestCase
-                var resultStatus = execitedTestCaseStatus switch
+                var testCaseExternalId = $"Z200-{testCaseResult.Id}";
+                var testCaseId = testLink.GetTestCaseByExternalId(testCaseExternalId).Id;
+                var resultStatus = testCaseResult.Status switch
                 {
+                    // TODO: Check all TestStatuses are mapped correctly
                     TestStatus.Passed => "p",
-                    TestStatus.Failed => "f",
-                    TestStatus.Skipped => "b",
+                    TestStatus.Failure or
+                        TestStatus.Error or
+                        TestStatus.Invalid => "f",
+                    TestStatus.Skipped or
+                        TestStatus.Ignored or
+                        TestStatus.Explicit or
+                        TestStatus.Other => "b",
                     _ => string.Empty,
                 };
 
                 var res = testLink.ReportTestCaseResult(
-                    testLinkTestCaseId,
+                    testCaseId,
                     testPlanId,
                     resultStatus,
                     platformName: string.Empty,
                     overwrite: true,
-                    notes: string.Empty, // TODO: notes: executedTestCase.Notes,
+                    notes: testCaseResult.Message, // TODO: Include stacktrace as legacy runner does
                     buildId: testBuild.Id);
             }
-        }
     }
 
     public interface IContext
