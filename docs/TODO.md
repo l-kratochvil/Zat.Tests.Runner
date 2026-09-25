@@ -8,6 +8,7 @@
 - Změna adresáře "Automized Tests":
   - Přesunout do Program Data / Roaming AppData
   - Přejmenovat na Zat.Tests
+  - Přejmenovat adresář "Test libs" (test-libs? runner-libs?)
 - TuiApp:
   - Implementovat výpis při startu testu (viz [test-run-start_output](test-run-start_output.png))
   - Odstranit legacy runner (ve vlastním commitu na main)
@@ -43,7 +44,9 @@
 1. Testy se z assembly nenačítají:
 
 - [viz link](https://claude.ai/share/2111234d-351e-4c9b-93c9-846f62da3015)
-- Zkusit nastavit x86 u Zat.Z2xxTests?
+- Zkusit nastavit x86 u Zat.Z2xxTests: Done
+- Zat.Tests.Runner.NUnitTestRunnerProxy.Tests dll dokáže načíst, ale TuiApp ne!:
+  - Upravit/Vytvořit nový test, který bude používat RPC (viz komentář v NUnitTestRunnerProxyTests.cs)
 
 ### Dokončit vazbu na TestLink
 

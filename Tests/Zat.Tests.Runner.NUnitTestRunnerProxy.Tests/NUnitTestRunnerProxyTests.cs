@@ -9,6 +9,7 @@ using NUnit.Framework;
 using Zat.Tests.Runner.Common.Model;
 
 // TODO: Test GetIsAssemblyLoadedAsync, GetIsTestRunningAsync, etc.
+// TODO: Change to Net10 and communicate with proxy via StreamJsonRpc (as the production proxy client does) instead of directly calling the proxy implementation.
 public class NUnitTestRunnerProxyTests
 {
     private const string Net481TestSuitePath = "NUnitTestAssembly.Net481";
@@ -286,15 +287,21 @@ public class NUnitTestRunnerProxyTests
     }
 
     private static TestCaseEntity[] GetTestCases(TestSuiteEntity[] testSuites, string? testFixturePath = null)
-        => [.. testSuites
-            .SelectMany(x => x.TestFixtures)
-            .Where(x => testFixturePath is null || x.ExecutionPath == testFixturePath)
-            .SelectMany(x => x.TestCases)];
+        =>
+        [
+            .. testSuites
+                .SelectMany(x => x.TestFixtures)
+                .Where(x => testFixturePath is null || x.ExecutionPath == testFixturePath)
+                .SelectMany(x => x.TestCases)
+        ];
 
     private static TestCaseResult[] GetTestCaseResults(ProxyTestResult result)
-        => [.. result.TestSuiteResults
-            .SelectMany(x => x.TestFixtureResults)
-            .SelectMany(x => x.TestCaseResults)];
+        =>
+        [
+            .. result.TestSuiteResults
+                .SelectMany(x => x.TestFixtureResults)
+                .SelectMany(x => x.TestCaseResults)
+        ];
 
     private Task<TestSuiteEntity[]> LoadNet481TestAssemblyAsync()
         => File.Exists(TestAssemblyNet481DllPath)

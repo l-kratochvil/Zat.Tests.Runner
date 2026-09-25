@@ -20,12 +20,9 @@ internal class App
         try
         {
             var nunitTestRunnerProxy = host.Services.GetRequiredService<INUnitTestRunnerProxy>();
-            var testConfigStore = host.Services.GetRequiredService<TestRunConfigStore>();
 
-            // testRunStore.LoadedTestSuites = await nunitTestRunnerProxy.LoadTestAssemblyAsync(Paths.Files.TestAssemblyFilePath);
-            testConfigStore.LoadedTestSuites
-                = await nunitTestRunnerProxy.LoadTestAssemblyAsync(
-                    @"c:\Users\l-kratochvil\source\repos\Zat.Tests.Runner\Tests\NUnitTestAssembly.Net481\bin\Debug\net481\NUnitTestAssembly.Net481.dll");
+            var testRunConfigStore = host.Services.GetRequiredService<TestRunConfigStore>();
+            testRunConfigStore.LoadedTestSuites = await nunitTestRunnerProxy.LoadTestAssemblyAsync(Paths.Files.TestAssemblyFilePath);
 
             await MainRenderAsync(host.Services.GetRequiredService<HomeScreen>());
         }
