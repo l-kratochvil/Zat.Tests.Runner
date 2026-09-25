@@ -5,6 +5,7 @@
 
 # Solution-specific files
 [Ee]xchange/
+AGENTS-SHARED.md
 
 # User-specific files
 *.rsuser
