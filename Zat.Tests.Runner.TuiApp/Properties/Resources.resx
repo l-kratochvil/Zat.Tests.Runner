@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="IdeInstallFolderPath_ChoiceText" xml:space="preserve">
-    <value>IDE install folder path: </value>
+    <value>IDE install folder path</value>
   </data>
   <data name="MoveUpAndDownToReveal_HelpText" xml:space="preserve">
     <value>Move up and down to reveal more choices</value>
@@ -368,5 +368,8 @@
   </data>
   <data name="MustBeInteger" xml:space="preserve">
     <value>Must be an integer</value>
+  </data>
+  <data name="BetaVersion_ChoiceText" xml:space="preserve">
+    <value>Beta version</value>
   </data>
 </root>

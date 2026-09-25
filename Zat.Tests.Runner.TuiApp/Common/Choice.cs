@@ -7,7 +7,7 @@ internal class Choice<TValue>(
     string displayText,
     string? displayValue = null)
 {
-    public string Text { get; } = TextFormattors.AsTextValuePair(displayText, displayValue);
+    public string Text { get; } = displayText.AsTextValuePair(displayValue);
 
     public TValue Value { get; } = value;
 }
@@ -15,9 +15,9 @@ internal class Choice<TValue>(
 internal static class Choice
 {
     public static Maybe<Choice<TChoiceValue>> InitChoice<TChoiceValue>(
-    TChoiceValue choiceValue,
-    string choiceDisplayText,
-    Func<bool>? shouldInitPredicate = null)
+        TChoiceValue choiceValue,
+        string choiceDisplayText,
+        Func<bool>? shouldInitPredicate = null)
         => InitChoice(
             choiceValue,
             choiceDisplayText,
@@ -29,13 +29,13 @@ internal static class Choice
         string choiceDisplayText,
         bool? choiceDisplayValue,
         Func<bool>? shouldInitPredicate = null)
-            => InitChoice(
-                choiceValue: choiceValue,
-                choiceDisplayText: choiceDisplayText,
-                choiceDisplayValue: choiceDisplayValue.HasValue
-                    ? (choiceDisplayValue.Value ? Resources.Yes : Resources.No)
-                    : null,
-                shouldInitPredicate: shouldInitPredicate);
+        => InitChoice(
+            choiceValue: choiceValue,
+            choiceDisplayText: choiceDisplayText,
+            choiceDisplayValue: choiceDisplayValue.HasValue
+                ? (choiceDisplayValue.Value ? Resources.Yes : Resources.No)
+                : null,
+            shouldInitPredicate: shouldInitPredicate);
 
     public static Maybe<Choice<TChoiceValue>> InitChoice<TChoiceValue>(
         TChoiceValue choiceValue,

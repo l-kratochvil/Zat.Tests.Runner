@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 using DevKit.Core.Extensions.Types;
 
-using Zat.Tests.Runner.Common.Net;
+using Zat.Tests.Runner.Common.Net.Model;
 using Zat.Tests.Runner.Common.Net.Services;
 
 public class TestResultHandler : ITestResultHandler

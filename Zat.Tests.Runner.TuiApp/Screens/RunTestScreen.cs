@@ -154,30 +154,65 @@ internal class RunTestScreen(
 
     private static void RenderNotRunSection(StringBuilder sb, TestResult result)
     {
+        var reportedResults = GetReportedResults(result);
         var entries = new List<ReportEntry>();
-        entries.AddRange(result.IgnoredResults.Select(
+        entries.AddRange(reportedResults.Where(x => x.Status is TestStatus.Ignored).Select(
             x => new ReportEntry("yellow", Resources.TestRunReport_Label_Ignored, x)));
-        entries.AddRange(result.ExplicitResults.Select(
+        entries.AddRange(reportedResults.Where(x => x.Status is TestStatus.Explicit).Select(
             x => new ReportEntry("yellow", Resources.TestRunReport_Label_Explicit, x)));
-        entries.AddRange(result.OtherResults.Select(
+        entries.AddRange(reportedResults.Where(x => x.Status is TestStatus.Skipped).Select(
             x => new ReportEntry("yellow", Resources.TestRunReport_Label_Skipped, x)));
+        entries.AddRange(reportedResults.Where(x => x.Status is TestStatus.Unknown).Select(
+            x => new ReportEntry("yellow", Resources.TestRunReport_Status_Unknown, x)));
 
         RenderEntrySection(sb, Resources.TestRunReport_TestsNotRun_SectionHeader, entries, includeStackTrace: false);
     }
 
     private static void RenderProblemsSection(StringBuilder sb, TestResult result)
     {
+        var reportedResults = GetReportedResults(result);
         var entries = new List<ReportEntry>();
-        entries.AddRange(result.ErrorResults.Select(
+        entries.AddRange(reportedResults.Where(x => x.Status is TestStatus.Error).Select(
             x => new ReportEntry("red", Resources.TestRunReport_Label_Error, x)));
-        entries.AddRange(result.InvalidResults.Select(
+        entries.AddRange(reportedResults.Where(x => x.Status is TestStatus.Invalid).Select(
             x => new ReportEntry("red", Resources.TestRunReport_Label_Invalid, x)));
-        entries.AddRange(result.FailureResults.Select(
+        entries.AddRange(reportedResults.Where(x => x.Status is TestStatus.Failure).Select(
             x => new ReportEntry("red", Resources.TestRunReport_Label_Failed, x)));
-        entries.AddRange(result.WarningResults.Select(
+        entries.AddRange(reportedResults.Where(x => x.Status is TestStatus.Warning).Select(
             x => new ReportEntry("yellow", Resources.TestRunReport_Label_Warning, x)));
 
         RenderEntrySection(sb, Resources.TestRunReport_ErrorsFailuresWarnings_SectionHeader, entries, includeStackTrace: true);
+    }
+
+    /// <summary>
+    /// Walks the result tree of <paramref name="result"/>: a node that did not pass is reported once and its children
+    /// are skipped, otherwise the children that did not pass are reported.
+    /// </summary>
+    private static TestEntityResult[] GetReportedResults(TestResult result)
+    {
+        var reportedResults = new List<TestEntityResult>();
+
+        foreach (var testSuite in result.TestSuiteResults)
+        {
+            if (testSuite.Status is not TestStatus.Passed)
+            {
+                reportedResults.Add(testSuite);
+                continue;
+            }
+
+            foreach (var testFixture in testSuite.TestFixtureResults)
+            {
+                if (testFixture.Status is not TestStatus.Passed)
+                {
+                    reportedResults.Add(testFixture);
+                    continue;
+                }
+
+                reportedResults.AddRange(testFixture.TestCaseResults.Where(x => x.Status is not TestStatus.Passed));
+            }
+        }
+
+        return [.. reportedResults];
     }
 
     private static void RenderEntrySection(
@@ -206,14 +241,16 @@ internal class RunTestScreen(
                 ? headerLine.EscapeMarkup()
                 : $"[{entry.Color}]{headerLine.EscapeMarkup()}[/]");
 
-            if (!string.IsNullOrEmpty(entry.Result.Message))
+            var detail = entry.Result.Detail;
+
+            if (!string.IsNullOrEmpty(detail?.Message))
             {
-                sb.AppendLine(entry.Result.Message.EscapeMarkup());
+                sb.AppendLine(detail.Message.EscapeMarkup());
             }
 
-            if (includeStackTrace && !string.IsNullOrEmpty(entry.Result.StackTrace))
+            if (includeStackTrace && !string.IsNullOrEmpty(detail?.StackTrace))
             {
-                sb.AppendLine(entry.Result.StackTrace.EscapeMarkup());
+                sb.AppendLine(detail.StackTrace.EscapeMarkup());
             }
         }
     }
@@ -232,23 +269,24 @@ internal class RunTestScreen(
 
         sb.AppendLine(
             $"  {MakeLabel(Resources.TestRunReport_Summary_TestCount)} {result.TestCaseResults.Length}" +
-            $", {MakeLabel(Resources.TestRunReport_Summary_Passed)} {result.PassedResults}" +
-            $", {MakeLabel(Resources.TestRunReport_Summary_Failed)} {result.FailedResults}" +
-            $", {MakeLabel(Resources.TestRunReport_Summary_Warnings)} {result.WarningResults}" +
-            $", {MakeLabel(Resources.TestRunReport_Summary_Inconclusive)} {result.InconclusiveResults}" +
-            $", {MakeLabel(Resources.TestRunReport_Summary_Skipped)} {result.SkippedResults}");
+            $", {MakeLabel(Resources.TestRunReport_Summary_Passed)} {result.PassedResults.Length}" +
+            $", {MakeLabel(Resources.TestRunReport_Summary_Failed)} {result.FailedResults.Length}" +
+            $", {MakeLabel(Resources.TestRunReport_Summary_Warnings)} {result.WarningResults.Length}" +
+            $", {MakeLabel(Resources.TestRunReport_Summary_Inconclusive)} {result.InconclusiveResults.Length}" +
+            $", {MakeLabel(Resources.TestRunReport_Summary_Skipped)} {result.NotRunResults.Length}");
 
         sb.AppendLine(
             $"    [green]{Resources.TestRunReport_Summary_FailedTests.EscapeMarkup()} -[/]" +
-            $" {MakeLabel(Resources.TestRunReport_Summary_Failures)} {result.FailureResults}" +
-            $", {MakeLabel(Resources.TestRunReport_Summary_Errors)} {result.ErrorResults}" +
-            $", {MakeLabel(Resources.TestRunReport_Summary_Invalid)} {result.InvalidResults}");
+            $" {MakeLabel(Resources.TestRunReport_Summary_Failures)} {result.FailureResults.Length}" +
+            $", {MakeLabel(Resources.TestRunReport_Summary_Errors)} {result.ErrorResults.Length}" +
+            $", {MakeLabel(Resources.TestRunReport_Summary_Invalid)} {result.InvalidResults.Length}");
 
         sb.AppendLine(
             $"    [green]{Resources.TestRunReport_Summary_SkippedTests.EscapeMarkup()} -[/]" +
-            $" {MakeLabel(Resources.TestRunReport_Summary_Ignored)} {result.IgnoredResults}" +
-            $", {MakeLabel(Resources.TestRunReport_Summary_Explicit)} {result.ExplicitResults}" +
-            $", {MakeLabel(Resources.TestRunReport_Summary_Other)} {result.OtherResults}");
+            $" {MakeLabel(Resources.TestRunReport_Summary_Ignored)} {result.IgnoredResults.Length}" +
+            $", {MakeLabel(Resources.TestRunReport_Summary_Explicit)} {result.ExplicitResults.Length}" +
+            $", {MakeLabel(Resources.TestRunReport_Summary_Other)} " +
+            $"{result.SkippedResults.Length + result.UnknownResults.Length}");
 
         sb.AppendLine(
             $"  {MakeLabel(Resources.TestRunReport_Summary_StartTime)} {FormatTimestamp(startTimeUtc)}");
@@ -270,8 +308,12 @@ internal class RunTestScreen(
         => status switch
         {
             TestStatus.Passed => Resources.TestRunReport_Status_Passed,
-            TestStatus.Failure => Resources.TestRunReport_Status_Failed,
-            TestStatus.Skipped => Resources.TestRunReport_Status_Skipped,
+            TestStatus.Failure or
+                TestStatus.Error or
+                TestStatus.Invalid => Resources.TestRunReport_Status_Failed,
+            TestStatus.Skipped or
+                TestStatus.Ignored or
+                TestStatus.Explicit => Resources.TestRunReport_Status_Skipped,
             TestStatus.Inconclusive => Resources.TestRunReport_Status_Inconclusive,
             TestStatus.Warning => Resources.TestRunReport_Status_Warning,
             _ => Resources.TestRunReport_Status_Unknown,
@@ -280,7 +322,7 @@ internal class RunTestScreen(
     private record ReportEntry(
         string? Color,
         string Label,
-        TestCaseResult Result);
+        TestEntityResult Result);
 
     private class State
     {

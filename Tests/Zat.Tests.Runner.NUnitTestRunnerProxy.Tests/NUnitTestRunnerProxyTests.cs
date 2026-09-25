@@ -8,9 +8,15 @@ using NUnit.Framework;
 
 using Zat.Tests.Runner.Common.Model;
 
-// TODO: Test RunTestAsync, etc.
+// TODO: Test GetIsAssemblyLoadedAsync, GetIsTestRunningAsync, etc.
 public class NUnitTestRunnerProxyTests
 {
+    private const string Net481TestSuitePath = "NUnitTestAssembly.Net481";
+    private const string SampleTestFixturePath = Net481TestSuitePath + ".SampleTestSuite";
+    private const string OneTimeSetUpFailingTestFixturePath = Net481TestSuitePath + ".OneTimeSetUpFailingFixture";
+    private const string OneTimeTearDownFailingTestFixturePath = Net481TestSuitePath + ".OneTimeTearDownFailingFixture";
+    private const string IgnoredTestFixturePath = Net481TestSuitePath + ".IgnoredFixture";
+
     private static readonly string NUnitTestAssembliesDirPath = Path.Combine(
         Assembly.GetExecutingAssembly().GetAssemblyDirectoryPath(),
         "NUnitTestAssemblies");
@@ -24,6 +30,14 @@ public class NUnitTestRunnerProxyTests
         NUnitTestAssembliesDirPath,
         "NUnitTestAssembly.Net481",
         "NUnitTestAssembly.Net481.dll");
+
+    private NUnitTestRunnerProxy unit = null!;
+
+    [SetUp]
+    public void SetUp()
+    {
+        this.unit = new NUnitTestRunnerProxy();
+    }
 
     [Test]
     public async Task LoadTestAssemblyAsync_WithNet481Assembly()
@@ -48,7 +62,7 @@ public class NUnitTestRunnerProxyTests
         var testSuite = result[0];
         Assert.That(testSuite.TestFixtures, Has.One.Matches<TestFixtureEntity>(x => x.Name == "SampleTestSuite"));
 
-        var testFixture = testSuite.TestFixtures[0];
+        var testFixture = testSuite.TestFixtures.Single(x => x.Name == "SampleTestSuite");
         Assert.That(testFixture.TestCases, Has.Length.EqualTo(4));
         Assert.That(testFixture.TestCases, Has.One.Matches<TestCaseEntity>(x => x.Name == "Pass"));
         Assert.That(testFixture.TestCases, Has.One.Matches<TestCaseEntity>(x => x.Name == "Fail"));
@@ -96,34 +110,194 @@ public class NUnitTestRunnerProxyTests
     }
 
     [Test]
-    public async Task RunTestAsync()
+    public async Task RunTestAsync__WhenRunWithAllTestCases__ThenShouldReturnTreeOfTestSuitesTestFixturesAndTestCases()
     {
-        var testAssemblyDllPath = TestAssemblyNet481DllPath;
-        if (!File.Exists(testAssemblyDllPath))
-        {
-            throw new FileNotFoundException(testAssemblyDllPath);
-        }
+        // Given:
+        var testCases = GetTestCases(await this.LoadNet481TestAssemblyAsync());
 
-        // Given
-        var unit = new NUnitTestRunnerProxy();
+        // When:
+        var result = await this.unit.RunTestAsync(testCases);
 
-        // When
-        var loaded = await unit.LoadTestAssemblyAsync(testAssemblyDllPath);
-        var testCaseEntites = loaded
-            .SelectMany(x => x.TestFixtures)
-            .SelectMany(x => x.TestCases)
-            .ToArray();
-        var result = await unit.RunTestAsync(testCaseEntites);
-
-        // Then
-        Assert.That(result.Status, Is.EqualTo(TestStatus.Failed));
-        Assert.That(result.ErrorResults, Has.Length.EqualTo(1));
-        Assert.That(result.FailureResults, Has.Length.EqualTo(1));
-        Assert.That(result.IgnoredResults, Has.Length.EqualTo(1));
-        Assert.That(result.Summary.Errors, Is.EqualTo(1));
-        Assert.That(result.Summary.Failures, Is.EqualTo(1));
-        Assert.That(result.Summary.Ignored, Is.EqualTo(1));
-        Assert.That(result.Summary.Passed, Is.EqualTo(1));
-        Assert.That(result.Summary.Total, Is.EqualTo(4));
+        // Then:
+        Assert.That(result.TestSuiteResults.Select(x => x.EntityName), Is.EqualTo(new[] { Net481TestSuitePath }));
+        Assert.That(
+            result.TestSuiteResults[0].TestFixtureResults.Select(x => x.EntityName),
+            Is.EquivalentTo(new[]
+            {
+                SampleTestFixturePath,
+                OneTimeSetUpFailingTestFixturePath,
+                OneTimeTearDownFailingTestFixturePath,
+                IgnoredTestFixturePath,
+            }));
+        Assert.That(
+            GetTestCaseResults(result).Select(x => x.EntityName),
+            Is.EquivalentTo(testCases.Select(x => x.ExecutionPath)));
     }
+
+    [Test]
+    public async Task RunTestAsync__WhenRunWithAllTestCases__ThenShouldReturnTestCaseIdsOfTestCaseEntities()
+    {
+        // Given:
+        var testCases = GetTestCases(await this.LoadNet481TestAssemblyAsync());
+
+        // When:
+        var result = await this.unit.RunTestAsync(testCases);
+
+        // Then:
+        Assert.That(
+            GetTestCaseResults(result).Select(x => (x.EntityName, x.Id)),
+            Is.EquivalentTo(testCases.Select(x => (x.ExecutionPath, x.Id))));
+    }
+
+    [TestCase("Pass", TestStatus.Passed, null)]
+    [TestCase("Fail", TestStatus.Failure, "FAILURE REASON")]
+    [TestCase("Error", TestStatus.Error, "ERROR REASON")]
+    [TestCase("Ignored", TestStatus.Ignored, "IGNORE REASON")]
+    public async Task RunTestAsync__WhenRunWithSingleTestCase__ThenShouldReturnItsStatusAndDetail_AndPassedParents(
+        string givenTestCaseName, TestStatus expectedStatus, string? expectedMessage)
+    {
+        // Given:
+        var testCase = GetTestCases(await this.LoadNet481TestAssemblyAsync())
+            .Single(x => x.ExecutionPath == $"{SampleTestFixturePath}.{givenTestCaseName}");
+
+        // When:
+        var result = await this.unit.RunTestAsync([testCase]);
+
+        // Then:
+        var testSuiteResult = result.TestSuiteResults.Single();
+        Assert.That(testSuiteResult.Status, Is.EqualTo(TestStatus.Passed));
+        Assert.That(testSuiteResult.Detail, Is.Null);
+
+        var testFixtureResult = testSuiteResult.TestFixtureResults.Single();
+        Assert.That(testFixtureResult.EntityName, Is.EqualTo(SampleTestFixturePath));
+        Assert.That(testFixtureResult.Status, Is.EqualTo(TestStatus.Passed));
+        Assert.That(testFixtureResult.Detail, Is.Null);
+
+        var testCaseResult = testFixtureResult.TestCaseResults.Single();
+        Assert.That(testCaseResult.EntityName, Is.EqualTo(testCase.ExecutionPath));
+        Assert.That(testCaseResult.Status, Is.EqualTo(expectedStatus));
+        if (expectedMessage is null)
+        {
+            Assert.That(testCaseResult.Detail, Is.Null);
+        }
+        else
+        {
+            Assert.That(testCaseResult.Detail?.Message, Does.Contain(expectedMessage));
+        }
+    }
+
+    [Test]
+    public async Task RunTestAsync__WhenTestFixtureOneTimeSetUpFails__ThenShouldReportErrorAtTestFixture_AndInheritItInTestCases()
+    {
+        // Given:
+        var testCases = GetTestCases(await this.LoadNet481TestAssemblyAsync(), OneTimeSetUpFailingTestFixturePath);
+
+        // When:
+        var result = await this.unit.RunTestAsync(testCases);
+
+        // Then:
+        var testSuiteResult = result.TestSuiteResults.Single();
+        Assert.That(testSuiteResult.Status, Is.EqualTo(TestStatus.Passed));
+
+        var testFixtureResult = testSuiteResult.TestFixtureResults.Single();
+        Assert.That(testFixtureResult.Status, Is.EqualTo(TestStatus.Error));
+        Assert.That(testFixtureResult.Detail?.Message, Does.Contain("ONE TIME SETUP REASON"));
+        Assert.That(testFixtureResult.Detail?.StackTrace, Is.Not.Empty);
+
+        Assert.That(testFixtureResult.TestCaseResults, Has.Length.EqualTo(2));
+        Assert.That(testFixtureResult.TestCaseResults, Has.All.Matches<TestCaseResult>(
+            x => x.Status == TestStatus.Error && x.Detail!.Message.Contains("ONE TIME SETUP REASON")));
+    }
+
+    [Test]
+    public async Task RunTestAsync__WhenTestFixtureOneTimeTearDownFails__ThenShouldReportErrorAtTestFixture_AndKeepTestCasesPassed()
+    {
+        // Given:
+        var testCases = GetTestCases(await this.LoadNet481TestAssemblyAsync(), OneTimeTearDownFailingTestFixturePath);
+
+        // When:
+        var result = await this.unit.RunTestAsync(testCases);
+
+        // Then:
+        var testSuiteResult = result.TestSuiteResults.Single();
+        Assert.That(testSuiteResult.Status, Is.EqualTo(TestStatus.Passed));
+
+        var testFixtureResult = testSuiteResult.TestFixtureResults.Single();
+        Assert.That(testFixtureResult.Status, Is.EqualTo(TestStatus.Error));
+        Assert.That(testFixtureResult.Detail?.Message, Does.Contain("ONE TIME TEARDOWN REASON"));
+
+        Assert.That(testFixtureResult.TestCaseResults, Has.Length.EqualTo(2));
+        Assert.That(testFixtureResult.TestCaseResults, Has.All.Matches<TestCaseResult>(
+            x => x.Status == TestStatus.Passed));
+    }
+
+    [Test]
+    public async Task RunTestAsync__WhenTestFixtureIsIgnored__ThenShouldReportIgnoredAtTestFixture_AndInheritItInTestCases()
+    {
+        // Given:
+        var testCases = GetTestCases(await this.LoadNet481TestAssemblyAsync(), IgnoredTestFixturePath);
+
+        // When:
+        var result = await this.unit.RunTestAsync(testCases);
+
+        // Then:
+        var testFixtureResult = result.TestSuiteResults.Single().TestFixtureResults.Single();
+        Assert.That(testFixtureResult.Status, Is.EqualTo(TestStatus.Ignored));
+        Assert.That(testFixtureResult.Detail?.Message, Does.Contain("FIXTURE IGNORE REASON"));
+
+        Assert.That(testFixtureResult.TestCaseResults, Has.Length.EqualTo(2));
+        Assert.That(testFixtureResult.TestCaseResults, Has.All.Matches<TestCaseResult>(
+            x => x.Status == TestStatus.Ignored && x.Detail!.Message.Contains("FIXTURE IGNORE REASON")));
+    }
+
+    [Test]
+    public async Task RunTestAsync__WhenRunWithTestSuiteEntity__ThenShouldReturnResultOfEveryTestCaseBeneathIt()
+    {
+        // Given:
+        var testSuites = await this.LoadNet481TestAssemblyAsync();
+
+        // When:
+        var result = await this.unit.RunTestAsync([testSuites.Single()]);
+
+        // Then:
+        Assert.That(
+            GetTestCaseResults(result).Select(x => x.EntityName),
+            Is.EquivalentTo(GetTestCases(testSuites).Select(x => x.ExecutionPath)));
+        Assert.That(GetTestCaseResults(result), Has.None.Matches<TestCaseResult>(x => x.Status == TestStatus.Unknown));
+    }
+
+    [Test]
+    public async Task RunTestAsync__WhenRunWithTestFixtureEntity__ThenShouldReturnResultOfEveryTestCaseBeneathIt()
+    {
+        // Given:
+        var testFixture = (await this.LoadNet481TestAssemblyAsync())
+            .SelectMany(x => x.TestFixtures)
+            .Single(x => x.ExecutionPath == SampleTestFixturePath);
+
+        // When:
+        var result = await this.unit.RunTestAsync([testFixture]);
+
+        // Then:
+        var testFixtureResult = result.TestSuiteResults.Single().TestFixtureResults.Single();
+        Assert.That(testFixtureResult.EntityName, Is.EqualTo(SampleTestFixturePath));
+        Assert.That(
+            testFixtureResult.TestCaseResults.Select(x => x.EntityName),
+            Is.EquivalentTo(testFixture.TestCases.Select(x => x.ExecutionPath)));
+    }
+
+    private static TestCaseEntity[] GetTestCases(TestSuiteEntity[] testSuites, string? testFixturePath = null)
+        => [.. testSuites
+            .SelectMany(x => x.TestFixtures)
+            .Where(x => testFixturePath is null || x.ExecutionPath == testFixturePath)
+            .SelectMany(x => x.TestCases)];
+
+    private static TestCaseResult[] GetTestCaseResults(ProxyTestResult result)
+        => [.. result.TestSuiteResults
+            .SelectMany(x => x.TestFixtureResults)
+            .SelectMany(x => x.TestCaseResults)];
+
+    private Task<TestSuiteEntity[]> LoadNet481TestAssemblyAsync()
+        => File.Exists(TestAssemblyNet481DllPath)
+            ? this.unit.LoadTestAssemblyAsync(TestAssemblyNet481DllPath)
+            : throw new FileNotFoundException(TestAssemblyNet481DllPath);
 }

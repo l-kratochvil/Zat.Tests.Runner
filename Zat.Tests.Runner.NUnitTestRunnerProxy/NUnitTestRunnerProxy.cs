@@ -17,8 +17,11 @@ using NUnit.Framework.Internal;
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Services;
 
+using NUnitTestStatus = NUnit.Framework.Interfaces.TestStatus;
+using TestCaseResult = Zat.Tests.Runner.Common.Model.TestCaseResult;
 using TestFilter = NUnit.Framework.Internal.TestFilter;
-using TestStatus = Common.Model.TestStatus;
+using TestStatus = Zat.Tests.Runner.Common.Model.TestStatus;
+using TestSuiteResult = Zat.Tests.Runner.Common.Model.TestSuiteResult;
 
 /// <summary>
 /// Out-of-process NUnit test runner. Hosts the .NET Framework <see cref="ITestAssemblyRunner"/>
@@ -26,6 +29,8 @@ using TestStatus = Common.Model.TestStatus;
 /// </summary>
 public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
 {
+    private const string NotRunMessage = "Not run";
+
     // TODO: NEMAPOVAT! Klient si názvy testovacích sad mapuje sám.
     private static readonly ImmutableDictionary<string, string> TestSuiteNamesMap =
         new Dictionary<string, string>
@@ -63,12 +68,12 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
                     { FrameworkPackageSettings.WorkDirectory, Path.GetDirectoryName(assemblyDllPath) },
                 });
 
-                return testAssemblyElement.Tests.Any() ? [..CollectTestSuiteEntities(testAssemblyElement.Tests[0])] : [];
+                return testAssemblyElement.Tests.Any() ? [.. CollectTestSuiteEntities(testAssemblyElement.Tests[0])] : [];
             },
             cancellationToken);
 
     /// <inheritdoc/>
-    public Task<Common.ProxyTestResult> RunTestAsync(
+    public Task<ProxyTestResult> RunTestAsync(
         IEnumerable<TestEntity> testRunEntities, CancellationToken cancellationToken = default)
     {
         if (!this.runner.IsTestLoaded)
@@ -96,43 +101,12 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
                 try
                 {
                     var result = this.runner.Run(TestListener.NULL, testFilter);
+                    var loadedTest = this.runner.LoadedTest;
 
-                    var buckets = new ResultBuckets();
-                    CollectResults(result, buckets);
-
-                    var summary = new Common.TestRunSummary(
-                        Total: result.PassCount + result.FailCount + result.WarningCount +
-                               result.InconclusiveCount + result.SkipCount,
-                        Passed: result.PassCount,
-                        Failed: result.FailCount,
-                        Warnings: result.WarningCount,
-                        Inconclusive: result.InconclusiveCount,
-                        Skipped: result.SkipCount,
-                        Failures: buckets.Failures.Count,
-                        Errors: buckets.Errors.Count,
-                        Invalid: buckets.Invalid.Count,
-                        Ignored: buckets.Ignored.Count,
-                        Explicit: buckets.Explicit.Count,
-                        Other: buckets.Other.Count);
-
-                    return new Common.ProxyTestResult(
-                        result.ResultState.Status switch
-                        {
-                            NUnit.Framework.Interfaces.TestStatus.Passed => TestStatus.Passed,
-                            NUnit.Framework.Interfaces.TestStatus.Failed => TestStatus.Failed,
-                            NUnit.Framework.Interfaces.TestStatus.Skipped => TestStatus.Skipped,
-                            NUnit.Framework.Interfaces.TestStatus.Inconclusive => TestStatus.Inconclusive,
-                            NUnit.Framework.Interfaces.TestStatus.Warning => TestStatus.Warning,
-                            _ => TestStatus.Unknown,
-                        },
-                        summary,
-                        [..buckets.Ignored],
-                        [..buckets.Explicit],
-                        [..buckets.Other],
-                        [..buckets.Errors],
-                        [..buckets.Invalid],
-                        [..buckets.Failures],
-                        [..buckets.Warnings]);
+                    return new ProxyTestResult(
+                        loadedTest.Tests.Any()
+                            ? [.. CollectTestSuiteResults(loadedTest.Tests[0], testFilter, IndexByFullName(result))]
+                            : []);
                 }
                 finally
                 {
@@ -143,98 +117,136 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
     }
 
     /// <summary>
-    /// Recursively walks the NUnit result tree and buckets outcomes into the not-run
-    /// (ignored/explicit/other), error, invalid, failure and warning collections. Results whose
-    /// outcome is merely propagated from a parent's setup or aggregated from children
-    /// (<see cref="FailureSite.Parent"/>/<see cref="FailureSite.Child"/>) are skipped, so each
-    /// intrinsic outcome is reported exactly once (e.g. a suite's own OneTimeSetUp error is reported
-    /// at the suite node, not duplicated onto its children). Skipped and warning outcomes are only
-    /// taken from leaf test cases to avoid duplicating a fixture-level outcome across its children.
+    /// Maps an NUnit <paramref name="resultState"/> to a <see cref="TestStatus"/>; an outcome not known here maps to
+    /// <see cref="TestStatus.Unknown"/>.
     /// </summary>
-    private static void CollectResults(ITestResult result, ResultBuckets buckets)
-    {
-        var resultState = result.ResultState;
-        var isPropagated = resultState.Site is FailureSite.Parent or FailureSite.Child;
-
-        if (!isPropagated)
+    private static TestStatus MapStatus(ResultState resultState)
+        => resultState.Status switch
         {
-            switch (resultState.Status)
+            NUnitTestStatus.Passed => TestStatus.Passed,
+            NUnitTestStatus.Inconclusive => TestStatus.Inconclusive,
+            NUnitTestStatus.Warning => TestStatus.Warning,
+            NUnitTestStatus.Failed when resultState.Label == ResultState.Error.Label => TestStatus.Error,
+            NUnitTestStatus.Failed when resultState.Label == ResultState.NotRunnable.Label => TestStatus.Invalid,
+            NUnitTestStatus.Failed when resultState.Label == ResultState.Cancelled.Label => TestStatus.Error,
+            NUnitTestStatus.Failed => TestStatus.Failure,
+            NUnitTestStatus.Skipped when resultState.Label == ResultState.Ignored.Label => TestStatus.Ignored,
+            NUnitTestStatus.Skipped when resultState.Label == ResultState.Explicit.Label => TestStatus.Explicit,
+            NUnitTestStatus.Skipped => TestStatus.Skipped,
+            _ => TestStatus.Unknown,
+        };
+
+    private static Detail? CreateDetail(ITestResult result)
+        => string.IsNullOrEmpty(result.Message) && string.IsNullOrEmpty(result.StackTrace)
+            ? null
+            : new Detail(result.Message ?? string.Empty, result.StackTrace);
+
+    /// <summary>
+    /// Creates the <see cref="TestStatus"/> and <see cref="Detail"/> of a test suite or test fixture from its intrinsic
+    /// outcome only: an outcome aggregated from its children or a missing <paramref name="result"/> is
+    /// <see cref="TestStatus.Passed"/>.
+    /// </summary>
+    private static (TestStatus Status, Detail? Detail) CreateGroupOutcome(ITestResult? result)
+    {
+        if (result is null || result.ResultState.Site is FailureSite.Child)
+        {
+            return (TestStatus.Passed, null);
+        }
+
+        var status = MapStatus(result.ResultState);
+        return status is TestStatus.Passed ? (status, null) : (status, CreateDetail(result));
+    }
+
+    private static ITestResult? FindResult(IReadOnlyDictionary<string, ITestResult> results, ITest test)
+        => results.TryGetValue(test.FullName, out var result) ? result : null;
+
+    private static Dictionary<string, ITestResult> IndexByFullName(ITestResult root)
+    {
+        var index = new Dictionary<string, ITestResult>();
+        var pending = new Stack<ITestResult>();
+        pending.Push(root);
+
+        while (pending.Count > 0)
+        {
+            var result = pending.Pop();
+
+            if (!index.ContainsKey(result.FullName))
             {
-                case NUnit.Framework.Interfaces.TestStatus.Failed when resultState.Label == "Error":
-                    buckets.Errors.Add(new Common.ErrorResult(
-                        result.FullName, result.Message ?? string.Empty, result.StackTrace ?? string.Empty));
-                    break;
+                index[result.FullName] = result;
+            }
 
-                case NUnit.Framework.Interfaces.TestStatus.Failed when resultState.Label == "Invalid":
-                    buckets.Invalid.Add(new Common.InvalidResult(
-                        result.FullName, result.Message ?? string.Empty, result.StackTrace ?? string.Empty));
-                    break;
-
-                case NUnit.Framework.Interfaces.TestStatus.Failed:
-                    buckets.Failures.Add(new Common.FailureResult(
-                        result.FullName, result.Message ?? string.Empty, result.StackTrace ?? string.Empty));
-                    break;
-
-                case NUnit.Framework.Interfaces.TestStatus.Warning when !result.HasChildren:
-                    buckets.Warnings.Add(new Common.WarningResult(
-                        result.FullName, result.Message ?? string.Empty, result.StackTrace ?? string.Empty));
-                    break;
-
-                case NUnit.Framework.Interfaces.TestStatus.Skipped when !result.HasChildren
-                                                                        && resultState.Label == "Ignored":
-                    buckets.Ignored.Add(new Common.IgnoredResult(
-                        result.FullName, result.Message ?? string.Empty, result.StackTrace ?? string.Empty));
-                    break;
-
-                case NUnit.Framework.Interfaces.TestStatus.Skipped when !result.HasChildren
-                                                                        && resultState.Label == "Explicit":
-                    buckets.Explicit.Add(new Common.ExplicitResult(
-                        result.FullName, result.Message ?? string.Empty, result.StackTrace ?? string.Empty));
-                    break;
-
-                case NUnit.Framework.Interfaces.TestStatus.Skipped when !result.HasChildren:
-                    buckets.Other.Add(new Common.OtherSkippedResult(
-                        result.FullName, result.Message ?? string.Empty, result.StackTrace ?? string.Empty));
-                    break;
-
-                case NUnit.Framework.Interfaces.TestStatus.Warning:
-                case NUnit.Framework.Interfaces.TestStatus.Skipped:
-                case NUnit.Framework.Interfaces.TestStatus.Inconclusive:
-                case NUnit.Framework.Interfaces.TestStatus.Passed:
-                    break;
-                default:
-                    throw new NotSupportedException();
+            foreach (var child in result.Children)
+            {
+                pending.Push(child);
             }
         }
 
-        if (!result.HasChildren)
-        {
-            return;
-        }
-
-        foreach (var child in result.Children)
-        {
-            CollectResults(child, buckets);
-        }
+        return index;
     }
 
-    /// <summary>Mutable accumulator for the categorized outcomes gathered during the result walk.</summary>
-    private sealed class ResultBuckets
+    /// <summary>
+    /// Builds the result tree from the loaded test tree filtered by <paramref name="testFilter"/>, so that a requested
+    /// test suite or test fixture expands to its test cases and a test case missing from <paramref name="results"/>
+    /// (e.g. after a cancelled run) is still present.
+    /// </summary>
+    private static IEnumerable<TestSuiteResult> CollectTestSuiteResults(
+        ITest root, TestFilter testFilter, IReadOnlyDictionary<string, ITestResult> results)
     {
-        public List<Common.IgnoredResult> Ignored { get; } = [];
-
-        public List<Common.ExplicitResult> Explicit { get; } = [];
-
-        public List<Common.OtherSkippedResult> Other { get; } = [];
-
-        public List<Common.ErrorResult> Errors { get; } = [];
-
-        public List<Common.InvalidResult> Invalid { get; } = [];
-
-        public List<Common.FailureResult> Failures { get; } = [];
-
-        public List<Common.WarningResult> Warnings { get; } = [];
+        foreach (var testSuite in root.Tests.OfType<TestSuite>().Where(x => testFilter.Pass(x)))
+        {
+            var (status, detail) = CreateGroupOutcome(FindResult(results, testSuite));
+            yield return new TestSuiteResult(
+                [.. CollectTestFixtureResults(testSuite, testFilter, results)],
+                testSuite.FullName,
+                status,
+                detail);
+        }
     }
+
+    private static IEnumerable<TestFixtureResult> CollectTestFixtureResults(
+        TestSuite testSuite, TestFilter testFilter, IReadOnlyDictionary<string, ITestResult> results)
+    {
+        foreach (var testFixture in testSuite.Tests.OfType<TestFixture>().Where(x => testFilter.Pass(x)))
+        {
+            var (status, detail) = CreateGroupOutcome(FindResult(results, testFixture));
+            yield return new TestFixtureResult(
+                [.. CollectTestCaseResults(testFixture, testFilter, results)],
+                testFixture.FullName,
+                status,
+                detail);
+        }
+    }
+
+    private static IEnumerable<TestCaseResult> CollectTestCaseResults(
+        TestFixture testFixture, TestFilter testFilter, IReadOnlyDictionary<string, ITestResult> results)
+    {
+        foreach (var testCase in testFixture.Tests.OfType<Test>().Where(x => testFilter.Pass(x)))
+        {
+            var id = GetTestCaseId(testCase);
+            yield return results.TryGetValue(testCase.FullName, out var result)
+                ? new TestCaseResult(
+                    id,
+                    EntityName: testCase.FullName,
+                    MapStatus(result.ResultState),
+                    CreateDetail(result))
+                : new TestCaseResult(
+                    id,
+                    EntityName: testCase.FullName,
+                    TestStatus.Unknown,
+                    new Detail(NotRunMessage, StackTrace: null));
+        }
+    }
+
+    /// <summary>
+    /// Gets the <see cref="TestCaseEntity.Id"/> of <paramref name="testCase"/>, shared by test discovery and result
+    /// collection so that both always agree.
+    /// </summary>
+    private static string GetTestCaseId(Test testCase)
+        => testCase
+            .Method?
+            .MethodInfo
+            .GetAttribute<TestCaseAttribute>()?
+            .TestName ?? testCase.Name;
 
     private static IEnumerable<TestSuiteEntity> CollectTestSuiteEntities(ITest root)
         => root.Tests.OfType<TestSuite>().Select(static x =>
@@ -244,7 +256,7 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
                 ? TestType.Runtime
                 : TestType.Application;
             return new TestSuiteEntity(
-                [..CollectTestFixtureEntities(x, testType)],
+                [.. CollectTestFixtureEntities(x, testType)],
                 testType,
                 name: TestSuiteNamesMap.TryGetValue(x.Name, out var testSuiteName) ? testSuiteName : x.Name,
                 executionPath: x.FullName);
@@ -261,7 +273,7 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
                 .GetAttribute<TestFixtureAttribute>()?
                 .Description ?? testFixture.Name;
             yield return new TestFixtureEntity(
-                [..CollectTestCaseEntities(testFixture, testType)],
+                [.. CollectTestCaseEntities(testFixture, testType)],
                 testType,
                 name: testFixtureName,
                 executionPath: testFixture.FullName);
@@ -273,14 +285,9 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
     {
         foreach (var testCase in testFixture.Tests.OfType<Test>())
         {
-            var testCaseId = testCase
-                .Method?
-                .MethodInfo
-                .GetAttribute<TestCaseAttribute>()?
-                .TestName ?? testCase.Name;
             yield return new TestCaseEntity(
                 testType,
-                id: testCaseId,
+                id: GetTestCaseId(testCase),
                 name: testCase.Name,
                 executionPath: testCase.FullName);
         }

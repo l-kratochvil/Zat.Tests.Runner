@@ -11,6 +11,5 @@ public enum TestStatus
     Ignored,
     Inconclusive,
     Warning,
-    Explicit,
-    Other,
+    Explicit
 }

@@ -89,30 +89,33 @@ public class TestLinkResultHandler(
                 testPlanId: testPlanId,
                 status: testCaseResult.Status switch
                 {
-                    // TODO: Check all TestStatuses are mapped correctly
                     TestStatus.Passed => "p",
                     TestStatus.Failure or
                         TestStatus.Error or
                         TestStatus.Invalid => "f",
                     TestStatus.Skipped or
                         TestStatus.Ignored or
-                        TestStatus.Explicit or
-                        TestStatus.Other => "b",
-                    _ => string.Empty,
+                        TestStatus.Explicit => "b",
+
+                    // TODO: Map to TestLink statuses
+                    TestStatus.Inconclusive or
+                        TestStatus.Warning or
+                        TestStatus.Unknown => string.Empty,
+                    _ => throw new NotSupportedException(testCaseResult.Status.ToString()),
                 },
                 platformName: string.Empty,
                 overwrite: true,
-                notes: $"Message: {testCaseResult.Message}\nStackTrace: {testCaseResult.StackTrace}",
+                notes: $"Message: {testCaseResult.Detail?.Message}\nStackTrace: {testCaseResult.Detail?.StackTrace}",
                 buildId: testBuild.Id);
 
             // TODO
-            testLink.UploadExecutionAttachment(
-                executionId: reportTestCaseResult.Id,
-                filename: "screenshot.png", // TODO
-                fileType: "image/png", // TODO
-                content: [], // TODO
-                title: "Screenshot", // TODO
-                description: "Attached screenshot for the test case result"); // TODO
+            // testLink.UploadExecutionAttachment(
+            //     executionId: reportTestCaseResult.Id,
+            //     filename: "screenshot.png", // TODO
+            //     fileType: "image/png", // TODO
+            //     content: [], // TODO
+            //     title: "Screenshot", // TODO
+            //     description: "Attached screenshot for the test case result"); // TODO
         }
     }
 

@@ -369,4 +369,7 @@
   <data name="MustBeInteger" xml:space="preserve">
     <value>Musí být celé číslo</value>
   </data>
+  <data name="BetaVersion_ChoiceText" xml:space="preserve">
+    <value>Beza verze</value>
+  </data>
 </root>

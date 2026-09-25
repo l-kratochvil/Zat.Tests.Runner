@@ -218,7 +218,7 @@ internal sealed class HomeScreen(
             // Beta version choice
             if (Choice.InitChoice<IScreen>(
                     betaVersionPromptScreen,
-                    Resources.BetaVersion_PromptText,
+                    Resources.BetaVersion_ChoiceText,
                     testRunConfigStore.BetaVersion,
                     () => testRunConfigStore.IsBetaVersion ?? false)
                 .TryGetValue(out var betaVersionPromptScreenChoice))

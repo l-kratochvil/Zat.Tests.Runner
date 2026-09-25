@@ -70,6 +70,15 @@ namespace Zat.Tests.Runner.TuiApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Beta version.
+        /// </summary>
+        public static string BetaVersion_ChoiceText {
+            get {
+                return ResourceManager.GetString("BetaVersion_ChoiceText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Elapsed time.
         /// </summary>
         public static string ElapsedTime {
@@ -178,7 +187,7 @@ namespace Zat.Tests.Runner.TuiApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to IDE install folder path: .
+        ///   Looks up a localized string similar to IDE install folder path.
         /// </summary>
         public static string IdeInstallFolderPath_ChoiceText {
             get {

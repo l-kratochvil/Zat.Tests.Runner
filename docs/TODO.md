@@ -8,28 +8,32 @@
 - Změna adresáře "Automized Tests":
   - Přesunout do Program Data / Roaming AppData
   - Přejmenovat na Zat.Tests
-- Odstranit legacy runner (ve vlastním commitu na main)
+- TuiApp:
+  - Implementovat výpis při startu testu (viz [test-run-start_output](test-run-start_output.png))
+  - Odstranit legacy runner (ve vlastním commitu na main)
 - WebApp:
   - Rework BindingSelect
   - TestDiscovery: Nahradit store za Fluxor
   - Vytvořit viewmodely pro features (viz TestConfigurationViewModel)
+  - Konfigurace testu stejná jako u TuiApp
   - Vyřešit Deploy
   - Kompletní code-review + refactor celé projektu WebApp (včetně testů) a docs
   - Lokalizace textů
   - Vylepšení vzhledu
+- Vyřešit code todos
 
 ## MidPrio
 
 - Update nuget balíčků solutionu
 - Refactor TestDiscovery feature
 - Rozšíření testů pro komponenty DataContext, BinindgInput, BindingSelect, BindingCheckbox
-- Playwright/vitest E2E tests
+- Email notifikace (po dokončení testu)
 
 ## LoPrio
 
+- Playwright/vitest E2E tests
 - Změna "Main" v menu na ikonku "home".
 - Vypisování manuálních předpokladů (získá se z TL)?
-- Email notifikace (po dokončení testu)
 - Zautomatizování kroků testera - pokročilé?
 
 ## HiPrio - Detaily
