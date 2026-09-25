@@ -156,19 +156,19 @@ public class TestExplorerViewModelTests
 
     private static IEnumerable<TestCaseData> CheckStateCases()
     {
-        const string Prefix = nameof(TestTreeNodeData.CheckState);
+        const string prefix = nameof(TestTreeNodeData.CheckState);
 
         yield return new TestCaseData(new object[] { Array.Empty<string>() })
-            .SetName(Prefix + "__WhenNoTestCaseIsSelected__ThenShouldBe_Unchecked")
+            .SetName(prefix + "__WhenNoTestCaseIsSelected__ThenShouldBe_Unchecked")
             .Returns(TestTreeNodeData.State.Unchecked);
 
         yield return new TestCaseData(new object[] { new[] { GivenFirstCasePath } })
-            .SetName(Prefix + "__WhenSomeTestCasesAreSelected__ThenShouldBe_Mixed")
+            .SetName(prefix + "__WhenSomeTestCasesAreSelected__ThenShouldBe_Mixed")
             .Returns(TestTreeNodeData.State.Mixed);
 
         yield return new TestCaseData(
                 new object[] { new[] { GivenFirstCasePath, GivenSecondCasePath } })
-            .SetName(Prefix + "__WhenEveryTestCaseIsSelected__ThenShouldBe_Checked")
+            .SetName(prefix + "__WhenEveryTestCaseIsSelected__ThenShouldBe_Checked")
             .Returns(TestTreeNodeData.State.Checked);
     }
 

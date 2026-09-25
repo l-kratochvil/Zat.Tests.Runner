@@ -24,13 +24,13 @@ public static class TestStationLabels
             [HwAssemblyType.HW02_BB1M] = "HW02 - BB1M",
             [HwAssemblyType.HW02_BB37M] = "HW02 - BB37M",
             [HwAssemblyType.HW03] = "HW03",
-            [HwAssemblyType.HW04_BD1M] = "HW04 - BD1M",
+            [HwAssemblyType.HW02_BD1M] = "HW04 - BD1M",
         };
 
     /// <summary>
     /// Gets the stations that can be chosen, in the order they are offered in.
     /// </summary>
-    public static IReadOnlyList<HwAssemblyType> Offered { get; } = [..LabelsByStation.Keys];
+    public static IReadOnlyList<HwAssemblyType> Offered { get; } = [.. LabelsByStation.Keys];
 
     /// <summary>
     /// Reads what a station is called on screen.

@@ -1,9 +1,6 @@
 # Agent skills
 
-If a doc referenced below is missing or unreadable, proceed using best judgment and note the
-missing file to the user.
-
-Be extremely concise. Sacrefice grammar for the sake of concision.
+For extra context see `CONTEXT.md`. Also see `AGENTS-SHARED-md` if the file exists.
 
 ## Issue tracker
 

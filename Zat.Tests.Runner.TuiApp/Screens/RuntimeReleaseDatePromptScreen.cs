@@ -3,7 +3,7 @@
 using Zat.Tests.Runner.TuiApp.Stores;
 
 internal class RuntimeReleaseDatePromptScreen(
-    TestConfigStore testConfigStore,
+    TestRunConfigStore testRunConfigStore,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
@@ -17,7 +17,7 @@ internal class RuntimeReleaseDatePromptScreen(
                 new TextPrompt<string>(Resources.EnterRuntimeReleaseDate_PromptText).Validate(Validators.IsDate),
                 date =>
                 {
-                    testConfigStore.RuntimeReleaseDate = date;
+                    testRunConfigStore.RuntimeReleaseDate = date;
                     return new RenderOutput();
                 },
                 ct),

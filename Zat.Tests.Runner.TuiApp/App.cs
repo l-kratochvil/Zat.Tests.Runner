@@ -20,7 +20,7 @@ internal class App
         try
         {
             var nunitTestRunnerProxy = host.Services.GetRequiredService<INUnitTestRunnerProxy>();
-            var testConfigStore = host.Services.GetRequiredService<TestConfigStore>();
+            var testConfigStore = host.Services.GetRequiredService<TestRunConfigStore>();
 
             // testRunStore.LoadedTestSuites = await nunitTestRunnerProxy.LoadTestAssemblyAsync(Paths.Files.TestAssemblyFilePath);
             testConfigStore.LoadedTestSuites

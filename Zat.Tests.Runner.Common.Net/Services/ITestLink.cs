@@ -1,6 +1,6 @@
 namespace Zat.Tests.Runner.Common.Net.Services;
 
-using Zat.Tests.Runner.Common.Net.TestLink.API.Model;
+using Zat.Tests.Runner.Common.Net.TestLinkApi.Model;
 
 public interface ITestLink
 {
@@ -23,6 +23,14 @@ public interface ITestLink
         string notes = "",
         int buildId = 0,
         int bugId = 0);
+
+    AttachmentRequestResponse UploadExecutionAttachment(
+        int executionId,
+        string filename,
+        string fileType,
+        byte[] content,
+        string title = "",
+        string description = "");
 
     // TODO: Is this needed?
     TestSuite[] GetFirstLevelTestSuitesForTestProject(int testProjectId);

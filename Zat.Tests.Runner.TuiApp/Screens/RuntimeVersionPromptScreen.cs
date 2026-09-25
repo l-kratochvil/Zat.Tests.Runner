@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using Zat.Tests.Runner.TuiApp.Stores;
 
 internal partial class RuntimeVersionPromptScreen(
-    TestConfigStore testConfigStore,
+    TestRunConfigStore testRunConfigStore,
     AppUserSettingsStore appUserSettingsStore,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
@@ -37,7 +37,7 @@ internal partial class RuntimeVersionPromptScreen(
                     prompt,
                     version =>
                     {
-                        testConfigStore.RuntimeVersion = version;
+                        testRunConfigStore.RuntimeVersion = version;
                         return RenderOutput.Default;
                     },
                     ct);
@@ -47,7 +47,7 @@ internal partial class RuntimeVersionPromptScreen(
     private static string[] GetInstalledRuntimeVersions(AppUserSettingsStore appUserSettingsStore)
         =>
         [
-            ..Directory
+            .. Directory
                 .GetDirectories(appUserSettingsStore.Current.IdeInstallFolderPath)
                 .Select(static dir => Path.GetFileName(dir))
                 .Where(static dirName => !string.IsNullOrEmpty(dirName) && RuntimeVersion().IsMatch(dirName))

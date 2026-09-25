@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-namespace Zat.Tests.Runner.Common.Net.TestLink.API;
+namespace Zat.Tests.Runner.Common.Net.TestLinkApi;
 
 using System;
 using System.Collections.Generic;

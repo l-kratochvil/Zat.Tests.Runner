@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using DevKit.Core.Extensions.Functional;
 
 using Zat.Tests.Runner.Common.Model;
-using Zat.Tests.Runner.Common.Net;
+using Zat.Tests.Runner.Common.Net.Model;
 using Zat.Tests.Runner.Common.Services;
 using Zat.Z2xxTests.Common.Model;
 

@@ -8,7 +8,7 @@ using Zat.Tests.Runner.TuiApp.Stores;
 using Zat.Z2xxTests.Common.Model;
 
 internal class HwAssemblyTypesSelectionScreen(
-    TestConfigStore testConfigStore,
+    TestRunConfigStore testRunConfigStore,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
@@ -27,7 +27,7 @@ internal class HwAssemblyTypesSelectionScreen(
                     .InstructionsText(SharedTexts.InstructionsHelpText)
                     .AddChoices(Enum.GetValues<HwAssemblyType>());
 
-                testConfigStore
+                testRunConfigStore
                     .HwAssemblyTypes?
                     .ForEach(entity => prompt.Select(entity));
 
@@ -35,7 +35,7 @@ internal class HwAssemblyTypesSelectionScreen(
                     prompt,
                     selectedHwAssemblyType =>
                     {
-                        testConfigStore.HwAssemblyTypes = [..selectedHwAssemblyType];
+                        testRunConfigStore.HwAssemblyTypes = [.. selectedHwAssemblyType];
                         return RenderOutput.Default;
                     },
                     ct,

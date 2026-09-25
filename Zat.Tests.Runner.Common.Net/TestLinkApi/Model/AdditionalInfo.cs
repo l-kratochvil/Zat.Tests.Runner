@@ -1,4 +1,4 @@
-﻿namespace Zat.Tests.Runner.Common.Net.TestLink.API.Model;
+﻿namespace Zat.Tests.Runner.Common.Net.TestLinkApi.Model;
 
 /// <summary>
 /// Additional Info is provided in some cases when objects are created.

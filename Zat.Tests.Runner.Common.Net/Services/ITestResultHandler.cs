@@ -1,5 +1,7 @@
 ﻿namespace Zat.Tests.Runner.Common.Net.Services;
 
+using Zat.Tests.Runner.Common.Net.Model;
+
 /// <summary>
 /// Describes a service that handles the test run result.
 /// </summary>

@@ -4,8 +4,8 @@ using System.Net;
 
 using CookComputing.XmlRpc;
 
-using Zat.Tests.Runner.Common.Net.TestLink.API;
-using Zat.Tests.Runner.Common.Net.TestLink.API.Model;
+using Zat.Tests.Runner.Common.Net.TestLinkApi;
+using Zat.Tests.Runner.Common.Net.TestLinkApi.Model;
 
 // TODO: Review method summaries
 public class TestLink : ITestLink

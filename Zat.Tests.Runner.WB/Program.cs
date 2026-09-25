@@ -4,7 +4,7 @@ using HtmlAgilityPack;
 
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Net.Services;
-using Zat.Tests.Runner.Common.Net.TestLink.API.Model;
+using Zat.Tests.Runner.Common.Net.TestLinkApi.Model;
 
 const string testLinkApiKey = "dc7a17e14a9f1879d38583a38c3a81e8";
 
@@ -33,9 +33,9 @@ List<TestSuite> GetAllTestSuitesAndTestCases(int testProjectId)
 
     foreach (var testSuite in testSuitesForTestProject)
     {
-        var _ts = GetTestSuitesAndCases(testSuite);
+        var ts = GetTestSuitesAndCases(testSuite);
 
-        suites.Add(_ts);
+        suites.Add(ts);
     }
 
     return suites;
@@ -43,11 +43,11 @@ List<TestSuite> GetAllTestSuitesAndTestCases(int testProjectId)
 
 string GetInformationForTester(TestSuite testSuite)
 {
-    var text = TransformFromHTMLDocToText(testSuite);
+    var text = TransformFromHtmlDocToText(testSuite);
     return GetMatchedTextForTester(text);
 }
 
-string TransformFromHTMLDocToText(TestSuite testSuite)
+string TransformFromHtmlDocToText(TestSuite testSuite)
 {
     var doc = new HtmlDocument();
     doc.LoadHtml(testSuite.Details);
@@ -83,16 +83,17 @@ TestSuite GetTestSuitesAndCases(TestSuite testSuite)
     var tc = apiClient.GetTestCasesForTestSuite(testSuite.Id, false);
     var ts = apiClient.GetTestSuitesForTestSuite(testSuite.Id);
 
-    for (var i = 0; i < tc.Length; i++)
+    foreach (var t in tc)
     {
-        suite.AddTestCase(tc[i]);
+        suite.AddTestCase(t);
     }
 
-    if (ts.Length > 0)
+    // ReSharper disable once InvertIf
+    if (ts.Length <= 0)
     {
-        for (var i = 0; i < ts.Length; i++)
+        foreach (var t in ts)
         {
-            var childSuite = GetTestSuitesAndCases(ts[i]);
+            var childSuite = GetTestSuitesAndCases(t);
             suite.AddTestSuite(childSuite);
         }
     }
@@ -102,9 +103,9 @@ TestSuite GetTestSuitesAndCases(TestSuite testSuite)
 
 void SaveTestResults(
     string build,
-    (TestStatus status, int testPlanId, int testSuiteId, int testCaseId, string notes)[] Result)
+    (TestStatus status, int testPlanId, int testSuiteId, int testCaseId, string notes)[] result)
 {
-    foreach (var result in Result)
+    foreach (var result in result)
     {
         var testPlatform = apiClient.GetTestPlanPlatforms(result.testPlanId).First();
 
@@ -121,7 +122,7 @@ void SaveTestResults(
 
         var
             testcase = testsuiteTestcases.First(x
-                => x.External_id == result.testCaseId.ToString()); // 44 je číselná složka z ID ve formátu Z200-XX (Z200-44)
+                => x.ExternalId == result.testCaseId.ToString()); // 44 je číselná složka z ID ve formátu Z200-XX (Z200-44)
         var testcaseApiId = testcase.Id;
 
         var resultStatus = result.status switch
@@ -136,7 +137,8 @@ void SaveTestResults(
             testcaseApiId,
             result.testPlanId,
             resultStatus,
-            platformId: testPlatform.Id, // Platforma musí být přidána do testovacího plánu. Pokud není potřeba specifikovat platformu, tak stačí zadat prázdný string do argument platfromName
+            platformId: testPlatform
+                .Id, // Platforma musí být přidána do testovacího plánu. Pokud není potřeba specifikovat platformu, tak stačí zadat prázdný string do argument platfromName
             overwrite: false,
             notes: result.notes,
             buildId: testBuild.Id);

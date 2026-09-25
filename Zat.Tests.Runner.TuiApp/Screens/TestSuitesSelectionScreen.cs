@@ -7,7 +7,7 @@ using Zat.Tests.Runner.TuiApp.Extensions;
 using Zat.Tests.Runner.TuiApp.Stores;
 
 internal class TestSuitesSelectionScreen(
-    TestConfigStore testConfigStore,
+    TestRunConfigStore testRunConfigStore,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
@@ -21,7 +21,7 @@ internal class TestSuitesSelectionScreen(
         {
             Main = ct =>
             {
-                var testSuites = testConfigStore.LoadedTestSuites.ToArray();
+                var testSuites = testRunConfigStore.LoadedTestSuites.ToArray();
 
                 var prompt = new MultiSelectionPrompt<TestEntity>(TestEntityEqualityComparer)
                     .Title(Resources.SelectTestSuites_PromptText.AsPromptTitle())
@@ -36,7 +36,7 @@ internal class TestSuitesSelectionScreen(
                     prompt.AddChoiceGroup(testsuite, testsuite.TestFixtures);
                 }
 
-                testConfigStore
+                testRunConfigStore
                     .SelectedTestEntities
                     .ForEach(entity => prompt.Select(entity));
 
@@ -44,7 +44,7 @@ internal class TestSuitesSelectionScreen(
                     prompt,
                     selectedTestSuites =>
                     {
-                        testConfigStore.SelectedTestEntities = [..selectedTestSuites];
+                        testRunConfigStore.SelectedTestEntities = [..selectedTestSuites];
                         return new RenderOutput();
                     },
                     ct);

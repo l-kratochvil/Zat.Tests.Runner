@@ -9,7 +9,7 @@ using Zat.Tests.Runner.TuiApp.Stores;
 using Zat.Z2xxTests.Common;
 
 internal sealed class HomeScreen(
-    TestConfigStore testConfigStore,
+    TestRunConfigStore testRunConfigStore,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen,
@@ -56,9 +56,9 @@ internal sealed class HomeScreen(
             },
             Info = () =>
             {
-                var testFixtures = testConfigStore
+                var testFixtures = testRunConfigStore
                     .SelectedTestEntities.OfType<TestFixtureEntity>().ToArray();
-                var testCases = testConfigStore
+                var testCases = testRunConfigStore
                     .SelectedTestEntities.OfType<TestCaseEntity>().ToArray();
 
                 TestEntity[] testEntities = [];
@@ -102,11 +102,11 @@ internal sealed class HomeScreen(
         yield return new Choice<IScreen>(
             value: runtimeVersionPromptScreen,
             displayText: Resources.RuntimeVersion_ChoiceText,
-            displayValue: testConfigStore.RuntimeVersion);
+            displayValue: testRunConfigStore.RuntimeVersion);
 
         // TODO: Runtime version should be optional (PDP tests can be run without runtime version)
         // REQUIRED: Runtime version
-        if (testConfigStore.RuntimeVersion is null)
+        if (testRunConfigStore.RuntimeVersion is null)
         {
             yield break;
         }
@@ -130,7 +130,7 @@ internal sealed class HomeScreen(
         }
 
         // REQUIRED: Test entities selection
-        if (!testConfigStore.SelectedTestEntities.Any())
+        if (!testRunConfigStore.SelectedTestEntities.Any())
         {
             yield break;
         }
@@ -139,15 +139,15 @@ internal sealed class HomeScreen(
         if (Choice.InitChoice<IScreen>(
                 hwAssemblyTypesSelectionScreen,
                 Resources.HwAssemblyTypes_ChoiceText,
-                testConfigStore.HwAssemblyTypes is null ? null : string.Join(", ", testConfigStore.HwAssemblyTypes),
-                () => testConfigStore.RuntimeTestEntitiesSelected)
+                testRunConfigStore.HwAssemblyTypes is null ? null : string.Join(", ", testRunConfigStore.HwAssemblyTypes),
+                () => testRunConfigStore.RuntimeTestEntitiesSelected)
             .TryGetValue(out var selectHwAssemblyTypesChoice))
         {
             yield return selectHwAssemblyTypesChoice;
         }
 
         // REQUIRED: HW assembly type selection when runtime test entities are selected
-        if (testConfigStore is
+        if (testRunConfigStore is
             {
                 RuntimeTestEntitiesSelected: true,
                 HwAssemblyTypes: null
@@ -160,26 +160,26 @@ internal sealed class HomeScreen(
         if (Choice.InitChoice<IScreen>(
                 enableTestLinkReportingPromptScreen,
                 Resources.EnableTestLinkReporting_PromptText,
-                testConfigStore.IsTestLinkReportingEnabled)
+                testRunConfigStore.IsTestLinkReportingEnabled)
             .TryGetValue(out var enableTestLinkReportingPromptScreenChoice))
         {
             yield return enableTestLinkReportingPromptScreenChoice;
         }
 
         // REQUIRED: Enable TestLink reporting
-        if (testConfigStore.IsTestLinkReportingEnabled is null)
+        if (testRunConfigStore.IsTestLinkReportingEnabled is null)
         {
             yield break;
         }
 
-        if (testConfigStore.IsTestLinkReportingEnabled.HasValue &&
-            testConfigStore.IsTestLinkReportingEnabled.Value)
+        if (testRunConfigStore.IsTestLinkReportingEnabled.HasValue &&
+            testRunConfigStore.IsTestLinkReportingEnabled.Value)
         {
             // IDE version choice
             if (Choice.InitChoice<IScreen>(
                     ideVersionPromptScreen,
                     Resources.IdeVersion_ChoiceText,
-                    testConfigStore.IdeVersion)
+                    testRunConfigStore.IdeVersion)
                 .TryGetValue(out var ideVersionChoice))
             {
                 yield return ideVersionChoice;
@@ -189,7 +189,7 @@ internal sealed class HomeScreen(
             if (Choice.InitChoice<IScreen>(
                     ideReleaseDatePromptScreen,
                     Resources.IdeReleaseDate_ChoiceText,
-                    testConfigStore.IdeReleaseDate)
+                    testRunConfigStore.IdeReleaseDate)
                 .TryGetValue(out var ideReleaseDateChoice))
             {
                 yield return ideReleaseDateChoice;
@@ -199,7 +199,7 @@ internal sealed class HomeScreen(
             if (Choice.InitChoice<IScreen>(
                     runtimeReleaseDatePromptScreen,
                     Resources.RuntimeReleaseDate_ChoiceText,
-                    testConfigStore.RuntimeReleaseDate)
+                    testRunConfigStore.RuntimeReleaseDate)
                 .TryGetValue(out var runtimeReleaseDateChoice))
             {
                 yield return runtimeReleaseDateChoice;
@@ -209,7 +209,7 @@ internal sealed class HomeScreen(
             if (Choice.InitChoice<IScreen>(
                     isBetaVersionPromptScreen,
                     Resources.IsBetaVersion_PromptText,
-                    testConfigStore.IsBetaVersion)
+                    testRunConfigStore.IsBetaVersion)
                 .TryGetValue(out var isBetaVersionPromptScreenChoice))
             {
                 yield return isBetaVersionPromptScreenChoice;
@@ -219,15 +219,15 @@ internal sealed class HomeScreen(
             if (Choice.InitChoice<IScreen>(
                     betaVersionPromptScreen,
                     Resources.BetaVersion_PromptText,
-                    testConfigStore.BetaVersion,
-                    () => testConfigStore.IsBetaVersion ?? false)
+                    testRunConfigStore.BetaVersion,
+                    () => testRunConfigStore.IsBetaVersion ?? false)
                 .TryGetValue(out var betaVersionPromptScreenChoice))
             {
                 yield return betaVersionPromptScreenChoice;
             }
 
             // REQUIRED: IDE version
-            if (testConfigStore.IdeVersion is null)
+            if (testRunConfigStore.IdeVersion is null)
             {
                 yield break;
             }
@@ -237,15 +237,15 @@ internal sealed class HomeScreen(
         if (Choice.InitChoice<IScreen>(
                 enableDebugModePromptScreen,
                 Resources.EnableDebugMode_PromptText,
-                testConfigStore.IsDebugModeEnabled)
+                testRunConfigStore.IsDebugModeEnabled)
             .TryGetValue(out var enableDebugModePromptScreenChoice))
         {
             yield return enableDebugModePromptScreenChoice;
         }
 
         // Validation of required configuration values
-        if (string.IsNullOrEmpty(testConfigStore.RuntimeVersion) ||
-            !testConfigStore.SelectedTestEntities.Any())
+        if (string.IsNullOrEmpty(testRunConfigStore.RuntimeVersion) ||
+            !testRunConfigStore.SelectedTestEntities.Any())
         {
             throw new InvalidOperationException("Invalid configuration (some required values are missing)");
         }

@@ -1,4 +1,4 @@
-﻿namespace Zat.Tests.Runner.Common.Net.TestLink.API.Model;
+﻿namespace Zat.Tests.Runner.Common.Net.TestLinkApi.Model;
 
 using System;
 
@@ -7,8 +7,8 @@ using System;
 /// </summary>
 public sealed record Attachment(
     byte[] Content,
-    DateTime Date_added,
-    string File_type,
+    DateTime DateAdded,
+    string FileType,
     int Id,
     string Name,
     string Title);

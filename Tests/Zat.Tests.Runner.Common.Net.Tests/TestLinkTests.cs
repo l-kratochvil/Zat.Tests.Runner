@@ -3,7 +3,7 @@ namespace Zat.Tests.Runner.Common.Net.Tests;
 using NUnit.Framework;
 
 using Zat.Tests.Runner.Common.Net.Services;
-using Zat.Tests.Runner.Common.Net.TestLink.API;
+using Zat.Tests.Runner.Common.Net.TestLinkApi;
 
 [TestFixture]
 public class TestLinkTests

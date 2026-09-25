@@ -1,0 +1,1 @@
+c:/Users/l-kratochvil/source/repos/ai-dev-tools-common/AGENTS-SHARED.md

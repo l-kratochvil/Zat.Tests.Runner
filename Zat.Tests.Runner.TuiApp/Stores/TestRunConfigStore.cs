@@ -7,7 +7,7 @@ using Zat.Z2xxTests.Common.Model;
 /// This is the store for test run config that is used by the running test.
 /// </summary>
 /// <param name="appStateStore"></param>
-internal class TestConfigStore(AppStateStore appStateStore)
+internal class TestRunConfigStore(AppStateStore appStateStore)
 {
     public IEnumerable<TestSuiteEntity> LoadedTestSuites { get; set; } = [];
 

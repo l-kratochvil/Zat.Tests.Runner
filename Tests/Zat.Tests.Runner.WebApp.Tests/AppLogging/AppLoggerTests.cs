@@ -98,19 +98,19 @@ public class AppLoggerTests
 
     private static IEnumerable<TestCaseData> SeverityMethodCases()
     {
-        const string Prefix = nameof(AppLogger.Log);
-        const string Message = "message";
+        const string prefix = nameof(AppLogger.Log);
+        const string message = "message";
 
-        yield return new TestCaseData((Action<IAppLogger>)(logger => logger.Info(Message)))
-            .SetName(Prefix + "_WhenCalledThroughInfo_ThenShouldAppend_Info")
+        yield return new TestCaseData((Action<IAppLogger>)(logger => logger.Info(message)))
+            .SetName(prefix + "_WhenCalledThroughInfo_ThenShouldAppend_Info")
             .Returns(LogSeverity.Info);
 
-        yield return new TestCaseData((Action<IAppLogger>)(logger => logger.Warning(Message)))
-            .SetName(Prefix + "_WhenCalledThroughWarning_ThenShouldAppend_Warning")
+        yield return new TestCaseData((Action<IAppLogger>)(logger => logger.Warning(message)))
+            .SetName(prefix + "_WhenCalledThroughWarning_ThenShouldAppend_Warning")
             .Returns(LogSeverity.Warning);
 
-        yield return new TestCaseData((Action<IAppLogger>)(logger => logger.Error(Message)))
-            .SetName(Prefix + "_WhenCalledThroughError_ThenShouldAppend_Error")
+        yield return new TestCaseData((Action<IAppLogger>)(logger => logger.Error(message)))
+            .SetName(prefix + "_WhenCalledThroughError_ThenShouldAppend_Error")
             .Returns(LogSeverity.Error);
     }
 }

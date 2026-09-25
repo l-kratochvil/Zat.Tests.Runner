@@ -3,7 +3,7 @@
 using Zat.Tests.Runner.TuiApp.Stores;
 
 internal class BetaVersionPromptScreen(
-    TestConfigStore testConfigStore,
+    TestRunConfigStore testRunConfigStore,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
@@ -17,7 +17,7 @@ internal class BetaVersionPromptScreen(
                 new TextPrompt<string>(Resources.EnterBetaVersion_PromptText).Validate(Validators.IsInt),
                 date =>
                 {
-                    testConfigStore.BetaVersion = date;
+                    testRunConfigStore.BetaVersion = date;
                     return new RenderOutput();
                 },
                 ct),

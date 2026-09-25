@@ -4,30 +4,34 @@ using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.TuiApp.Stores;
 
 internal class TestLinkResultHandlerContext(
-    TestConfigStore testConfigStore)
+    TestRunConfigStore testRunConfigStore)
     : TestLinkResultHandler.IContext
 {
     /// <inheritdoc/>
     public bool IsTestLinkReportingEnabled
-        => testConfigStore.IsTestLinkReportingEnabled ?? false;
+        => testRunConfigStore.IsTestLinkReportingEnabled ?? false;
+
+    /// <inheritdoc/>
+    public bool IsDebuggingEnabled
+        => testRunConfigStore.IsDebugModeEnabled ?? false;
 
     /// <inheritdoc/>
     public string? IdeVersion
-        => testConfigStore.IdeVersion;
+        => testRunConfigStore.IdeVersion;
 
     /// <inheritdoc/>
     public string? IdeReleaseDate
-        => testConfigStore.IdeReleaseDate;
+        => testRunConfigStore.IdeReleaseDate;
 
     /// <inheritdoc/>
     public string? RuntimeVersion
-        => testConfigStore.RuntimeVersion;
+        => testRunConfigStore.RuntimeVersion;
 
     /// <inheritdoc/>
     public string? RuntimeReleaseDate
-        => testConfigStore.RuntimeReleaseDate;
+        => testRunConfigStore.RuntimeReleaseDate;
 
     /// <inheritdoc/>
     public string? BetaVersion
-        => testConfigStore.BetaVersion;
+        => testRunConfigStore.BetaVersion;
 }

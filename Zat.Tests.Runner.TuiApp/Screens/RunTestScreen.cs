@@ -8,15 +8,14 @@ using DevKit.Core.Utils;
 
 using WindowsInput.Native;
 
-using Zat.Tests.Runner.Common;
 using Zat.Tests.Runner.Common.Model;
-using Zat.Tests.Runner.Common.Net;
+using Zat.Tests.Runner.Common.Net.Model;
 using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.TuiApp.Common;
 using Zat.Tests.Runner.TuiApp.Stores;
 
 internal class RunTestScreen(
-    TestConfigStore testConfigStore,
+    TestRunConfigStore testRunConfigStore,
     ITestRunnerEngine testRunnerEngine,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
@@ -40,7 +39,7 @@ internal class RunTestScreen(
     protected override ICommand[] AdditionalCommands
         => field ??=
         [
-            ..base.AdditionalCommands,
+            .. base.AdditionalCommands,
             new ActionCommand(
                 Key: VirtualKeyCode.F2,
                 Text: Resources.StopTest_CommandText,
@@ -78,11 +77,11 @@ internal class RunTestScreen(
                 this.currentTestStartTime = DateTime.UtcNow;
 
                 var runTestTask = testRunnerEngine.RunTestAsync(
-                    testRunEntities: testConfigStore.SelectedTestEntities,
+                    testRunEntities: testRunConfigStore.SelectedTestEntities,
                     config: new ITestRunnerEngine.Config(
-                        IsDebug: testConfigStore.IsDebugModeEnabled ?? false,
-                        TestedRuntimeVersion: testConfigStore.RuntimeVersion,
-                        TestedHwAssemblyTypes: testConfigStore.HwAssemblyTypes,
+                        IsDebug: testRunConfigStore.IsDebugModeEnabled ?? false,
+                        TestedRuntimeVersion: testRunConfigStore.RuntimeVersion,
+                        TestedHwAssemblyTypes: testRunConfigStore.HwAssemblyTypes,
                         TestResultHandlers: [this]));
 
                 var promptResult = await ShowLiveDataAsync(
@@ -153,7 +152,7 @@ internal class RunTestScreen(
             },
         };
 
-    private static void RenderNotRunSection(StringBuilder sb, ProxyTestResult result)
+    private static void RenderNotRunSection(StringBuilder sb, TestResult result)
     {
         var entries = new List<ReportEntry>();
         entries.AddRange(result.IgnoredResults.Select(
@@ -166,7 +165,7 @@ internal class RunTestScreen(
         RenderEntrySection(sb, Resources.TestRunReport_TestsNotRun_SectionHeader, entries, includeStackTrace: false);
     }
 
-    private static void RenderProblemsSection(StringBuilder sb, ProxyTestResult result)
+    private static void RenderProblemsSection(StringBuilder sb, TestResult result)
     {
         var entries = new List<ReportEntry>();
         entries.AddRange(result.ErrorResults.Select(
@@ -221,7 +220,7 @@ internal class RunTestScreen(
 
     private static void RenderSummarySection(
         StringBuilder sb,
-        ProxyTestResult result,
+        TestResult result,
         DateTime startTimeUtc,
         DateTime endTimeUtc,
         TimeSpan duration)
@@ -289,7 +288,7 @@ internal class RunTestScreen(
     }
 
     private record TestResultHandled(
-        ProxyTestResult Result,
+        TestResult Result,
         DateTime StartTime,
         DateTime EndTime,
         TimeSpan Duration);

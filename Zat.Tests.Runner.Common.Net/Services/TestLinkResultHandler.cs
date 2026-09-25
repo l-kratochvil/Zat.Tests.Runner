@@ -5,7 +5,7 @@ using System.Diagnostics;
 using DevKit.Core.Extensions;
 
 using Zat.Tests.Runner.Common.Model;
-using Zat.Tests.Runner.Common.Net;
+using Zat.Tests.Runner.Common.Net.Model;
 
 public class TestLinkResultHandler(
     ITestLink testLink,
@@ -29,7 +29,8 @@ public class TestLinkResultHandler(
         {
             TestType.Runtime => RuntimeTestsTestPlanId,
             TestType.Application => ApplicationTestsTestPlanId,
-            TestType.Unknown => throw new InvalidOperationException("Unknown test type"),
+            TestType.Unknown => throw new InvalidOperationException(
+                $"Unable to determine test plan ID: Test type is '{testResult.TestType}'"),
             _ => throw new NotSupportedException(testResult.TestType.ToString()),
         };
 
@@ -40,7 +41,7 @@ public class TestLinkResultHandler(
             buildName += $"(beta{context.BetaVersion})";
         }
 
-        if (testResult.TestType == TestType.Runtime)
+        if (testResult.TestType is TestType.Runtime)
         {
             if (testResult.TestedHwAssemblyType is null)
             {
@@ -50,6 +51,11 @@ public class TestLinkResultHandler(
             }
 
             buildName += $" : {testResult.TestedHwAssemblyType}";
+        }
+
+        if (context.IsDebuggingEnabled)
+        {
+            buildName += " (Debug)";
         }
 
         if (testLink.GetBuildsForTestPlan(testPlanId).All(x => x.Name != buildName))
@@ -75,10 +81,13 @@ public class TestLinkResultHandler(
             .CheckIsNotNull($"Build '{buildName}' for test plan with ID '{testPlanId}' not found");
 
         foreach (var testCaseResult in testResult.TestCaseResults)
-            {
-                var testCaseExternalId = $"Z200-{testCaseResult.Id}";
-                var testCaseId = testLink.GetTestCaseByExternalId(testCaseExternalId).Id;
-                var resultStatus = testCaseResult.Status switch
+        {
+            var testCaseExternalId = $"Z200-{testCaseResult.Id}";
+            var testCaseId = testLink.GetTestCaseByExternalId(testCaseExternalId).Id;
+            var reportTestCaseResult = testLink.ReportTestCaseResult(
+                testCaseId: testCaseId,
+                testPlanId: testPlanId,
+                status: testCaseResult.Status switch
                 {
                     // TODO: Check all TestStatuses are mapped correctly
                     TestStatus.Passed => "p",
@@ -90,22 +99,28 @@ public class TestLinkResultHandler(
                         TestStatus.Explicit or
                         TestStatus.Other => "b",
                     _ => string.Empty,
-                };
+                },
+                platformName: string.Empty,
+                overwrite: true,
+                notes: $"Message: {testCaseResult.Message}\nStackTrace: {testCaseResult.StackTrace}",
+                buildId: testBuild.Id);
 
-                var res = testLink.ReportTestCaseResult(
-                    testCaseId,
-                    testPlanId,
-                    resultStatus,
-                    platformName: string.Empty,
-                    overwrite: true,
-                    notes: testCaseResult.Message, // TODO: Include stacktrace as legacy runner does
-                    buildId: testBuild.Id);
-            }
+            // TODO
+            testLink.UploadExecutionAttachment(
+                executionId: reportTestCaseResult.Id,
+                filename: "screenshot.png", // TODO
+                fileType: "image/png", // TODO
+                content: [], // TODO
+                title: "Screenshot", // TODO
+                description: "Attached screenshot for the test case result"); // TODO
+        }
     }
 
     public interface IContext
     {
         bool IsTestLinkReportingEnabled { get; }
+
+        bool IsDebuggingEnabled { get; }
 
         string? IdeVersion { get; }
 

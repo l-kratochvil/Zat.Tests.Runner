@@ -3,7 +3,7 @@
 using Zat.Tests.Runner.TuiApp.Stores;
 
 internal class IsBetaVersionPromptScreen(
-    TestConfigStore testConfigStore,
+    TestRunConfigStore testRunConfigStore,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
@@ -17,7 +17,7 @@ internal class IsBetaVersionPromptScreen(
                 new ConfirmationPrompt(Resources.IsBetaVersion_PromptText).ConfigureDefaultOptions(),
                 confired =>
                 {
-                    testConfigStore.IsBetaVersion = confired;
+                    testRunConfigStore.IsBetaVersion = confired;
                     return new RenderOutput();
                 },
                 ct),

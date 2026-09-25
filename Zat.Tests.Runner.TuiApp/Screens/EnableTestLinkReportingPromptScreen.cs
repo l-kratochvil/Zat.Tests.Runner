@@ -3,7 +3,7 @@
 using Zat.Tests.Runner.TuiApp.Stores;
 
 internal class EnableTestLinkReportingPromptScreen(
-    TestConfigStore testConfigStore,
+    TestRunConfigStore testRunConfigStore,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
@@ -17,7 +17,7 @@ internal class EnableTestLinkReportingPromptScreen(
                 new ConfirmationPrompt(Resources.EnableTestLinkReporting_PromptText).ConfigureDefaultOptions(),
                 confired =>
                 {
-                    testConfigStore.IsTestLinkReportingEnabled = confired;
+                    testRunConfigStore.IsTestLinkReportingEnabled = confired;
                     return new RenderOutput();
                 },
                 ct),

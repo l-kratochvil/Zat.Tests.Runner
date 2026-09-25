@@ -11,7 +11,7 @@ using Zat.Tests.Runner.TuiApp.Extensions;
 using Zat.Tests.Runner.TuiApp.Stores;
 
 internal class TestCasesSelectionScreen(
-    TestConfigStore testConfigStore,
+    TestRunConfigStore testRunConfigStore,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
@@ -25,7 +25,7 @@ internal class TestCasesSelectionScreen(
         {
             Main = ct =>
             {
-                var testSuites = testConfigStore.LoadedTestSuites;
+                var testSuites = testRunConfigStore.LoadedTestSuites;
                 var prompt = new MultiSelectionPrompt<TestSuiteEntity>(TestEntityEqualityComparer)
                     .Title(Resources.SelectTestSuitesToSelectTestCases_PromptText.AsPromptTitle())
                     .MoreChoicesText(SharedTexts.MoreChoicesHelpText)
@@ -34,7 +34,7 @@ internal class TestCasesSelectionScreen(
                     .AddChoices(testSuites)
                     .UseConverter(x => x.Name);
 
-                testConfigStore
+                testRunConfigStore
                     .SelectedTestEntities
                     .OfType<TestSuiteEntity>()
                     .ForEach(entity => prompt.Select(entity));
@@ -44,7 +44,7 @@ internal class TestCasesSelectionScreen(
                     selectedTestSuites => new RenderOutput(
                         NextScreen: new SelectTestCasesScreen(
                             testSuites: selectedTestSuites,
-                            testConfigStore: testConfigStore,
+                            testRunConfigStore: testRunConfigStore,
                             homeScreen: this.HomeScreenLazy,
                             exitScreen: this.ExitScreenLazy,
                             settingsScreen: this.SettingsScreenLazy)),
@@ -54,7 +54,7 @@ internal class TestCasesSelectionScreen(
 
     private class SelectTestCasesScreen(
         IEnumerable<TestSuiteEntity> testSuites,
-        TestConfigStore testConfigStore,
+        TestRunConfigStore testRunConfigStore,
         Lazy<HomeScreen> homeScreen,
         Lazy<ExitScreen> exitScreen,
         Lazy<SettingsScreen> settingsScreen)
@@ -79,15 +79,15 @@ internal class TestCasesSelectionScreen(
                         prompt.AddChoiceGroup(testFixture, testFixture.TestCases.OrderBy(x => x.Id));
                     }
 
-                    testConfigStore.SelectedTestEntities.ForEach(entity => prompt.Select(entity));
+                    testRunConfigStore.SelectedTestEntities.ForEach(entity => prompt.Select(entity));
 
                     return await ShowPromptAsync(
                         prompt,
                         selectedTestCases =>
                         {
-                            testConfigStore.SelectedTestEntities =
+                            testRunConfigStore.SelectedTestEntities =
                             [
-                                ..testConfigStore.SelectedTestEntities
+                                ..testRunConfigStore.SelectedTestEntities
                                     .Where(currentEntity => selectedTestCases.Any(currentEntity.Equals))
                                     .Union(selectedTestCases)
                             ];

@@ -1,8 +1,8 @@
-﻿namespace Zat.Tests.Runner.Common.Net.TestLink.API;
+﻿namespace Zat.Tests.Runner.Common.Net.TestLinkApi;
 
 using CookComputing.XmlRpc;
 
-using Zat.Tests.Runner.Common.Net.TestLink.API.Model;
+using Zat.Tests.Runner.Common.Net.TestLinkApi.Model;
 
 internal static class XmlRpcStructConvertors
 {
@@ -39,8 +39,8 @@ internal static class XmlRpcStructConvertors
     public static AttachmentRequestResponse ToAttachmentRequestResponse(XmlRpcStruct data)
         => new(
             Description: ToString(data, "description"),
-            File_name: ToString(data, "file_name"),
-            File_type: ToString(data, "file_type"),
+            FileName: ToString(data, "file_name"),
+            FileType: ToString(data, "file_type"),
             ForeignKeyId: ToInt(data, "fk_id"),
             LinkedTableName: ToString(data, "fk_table"),
             Size: ToInt(data, "file_size"),
@@ -64,10 +64,10 @@ internal static class XmlRpcStructConvertors
         => new(
             Active: ToInt(data, "active") == 1,
             Id: ToInt(data, "id"),
-            Is_open: ToInt(data, "is_open") == 1,
+            IsOpen: ToInt(data, "is_open") == 1,
             Name: ToString(data, "name"),
             Notes: ToString(data, "notes"),
-            Testplan_id: ToInt(data, "testplan_id"));
+            TestplanId: ToInt(data, "testplan_id"));
 
     public static TestCaseFromTestSuite ToTestCaseFromTestSuite(XmlRpcStruct data)
     {
@@ -76,28 +76,28 @@ internal static class XmlRpcStructConvertors
             : string.Empty;
 
         return new TestCaseFromTestSuite(
-            Active: int.Parse((string)data["active"]) == 1,
-            Author_id: ToInt(data, "author_id"),
-            Creation_ts: ToDate(data, "creation_ts"),
+            Active: ToInt(data, "active") == 1,
+            AuthorId: ToInt(data, "author_id"),
+            CreationTs: ToDate(data, "creation_ts"),
             Details: details,
-            Execution_type: ToInt(data, "execution_type"),
-            External_id: ToString(data, "tc_external_id"),
+            ExecutionType: ToInt(data, "execution_type"),
+            ExternalId: ToString(data, "tc_external_id"),
             Id: ToInt(data, "id"),
             Importance: ToInt(data, "importance"),
-            Is_open: int.Parse((string)data["is_open"]) == 1,
+            IsOpen: ToInt(data, "is_open") == 1,
             Layout: ToString(data, "layout"),
-            Modification_ts: ToDate(data, "modification_ts"),
+            ModificationTs: ToDate(data, "modification_ts"),
             Name: ToString(data, "name"),
-            Node_order: ToInt(data, "node_order"),
-            Node_table: ToString(data, "node_table"),
-            Node_type_id: ToInt(data, "node_type_id"),
-            Parent_id: ToInt(data, "parent_id"),
+            NodeOrder: ToInt(data, "node_order"),
+            NodeTable: ToString(data, "node_table"),
+            NodeTypeId: ToInt(data, "node_type_id"),
+            ParentId: ToInt(data, "parent_id"),
             Preconditions: ToString(data, "preconditions"),
             Status: ToInt(data, "status"),
             Summary: ToString(data, "summary"),
-            Tcversion_id: ToInt(data, "tcversion_id"),
-            TestSuite_id: ToInt(data, "parent_id"),
-            Updater_id: ToInt(data, "updater_id"),
+            TcversionId: ToInt(data, "tcversion_id"),
+            TestSuiteId: ToInt(data, "parent_id"),
+            UpdaterId: ToInt(data, "updater_id"),
             Version: ToInt(data, "version"));
     }
 
@@ -109,10 +109,10 @@ internal static class XmlRpcStructConvertors
         => new(
             Actions: ToString(data, "actions"),
             Active: ToInt(data, "active") == 1,
-            Execution_type: ToInt(data, "execution_type"),
-            Expected_results: ToString(data, "expected_results"),
+            ExecutionType: ToInt(data, "execution_type"),
+            ExpectedResults: ToString(data, "expected_results"),
             Id: ToInt(data, "id"),
-            Step_number: ToInt(data, "step_number"));
+            StepNumber: ToInt(data, "step_number"));
 
     /// <summary>
     ///  constructor used by XMLRPC interface on decoding the function return
@@ -179,7 +179,7 @@ internal static class XmlRpcStructConvertors
 
     private static DateTime ToDate(XmlRpcStruct data, string name)
     {
-        if (data.ContainsKey(name) && DateTime.TryParse((string)data[name], out var n))
+        if (data.ContainsKey(name) && DateTime.TryParse(ToString(data, name), out var n))
         {
             return n;
         }
@@ -197,7 +197,8 @@ internal static class XmlRpcStructConvertors
             return '\x00';
         }
 
-        var s = (string)data[name];
-        return s[0];
+        var str = ToString(data, name);
+
+        return str.Length > 0 ? str[0] : '\x00';
     }
 }

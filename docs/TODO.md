@@ -3,8 +3,12 @@
 ## HiPrio
 
 - Vyrešit issues
-- Dokončit TestLinkApi
+- Dokončit vazbu na TestLink
 - Zautomatizování kroků testera - základní
+- Změna adresáře "Automized Tests":
+  - Přesunout do Program Data / Roaming AppData
+  - Přejmenovat na Zat.Tests
+- Odstranit legacy runner (ve vlastním commitu na main)
 - WebApp:
   - Rework BindingSelect
   - TestDiscovery: Nahradit store za Fluxor
@@ -37,14 +41,36 @@
 - [viz link](https://claude.ai/share/2111234d-351e-4c9b-93c9-846f62da3015)
 - Zkusit nastavit x86 u Zat.Z2xxTests?
 
-### Dokončit TestLinkApi
+### Dokončit vazbu na TestLink
 
-- ITestLink.Config.Default: API key musí být secret!
-- Použít jiný balíček než CookComputing?:
-  - Použít Horizon.XmlRpc / TouchSocket.XmlRpc
-  - Použít /code-review -> /implement
-- Přejemnovat TestLink.API namespace
-- Nutno refaktorovat a vyřešit warningy
+#### 1. Nahrávání přílohy k výsledku testu
+
+- Zavolat metodu tl.uploadExecutionAttachment a předat získávané execution_id společně s parametry přílohy
+  - executionId: ID vykonaného testu
+  - fileName: Název souboru
+  - fileType / mimetype: Typ souboru (MIME type)
+  - content: Obsah souboru zakódovaný do Base64
+  - title / description (volitelně): Název a popis přílohy
+- Příloha se vytáhne z 'c:\Automized tests\runner-exchange\': Do tohoto adresáře test bude sypat veškeré screenshoty
+- V názvu souboru bude ID testcasu (executionId)
+
+#### 2. Pročistit ITestLink a Testlink
+
+- Týká se i Model a poté XmlRpcStructConvertor
+
+#### 3. Ověřit na začátku testu spojení s testlink (v api je něco jako Hello metoda)
+
+- Použít SayHello
+- pokud se nepodaří oznámit tuto skutečnost uživateli a zakázat využívání testlink (vyřadit prompt, zda se má nahrát výsledek)
+
+#### 4. ITestLink.Config.Default: API key musí být secret
+
+#### 5. Použít jiný balíček než CookComputing
+
+- Použít Horizon.XmlRpc
+- Použít /code-review -> /implement
+
+#### 6. Nutno refaktorovat a vyřešit warningy
 
 ### Rework BindingSelect
 
@@ -85,18 +111,6 @@
 ### Zautomatizování kroků testera - základní
 
 - Tzn. automatizovat kapitolu 2.9.3 z dokumentu Automatizované testování
-- TestLink integrace:
-  - Bude vyžádat specifikovat datum vydání instalací (IDE, RT)
-  - Ověřit na začátku testu spojení s testlink (v api je něco jako Hello metoda): pokud se nepodaří oznámit tuto skutečnost uživateli a zakázat využívání testlink (vyřadit prompt, zda se má nahrát výsledek)
-- Nahrávání přílohy k výsledku testu:
-  - Zavolat metodu tl.uploadExecutionAttachment a předat získávané execution_id společně s parametry přílohy:
-    - executionId: ID vykonaného testu
-    - fileName: Název souboru
-    - fileType / mimetype: Typ souboru (MIME type)
-    - content: Obsah souboru zakódovaný do Base64
-    - title / description (volitelně): Název a popis přílohy
-  - Příloha se vytáhne z 'c:\Automized tests\Tests Output\Screenshots\Current\': Do tohoto adresáře test bude sypat veškeré screenshoty
-  - V názvu souboru bude ID testcasu (executionId)
 
 ### Vylepšení vzhledu
 

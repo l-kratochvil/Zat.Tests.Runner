@@ -3,7 +3,7 @@
 using Zat.Tests.Runner.TuiApp.Stores;
 
 internal class IdeVersionPromptScreen(
-    TestConfigStore testConfigStore,
+    TestRunConfigStore testRunConfigStore,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
@@ -17,7 +17,7 @@ internal class IdeVersionPromptScreen(
                 new TextPrompt<string>(Resources.EnterIdeVersion_PromptText),
                 version =>
                 {
-                    testConfigStore.IdeVersion = version;
+                    testRunConfigStore.IdeVersion = version;
                     return new RenderOutput();
                 },
                 ct),
