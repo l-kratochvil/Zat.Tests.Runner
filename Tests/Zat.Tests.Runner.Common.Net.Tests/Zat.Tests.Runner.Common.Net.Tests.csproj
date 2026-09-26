@@ -5,10 +5,33 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<IsTestProject>true</IsTestProject>
+		<IncludeNUnitTestRunnerProxyDirOutput>true</IncludeNUnitTestRunnerProxyDirOutput>
 	</PropertyGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\Zat.Tests.Runner.Common.Net\Zat.Tests.Runner.Common.Net.csproj" />
+	  <ProjectReference Include="..\..\Zat.Tests.Runner.Common\Zat.Tests.Runner.Common.csproj" />
 	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\NUnitTestAssembly.Net481\NUnitTestAssembly.Net481.csproj">
+			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+			<Private>false</Private>
+		</ProjectReference>
+		<ProjectReference Include="..\NUnitTestAssembly.Net461\NUnitTestAssembly.Net461.csproj">
+			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+			<Private>false</Private>
+		</ProjectReference>
+	</ItemGroup>
+
+	<!-- Copy the staged NUnit test assemblies into this project's output directory. -->
+	<Target Name="IncludeNUnitTestAssemblies" BeforeTargets="AssignTargetPaths">
+		<ItemGroup>
+			<_NUnitTestAssemblyFile Include="$(NUnitTestAssembliesDir)**\*" />
+			<!-- ReSharper disable UnknownItemGroup -->
+			<Content Include="@(_NUnitTestAssemblyFile)" Link="NUnitTestAssemblies\%(_NUnitTestAssemblyFile.RecursiveDir)%(_NUnitTestAssemblyFile.Filename)%(_NUnitTestAssemblyFile.Extension)" CopyToOutputDirectory="Always" />
+			<!-- ReSharper restore UnknownItemGroup -->
+		</ItemGroup>
+	</Target>
 
 </Project>

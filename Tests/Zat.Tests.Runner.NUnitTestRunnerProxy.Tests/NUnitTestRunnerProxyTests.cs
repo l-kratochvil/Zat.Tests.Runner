@@ -12,7 +12,10 @@ using Zat.Tests.Runner.Common.Model;
 // TODO: Change to Net10 and communicate with proxy via StreamJsonRpc (as the production proxy client does) instead of directly calling the proxy implementation.
 public class NUnitTestRunnerProxyTests
 {
-    private const string Net481TestSuitePath = "NUnitTestAssembly.Net481";
+    private const string TestAssemblyNet461Name = "NUnitTestAssembly.Net461";
+    private const string TestAssemblyNet481Name = "NUnitTestAssembly.Net481";
+
+    private const string Net481TestSuitePath = TestAssemblyNet481Name;
     private const string SampleTestFixturePath = Net481TestSuitePath + ".SampleTestSuite";
     private const string OneTimeSetUpFailingTestFixturePath = Net481TestSuitePath + ".OneTimeSetUpFailingFixture";
     private const string OneTimeTearDownFailingTestFixturePath = Net481TestSuitePath + ".OneTimeTearDownFailingFixture";
@@ -24,13 +27,13 @@ public class NUnitTestRunnerProxyTests
 
     private static readonly string TestAssemblyNet461DllPath = Path.Combine(
         NUnitTestAssembliesDirPath,
-        "NUnitTestAssembly.Net461",
-        "NUnitTestAssembly.Net461.dll");
+        TestAssemblyNet461Name,
+        $"{TestAssemblyNet461Name}.dll");
 
     private static readonly string TestAssemblyNet481DllPath = Path.Combine(
         NUnitTestAssembliesDirPath,
-        "NUnitTestAssembly.Net481",
-        "NUnitTestAssembly.Net481.dll");
+        TestAssemblyNet481Name,
+        $"{TestAssemblyNet481Name}.dll");
 
     private NUnitTestRunnerProxy unit = null!;
 

@@ -1,4 +1,4 @@
-namespace Zat.Tests.Runner.Common.Net.Tests;
+namespace Zat.Tests.Runner.Common.Net.Tests.Services;
 
 using NUnit.Framework;
 
