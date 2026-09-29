@@ -3,7 +3,7 @@ namespace Zat.Tests.Runner.WebApp.Shared.Storage;
 using System.IO;
 using System.Text.Json;
 
-using Zat.Tests.Runner.WebApp.Shared.Logging;
+using Zat.Tests.Runner.Common.Net.Logging;
 
 /// <summary>
 /// Keeps one shared value in a JSON file on the test machine.

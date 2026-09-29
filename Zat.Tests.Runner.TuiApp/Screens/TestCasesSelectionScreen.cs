@@ -7,6 +7,7 @@ using System.Linq;
 using Spectre.Console;
 
 using Zat.Tests.Runner.Common.Model;
+using Zat.Tests.Runner.Common.Net.Utils;
 using Zat.Tests.Runner.TuiApp.Extensions;
 using Zat.Tests.Runner.TuiApp.Stores;
 
@@ -32,7 +33,7 @@ internal class TestCasesSelectionScreen(
                     .InstructionsText(SharedTexts.InstructionsHelpText)
                     .PageSize(10)
                     .AddChoices(testSuites)
-                    .UseConverter(x => x.Name);
+                    .UseConverter(x => LocalizationUtils.MapTextToLocalized(x.Name));
 
                 testRunConfigStore
                     .SelectedTestEntities

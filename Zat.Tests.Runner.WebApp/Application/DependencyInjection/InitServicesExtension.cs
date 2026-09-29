@@ -7,7 +7,9 @@ using Fluxor.Persist.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
 
+using Zat.Tests.Runner.Common.Net.Logging;
 using Zat.Tests.Runner.Common.Net.Services;
+using Zat.Tests.Runner.WebApp.Application.Logging;
 using Zat.Tests.Runner.WebApp.Application.Paths;
 using Zat.Tests.Runner.WebApp.Features.TestResultReporting.Services;
 using Zat.Tests.Runner.WebApp.Shared.JsInterop;
@@ -38,6 +40,7 @@ public static class InitServicesExtension
                 .InitTestLink()
                 .InitNUnitTestRunner()
                 .InitTestRunnerEngine()
+                .InitLogging()
                 .AddScoped<IJsModuleInteropFactory, JsModuleInteropFactory>()
                 .AddSingleton<BrowserLogger>()
                 .AddSingleton<IAppPathsProvider, AppPathsProvider>()
@@ -57,6 +60,12 @@ public static class InitServicesExtension
                 .ValidateOnStart();
 
             return services;
+        }
+
+        private IServiceCollection InitLogging()
+        {
+            Common.Net.Logging.InitLoggingExtensions.InitLogging(services);
+            return services.AddSingleton<IAppLoggerSink, DiagnosticsLoggerSink>();
         }
 
         private IServiceCollection InitNUnitTestRunner()

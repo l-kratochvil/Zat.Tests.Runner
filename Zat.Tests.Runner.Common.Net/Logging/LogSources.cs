@@ -1,4 +1,4 @@
-namespace Zat.Tests.Runner.WebApp.Shared.Logging;
+namespace Zat.Tests.Runner.Common.Net.Logging;
 
 /// <summary>
 /// Known log sources, kept as plain strings so outside entries can be routed without a mapping.
@@ -6,22 +6,22 @@ namespace Zat.Tests.Runner.WebApp.Shared.Logging;
 public static class LogSources
 {
     /// <summary>
-    /// The application itself: lifecycle, navigation, and settings.
+    /// Gets the source representing the application itself: lifecycle, navigation, and settings.
     /// </summary>
     public const string App = "App";
 
     /// <summary>
-    /// A test run and the output of the test runner.
+    /// Gets the source representing a test run and the output of the test runner.
     /// </summary>
     public const string TestRun = "TestRun";
 
     /// <summary>
-    /// Communication with TestLink.
+    /// Gets the source representing communication with TestLink.
     /// </summary>
     public const string TestLink = "TestLink";
 
     /// <summary>
-    /// Gets the known sources in UI order.
+    /// Gets the list of all known sources.
     /// </summary>
     public static IReadOnlyList<string> All { get; } = [App, TestRun, TestLink];
 }

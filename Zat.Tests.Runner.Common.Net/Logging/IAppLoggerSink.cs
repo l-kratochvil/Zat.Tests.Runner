@@ -1,6 +1,4 @@
-namespace Zat.Tests.Runner.WebApp.Features.AppLogging.Services;
-
-using Zat.Tests.Runner.WebApp.Features.AppLogging.Models;
+namespace Zat.Tests.Runner.Common.Net.Logging;
 
 /// <summary>
 /// A destination the application log is mirrored to, in addition to the in-memory buffer.

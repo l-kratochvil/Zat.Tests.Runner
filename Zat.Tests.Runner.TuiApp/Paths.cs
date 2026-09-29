@@ -30,4 +30,9 @@ internal static class Paths
 
         public static string TestAssemblyFilePath { get; } = Path.Combine(Directories.AutomizedTests, "Test libs", "Zat.Z2xxTests.dll");
     }
+
+    public static class FileNames
+    {
+        public const string Log = ".log";
+    }
 }

@@ -1,7 +1,5 @@
 namespace Zat.Tests.Runner.TuiApp.Screens;
 
-using System.Threading.Tasks;
-
 internal class EmptyScreen(
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
@@ -24,8 +22,7 @@ internal class EmptyScreen(
 
                 AnsiConsole.Console.Input.ReadKey(true);
 
-                return Task.FromResult<ShowPromptResult>(
-                    new CompletedShowPrompt(RenderOutput: RenderOutput.Default));
+                return new CompletedShowPrompt(RenderOutput: RenderOutput.Default).AsTask();
             },
         };
 }

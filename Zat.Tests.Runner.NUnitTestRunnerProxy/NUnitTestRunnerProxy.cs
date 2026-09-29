@@ -1,11 +1,11 @@
 namespace Zat.Tests.Runner.NUnitTestRunnerProxy;
 
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using DevKit.Core.Extensions;
 using DevKit.Core.Extensions.Types;
 
 using NUnit;
@@ -31,24 +31,15 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
 {
     private const string NotRunMessage = "Not run";
 
-    // TODO: NEMAPOVAT! Klient si názvy testovacích sad mapuje sám.
-    private static readonly ImmutableDictionary<string, string> TestSuiteNamesMap =
-        new Dictionary<string, string>
-        {
-            { "PdpClientTests", "Testy PDP klient" },
-            { "Pertinax6Tests", "Testy Pertinax6" },
-            { "RuntimeTests", "Testy Runtime" },
-        }.ToImmutableDictionary();
-
     private readonly NUnitTestAssemblyRunner runner = new(new DefaultTestAssemblyBuilder());
 
     /// <inheritdoc/>
     public Task<bool> GetIsAssemblyLoadedAsync(CancellationToken cancellationToken = default)
-        => Task.FromResult(this.runner.IsTestLoaded);
+        => this.runner.IsTestLoaded.AsTask();
 
     /// <inheritdoc/>
     public Task<bool> GetIsTestRunningAsync(CancellationToken cancellationToken = default)
-        => Task.FromResult(this.runner.IsTestRunning);
+        => this.runner.IsTestRunning.AsTask();
 
     /// <inheritdoc/>
     public Task<TestSuiteEntity[]> LoadTestAssemblyAsync(
@@ -63,10 +54,12 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
                 // process (see <PlatformTarget>x86</PlatformTarget> in the proxy/test
                 // project); otherwise the assembly is reported as NotRunnable with a
                 // BadImageFormatException and no tests are discovered.
-                var testAssemblyElement = this.runner.Load(assemblyDllPath, new Dictionary<string, object>
-                {
-                    { FrameworkPackageSettings.WorkDirectory, Path.GetDirectoryName(assemblyDllPath) },
-                });
+                var testAssemblyElement = this.runner.Load(
+                    assemblyDllPath,
+                    new Dictionary<string, object>
+                    {
+                        { FrameworkPackageSettings.WorkDirectory, Path.GetDirectoryName(assemblyDllPath) },
+                    });
 
                 return testAssemblyElement.Tests.Any() ? [.. CollectTestSuiteEntities(testAssemblyElement.Tests[0])] : [];
             },
@@ -123,16 +116,26 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
     private static TestStatus MapStatus(ResultState resultState)
         => resultState.Status switch
         {
-            NUnitTestStatus.Passed => TestStatus.Passed,
-            NUnitTestStatus.Inconclusive => TestStatus.Inconclusive,
-            NUnitTestStatus.Warning => TestStatus.Warning,
-            NUnitTestStatus.Failed when resultState.Label == ResultState.Error.Label => TestStatus.Error,
-            NUnitTestStatus.Failed when resultState.Label == ResultState.NotRunnable.Label => TestStatus.Invalid,
-            NUnitTestStatus.Failed when resultState.Label == ResultState.Cancelled.Label => TestStatus.Error,
-            NUnitTestStatus.Failed => TestStatus.Failure,
-            NUnitTestStatus.Skipped when resultState.Label == ResultState.Ignored.Label => TestStatus.Ignored,
-            NUnitTestStatus.Skipped when resultState.Label == ResultState.Explicit.Label => TestStatus.Explicit,
-            NUnitTestStatus.Skipped => TestStatus.Skipped,
+            NUnitTestStatus.Passed
+                => TestStatus.Passed,
+            NUnitTestStatus.Inconclusive
+                => TestStatus.Inconclusive,
+            NUnitTestStatus.Warning
+                => TestStatus.Warning,
+            NUnitTestStatus.Failed when resultState.Label == ResultState.Error.Label
+                => TestStatus.Error,
+            NUnitTestStatus.Failed when resultState.Label == ResultState.NotRunnable.Label
+                => TestStatus.Invalid,
+            NUnitTestStatus.Failed when resultState.Label == ResultState.Cancelled.Label
+                => TestStatus.Skipped,
+            NUnitTestStatus.Failed
+                => TestStatus.Failure,
+            NUnitTestStatus.Skipped when resultState.Label == ResultState.Ignored.Label
+                => TestStatus.Ignored,
+            NUnitTestStatus.Skipped when resultState.Label == ResultState.Explicit.Label
+                => TestStatus.Explicit,
+            NUnitTestStatus.Skipped
+                => TestStatus.Skipped,
             _ => TestStatus.Unknown,
         };
 
@@ -258,7 +261,7 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
             return new TestSuiteEntity(
                 [.. CollectTestFixtureEntities(x, testType)],
                 testType,
-                name: TestSuiteNamesMap.TryGetValue(x.Name, out var testSuiteName) ? testSuiteName : x.Name,
+                name: x.Name,
                 executionPath: x.FullName);
         });
 

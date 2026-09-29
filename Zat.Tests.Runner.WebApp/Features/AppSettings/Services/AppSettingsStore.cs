@@ -3,7 +3,7 @@ namespace Zat.Tests.Runner.WebApp.Features.AppSettings.Services;
 using Microsoft.Extensions.Hosting;
 
 using Zat.Tests.Runner.WebApp.Application.Paths;
-using Zat.Tests.Runner.WebApp.Shared.Logging;
+using Zat.Tests.Runner.Common.Net.Logging;
 using Zat.Tests.Runner.WebApp.Shared.Storage;
 using Zat.Tests.Runner.WebApp.Shared.Stores;
 using Zat.Tests.Runner.WebApp.Shared.Stores.AppSettings;

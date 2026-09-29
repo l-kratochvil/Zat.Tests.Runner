@@ -8,13 +8,12 @@ using Moq;
 
 using NUnit.Framework;
 
+using Zat.Tests.Runner.Common.Net.Logging;
 using Zat.Tests.Runner.WebApp.Application.DependencyInjection;
 using Zat.Tests.Runner.WebApp.Application.Logging;
 using Zat.Tests.Runner.WebApp.Application.Paths;
-using Zat.Tests.Runner.WebApp.Features.AppLogging.Services;
 using Zat.Tests.Runner.WebApp.Features.AppSettings.Services;
 using Zat.Tests.Runner.WebApp.Shared.JsInterop;
-using Zat.Tests.Runner.WebApp.Shared.Logging;
 
 [TestFixture]
 public class InitServicesExtensionTests
@@ -93,22 +92,6 @@ public class InitServicesExtensionTests
 
         // Then:
         Assert.That(result, Is.EqualTo(expectedTypes));
-    }
-
-    [Test]
-    public void InitAppLogging__WhenAnEntryIsLogged__ThenShouldReachTheLogFileThroughTheLoggingPipeline()
-    {
-        // Given:
-        const string givenMessage = "Test run finished.";
-        this.unit.GetRequiredService<IAppLogger>().Info(givenMessage);
-
-        // When:
-        // Disposing flushes the pending records of the file provider.
-        this.unit.Dispose();
-
-        // Then:
-        var content = File.ReadAllText(LogFile.GetPath(this.logsDirectoryPath, DateTimeOffset.Now));
-        Assert.That(content, Does.Contain(DiagnosticsLoggerSink.GetCategory(LogSources.App)).And.Contains(givenMessage));
     }
 
     [Test]

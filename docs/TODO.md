@@ -29,6 +29,8 @@
 - Refactor TestDiscovery feature
 - Rozšíření testů pro komponenty DataContext, BinindgInput, BindingSelect, BindingCheckbox
 - Email notifikace (po dokončení testu)
+- TuiApp:
+  - Migrace do Terminal.Gui?
 
 ## LoPrio
 
@@ -129,6 +131,15 @@
 
 ## MidPrio - Detaily
 
+### Migrace do Terminal.Gui
+
+- Agent: Vytvořit nejprve prázdný prototyp UI (bez chování)
+- UI inspirované WebApp
+- Vytvoří wireframe/screenshot WebApp?
+- Šel by použít viewmodel WebApp?
+
+## LoPrio - Detaily
+
 ### Rozšíření testů pro komponenty DataContext, BinindgInput, BindingSelect, BindingCheckbox
 
 - Rozšířit o testy:
@@ -141,8 +152,6 @@
 
 - Aplikace by se před testem pustila s mock službami (např INunitRunnerProxy)
 - Spousta dosavadních testů by se pak asi mohla vyhodit
-
-## LoPrio - Detaily
 
 ### Změna "Main" v menu na ikonku "home"
 

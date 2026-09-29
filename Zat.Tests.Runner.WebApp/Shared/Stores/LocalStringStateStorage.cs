@@ -4,7 +4,7 @@ using Fluxor.Persist.Storage;
 
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
-using Zat.Tests.Runner.WebApp.Shared.Logging;
+using Zat.Tests.Runner.Common.Net.Logging;
 using Zat.Tests.Runner.WebApp.Shared.Storage;
 
 public class LocalStringStateStorage(

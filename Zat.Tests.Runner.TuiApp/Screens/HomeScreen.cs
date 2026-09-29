@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.TuiApp.Common;
 using Zat.Tests.Runner.TuiApp.Stores;
-using Zat.Z2xxTests.Common;
 
 internal sealed class HomeScreen(
     TestRunConfigStore testRunConfigStore,
@@ -156,7 +155,7 @@ internal sealed class HomeScreen(
             yield break;
         }
 
-        // Enable Test Link reporting choice
+        // Enable TestLink reporting choice
         if (Choice.InitChoice<IScreen>(
                 enableTestLinkReportingPromptScreen,
                 Resources.EnableTestLinkReporting_PromptText,

@@ -8,7 +8,7 @@ internal static class CommonUtils
     /// <typeparam name="T">Type of the object to pick.</typeparam>
     /// <param name="reference">Reference to the object to pick.</param>
     /// <returns>Picked object.</returns>
-    internal static T? PickRef<T>(ref T? reference) where T : class
+    public static T? PickRef<T>(ref T? reference) where T : class
     {
         var value = reference;
         reference = null;

@@ -1,6 +1,4 @@
-namespace Zat.Tests.Runner.WebApp.Features.AppLogging.Models;
-
-using Zat.Tests.Runner.WebApp.Shared.Logging;
+namespace Zat.Tests.Runner.Common.Net.Logging;
 
 /// <summary>
 /// One record in the application log.

@@ -3,8 +3,8 @@
 
 @using Microsoft.Extensions.Options
 @using Zat.Tests.Runner.WebApp.Application.Logging
-@using Zat.Tests.Runner.WebApp.Features.AppLogging.Models
-@using Zat.Tests.Runner.WebApp.Features.AppLogging.Services
+@using Zat.Tests.Runner.Common.Net.Logging
+@using Zat.Tests.Runner.Common.Net.Logging
 
 @implements IAsyncDisposable
 
@@ -95,7 +95,7 @@
     private IReadOnlyList<LogEntry> entries = [];
     private ElementReference entriesElement;
     private JsModuleInterop? jsModuleInterop;
-    
+
     private System.Threading.Timer? refreshTimer;
     private volatile bool hasNewEntries;
     private bool isCollapsed;

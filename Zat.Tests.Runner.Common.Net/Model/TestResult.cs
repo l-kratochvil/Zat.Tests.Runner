@@ -34,6 +34,12 @@ public record TestResult(
     private TestStatus? overallStatus;
 
     /// <summary>
+    /// Gets a value indicating whether the test entity has failed.
+    /// </summary>
+    public bool Failed
+        => this.FailedResults.Length > 0;
+
+    /// <summary>
     /// Gets the overall status of the test result, taking the statuses of test suites and test fixtures into account
     /// as well as the statuses of test cases.
     /// </summary>
@@ -117,10 +123,7 @@ public record TestResult(
     /// or <see cref="TestStatus.Invalid"/>.
     /// </summary>
     public TestCaseResult[] FailedResults
-        => field ??= this.GetTestCaseResults(
-            TestStatus.Failure,
-            TestStatus.Error,
-            TestStatus.Invalid);
+        => field ??= [..this.TestCaseResults.Where(x => x.Failed)];
 
     /// <summary>
     /// Gets the test case results that were not run: with a status of <see cref="TestStatus.Skipped"/>,

@@ -1,11 +1,10 @@
-namespace Zat.Tests.Runner.WebApp.Features.AppLogging.Services;
+namespace Zat.Tests.Runner.WebApp.Application.Logging;
 
 using System.Collections.Concurrent;
 
 using Microsoft.Extensions.Logging;
 
-using Zat.Tests.Runner.WebApp.Features.AppLogging.Models;
-using Zat.Tests.Runner.WebApp.Shared.Logging;
+using Zat.Tests.Runner.Common.Net.Logging;
 
 /// <summary>
 /// Mirrors every application log entry into <see cref="ILogger"/>, so that the entries reach the

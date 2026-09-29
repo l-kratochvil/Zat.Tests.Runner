@@ -2,11 +2,9 @@ namespace Zat.Tests.Runner.WebApp.Application.DependencyInjection;
 
 using Microsoft.Extensions.DependencyInjection;
 
-using Zat.Tests.Runner.WebApp.Features.AppLogging.Services;
 using Zat.Tests.Runner.WebApp.Features.AppSettings.Services;
 using Zat.Tests.Runner.WebApp.Features.TestConfiguration.Components;
 using Zat.Tests.Runner.WebApp.Features.TestDiscovery.Services;
-using Zat.Tests.Runner.WebApp.Shared.Logging;
 using Zat.Tests.Runner.WebApp.Shared.Stores.AppSettings;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
 
@@ -19,20 +17,9 @@ public static class InitFeaturesExtensions
     {
         public IServiceCollection InitFeatures()
             => services
-                .InitAppLogging()
                 .InitAppSettings()
                 .InitTestDiscovery()
                 .InitTestConfiguration();
-
-        private IServiceCollection InitAppLogging()
-            => services
-                .AddSingleton<IAppLoggerSink, DiagnosticsLoggerSink>()
-                .AddSingleton<IAppLoggerFactory, AppLoggerFactory>()
-                .AddSingleton(static provider =>
-                    provider
-                        .GetRequiredService<IAppLoggerFactory>()
-                        .CreateLogger(LogSources.App))
-                .AddSingleton<IAppLoggerHub, AppLoggerHub>();
 
         private IServiceCollection InitTestDiscovery()
             => services

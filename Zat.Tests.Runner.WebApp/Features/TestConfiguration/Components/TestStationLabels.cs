@@ -24,7 +24,7 @@ public static class TestStationLabels
             [HwAssemblyType.HW02_BB1M] = "HW02 - BB1M",
             [HwAssemblyType.HW02_BB37M] = "HW02 - BB37M",
             [HwAssemblyType.HW03] = "HW03",
-            [HwAssemblyType.HW02_BD1M] = "HW04 - BD1M",
+            [HwAssemblyType.HW04_BD1M] = "HW04 - BD1M",
         };
 
     /// <summary>

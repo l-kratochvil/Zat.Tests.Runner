@@ -1,7 +1,7 @@
 namespace Zat.Tests.Runner.WebApp.Shared.Storage;
 
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
-using Zat.Tests.Runner.WebApp.Shared.Logging;
+using Zat.Tests.Runner.Common.Net.Logging;
 
 /// <typeparam name="TData">Shape of the remembered value.</typeparam>
 /// <param name="storageName">Key <typeparamref name="TData"/> is remembered under.</param>

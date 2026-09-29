@@ -1,11 +1,10 @@
 namespace Zat.Tests.Runner.WebApp.Shared.Stores.NUnitTestRunner;
 
 using Microsoft.Extensions.Hosting;
-
 using Zat.Tests.Runner.Common.Model;
+using Zat.Tests.Runner.Common.Net.Logging;
 using Zat.Tests.Runner.Common.Services;
 using Zat.Tests.Runner.WebApp.Application.Paths;
-using Zat.Tests.Runner.WebApp.Shared.Logging;
 
 /// <summary>
 /// Store of test suites discovered from the test machine when the application starts.
@@ -23,7 +22,7 @@ public sealed class NUnitTestRunnerStore(
     : INUnitTestRunnerStore, IHostedService
 {
     // private const string TestAssemblyPath =
-    //    @"c:\Users\l-kratochvil\source\repos\Zat.Tests.Runner\Tests\NUnitTestAssembly.Net481\bin\Debug\net481\NUnitTestAssembly.Net481.dll";
+    //  @"c:\Users\l-kratochvil\source\repos\Zat.Tests.Runner\Tests\NUnitTestAssembly.Net481\bin\Debug\net481\NUnitTestAssembly.Net481.dll";
 
     private readonly IAppLogger logger = loggerFactory.CreateLogger(LogSources.TestRun);
 

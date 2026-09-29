@@ -1,6 +1,4 @@
-namespace Zat.Tests.Runner.WebApp.Features.AppLogging.Services;
-
-using Zat.Tests.Runner.WebApp.Features.AppLogging.Models;
+namespace Zat.Tests.Runner.Common.Net.Logging;
 
 /// <summary>
 /// The application log buffer shared by every browser connected to this server.

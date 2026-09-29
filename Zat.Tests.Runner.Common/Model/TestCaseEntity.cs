@@ -11,5 +11,8 @@ public class TestCaseEntity(
         name: name,
         executionPath: executionPath)
 {
-    public string Id { get; set; } = id;
+    /// <summary>
+    /// Gets the unique identifier of the test case.
+    /// </summary>
+    public string Id { get; } = id;
 }

@@ -7,6 +7,7 @@ internal class ExitScreen(
     : ScreenBase(homeScreen, exitScreen, settingsScreen)
 {
     // TODO:
+
     /// <inheritdoc/>
     protected override ScreenRenderer CreateRenderer()
         => new()

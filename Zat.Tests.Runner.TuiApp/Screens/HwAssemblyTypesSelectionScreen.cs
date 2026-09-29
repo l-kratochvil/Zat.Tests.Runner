@@ -20,19 +20,24 @@ internal class HwAssemblyTypesSelectionScreen(
         {
             Main = ct =>
             {
-                var prompt = new MultiSelectionPrompt<HwAssemblyType>()
-                    .Title(Resources.HwAssemblyTypes_ChoiceText.AsPromptTitle())
-                    .MoreChoicesText(SharedTexts.MoreChoicesHelpText)
-                    .PageSize(10)
-                    .InstructionsText(SharedTexts.InstructionsHelpText)
-                    .AddChoices(Enum.GetValues<HwAssemblyType>());
-
-                testRunConfigStore
-                    .HwAssemblyTypes?
-                    .ForEach(entity => prompt.Select(entity));
-
                 return ShowPromptAsync(
-                    prompt,
+                    () =>
+                    {
+                        var prompt = new MultiSelectionPrompt<HwAssemblyType>()
+                            .Title(Resources.HwAssemblyTypes_ChoiceText.AsPromptTitle())
+                            .MoreChoicesText(SharedTexts.MoreChoicesHelpText)
+                            .PageSize(10)
+                            .InstructionsText(SharedTexts.InstructionsHelpText)
+                            .AddChoices(Enum
+                                .GetValues<HwAssemblyType>()
+                                .Where(x => x is not HwAssemblyType.Unknown));
+
+                        testRunConfigStore
+                            .HwAssemblyTypes?
+                            .ForEach(entity => prompt.Select(entity));
+
+                        return prompt;
+                    },
                     selectedHwAssemblyType =>
                     {
                         testRunConfigStore.HwAssemblyTypes = [.. selectedHwAssemblyType];

@@ -1,7 +1,6 @@
 namespace Zat.Tests.Runner.WebApp.Features.AppLogging.Components;
 
-using Zat.Tests.Runner.WebApp.Features.AppLogging.Models;
-using Zat.Tests.Runner.WebApp.Shared.Logging;
+using Zat.Tests.Runner.Common.Net.Logging;
 
 /// <summary>
 /// Which severities and log sources are shown in the log panel.

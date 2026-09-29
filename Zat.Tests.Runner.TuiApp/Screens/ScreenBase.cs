@@ -30,7 +30,7 @@ internal abstract class ScreenBase : IScreen
         this.ExitScreenLazy = exitScreen;
         this.SettingsScreenLazy = settingsScreen;
 
-        this.lazyCommands = new Lazy<ICommand[]>(() => [..this.InitCommands()]);
+        this.lazyCommands = new Lazy<ICommand[]>(() => [.. this.InitCommands()]);
 
         this.lazyRenderer = new Lazy<ScreenRenderer>(
             () => this.CreateRenderer().Pipe(renderer =>
@@ -104,6 +104,18 @@ internal abstract class ScreenBase : IScreen
             true => new CompletedShowPrompt(onSucces(data)),
             false => new InterruptedShowPrompt(),
         };
+
+    protected static async Task<ShowPromptResult> ShowPromptAsync<T>(
+        Func<IPrompt<T>> prompt,
+        Func<T, RenderOutput> onSucces,
+        CancellationToken ct,
+        Func<T, ValidationResult>? validator = null)
+        => await ConsoleUtils.ShowPromptAsync(prompt, ct, validator)
+            switch
+            {
+                (true, { } promptResult) => new CompletedShowPrompt(onSucces(promptResult)),
+                (false, _) => new InterruptedShowPrompt(),
+            };
 
     protected static async Task<ShowPromptResult> ShowPromptAsync<T>(
         IPrompt<T> prompt,

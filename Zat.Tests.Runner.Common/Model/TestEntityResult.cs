@@ -26,4 +26,13 @@ public abstract record TestEntityResult(
     /// Gets the detail of the outcome, <see langword="null"/> when there is nothing to say.
     /// </summary>
     public Detail? Detail { get; } = Detail;
+
+    /// <summary>
+    /// Gets a value indicating whether the test entity has failed.
+    /// </summary>
+    public bool Failed
+        => this.Status is
+            TestStatus.Failure or
+            TestStatus.Error or
+            TestStatus.Invalid;
 }

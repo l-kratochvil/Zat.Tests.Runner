@@ -1,25 +1,30 @@
 namespace Zat.Tests.Runner.Common.Net.Services;
 
-using System.Diagnostics;
-
 using DevKit.Core.Extensions;
 
+using Microsoft.AspNetCore.StaticFiles;
+
 using Zat.Tests.Runner.Common.Model;
+using Zat.Tests.Runner.Common.Net.Logging;
 using Zat.Tests.Runner.Common.Net.Model;
+using Zat.Z2xxTests.Common;
 
 public class TestLinkResultHandler(
     ITestLink testLink,
-    TestLinkResultHandler.IContext context)
+    TestLinkResultHandler.IContext context,
+    IAppLoggerFactory loggerFactory)
     : ITestResultHandler
 {
     private const int RuntimeTestsTestPlanId = 9560;
     private const int ApplicationTestsTestPlanId = 10130;
 
+    private static readonly FileExtensionContentTypeProvider FileExtensionContentTypeProvider = new();
+
+    private readonly IAppLogger logger = loggerFactory.CreateLogger(LogSources.Instance.TestLink);
+
     /// <inheritdoc />
     public void Handle(TestResult testResult)
     {
-        Debug.Fail("TODO");
-
         if (!context.IsTestLinkReportingEnabled)
         {
             return;
@@ -82,6 +87,12 @@ public class TestLinkResultHandler(
 
         foreach (var testCaseResult in testResult.TestCaseResults)
         {
+            if (testCaseResult.Status is TestStatus.Unknown)
+            {
+                // TODO: What to do next when we don't know the result?
+                logger.Warning($"Test case with ID '{testCaseResult.Id}' has unknown status");
+            }
+
             var testCaseExternalId = $"Z200-{testCaseResult.Id}";
             var testCaseId = testLink.GetTestCaseByExternalId(testCaseExternalId).Id;
             var reportTestCaseResult = testLink.ReportTestCaseResult(
@@ -95,12 +106,10 @@ public class TestLinkResultHandler(
                         TestStatus.Invalid => "f",
                     TestStatus.Skipped or
                         TestStatus.Ignored or
-                        TestStatus.Explicit => "b",
-
-                    // TODO: Map to TestLink statuses
-                    TestStatus.Inconclusive or
+                        TestStatus.Explicit or
+                        TestStatus.Inconclusive or
                         TestStatus.Warning or
-                        TestStatus.Unknown => string.Empty,
+                        TestStatus.Unknown => "b",
                     _ => throw new NotSupportedException(testCaseResult.Status.ToString()),
                 },
                 platformName: string.Empty,
@@ -108,14 +117,35 @@ public class TestLinkResultHandler(
                 notes: $"Message: {testCaseResult.Detail?.Message}\nStackTrace: {testCaseResult.Detail?.StackTrace}",
                 buildId: testBuild.Id);
 
-            // TODO
-            // testLink.UploadExecutionAttachment(
-            //     executionId: reportTestCaseResult.Id,
-            //     filename: "screenshot.png", // TODO
-            //     fileType: "image/png", // TODO
-            //     content: [], // TODO
-            //     title: "Screenshot", // TODO
-            //     description: "Attached screenshot for the test case result"); // TODO
+            // Attach failure screenshot only for failed test cases
+            if (!testCaseResult.Failed)
+            {
+                continue;
+            }
+
+            var failureScreenshotName = Paths.FileNames.MakeFailureScreenshotName(
+                testCaseId: testCaseExternalId,
+                hwAssemblyType: testResult.TestedHwAssemblyType);
+            var failureScreenshotPath = Path.Combine(Paths.Directories.Current, failureScreenshotName);
+            if (!File.Exists(failureScreenshotPath))
+            {
+                logger.Error($"Failure screenshot not found at path: {failureScreenshotPath}");
+                continue;
+            }
+
+            var failureScreenshotFileBytes = File.ReadAllBytes(failureScreenshotPath);
+            var fileType = FileExtensionContentTypeProvider.TryGetContentType(
+                failureScreenshotPath, out var contentType)
+                ? contentType
+                : "application/octet-stream";
+
+            testLink.UploadExecutionAttachment(
+                executionId: reportTestCaseResult.Id,
+                filename: failureScreenshotName,
+                fileType: fileType,
+                content: failureScreenshotFileBytes,
+                title: "Screenshot", // TODO: Better text?
+                description: "Attached screenshot for the test case result"); // TODO: Better text?
         }
     }
 

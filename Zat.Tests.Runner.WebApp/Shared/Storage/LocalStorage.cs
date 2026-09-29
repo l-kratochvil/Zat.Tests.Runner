@@ -2,7 +2,7 @@ namespace Zat.Tests.Runner.WebApp.Shared.Storage;
 
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
-using Zat.Tests.Runner.WebApp.Shared.Logging;
+using Zat.Tests.Runner.Common.Net.Logging;
 
 public class LocalStorage<TData>(
     ProtectedLocalStorage protectedLocalStorage,

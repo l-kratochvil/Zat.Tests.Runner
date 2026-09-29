@@ -3,10 +3,7 @@ namespace Zat.Tests.Runner.WebApp.Tests.AppLogging;
 using Moq;
 
 using NUnit.Framework;
-
-using Zat.Tests.Runner.WebApp.Features.AppLogging.Models;
-using Zat.Tests.Runner.WebApp.Features.AppLogging.Services;
-using Zat.Tests.Runner.WebApp.Shared.Logging;
+using Zat.Tests.Runner.Common.Net.Logging;
 
 [TestFixture]
 public class AppLoggerTests

@@ -24,7 +24,7 @@ internal partial class RuntimeVersionPromptScreen(
                 if (installedRuntimeVersions.Length == 0)
                 {
                     ConsoleUtils.WaitForAnyKeyPress(Resources.NoRuntimesFoundUnderIdeInstallFolder_Message);
-                    return Task.FromResult<ShowPromptResult>(CompletedShowPrompt.Default);
+                    return CompletedShowPrompt.Default.AsTask();
                 }
 
                 var prompt = new SelectionPrompt<string>()

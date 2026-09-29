@@ -1,5 +1,6 @@
 namespace Zat.Tests.Runner.Common.Net.Services;
 
+using DevKit.Core.Extensions;
 using Zat.Z2xxTests.Common.Model;
 using Zat.Z2xxTests.Common.Services;
 
@@ -9,5 +10,5 @@ public class TestRunnerBridge(
 {
     /// <inheritdoc/>
     public Task<TestConfig> GetTestConfigAsync()
-        => Task.FromResult(testConfig);
+        => testConfig.AsTask();
 }

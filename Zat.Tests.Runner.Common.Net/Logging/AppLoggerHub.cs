@@ -1,9 +1,6 @@
-namespace Zat.Tests.Runner.WebApp.Features.AppLogging.Services;
+namespace Zat.Tests.Runner.Common.Net.Logging;
 
 using System.Threading;
-
-using Zat.Tests.Runner.WebApp.Features.AppLogging.Models;
-using Zat.Tests.Runner.WebApp.Shared.Logging;
 
 /// <summary>
 /// In-memory log buffer that mirrors entries to the registered sinks.
@@ -63,9 +60,8 @@ public sealed class AppLoggerHub : IAppLoggerHub
 
     /// <inheritdoc/>
     public void ReportFailure(string message)
-    {
-        this.AppendToBuffer(new LogEntry(DateTimeOffset.Now, LogSeverity.Error, LogSources.App, message));
-    }
+        => this.AppendToBuffer(new LogEntry(
+            DateTimeOffset.Now, LogSeverity.Error, LogSources.App, message));
 
     private void AppendToBuffer(LogEntry entry)
     {

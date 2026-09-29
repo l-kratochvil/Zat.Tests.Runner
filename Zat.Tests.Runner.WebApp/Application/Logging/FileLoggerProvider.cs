@@ -8,7 +8,8 @@ using Serilog;
 using Serilog.Core;
 using Serilog.Extensions.Logging;
 using Zat.Tests.Runner.WebApp.Application.Paths;
-using ILogger = ILogger;
+
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 /// <summary>
 /// An <see cref="ILoggerProvider"/> that writes diagnostics to the log file.
@@ -25,8 +26,6 @@ public sealed class FileLoggerProvider : ILoggerProvider
     private readonly ConcurrentDictionary<string, ILogger> loggers = new(StringComparer.Ordinal);
     private readonly Logger fileLogger;
     private readonly SerilogLoggerProvider provider;
-
-    private readonly Lock gate = new();
 
     private bool disposed;
 

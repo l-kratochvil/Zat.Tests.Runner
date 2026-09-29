@@ -44,12 +44,12 @@ internal static class ConsoleUtils
     /// Shows the prompt and returns the result.
     /// </summary>
     /// <typeparam name="TResult">Type of the result.</typeparam>
-    /// <param name="prompt">Prompt to show.</param>
+    /// <param name="promptFactory">Factory function to create the prompt to show.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <param name="validator">Optional validator function to validate the result.</param>
     /// <returns>False if the prompt was not sucessful (interrupted), true otherwise.</returns>
     public static async Task<(bool Completed, TResult? Result)> ShowPromptAsync<TResult>(
-        IPrompt<TResult> prompt, CancellationToken ct, Func<TResult, ValidationResult>? validator = null)
+        Func<IPrompt<TResult>> promptFactory, CancellationToken ct, Func<TResult, ValidationResult>? validator = null)
     {
         var result = default(TResult?);
 
@@ -61,7 +61,7 @@ internal static class ConsoleUtils
 
             while (!validationResult.Successful)
             {
-                result = await prompt.ShowAsync(AnsiConsole.Console, ct)
+                result = await promptFactory().ShowAsync(AnsiConsole.Console, ct)
                          ?? throw new InvalidOperationException("Null prompt returned");
                 validationResult = validator?.Invoke(result) ?? ValidationResult.Success();
 
@@ -83,6 +83,18 @@ internal static class ConsoleUtils
 
         return (Completed: completed, Result: result);
     }
+
+    /// <summary>
+    /// Shows the prompt and returns the result.
+    /// </summary>
+    /// <typeparam name="TResult">Type of the result.</typeparam>
+    /// <param name="prompt">Prompt to show.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <param name="validator">Optional validator function to validate the result.</param>
+    /// <returns>False if the prompt was not sucessful (interrupted), true otherwise.</returns>
+    public static async Task<(bool Completed, TResult? Result)> ShowPromptAsync<TResult>(
+        IPrompt<TResult> prompt, CancellationToken ct, Func<TResult, ValidationResult>? validator = null)
+        => await ShowPromptAsync(() => prompt, ct, validator);
 
     public static void WaitForAnyKeyPress(string text)
     {

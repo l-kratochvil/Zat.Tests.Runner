@@ -1,6 +1,4 @@
-namespace Zat.Tests.Runner.WebApp.Features.AppLogging.Services;
-
-using Zat.Tests.Runner.WebApp.Shared.Logging;
+namespace Zat.Tests.Runner.Common.Net.Logging;
 
 /// <summary>
 /// Creates application loggers writing into the shared hub.

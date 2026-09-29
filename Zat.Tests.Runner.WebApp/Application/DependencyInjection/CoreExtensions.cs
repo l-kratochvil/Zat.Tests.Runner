@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 /// <summary>
 /// Initialisation of the services that ask for it.
 /// </summary>
-public static class InitDependencyInjectionExtensions
+public static class CoreExtensions
 {
     /// <param name="provider">Service provider to extend.</param>
     extension(IServiceProvider provider)

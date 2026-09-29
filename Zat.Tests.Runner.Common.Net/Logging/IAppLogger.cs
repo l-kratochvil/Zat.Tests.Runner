@@ -1,4 +1,4 @@
-namespace Zat.Tests.Runner.WebApp.Shared.Logging;
+namespace Zat.Tests.Runner.Common.Net.Logging;
 
 /// <summary>
 /// Writes log entries under one log source.

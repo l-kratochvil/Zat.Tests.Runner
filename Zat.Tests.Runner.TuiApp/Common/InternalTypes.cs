@@ -45,6 +45,11 @@ internal static class InternalTypes
     {
         public static CompletedShowPrompt Default
             => new(RenderOutput.Default);
+
+        internal async Task<ShowPromptResult> AsTask()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public record InterruptedShowPrompt : ShowPromptResult;

@@ -2,8 +2,6 @@ namespace Zat.Tests.Runner.WebApp.Tests.Application.Logging;
 
 using NUnit.Framework;
 
-using Zat.Tests.Runner.WebApp.Application.Logging;
-
 [TestFixture]
 public class LogFileTests
 {
