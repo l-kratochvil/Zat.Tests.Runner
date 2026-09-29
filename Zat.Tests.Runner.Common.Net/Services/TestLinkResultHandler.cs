@@ -20,7 +20,7 @@ public class TestLinkResultHandler(
 
     private static readonly FileExtensionContentTypeProvider FileExtensionContentTypeProvider = new();
 
-    private readonly IAppLogger logger = loggerFactory.CreateLogger(LogSources.Instance.TestLink);
+    private readonly IAppLogger logger = loggerFactory.CreateLogger(LogSources.TestLink);
 
     /// <inheritdoc />
     public void Handle(TestResult testResult)
@@ -39,29 +39,7 @@ public class TestLinkResultHandler(
             _ => throw new NotSupportedException(testResult.TestType.ToString()),
         };
 
-        var buildName = $"IDE v{context.IdeVersion}, RT v{context.RuntimeVersion}";
-
-        if (context.BetaVersion is not null)
-        {
-            buildName += $"(beta{context.BetaVersion})";
-        }
-
-        if (testResult.TestType is TestType.Runtime)
-        {
-            if (testResult.TestedHwAssemblyType is null)
-            {
-                throw new InvalidOperationException(
-                    $"Result has no {nameof(testResult.TestedHwAssemblyType)} " +
-                    $"but it's required for runtime tests");
-            }
-
-            buildName += $" : {testResult.TestedHwAssemblyType}";
-        }
-
-        if (context.IsDebuggingEnabled)
-        {
-            buildName += " (Debug)";
-        }
+        var buildName = MakeBuildName(context, testResult);
 
         if (testLink.GetBuildsForTestPlan(testPlanId).All(x => x.Name != buildName))
         {
@@ -146,6 +124,48 @@ public class TestLinkResultHandler(
                 content: failureScreenshotFileBytes,
                 title: "Screenshot", // TODO: Better text?
                 description: "Attached screenshot for the test case result"); // TODO: Better text?
+        }
+
+
+        static string MakeBuildName(IContext context, TestResult testResult)
+        {
+            var buildName = $"IDE v{context.IdeVersion}, RT v{context.RuntimeVersion}";
+
+            if (context.BetaVersion is not null)
+            {
+                buildName += $"(beta{context.BetaVersion})";
+            }
+
+            if (testResult.TestType is TestType.Runtime)
+            {
+                if (testResult.TestedHwAssemblyType is null)
+                {
+                    throw new InvalidOperationException(
+                        $"Result has no {nameof(testResult.TestedHwAssemblyType)} " +
+                        $"but it's required for runtime tests");
+                }
+
+                buildName += $" : {testResult.TestedHwAssemblyType}";
+            }
+
+            if (testResult.TestType is TestType.Runtime)
+            {
+                if (testResult.TestedHwAssemblyType is null)
+                {
+                    throw new InvalidOperationException(
+                        $"Result has no {nameof(testResult.TestedHwAssemblyType)} " +
+                        $"but it's required for runtime tests");
+                }
+
+                buildName += $" : {testResult.TestedHwAssemblyType}";
+            }
+
+            if (context.IsDebuggingEnabled)
+            {
+                buildName += " (Debug)";
+            }
+
+            return buildName;
         }
     }
 
