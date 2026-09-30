@@ -8,7 +8,7 @@ using FluentValidation;
 
 using Fluxor;
 
-using Zat.Tests.Runner.Common.Net.Logging;
+using Zat.Tests.Runner.Common.Net.Application.Logging;
 using Zat.Tests.Runner.WebApp.Shared.Stores.AppSettings;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
 using Zat.Tests.Runner.WebApp.Shared.ViewModel;
@@ -28,20 +28,19 @@ public partial class TestConfigurationViewModel : ViewModelBase, IInitializable
 {
     private readonly IState<TestConfigurationState> state;
     private readonly IAppSettingsStore appSettingsStore;
-    private readonly IAppLogger logger;
+    private readonly ILogger logger;
     private readonly IDispatcher dispatcher;
 
     public TestConfigurationViewModel(
         IState<TestConfigurationState> state,
         IAppSettingsStore appSettingsStore,
-        IAppLoggerFactory loggerFactory,
+        ILogger<LogSources.App> logger,
         IDispatcher dispatcher)
     {
-        this.dispatcher = dispatcher;
         this.state = state;
         this.appSettingsStore = appSettingsStore;
-
-        this.logger = loggerFactory.CreateLogger(LogSources.App);
+        this.logger = logger;
+        this.dispatcher = dispatcher;
 
         this.HasErrorsChanged +=
             hasErrors => this.dispatcher.Dispatch(
@@ -162,10 +161,12 @@ public partial class TestConfigurationViewModel : ViewModelBase, IInitializable
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
-            this.logger.Warning(
-                "The IDE install folder could not be read, so there are no runtime versions to " +
-                $"choose from ({installFolderPath}).",
-                exception.ToString());
+            this.logger.Log(
+                LogLevel.Warning,
+                "Error while reading the IDE install folder {InstallFolderPath} - no runtime versions available." +
+                "\nException: {Exception}",
+                installFolderPath,
+                exception);
 
             return [];
         }

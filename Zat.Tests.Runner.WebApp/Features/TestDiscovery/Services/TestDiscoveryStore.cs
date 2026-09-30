@@ -5,7 +5,6 @@ using System.Linq;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 using Zat.Tests.Runner.Common.Model;
-using Zat.Tests.Runner.Common.Net.Logging;
 using Zat.Tests.Runner.WebApp.Shared.Storage;
 using Zat.Tests.Runner.WebApp.Shared.Stores;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
@@ -21,7 +20,7 @@ using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
 /// <param name="logger">Log a storage failure is reported to.</param>
 /// <param name="protectedLocalStorage">Browser storage the selection is remembered in.</param>
 public sealed class TestDiscoveryStore(
-    IAppLogger logger,
+    ILogger logger,
     ProtectedLocalStorage protectedLocalStorage)
     : StoreBase<TestDiscoveryState>, ITestDiscoveryStore
 {

@@ -1,9 +1,7 @@
 namespace Zat.Tests.Runner.WebApp.Features.AppSettings.Services;
 
 using Microsoft.Extensions.Hosting;
-
-using Zat.Tests.Runner.WebApp.Application.Paths;
-using Zat.Tests.Runner.Common.Net.Logging;
+using Zat.Tests.Runner.Common.Net.Application.Paths;
 using Zat.Tests.Runner.WebApp.Shared.Storage;
 using Zat.Tests.Runner.WebApp.Shared.Stores;
 using Zat.Tests.Runner.WebApp.Shared.Stores.AppSettings;
@@ -20,7 +18,7 @@ using Zat.Tests.Runner.WebApp.Shared.Stores.AppSettings;
 /// </remarks>
 /// <param name="paths">Provider of the application paths, naming the settings file.</param>
 /// <param name="logger">Log the failures of the settings file are reported to.</param>
-public sealed class AppSettingsStore(IAppPathsProvider paths, IAppLogger logger)
+public sealed class AppSettingsStore(IAppPathsProvider paths, ILogger logger)
     : StoreBase<AppSettingsState>, IAppSettingsStore, IHostedService
 {
     /// <summary>

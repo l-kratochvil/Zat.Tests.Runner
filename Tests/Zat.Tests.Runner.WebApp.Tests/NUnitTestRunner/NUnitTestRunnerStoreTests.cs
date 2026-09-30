@@ -1,63 +1,34 @@
 namespace Zat.Tests.Runner.WebApp.Tests.NUnitTestRunner;
 
+using Microsoft.Extensions.Logging;
 using Moq;
 
 using NUnit.Framework;
 
 using Zat.Tests.Runner.Common.Model;
+using Zat.Tests.Runner.Common.Net.Application.Logging;
+using Zat.Tests.Runner.Common.Net.Application.Paths;
 using Zat.Tests.Runner.Common.Services;
-using Zat.Tests.Runner.WebApp.Application.Paths;
-using Zat.Tests.Runner.Common.Net.Logging;
 using Zat.Tests.Runner.WebApp.Shared.Stores.NUnitTestRunner;
 
 [TestFixture]
 public class NUnitTestRunnerStoreTests
 {
     private Mock<INUnitTestRunnerProxy> proxyMock;
-    private Mock<IAppLogger> loggerMock;
+    private Mock<ILogger<LogSources.TestRun>> loggerMock;
     private NUnitTestRunnerStore unit;
 
     [SetUp]
     public void SetUp()
     {
         this.proxyMock = new Mock<INUnitTestRunnerProxy>();
-        this.loggerMock = new Mock<IAppLogger>();
-
-        var loggerFactoryMock = new Mock<IAppLoggerFactory>();
-        loggerFactoryMock
-            .Setup(factory => factory.CreateLogger(It.IsAny<string>()))
-            .Returns(this.loggerMock.Object);
-
+        this.loggerMock = new Mock<ILogger<LogSources.TestRun>>();
         var appPathsProviderMock = new Mock<IAppPathsProvider>();
 
         this.unit = new NUnitTestRunnerStore(
             this.proxyMock.Object,
-            loggerFactoryMock.Object,
+            this.loggerMock.Object,
             appPathsProviderMock.Object);
-    }
-
-    [Test]
-    public void Logger__WhenTheStoreIsBuilt__ThenShouldWriteUnderTheTestRunSource()
-    {
-        // Given:
-        // Discovery is the test runner talking, so it belongs to the channel the tester watches for
-        // the runner rather than to the one about the application itself.
-        var givenLoggerFactoryMock = new Mock<IAppLoggerFactory>();
-        givenLoggerFactoryMock
-            .Setup(factory => factory.CreateLogger(It.IsAny<string>()))
-            .Returns(this.loggerMock.Object);
-
-        var givenAppPathsProviderMock = new Mock<IAppPathsProvider>();
-
-        // When:
-        _ = new NUnitTestRunnerStore(
-            this.proxyMock.Object,
-            givenLoggerFactoryMock.Object,
-            givenAppPathsProviderMock.Object);
-
-        // Then:
-        givenLoggerFactoryMock.Verify(
-            factory => factory.CreateLogger(LogSources.TestRun), Times.Once);
     }
 
     [Test]
@@ -118,7 +89,8 @@ public class NUnitTestRunnerStoreTests
 
         // Then:
         this.loggerMock.Verify(
-            logger => logger.Warning(
+            logger => logger.Log(
+                LogLevel.Warning,
                 It.IsAny<string>(),
                 It.Is<string>(detail => detail != null && detail.Contains(givenException.Message))),
             Times.Once);
@@ -137,9 +109,17 @@ public class NUnitTestRunnerStoreTests
         using (Assert.EnterMultipleScope())
         {
             this.loggerMock.Verify(
-                logger => logger.Info(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+                logger => logger.Log(
+                LogLevel.Information,
+                It.IsAny<string>(),
+                It.IsAny<string>()),
+                Times.Once);
             this.loggerMock.Verify(
-                logger => logger.Warning(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+                logger => logger.Log(
+                LogLevel.Warning,
+                It.IsAny<string>(),
+                It.IsAny<string>()),
+                Times.Never);
         }
     }
 

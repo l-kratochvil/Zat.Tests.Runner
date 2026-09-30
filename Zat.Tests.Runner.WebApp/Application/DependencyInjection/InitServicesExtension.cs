@@ -1,5 +1,6 @@
 namespace Zat.Tests.Runner.WebApp.Application.DependencyInjection;
 
+using CommunityToolkit.Mvvm.Messaging;
 using Fluxor;
 using Fluxor.Persist.Middleware;
 using Fluxor.Persist.Storage;
@@ -7,12 +8,11 @@ using Fluxor.Persist.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
 
-using Zat.Tests.Runner.Common.Net.Logging;
+using Zat.Tests.Runner.Common.Net.Application.Paths;
 using Zat.Tests.Runner.Common.Net.Services;
-using Zat.Tests.Runner.WebApp.Application.Logging;
-using Zat.Tests.Runner.WebApp.Application.Paths;
 using Zat.Tests.Runner.WebApp.Features.TestResultReporting.Services;
 using Zat.Tests.Runner.WebApp.Shared.JsInterop;
+using Zat.Tests.Runner.WebApp.Shared.Services;
 using Zat.Tests.Runner.WebApp.Shared.Stores;
 using Zat.Tests.Runner.WebApp.Shared.Stores.NUnitTestRunner;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
@@ -33,40 +33,17 @@ public static class InitServicesExtension
         /// <see cref="JsModuleInteropFactory"/>.
         /// </remarks>
         /// <returns>The service collection, to allow chaining.</returns>
-        public IServiceCollection InitSharedServices()
+        public IServiceCollection InitServices()
             => services
-                .InitAppOptions()
+                .InitSharedServices<AppOptions>(AppOptions.SectionName)
                 .InitFluxor()
-                .InitTestLink()
                 .InitNUnitTestRunner()
-                .InitTestRunnerEngine()
-                .InitLogging()
                 .AddScoped<IJsModuleInteropFactory, JsModuleInteropFactory>()
+                .AddScoped<ITestResultHandler, TestResultHandler>()
+                .AddScoped<TestLinkResultHandler.IContext, TestLinkResultHandlerContext>()
+                .AddScoped<WeakReferenceMessenger>()
                 .AddSingleton<BrowserLogger>()
-                .AddSingleton<IAppPathsProvider, AppPathsProvider>()
-                .AddSingleton<ITestRunnerBridgeConnector, TestRunnerBridgeConnector>();
-
-        public IServiceCollection InitAppOptions()
-        {
-            services
-                .AddOptions<AppOptions>()
-                .BindConfiguration(
-                    AppOptions.SectionName,
-                    static binderOptions => binderOptions.ErrorOnUnknownConfiguration = true)
-                .Validate(
-                    static options => !string.IsNullOrWhiteSpace(options.LocalAppDataPath)
-                                      && Path.IsPathFullyQualified(options.LocalAppDataPath),
-                    $"'{AppOptions.SectionName}:{nameof(AppOptions.LocalAppDataPath)}' has to be an absolute path.")
-                .ValidateOnStart();
-
-            return services;
-        }
-
-        private IServiceCollection InitLogging()
-        {
-            Common.Net.Logging.InitLoggingExtensions.InitLogging(services);
-            return services.AddSingleton<IAppLoggerSink, DiagnosticsLoggerSink>();
-        }
+                .AddSingleton<IAppPathsProvider, AppPathsProvider>();
 
         private IServiceCollection InitNUnitTestRunner()
             => services
@@ -90,16 +67,5 @@ public static class InitServicesExtension
                         }))
                 .AddScoped<IStringStateStorage, LocalStringStateStorage>()
                 .AddScoped<IStoreHandler, JsonStoreHandler>();
-
-        private IServiceCollection InitTestLink()
-            => services
-                .AddSingleton<ITestLink, TestLink>()
-                .AddSingleton(_ => ITestLink.Config.Default);
-
-        private IServiceCollection InitTestRunnerEngine()
-            => services
-                .AddSingleton<ITestRunnerEngine, TestRunnerEngine>()
-                .AddSingleton<ITestResultHandler, TestLinkResultHandler>()
-                .AddScoped<ITestResultHandler, TestResultHandler>();
     }
 }

@@ -3,24 +3,22 @@ namespace Zat.Tests.Runner.Common.Net.Services;
 using DevKit.Core.Extensions;
 
 using Microsoft.AspNetCore.StaticFiles;
-
+using Microsoft.Extensions.Logging;
 using Zat.Tests.Runner.Common.Model;
-using Zat.Tests.Runner.Common.Net.Logging;
+using Zat.Tests.Runner.Common.Net.Application.Logging;
 using Zat.Tests.Runner.Common.Net.Model;
 using Zat.Z2xxTests.Common;
 
 public class TestLinkResultHandler(
     ITestLink testLink,
     TestLinkResultHandler.IContext context,
-    IAppLoggerFactory loggerFactory)
+    ILogger<LogSources.TestLink> logger)
     : ITestResultHandler
 {
     private const int RuntimeTestsTestPlanId = 9560;
     private const int ApplicationTestsTestPlanId = 10130;
 
     private static readonly FileExtensionContentTypeProvider FileExtensionContentTypeProvider = new();
-
-    private readonly IAppLogger logger = loggerFactory.CreateLogger(LogSources.TestLink);
 
     /// <inheritdoc />
     public void Handle(TestResult testResult)
@@ -68,7 +66,10 @@ public class TestLinkResultHandler(
             if (testCaseResult.Status is TestStatus.Unknown)
             {
                 // TODO: What to do next when we don't know the result?
-                logger.Warning($"Test case with ID '{testCaseResult.Id}' has unknown status");
+                logger.Log(
+                    LogLevel.Warning,
+                    "Test case with ID '{TestCaseResultId}' has unknown status",
+                    testCaseResult.Id);
             }
 
             var testCaseExternalId = $"Z200-{testCaseResult.Id}";
@@ -107,7 +108,10 @@ public class TestLinkResultHandler(
             var failureScreenshotPath = Path.Combine(Paths.Directories.Current, failureScreenshotName);
             if (!File.Exists(failureScreenshotPath))
             {
-                logger.Error($"Failure screenshot not found at path: {failureScreenshotPath}");
+                logger.Log(
+                    LogLevel.Error,
+                    "Failure screenshot not found at path: {FailureScreenshotPath}",
+                    failureScreenshotPath);
                 continue;
             }
 
@@ -125,7 +129,6 @@ public class TestLinkResultHandler(
                 title: "Screenshot", // TODO: Better text?
                 description: "Attached screenshot for the test case result"); // TODO: Better text?
         }
-
 
         static string MakeBuildName(IContext context, TestResult testResult)
         {

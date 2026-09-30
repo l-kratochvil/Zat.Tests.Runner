@@ -1,4 +1,4 @@
-namespace Zat.Tests.Runner.WebApp.Application.Logging;
+namespace Zat.Tests.Runner.Common.Net.Application.Logging;
 
 /// <summary>
 /// Options that configure the file logger, bound from <c>Logging:File</c>.

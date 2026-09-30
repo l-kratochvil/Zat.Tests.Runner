@@ -1,24 +1,21 @@
-namespace Zat.Tests.Runner.WebApp.Application.Paths;
+namespace Zat.Tests.Runner.Common.Net.Application.Paths;
 
 using DevKit.Core.Interfaces;
-
 using Microsoft.Extensions.Options;
-
 using Zat.Z2xxTests.Common;
 
 /// <summary>
 /// The application paths, derived from the configured application data path.
 /// </summary>
-public sealed class AppPathsProvider : IAppPathsProvider, IInitializable
+public class AppPathsProvider : IAppPathsProvider, IInitializable
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="AppPathsProvider"/> class.
     /// </summary>
-    /// <param name="options">Options carrying the application data path.</param>
-    public AppPathsProvider(IOptions<AppOptions> options)
+    /// <param name="sharedAppOptions">The shared application options.</param>
+    public AppPathsProvider(IOptions<ISharedAppOptions> sharedAppOptions)
     {
-        var appDataPath = options.Value.LocalAppDataPath;
-
+        var localAppDataPath = sharedAppOptions.Value.LocalAppDataPath;
         this.Extensions = new AppFileExtensions(
             Log: ".log");
 
@@ -28,11 +25,11 @@ public sealed class AppPathsProvider : IAppPathsProvider, IInitializable
             MainAssemblyDll: "Zat.Z2xxTests.dll");
 
         this.Directories = new AppDirectoryPaths(
-            AppData: appDataPath,
-            Logs: Path.Combine(appDataPath, "logs"));
+            AppData: localAppDataPath,
+            Logs: Path.Combine(localAppDataPath, "logs"));
 
         this.Files = new AppFilePaths(
-            UserSettings: Path.Combine(appDataPath, "user-settings.json"),
+            UserSettings: Path.Combine(localAppDataPath, "user-settings.json"),
             MainAssemblyDll: Path.Combine(
                 Paths.Directories.TestLibs, this.FileNames.MainAssemblyDll));
     }

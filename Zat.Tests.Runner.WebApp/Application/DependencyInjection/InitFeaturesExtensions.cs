@@ -1,7 +1,8 @@
 namespace Zat.Tests.Runner.WebApp.Application.DependencyInjection;
 
 using Microsoft.Extensions.DependencyInjection;
-
+using Zat.Tests.Runner.Common.Net.Extensions;
+using Zat.Tests.Runner.WebApp.Features.AppLogging.Services;
 using Zat.Tests.Runner.WebApp.Features.AppSettings.Services;
 using Zat.Tests.Runner.WebApp.Features.TestConfiguration.Components;
 using Zat.Tests.Runner.WebApp.Features.TestDiscovery.Services;
@@ -19,7 +20,8 @@ public static class InitFeaturesExtensions
             => services
                 .InitAppSettings()
                 .InitTestDiscovery()
-                .InitTestConfiguration();
+                .InitTestConfiguration()
+                .InitAppLogging();
 
         private IServiceCollection InitTestDiscovery()
             => services
@@ -41,5 +43,9 @@ public static class InitFeaturesExtensions
         private IServiceCollection InitTestConfiguration()
             => services
                 .AddScoped<TestConfigurationViewModel>();
+
+        private IServiceCollection InitAppLogging()
+            => services
+                .AddScopedLoggerProvider<AppLoggerProvider>();
     }
 }

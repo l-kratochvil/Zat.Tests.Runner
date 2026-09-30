@@ -1,13 +1,14 @@
-namespace Zat.Tests.Runner.WebApp.Application.Logging;
+namespace Zat.Tests.Runner.Common.Net.Application.Logging;
 
 using System.Collections.Concurrent;
-using System.Threading;
+
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
 using Serilog;
 using Serilog.Core;
 using Serilog.Extensions.Logging;
-using Zat.Tests.Runner.WebApp.Application.Paths;
+using Zat.Tests.Runner.Common.Net.Application.Paths;
 
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 

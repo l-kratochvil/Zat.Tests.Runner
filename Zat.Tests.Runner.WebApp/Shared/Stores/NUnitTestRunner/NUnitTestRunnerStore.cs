@@ -2,9 +2,9 @@ namespace Zat.Tests.Runner.WebApp.Shared.Stores.NUnitTestRunner;
 
 using Microsoft.Extensions.Hosting;
 using Zat.Tests.Runner.Common.Model;
-using Zat.Tests.Runner.Common.Net.Logging;
+using Zat.Tests.Runner.Common.Net.Application.Logging;
+using Zat.Tests.Runner.Common.Net.Application.Paths;
 using Zat.Tests.Runner.Common.Services;
-using Zat.Tests.Runner.WebApp.Application.Paths;
 
 /// <summary>
 /// Store of test suites discovered from the test machine when the application starts.
@@ -14,17 +14,15 @@ using Zat.Tests.Runner.WebApp.Application.Paths;
 /// browser connects.
 /// </remarks>
 /// <param name="proxy">Proxy the test assembly is discovered through.</param>
-/// <param name="loggerFactory">Creates the log discovery failures are reported to.</param>
+/// <param name="logger">Creates the log discovery failures are reported to.</param>
 public sealed class NUnitTestRunnerStore(
     INUnitTestRunnerProxy proxy,
-    IAppLoggerFactory loggerFactory,
+    ILogger<LogSources.TestRun> logger,
     IAppPathsProvider appPathsProvider)
     : INUnitTestRunnerStore, IHostedService
 {
     // private const string TestAssemblyPath =
     //  @"c:\Users\l-kratochvil\source\repos\Zat.Tests.Runner\Tests\NUnitTestAssembly.Net481\bin\Debug\net481\NUnitTestAssembly.Net481.dll";
-
-    private readonly IAppLogger logger = loggerFactory.CreateLogger(LogSources.TestRun);
 
     /// <inheritdoc/>
     public IReadOnlyList<TestSuiteEntity> LoadedTestSuites { get; private set; } = [];
@@ -48,12 +46,17 @@ public sealed class NUnitTestRunnerStore(
 
             this.LoadedTestSuites = await proxy.LoadTestAssemblyAsync(testAssemblyPath, cancellationToken);
 
-            this.logger.Info($"Loaded {this.LoadedTestSuites.Count} test suites.", testAssemblyPath);
+            logger.Log(
+                LogLevel.Information,
+                "Loaded {LoadedTestSuitesCount} test suites from {TestAssemblyPath}.",
+                this.LoadedTestSuites.Count,
+                testAssemblyPath);
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
-            this.logger.Warning(
-                "The test assembly could not be read, so there are no tests to choose from.",
+            logger.Log(
+                LogLevel.Warning,
+                "The test assembly could not be read, so there are no tests to choose from.\nException: {Exception}",
                 exception.ToString());
         }
     }

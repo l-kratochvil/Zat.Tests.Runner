@@ -1,6 +1,6 @@
+using Zat.Tests.Runner.Common.Net.Application.Logging;
 using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.WebApp.Application.DependencyInjection;
-using Zat.Tests.Runner.WebApp.Application.Logging;
 using Zat.Tests.Runner.WebApp.Components;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,9 +16,9 @@ builder.Services
     .AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Logging.InitFileLogger();
+builder.Logging.InitLogging();
 builder.Services.AddSingleton(nunitTestRunnerProxyConnector.Proxy);
-builder.Services.InitSharedServices();
+builder.Services.InitServices();
 builder.Services.InitFeatures();
 
 var app = builder.Build();

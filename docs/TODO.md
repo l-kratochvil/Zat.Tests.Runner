@@ -5,6 +5,7 @@
 - Vyrešit issues
 - Dokončit vazbu na TestLink
 - Zautomatizování kroků testera - základní
+- Sdílet WebApp.Application.Paths s TuiApp
 - Změna adresáře "Automized Tests":
   - Přesunout do Program Data / Roaming AppData
   - Přejmenovat na Zat.Tests

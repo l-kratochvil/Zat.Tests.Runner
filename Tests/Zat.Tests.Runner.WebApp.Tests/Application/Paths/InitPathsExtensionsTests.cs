@@ -10,7 +10,6 @@ using Microsoft.Extensions.Options;
 using NUnit.Framework;
 
 using Zat.Tests.Runner.WebApp.Application.DependencyInjection;
-using Zat.Tests.Runner.WebApp.Application.Paths;
 
 [TestFixture]
 public class InitPathsExtensionsTests
@@ -208,7 +207,7 @@ public class InitPathsExtensionsTests
     {
         var builder = Host.CreateEmptyApplicationBuilder(settings: null);
         builder.Configuration.AddInMemoryCollection(configuration);
-        builder.Services.InitSharedServices();
+        builder.Services.InitServices();
 
         using var host = builder.Build();
         await host.StartAsync();
@@ -226,7 +225,7 @@ public class InitPathsExtensionsTests
 
         this.services = [];
         this.services.AddSingleton(configuration);
-        this.services.InitSharedServices();
+        this.services.InitServices();
 
         return this.services.BuildServiceProvider();
     }

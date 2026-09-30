@@ -2,9 +2,8 @@
    Shown in MainLayout, so the log is reachable from every screen. *@
 
 @using Microsoft.Extensions.Options
-@using Zat.Tests.Runner.WebApp.Application.Logging
-@using Zat.Tests.Runner.Common.Net.Logging
-@using Zat.Tests.Runner.Common.Net.Logging
+@using Zat.Tests.Runner.Common.Net.Application.Logging
+@using Zat.Tests.Runner.WebApp.Shared.Model
 
 @implements IAsyncDisposable
 
@@ -30,7 +29,7 @@
         {
             <div class="filters">
                 <span class="filter-group">
-                    @foreach (var severity in Enum.GetValues<LogSeverity>())
+                    @foreach (var severity in Enum.GetValues<LogLevel>())
                     {
                         <label class="form-check-label filter-option">
                             <input type="checkbox"
@@ -91,6 +90,7 @@
     private const string ModulePath = "./Features/AppLogging/Components/AppLoggerView.razor.js";
 
     private readonly AppLoggerFilter filter = AppLoggerFilter.CreateDefault();
+    private readonly Guid weakReferenceMessangerToken = Guid.NewGuid();
 
     private IReadOnlyList<LogEntry> entries = [];
     private ElementReference entriesElement;
@@ -99,12 +99,6 @@
     private System.Threading.Timer? refreshTimer;
     private volatile bool hasNewEntries;
     private bool isCollapsed;
-
-    /// <summary>
-    /// Gets or sets the hub the shown log entries are read from.
-    /// </summary>
-    [Inject]
-    private IAppLoggerHub LoggerHub { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the options of the file logger, read to show where the log file is.
@@ -125,7 +119,7 @@
     public EventCallback<bool> CollapsedChanged { get; set; }
 
     private int ErrorCount 
-        => this.entries.Count(entry => entry.Severity == LogSeverity.Error);
+        => this.entries.Count(entry => entry.LogLevel == LogLevel.Error);
 
     private JsModuleInterop JsModuleInterop 
         => this.jsModuleInterop ??= this.JsModuleInteropFactory.Create(ModulePath);
@@ -138,8 +132,6 @@
     /// <inheritdoc/>
     public async ValueTask DisposeAsync()
     {
-        this.LoggerHub.EntryAppended -= this.OnEntryAppended;
-
         if (this.refreshTimer is not null)
         {
             await this.refreshTimer.DisposeAsync();

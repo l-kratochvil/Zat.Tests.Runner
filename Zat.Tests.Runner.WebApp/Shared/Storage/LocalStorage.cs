@@ -2,11 +2,9 @@ namespace Zat.Tests.Runner.WebApp.Shared.Storage;
 
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
-using Zat.Tests.Runner.Common.Net.Logging;
-
 public class LocalStorage<TData>(
     ProtectedLocalStorage protectedLocalStorage,
-    IAppLogger logger,
+    ILogger logger,
     Func<TData> fallbackFactory)
     where TData : class
 {
@@ -25,9 +23,11 @@ public class LocalStorage<TData>(
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
-            logger.Warning(
-                "The state remembered by the browser could not be read.",
-                exception.ToString());
+            logger.Log(
+                LogLevel.Warning,
+                "The state remembered by the browser could not be read." +
+                "\nException: {Exception}",
+                exception);
 
             return fallbackFactory();
         }
@@ -41,9 +41,11 @@ public class LocalStorage<TData>(
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
-            logger.Warning(
-                "The current state could not be remembered by the browser, so it is lost on reload.",
-                exception.ToString());
+            logger.Log(
+                LogLevel.Warning,
+                "The current state could not be remembered by the browser, so it is lost on reload." +
+                "\nException: {Exception}",
+                exception);
         }
     }
 
@@ -55,9 +57,11 @@ public class LocalStorage<TData>(
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
-            logger.Warning(
-                "The current state could not be deleted from the browser storage.",
-                exception.ToString());
+            logger.Log(
+                LogLevel.Warning,
+                "The current state could not be deleted from the browser storage." +
+                "\nException: {Exception}",
+                exception);
         }
     }
 

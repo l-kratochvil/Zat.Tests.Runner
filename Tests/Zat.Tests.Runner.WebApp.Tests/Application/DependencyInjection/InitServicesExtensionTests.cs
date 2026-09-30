@@ -3,15 +3,12 @@ namespace Zat.Tests.Runner.WebApp.Tests.Application.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-
 using Moq;
 
 using NUnit.Framework;
-
-using Zat.Tests.Runner.Common.Net.Logging;
+using Zat.Tests.Runner.Common.Net.Application.Logging;
+using Zat.Tests.Runner.Common.Net.Application.Paths;
 using Zat.Tests.Runner.WebApp.Application.DependencyInjection;
-using Zat.Tests.Runner.WebApp.Application.Logging;
-using Zat.Tests.Runner.WebApp.Application.Paths;
 using Zat.Tests.Runner.WebApp.Features.AppSettings.Services;
 using Zat.Tests.Runner.WebApp.Shared.JsInterop;
 
@@ -40,46 +37,6 @@ public class InitServicesExtensionTests
     }
 
     [Test]
-    public void InitAppLogging__WhenTheDefaultLoggerIsResolved__ThenShouldBeBoundToTheAppSource()
-    {
-        // When:
-        var result = this.unit.GetRequiredService<IAppLogger>();
-
-        // Then:
-        Assert.That(result.Source, Is.EqualTo(LogSources.App));
-    }
-
-    [Test]
-    public void InitAppLogging__WhenLoggersOfDifferentSourcesLog__ThenShouldAppendIntoTheSameStore()
-    {
-        // Given:
-        string[] expectedSources = [LogSources.TestRun, LogSources.TestLink];
-        var givenFactory = this.unit.GetRequiredService<IAppLoggerFactory>();
-
-        // When:
-        givenFactory.CreateLogger(expectedSources[0]).Warning("slow");
-        givenFactory.CreateLogger(expectedSources[1]).Error("unreachable");
-
-        // Then:
-        Assert.That(
-            this.unit.GetRequiredService<IAppLoggerHub>().GetEntries().Select(entry => entry.Source),
-            Is.EqualTo(expectedSources));
-    }
-
-    [Test]
-    public void InitAppLogging__WhenTheSinksAreResolved__ThenShouldRegisterTheBridgeIntoTheLoggingPipeline()
-    {
-        // Given:
-        Type[] expectedTypes = [typeof(DiagnosticsLoggerSink)];
-
-        // When:
-        var result = this.unit.GetServices<IAppLoggerSink>().Select(sink => sink.GetType());
-
-        // Then:
-        Assert.That(result, Is.EqualTo(expectedTypes));
-    }
-
-    [Test]
     public void InitFeatures__WhenHostedServicesAreResolved__ThenShouldRegisterOnlyTheSettingsStore()
     {
         // Given:
@@ -95,36 +52,6 @@ public class InitServicesExtensionTests
     }
 
     [Test]
-    public void InitAppLogging__WhenTheLogFileCannotBeWritten__ThenShouldReportItInTheHub()
-    {
-        // Given:
-        // A file where the logs directory should be, so that the provider cannot write anything.
-        // A silently broken log file is the worst way for a log to fail, so it has to surface in
-        // the panel.
-        var givenBlockedPath = Path.Combine(Path.GetTempPath(), $"applogging-di-blocked-{Guid.NewGuid():N}");
-        File.WriteAllText(givenBlockedPath, string.Empty);
-
-        try
-        {
-            var provider = BuildProvider(givenBlockedPath);
-            var loggerHub = provider.GetRequiredService<IAppLoggerHub>();
-
-            // When:
-            provider.GetRequiredService<IAppLogger>().Info("message");
-            provider.Dispose();
-
-            // Then:
-            Assert.That(
-                loggerHub.GetEntries().Select(entry => entry.Message),
-                Has.Some.Contains("log file"));
-        }
-        finally
-        {
-            File.Delete(givenBlockedPath);
-        }
-    }
-
-    [Test]
     public void InitSharedServices__WhenTheJsModuleInteropFactoryIsRegistered__ThenShouldBeScoped()
     {
         // Given:
@@ -133,7 +60,7 @@ public class InitServicesExtensionTests
         var givenServices = new ServiceCollection();
 
         // When:
-        givenServices.InitSharedServices();
+        givenServices.InitServices();
 
         // Then:
         var result = givenServices.Single(
@@ -157,7 +84,7 @@ public class InitServicesExtensionTests
 
         var services = new ServiceCollection();
         services.AddSingleton(configuration);
-        services.AddLogging(builder => builder.InitFileLogger());
+        services.AddLogging(builder => builder.InitLogging());
         services.Configure<FileLoggerOptions>(configuration);
         services.AddSingleton(CreatePaths(logsDirectoryPath));
         services.InitFeatures();

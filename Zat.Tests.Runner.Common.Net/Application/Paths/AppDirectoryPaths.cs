@@ -1,4 +1,4 @@
-namespace Zat.Tests.Runner.WebApp.Application.Paths;
+namespace Zat.Tests.Runner.Common.Net.Application.Paths;
 
 /// <summary>
 /// The directories of this application.

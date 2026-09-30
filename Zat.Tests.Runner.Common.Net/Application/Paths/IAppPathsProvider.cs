@@ -1,4 +1,4 @@
-namespace Zat.Tests.Runner.WebApp.Application.Paths;
+namespace Zat.Tests.Runner.Common.Net.Application.Paths;
 
 /// <summary>
 /// Where this application keeps everything it reads and writes.

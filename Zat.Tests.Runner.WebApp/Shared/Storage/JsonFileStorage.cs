@@ -3,8 +3,6 @@ namespace Zat.Tests.Runner.WebApp.Shared.Storage;
 using System.IO;
 using System.Text.Json;
 
-using Zat.Tests.Runner.Common.Net.Logging;
-
 /// <summary>
 /// Keeps one shared value in a JSON file on the test machine.
 /// </summary>
@@ -22,7 +20,7 @@ using Zat.Tests.Runner.Common.Net.Logging;
 /// <param name="fallbackFactory">Produces the fallback value when the file cannot be read.</param>
 public class JsonFileStorage<TData>(
     string filePath,
-    IAppLogger logger,
+    ILogger logger,
     Func<TData> fallbackFactory)
     where TData : class
 {
@@ -48,9 +46,12 @@ public class JsonFileStorage<TData>(
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
-            logger.Warning(
-                $"The settings file could not be read, so the default settings are used ({filePath}).",
-                exception.ToString());
+            logger.Log(
+                LogLevel.Warning,
+                "The settings file could not be read, so the default settings are used ({FilePath})." +
+                "\nException: {Exception}",
+                filePath,
+                exception);
 
             return fallbackFactory();
         }
@@ -78,9 +79,12 @@ public class JsonFileStorage<TData>(
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
-            logger.Error(
-                $"The settings could not be saved, so they are lost when the application stops ({filePath}).",
-                exception.ToString());
+            logger.Log(
+                LogLevel.Error,
+                "The settings could not be saved, so they are lost when the application stops ({FilePath})." +
+                "\nException: {Exception}",
+                filePath,
+                exception);
 
             return false;
         }

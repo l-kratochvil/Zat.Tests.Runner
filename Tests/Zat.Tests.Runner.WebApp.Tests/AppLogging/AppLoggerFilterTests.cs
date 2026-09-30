@@ -3,7 +3,7 @@ namespace Zat.Tests.Runner.WebApp.Tests.AppLogging;
 using NUnit.Framework;
 
 using Zat.Tests.Runner.WebApp.Features.AppLogging.Components;
-using Zat.Tests.Runner.Common.Net.Logging;
+using Zat.Tests.Runner.Common.Net.Application.Logging;
 
 [TestFixture]
 public class AppLoggerFilterTests

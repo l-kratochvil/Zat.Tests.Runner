@@ -10,7 +10,6 @@ using Microsoft.Extensions.Options;
 using NUnit.Framework;
 
 using Zat.Tests.Runner.WebApp.Application.DependencyInjection;
-using Zat.Tests.Runner.WebApp.Application.Logging;
 
 [TestFixture]
 public class InitLoggingExtensionsTests
@@ -120,7 +119,7 @@ public class InitLoggingExtensionsTests
 
         var services = new ServiceCollection();
         services.AddSingleton(builtConfiguration);
-        services.InitSharedServices();
+        services.InitServices();
         services.AddLogging(builder =>
         {
             builder.AddConfiguration(builtConfiguration.GetSection("Logging"));

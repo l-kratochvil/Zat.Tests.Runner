@@ -4,7 +4,7 @@ using Moq;
 
 using NUnit.Framework;
 
-using Zat.Tests.Runner.Common.Net.Logging;
+using Zat.Tests.Runner.Common.Net.Application.Logging;
 
 [TestFixture]
 public class AppLoggerHubTests

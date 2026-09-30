@@ -9,9 +9,6 @@ using Moq;
 
 using NUnit.Framework;
 
-using Zat.Tests.Runner.WebApp.Application.Logging;
-using Zat.Tests.Runner.WebApp.Application.Paths;
-
 [TestFixture]
 public class FileLoggerProviderTests
 {

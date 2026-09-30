@@ -1,6 +1,6 @@
 namespace Zat.Tests.Runner.WebApp.Features.AppLogging.Components;
 
-using Zat.Tests.Runner.Common.Net.Logging;
+using Zat.Tests.Runner.Common.Net.Application.Logging;
 
 /// <summary>
 /// Which severities and log sources are shown in the log panel.
@@ -11,31 +11,31 @@ using Zat.Tests.Runner.Common.Net.Logging;
 /// </remarks>
 public sealed class AppLoggerFilter
 {
-    private readonly HashSet<LogSeverity> selectedSeverities;
+    private readonly HashSet<LogLevel> selectedLogLevels;
     private readonly HashSet<string> hiddenSources = new(StringComparer.OrdinalIgnoreCase);
 
-    private AppLoggerFilter(IEnumerable<LogSeverity> selectedSeverities)
+    private AppLoggerFilter(IEnumerable<LogLevel> selectedLogLevels)
     {
-        this.selectedSeverities = [.. selectedSeverities];
+        this.selectedLogLevels = [.. selectedLogLevels];
     }
 
     /// <summary>
-    /// Creates the filter used when the panel first opens: every severity and log source is shown.
+    /// Creates the filter used when the panel first opens: every logLevel and log source is shown.
     /// </summary>
     /// <returns>The default filter.</returns>
     public static AppLoggerFilter CreateDefault()
     {
-        return new AppLoggerFilter(Enum.GetValues<LogSeverity>());
+        return new AppLoggerFilter(Enum.GetValues<LogLevel>());
     }
 
     /// <summary>
-    /// Determines whether log entries of <paramref name="severity"/> are shown.
+    /// Determines whether log entries of <paramref name="logLevel"/> are shown.
     /// </summary>
-    /// <param name="severity">Severity to test.</param>
-    /// <returns><see langword="true"/> when <paramref name="severity"/> is shown.</returns>
-    public bool IsSelected(LogSeverity severity)
+    /// <param name="logLevel">LogLevel to test.</param>
+    /// <returns><see langword="true"/> when <paramref name="logLevel"/> is shown.</returns>
+    public bool IsSelected(LogLevel logLevel)
     {
-        return this.selectedSeverities.Contains(severity);
+        return this.selectedLogLevels.Contains(logLevel);
     }
 
     /// <summary>
@@ -49,19 +49,19 @@ public sealed class AppLoggerFilter
     }
 
     /// <summary>
-    /// Shows or hides log entries of <paramref name="severity"/>.
+    /// Shows or hides log entries of <paramref name="logLevel"/>.
     /// </summary>
-    /// <param name="severity">Severity to change.</param>
-    /// <param name="selected">Whether <paramref name="severity"/> should be shown.</param>
-    public void SetSelected(LogSeverity severity, bool selected)
+    /// <param name="logLevel">LogLevel to change.</param>
+    /// <param name="selected">Whether <paramref name="logLevel"/> should be shown.</param>
+    public void SetSelected(LogLevel logLevel, bool selected)
     {
         if (selected)
         {
-            this.selectedSeverities.Add(severity);
+            this.selectedLogLevels.Add(logLevel);
         }
         else
         {
-            this.selectedSeverities.Remove(severity);
+            this.selectedLogLevels.Remove(logLevel);
         }
     }
 
@@ -89,7 +89,7 @@ public sealed class AppLoggerFilter
     /// <returns><see langword="true"/> when <paramref name="entry"/> should be shown.</returns>
     public bool Matches(LogEntry entry)
     {
-        return this.IsSelected(entry.Severity) && this.IsSelected(entry.Source);
+        return this.IsSelected(entry.LogLevel) && this.IsSelected(entry.Source);
     }
 
     /// <summary>
