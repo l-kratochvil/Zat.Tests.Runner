@@ -16,8 +16,8 @@ public class TestLinkResultHandler(
     ILogger<LogSources.TestLink> logger)
     : ITestResultHandler
 {
-    private const int RuntimeTestsTestPlanId = 9560;
-    private const int ApplicationTestsTestPlanId = 10130;
+    private const int ApplicationTestsTestPlanId = 9560;
+    private const int RuntimeTestsTestPlanId = 10130;
 
     private static readonly FileExtensionContentTypeProvider FileExtensionContentTypeProvider = new();
 

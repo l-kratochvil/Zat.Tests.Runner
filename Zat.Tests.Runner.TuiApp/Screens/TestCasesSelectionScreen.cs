@@ -68,7 +68,7 @@ internal class TestCasesSelectionScreen(
                 Main = async ct =>
                 {
                     var prompt = new MultiSelectionPrompt<TestEntity>(TestEntityEqualityComparer)
-                        .Title(Resources.SelectTestSuites_PromptText.AsPromptTitle())
+                        .Title(Resources.SelectTestCases_PromptText.AsPromptTitle())
                         .MoreChoicesText(SharedTexts.MoreChoicesHelpText)
                         .InstructionsText(SharedTexts.InstructionsHelpText)
                         .NotRequired()
@@ -88,7 +88,7 @@ internal class TestCasesSelectionScreen(
                         {
                             testRunConfigStore.SelectedTestEntities =
                             [
-                                ..testRunConfigStore.SelectedTestEntities
+                                .. testRunConfigStore.SelectedTestEntities
                                     .Where(currentEntity => selectedTestCases.Any(currentEntity.Equals))
                                     .Union(selectedTestCases)
                             ];

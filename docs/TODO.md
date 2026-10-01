@@ -2,10 +2,8 @@
 
 ## HiPrio
 
-- Vyrešit issues
 - Dokončit vazbu na TestLink
 - Zautomatizování kroků testera - základní
-- Sdílet WebApp.Application.Paths s TuiApp
 - Změna adresáře "Automized Tests":
   - Přesunout do Program Data / Roaming AppData
   - Přejmenovat na Zat.Tests
@@ -15,6 +13,7 @@
   - Odstranit legacy runner (ve vlastním commitu na main)
 - WebApp:
   - Rework BindingSelect
+  - Vylepšit pojmenování pro "fluxor stores" a "stores StoreBase": Obojí fungujou jinak, ale zároveň obojí je store
   - TestDiscovery: Nahradit store za Fluxor
   - Vytvořit viewmodely pro features (viz TestConfigurationViewModel)
   - Konfigurace testu stejná jako u TuiApp
@@ -27,8 +26,9 @@
 ## MidPrio
 
 - Update nuget balíčků solutionu
-- Refactor TestDiscovery feature
-- Rozšíření testů pro komponenty DataContext, BinindgInput, BindingSelect, BindingCheckbox
+- WebApp: 
+    - Refactor TestDiscovery feature
+    - Rozšíření testů pro komponenty DataContext, BinindgInput, BindingSelect, BindingCheckbox
 - Email notifikace (po dokončení testu)
 - TuiApp:
   - Migrace do Terminal.Gui?
@@ -36,21 +36,15 @@
 
 ## LoPrio
 
-- Playwright/vitest E2E tests
-- Změna "Main" v menu na ikonku "home".
+- WebApp: 
+  - Změna "Main" v menu na ikonku "home"
+  - Playwright/vitest E2E tests
+- TuiApp:
+  - Migrace do Terminal.Gui?
 - Vypisování manuálních předpokladů (získá se z TL)?
 - Zautomatizování kroků testera - pokročilé?
 
 ## HiPrio - Detaily
-
-### Issues
-
-1. Testy se z assembly nenačítají:
-
-- [viz link](https://claude.ai/share/2111234d-351e-4c9b-93c9-846f62da3015)
-- Zkusit nastavit x86 u Zat.Z2xxTests: Done
-- Zat.Tests.Runner.NUnitTestRunnerProxy.Tests dll dokáže načíst, ale TuiApp ne!:
-  - Upravit/Vytvořit nový test, který bude používat RPC (viz komentář v NUnitTestRunnerProxyTests.cs)
 
 ### Dokončit vazbu na TestLink
 

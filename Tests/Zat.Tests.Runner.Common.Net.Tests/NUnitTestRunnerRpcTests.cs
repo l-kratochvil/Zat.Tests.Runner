@@ -30,7 +30,7 @@ public class NUnitTestRunnerRpcTests
         TestAssemblyNet481Name,
         $"{TestAssemblyNet481Name}.dll");
 
-    // private readonly AppPathsProvider appPathsProvider = new (TestContext.CurrentContext.TestDirectory);
+    private readonly AppPathsProvider appPathsProvider = new(TestContext.CurrentContext.TestDirectory);
 
     private NUnitTestRunnerProxyConnector connector = null!;
 
@@ -88,7 +88,7 @@ public class NUnitTestRunnerRpcTests
     public async Task LoadTestAssemblyAsync_WithZatTestsAssembly()
     {
         // TODO: "Test libs" folder content should be copied to the output folder of this test project, so that the test can run on any machine without manual setup.
-        var zatTestsAssemblyPath = Path.Combine(@"C:\Automized tests\Test libs\", "Zat.Z2xxTests.dll");
+        var zatTestsAssemblyPath = Path.Combine(this.appPathsProvider.Files.MainAssemblyDll);
 
         if (!File.Exists(zatTestsAssemblyPath))
         {
@@ -110,11 +110,11 @@ public class NUnitTestRunnerRpcTests
         var testFixtures = testSuites.SelectMany(x => x.TestFixtures).ToArray();
         var testCases = testFixtures.SelectMany(x => x.TestCases).ToArray();
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(testSuites, Is.Not.Empty);
             Assert.That(testFixtures, Is.Not.Empty);
             Assert.That(testCases, Is.Not.Empty);
-        });
+        }
     }
 }
