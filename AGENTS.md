@@ -1,8 +1,9 @@
 # Agent skills
 
-For extra context see `CONTEXT.md`.
+**Before your first reply, read `AGENTS-SHARED.md`** by its path (symlink, glob skips it); it is part
+of these instructions. If it can't be read, tell the user.
 
-Also include `AGENTS-SHARED.md` — check whether the file exists first; if glob finds nothing, try reading the file directly (it may be a symlink, which glob skips). If it still can't be read, tell the user.
+For extra context see `CONTEXT.md`.
 
 ## Issue tracker
 

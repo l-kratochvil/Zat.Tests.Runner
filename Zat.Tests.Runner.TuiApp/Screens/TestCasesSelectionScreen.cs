@@ -26,35 +26,58 @@ internal class TestCasesSelectionScreen(
         {
             Main = ct =>
             {
-                var testSuites = testRunConfigStore.LoadedTestSuites;
-                var prompt = new MultiSelectionPrompt<TestSuiteEntity>(TestEntityEqualityComparer)
+                var testSuites = testRunConfigStore.LoadedTestSuites.ToArray();
+                var selectedTestEntities = testRunConfigStore.SelectedTestEntities.ToArray();
+                var prompt = new MultiSelectionPrompt<TestEntity>(TestEntityEqualityComparer)
                     .Title(Resources.SelectTestSuitesToSelectTestCases_PromptText.AsPromptTitle())
                     .MoreChoicesText(SharedTexts.MoreChoicesHelpText)
                     .InstructionsText(SharedTexts.InstructionsHelpText)
                     .PageSize(10)
-                    .AddChoices(testSuites)
                     .UseConverter(x => LocalizationUtils.MapTextToLocalized(x.Name));
 
-                testRunConfigStore
-                    .SelectedTestEntities
-                    .OfType<TestSuiteEntity>()
-                    .ForEach(entity => prompt.Select(entity));
+                foreach (var testSuite in testSuites)
+                {
+                    prompt.AddChoiceGroup(testSuite, testSuite.TestFixtures);
+                }
+
+                testSuites
+                    .SelectMany(testSuite => testSuite.TestFixtures)
+                    .Where(testFixture => ContainsAny(
+                        entities: selectedTestEntities,
+                        searchedEntities: [testFixture, .. testFixture.TestCases]))
+                    .ForEach(testFixture => prompt.Select(testFixture));
 
                 return ShowPromptAsync(
                     prompt,
-                    selectedTestSuites => new RenderOutput(
-                        NextScreen: new SelectTestCasesScreen(
-                            testSuites: selectedTestSuites,
-                            testRunConfigStore: testRunConfigStore,
-                            homeScreen: this.HomeScreenLazy,
-                            exitScreen: this.ExitScreenLazy,
-                            settingsScreen: this.SettingsScreenLazy)),
+                    selectedEntities =>
+                    {
+                        // Empty test suites come back as leaves; neither they nor empty test fixtures have test cases to offer.
+                        var testFixtures = selectedEntities
+                            .OfType<TestFixtureEntity>()
+                            .Where(testFixture => testFixture.TestCases.Length > 0)
+                            .ToArray();
+
+                        return testFixtures.Length == 0
+                            ? RenderOutput.Default
+                            : new RenderOutput(
+                                NextScreen: new SelectTestCasesScreen(
+                                    testFixtures: testFixtures,
+                                    testRunConfigStore: testRunConfigStore,
+                                    homeScreen: this.HomeScreenLazy,
+                                    exitScreen: this.ExitScreenLazy,
+                                    settingsScreen: this.SettingsScreenLazy));
+                    },
                     ct);
             },
         };
 
+    private static bool ContainsAny(
+        IEnumerable<TestEntity> entities,
+        IEnumerable<TestEntity> searchedEntities)
+        => entities.Any(entity => searchedEntities.Contains(entity, TestEntityEqualityComparer));
+
     private class SelectTestCasesScreen(
-        IEnumerable<TestSuiteEntity> testSuites,
+        TestFixtureEntity[] testFixtures,
         TestRunConfigStore testRunConfigStore,
         Lazy<HomeScreen> homeScreen,
         Lazy<ExitScreen> exitScreen,
@@ -75,12 +98,29 @@ internal class TestCasesSelectionScreen(
                         .PageSize(10)
                         .UseConverter(x => (x as TestCaseEntity)?.Id ?? x.Name);
 
-                    foreach (var testFixture in testSuites.SelectMany(x => x.TestFixtures))
+                    var selectedTestEntities = testRunConfigStore.SelectedTestEntities.ToArray();
+
+                    foreach (var testFixture in testFixtures)
                     {
                         prompt.AddChoiceGroup(testFixture, testFixture.TestCases.OrderBy(x => x.Id));
+
+                        // A whole selected test fixture means all of its test cases are selected.
+                        var isTestFixtureSelected = ContainsAny(
+                            entities: selectedTestEntities,
+                            searchedEntities: [testFixture]);
+
+                        testFixture.TestCases
+                            .Where(testCase => isTestFixtureSelected || ContainsAny(
+                                entities: selectedTestEntities,
+                                searchedEntities: [testCase]))
+                            .ForEach(testCase => prompt.Select(testCase));
                     }
 
-                    testRunConfigStore.SelectedTestEntities.ForEach(entity => prompt.Select(entity));
+                    TestEntity[] shownEntities =
+                    [
+                        .. testFixtures,
+                        .. testFixtures.SelectMany(testFixture => testFixture.TestCases),
+                    ];
 
                     return await ShowPromptAsync(
                         prompt,
@@ -88,9 +128,9 @@ internal class TestCasesSelectionScreen(
                         {
                             testRunConfigStore.SelectedTestEntities =
                             [
-                                .. testRunConfigStore.SelectedTestEntities
-                                    .Where(currentEntity => selectedTestCases.Any(currentEntity.Equals))
-                                    .Union(selectedTestCases)
+                                .. selectedTestEntities
+                                    .Where(entity => !shownEntities.Contains(entity, TestEntityEqualityComparer))
+                                    .Union(selectedTestCases, TestEntityEqualityComparer)
                             ];
 
                             return RenderOutput.Default;
