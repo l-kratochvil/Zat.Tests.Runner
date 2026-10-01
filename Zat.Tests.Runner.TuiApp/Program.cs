@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -6,7 +8,7 @@ using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.TuiApp;
 using Zat.Tests.Runner.TuiApp.Application.DependencyInjection;
 
-await using var nunitTestRunnerProxyConnector = await NUnitTestRunnerProxyConnector.ConnectAsync();
+await using var nunitTestRunnerProxyConnector = await NUnitTestRunnerProxyConnector.ConnectAsync(launchDebugger: !Debugger.IsAttached);
 
 var hostBuilder = Host.CreateDefaultBuilder();
 

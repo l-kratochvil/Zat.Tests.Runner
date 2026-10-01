@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 using Zat.Tests.Runner.Common.Net.Application.DependencyInjection;
 using Zat.Tests.Runner.Common.Net.Application.Logging;
 using Zat.Tests.Runner.Common.Net.Services;
@@ -10,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 // as the application is. Failing to reach it at all means the build did not put the server next to
 // us or that it cannot run here, which is a fault of the installation rather than of the test run:
 // starting up and pretending there are simply no tests would hide it.
-await using var nunitTestRunnerProxyConnector = await NUnitTestRunnerProxyConnector.ConnectAsync();
+await using var nunitTestRunnerProxyConnector = await NUnitTestRunnerProxyConnector.ConnectAsync(launchDebugger: !Debugger.IsAttached);
 
 // Add services to the container.
 builder.Services

@@ -43,7 +43,9 @@ public sealed class NUnitTestRunnerProxyConnector : IAsyncDisposable
     }
 
     /// <summary>Launches the proxy server and connects to it.</summary>
-    public static async Task<NUnitTestRunnerProxyConnector> ConnectAsync(CancellationToken cancellationToken = default)
+    /// <param name="launchDebugger">When <see langword="true"/>, passes <c>--debug</c> to the server so a Debug build asks for a debugger on start-up.</param>
+    /// <param name="cancellationToken">Cancels the connection attempt.</param>
+    public static async Task<NUnitTestRunnerProxyConnector> ConnectAsync(bool launchDebugger = false, CancellationToken cancellationToken = default)
     {
         var serverPath = Path.Combine(AppContext.BaseDirectory, ServerRelativePath);
         if (!File.Exists(serverPath))
@@ -62,7 +64,8 @@ public sealed class NUnitTestRunnerProxyConnector : IAsyncDisposable
         Process? serverProcess = null;
         try
         {
-            serverProcess = Process.Start(new ProcessStartInfo(serverPath, pipeName)
+            var arguments = launchDebugger ? $"{pipeName} --debug" : pipeName;
+            serverProcess = Process.Start(new ProcessStartInfo(serverPath, arguments)
             {
                 UseShellExecute = false,
                 CreateNoWindow = true,

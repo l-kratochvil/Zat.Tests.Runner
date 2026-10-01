@@ -7,14 +7,17 @@ using StreamJsonRpc;
 
 using Zat.Tests.Runner.NUnitTestRunnerProxy;
 
-if (DebuggerUtils.NetDebuggerLaunchAllowed)
+#if DEBUG
+var debugRequested = args.Skip(1).Any(arg => string.Equals(arg, "--debug", StringComparison.OrdinalIgnoreCase));
+if (debugRequested && DebuggerUtils.NetDebuggerLaunchAllowed)
 {
     Debugger.Launch();
 }
+#endif
 
 if (args.Length < 1 || string.IsNullOrWhiteSpace(args[0]))
 {
-    await Console.Error.WriteLineAsync("Usage: Zat.Tests.Runner.NUnitTestRunnerProxy.Server <pipe-name>");
+    await Console.Error.WriteLineAsync("Usage: Zat.Tests.Runner.NUnitTestRunnerProxy.Server <pipe-name> [--debug]");
     return 1;
 }
 

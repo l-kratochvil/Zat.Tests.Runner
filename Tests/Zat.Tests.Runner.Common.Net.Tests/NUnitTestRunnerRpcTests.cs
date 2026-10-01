@@ -1,5 +1,6 @@
 ﻿namespace Zat.Tests.Runner.Common.Net.Tests;
 
+using System.Diagnostics;
 using System.Reflection;
 
 using DevKit.Core.Extensions.Types;
@@ -37,7 +38,7 @@ public class NUnitTestRunnerRpcTests
     [SetUp]
     public async Task SetUp()
     {
-        this.connector = await NUnitTestRunnerProxyConnector.ConnectAsync();
+        this.connector = await NUnitTestRunnerProxyConnector.ConnectAsync(launchDebugger: !Debugger.IsAttached);
     }
 
     [TearDown]
