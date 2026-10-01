@@ -2,6 +2,7 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+
 using Zat.Tests.Runner.Common.Net.Application.Logging;
 using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.Common.Services;
@@ -17,7 +18,10 @@ internal static class InitServicesExtensions
             => hostBuilder.ConfigureServices(
                 services => services
                     .AddLogging(builder => builder.InitLogging())
-                    .InitSharedServices<AppOptions, AppPathsProvider>(AppOptions.SectionName)
+                    .InitSharedServices<
+                        AppOptions,
+                        AppPathsProvider,
+                        IAppPathsProvider>(AppOptions.SectionName)
                     .AddSingleton<IAppPathsProvider>(
                         static provider => provider.GetRequiredService<AppPathsProvider>())
                     .AddSingleton(nunitTestRunnerProxy)

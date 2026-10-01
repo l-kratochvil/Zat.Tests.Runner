@@ -13,18 +13,28 @@ public static class ServicesExtensions
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection InitSharedServices<TAppOptions, TAppPathsProvider>(
+        /// <summary>
+        /// Initializes the shared services for the application.
+        /// </summary>
+        /// <typeparam name="TAppOptions">App options service type.</typeparam>
+        /// <typeparam name="TAppPathsProvider">App paths provider service type.</typeparam>
+        /// <typeparam name="TAppPathsProviderInterface">App paths provider interface type under which the service will be registered.</typeparam>
+        /// <param name="appOptionsSectionName">The name of the configuration section for the app options.</param>
+        /// <returns>The updated service collection.</returns>
+        public IServiceCollection InitSharedServices<
+            TAppOptions,
+            TAppPathsProvider,
+            TAppPathsProviderInterface>(
             string appOptionsSectionName)
             where TAppOptions : AppOptionsBase
-            where TAppPathsProvider : class, ISharedAppPathsProvider
+            where TAppPathsProvider : class, ISharedAppPathsProvider, TAppPathsProviderInterface
+            where TAppPathsProviderInterface : class
             => services
                 .InitAppOptions<TAppOptions>(appOptionsSectionName)
+                .InitAppPathsProvider<TAppPathsProvider, TAppPathsProviderInterface>()
                 .InitLogging()
                 .AddScoped<WeakReferenceMessenger>()
                 .AddSingleton<GlobalWeakReferenceMessanger>()
-                .AddSingleton<TAppPathsProvider>()
-                .AddSingleton<ISharedAppPathsProvider>(
-                    static provider => provider.GetRequiredService<TAppPathsProvider>())
                 .AddSingleton<ITestRunnerBridgeConnector, TestRunnerBridgeConnector>()
                 .AddSingleton<ITestLink, TestLink>()
                 .AddSingleton(_ => ITestLink.Config.Default)
@@ -49,5 +59,15 @@ public static class ServicesExtensions
             return services.AddSingleton<IOptions<ISharedAppOptions>>(
                 sp => sp.GetRequiredService<IOptions<TOptions>>());
         }
+
+        private IServiceCollection InitAppPathsProvider<TAppPathsProvider, TAppPathsProviderInterface>()
+            where TAppPathsProvider : class, ISharedAppPathsProvider, TAppPathsProviderInterface
+            where TAppPathsProviderInterface : class
+            => services
+                .AddSingleton<TAppPathsProvider>()
+                .AddSingleton<ISharedAppPathsProvider>(
+                    static provider => provider.GetRequiredService<TAppPathsProvider>())
+                .AddSingleton<TAppPathsProviderInterface>(
+                    static provider => provider.GetRequiredService<TAppPathsProvider>());
     }
 }

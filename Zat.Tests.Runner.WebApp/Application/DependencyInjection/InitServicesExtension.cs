@@ -1,6 +1,7 @@
 namespace Zat.Tests.Runner.WebApp.Application.DependencyInjection;
 
 using CommunityToolkit.Mvvm.Messaging;
+
 using Fluxor;
 using Fluxor.Persist.Middleware;
 using Fluxor.Persist.Storage;
@@ -35,7 +36,10 @@ public static class InitServicesExtension
         /// <returns>The service collection, to allow chaining.</returns>
         public IServiceCollection InitServices()
             => services
-                .InitSharedServices<AppOptions, AppPathsProvider>(AppOptions.SectionName)
+                .InitSharedServices<
+                    AppOptions,
+                    AppPathsProvider,
+                    IAppPathsProvider>(AppOptions.SectionName)
                 .AddSingleton<IAppPathsProvider>(
                     static provider => provider.GetRequiredService<AppPathsProvider>())
                 .InitFluxor()
