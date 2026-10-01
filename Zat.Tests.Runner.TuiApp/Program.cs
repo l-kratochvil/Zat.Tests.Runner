@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
+using Zat.Tests.Runner.Common.Net.Application.DependencyInjection;
 using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.TuiApp;
 using Zat.Tests.Runner.TuiApp.Application.DependencyInjection;
@@ -15,10 +17,13 @@ if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT"
 }
 #endif
 
+IServiceCollection registeredServices = new ServiceCollection();
+
 var host = hostBuilder
     .InitServices(nunitTestRunnerProxyConnector.Proxy)
     .InitScreens()
     .InitStores()
+    .ConfigureServices(services => registeredServices = services)
     .UseDefaultServiceProvider(
         (_, options) =>
         {
@@ -26,5 +31,7 @@ var host = hostBuilder
             options.ValidateOnBuild = true;
         })
     .Build();
+
+host.Services.InitInitializableServices(registeredServices);
 
 await App.RunAsync(host);

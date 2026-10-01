@@ -1,4 +1,4 @@
-namespace Zat.Tests.Runner.WebApp.Application.DependencyInjection;
+namespace Zat.Tests.Runner.Common.Net.Application.DependencyInjection;
 
 using DevKit.Core.Extensions.Collections;
 using DevKit.Core.Interfaces;
@@ -34,7 +34,9 @@ public static class CoreExtensions
                          .Where(static descriptor => descriptor.Lifetime is ServiceLifetime.Singleton
                                                      && !descriptor.IsKeyedService
                                                      && IsInitializable(descriptor))
+#pragma warning disable SA1101 // StyleCop mistakes the extension receiver for an instance member.
                          .Select(descriptor => provider.GetRequiredService(descriptor.ServiceType))
+#pragma warning restore SA1101
                          .Select(service => service as IInitializable)
                          .WhereNotNull())
             {

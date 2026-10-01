@@ -9,6 +9,7 @@ using NUnit.Framework;
 using Zat.Tests.Runner.Common.Net.Application.Logging;
 using Zat.Tests.Runner.Common.Net.Application.Paths;
 using Zat.Tests.Runner.WebApp.Application.DependencyInjection;
+using Zat.Tests.Runner.WebApp.Application.Paths;
 using Zat.Tests.Runner.WebApp.Features.AppSettings.Services;
 using Zat.Tests.Runner.WebApp.Shared.JsInterop;
 
@@ -82,11 +83,14 @@ public class InitServicesExtensionTests
             })
             .Build();
 
+        var paths = CreatePaths(logsDirectoryPath);
+
         var services = new ServiceCollection();
         services.AddSingleton(configuration);
         services.AddLogging(builder => builder.InitLogging());
         services.Configure<FileLoggerOptions>(configuration);
-        services.AddSingleton(CreatePaths(logsDirectoryPath));
+        services.AddSingleton(paths);
+        services.AddSingleton<ISharedAppPathsProvider>(paths);
         services.InitFeatures();
 
         return services.BuildServiceProvider();
@@ -100,9 +104,9 @@ public class InitServicesExtensionTests
         var paths = new Mock<IAppPathsProvider>();
 
         paths.SetupGet(provider => provider.Directories)
-            .Returns(new AppDirectoryPaths(AppData: appDataPath, Logs: appDataPath));
+            .Returns(new SharedAppDirectoryPaths(AppData: appDataPath, Logs: appDataPath));
         paths.SetupGet(provider => provider.Files)
-            .Returns(new AppFilePaths(
+            .Returns(new SharedAppFilePaths(
                 UserSettings: Path.Combine(appDataPath, "user-settings.json"),
                 MainAssemblyDll: Path.Combine(appDataPath, "main-assembly.dll")));
 

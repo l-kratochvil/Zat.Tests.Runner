@@ -9,7 +9,9 @@ using Microsoft.Extensions.Options;
 
 using NUnit.Framework;
 
+using Zat.Tests.Runner.Common.Net.Application.DependencyInjection;
 using Zat.Tests.Runner.WebApp.Application.DependencyInjection;
+using Zat.Tests.Runner.WebApp.Application.Paths;
 
 [TestFixture]
 public class InitPathsExtensionsTests

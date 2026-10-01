@@ -1,4 +1,4 @@
-namespace Zat.Tests.Runner.WebApp.Tests.Application.DependencyInjection;
+namespace Zat.Tests.Runner.Common.Net.Tests.Application.DependencyInjection;
 
 using DevKit.Core.Interfaces;
 
@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using NUnit.Framework;
 
-using Zat.Tests.Runner.WebApp.Application.DependencyInjection;
+using Zat.Tests.Runner.Common.Net.Application.DependencyInjection;
 
 /// <summary>
 /// Which of the registered services are initialised, and how often.

@@ -3,6 +3,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
+using Zat.Tests.Runner.TuiApp.Application.Paths;
 using Zat.Tests.Runner.TuiApp.Stores;
 
 internal static class InitStoresExtensions
@@ -11,8 +12,10 @@ internal static class InitStoresExtensions
     {
         public IHostBuilder InitStores()
             => hostBuilder.ConfigureServices(services => services
-                .AddSingleton(_ => AppUserSettingsStore.Create())
-                .AddSingleton(_ => AppStateStore.Create())
+                .AddSingleton(static provider => AppUserSettingsStore.Create(
+                    provider.GetRequiredService<IAppPathsProvider>()))
+                .AddSingleton(static provider => AppStateStore.Create(
+                    provider.GetRequiredService<IAppPathsProvider>()))
                 .AddSingleton<TestRunConfigStore>());
     }
 }

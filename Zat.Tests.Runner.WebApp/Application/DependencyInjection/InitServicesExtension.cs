@@ -8,8 +8,8 @@ using Fluxor.Persist.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
 
-using Zat.Tests.Runner.Common.Net.Application.Paths;
 using Zat.Tests.Runner.Common.Net.Services;
+using Zat.Tests.Runner.WebApp.Application.Paths;
 using Zat.Tests.Runner.WebApp.Features.TestResultReporting.Services;
 using Zat.Tests.Runner.WebApp.Shared.JsInterop;
 using Zat.Tests.Runner.WebApp.Shared.Services;
@@ -35,7 +35,9 @@ public static class InitServicesExtension
         /// <returns>The service collection, to allow chaining.</returns>
         public IServiceCollection InitServices()
             => services
-                .InitSharedServices<AppOptions>(AppOptions.SectionName)
+                .InitSharedServices<AppOptions, AppPathsProvider>(AppOptions.SectionName)
+                .AddSingleton<IAppPathsProvider>(
+                    static provider => provider.GetRequiredService<AppPathsProvider>())
                 .InitFluxor()
                 .InitNUnitTestRunner()
                 .AddScoped<IJsModuleInteropFactory, JsModuleInteropFactory>()
@@ -43,8 +45,7 @@ public static class InitServicesExtension
                 .AddScoped<TestLinkResultHandler.IContext, TestLinkResultHandlerContext>()
                 .AddScoped<WeakReferenceMessenger>()
                 .AddScoped<MidlewareInitializer>()
-                .AddSingleton<BrowserLogger>()
-                .AddSingleton<IAppPathsProvider, AppPathsProvider>();
+                .AddSingleton<BrowserLogger>();
 
         private IServiceCollection InitNUnitTestRunner()
             => services

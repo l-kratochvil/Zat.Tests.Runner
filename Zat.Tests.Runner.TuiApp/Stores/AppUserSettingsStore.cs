@@ -1,29 +1,23 @@
 namespace Zat.Tests.Runner.TuiApp.Stores;
 
-using Zat.Tests.Runner.TuiApp;
+using Zat.Tests.Runner.TuiApp.Application.Paths;
 using Zat.Tests.Runner.TuiApp.Model;
 
-internal class AppUserSettingsStore : IJsonPersistanceStore<AppUserSettings>
+internal class AppUserSettingsStore(string jsonPath) : IJsonPersistanceStore<AppUserSettings>
 {
     private const string DefaultIdeInstallationDirPath = @"C:\Program Files (x86)\Pertinax6";
 
-    private static readonly string JsonPath = Paths.Files.AppUserSettings;
-
-    private readonly JsonPersistanceStore<AppUserSettings> jsonPersistanceStore = new(CreateDefaultAppUserSettings, JsonPath);
-
-    private AppUserSettingsStore()
-    {
-    }
+    private readonly JsonPersistanceStore<AppUserSettings> jsonPersistanceStore = new(CreateDefaultAppUserSettings, jsonPath);
 
     /// <inheritdoc/>
     public AppUserSettings Current
         => this.jsonPersistanceStore.Current;
 
-    public static AppUserSettingsStore Create()
+    public static AppUserSettingsStore Create(IAppPathsProvider paths)
         => JsonPersistanceStore<AppUserSettings>.InitStore(
-            JsonPath,
+            paths.Files.UserSettings,
             CreateDefaultAppUserSettings,
-            model => new AppUserSettingsStore().Visit(x => x.Update(model)));
+            model => new AppUserSettingsStore(paths.Files.UserSettings).Visit(x => x.Update(model)));
 
     /// <inheritdoc/>
     public void Update(Func<AppUserSettings, AppUserSettings> updator)

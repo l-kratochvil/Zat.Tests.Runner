@@ -35,7 +35,7 @@ public sealed class FileLoggerProvider : ILoggerProvider
     /// </summary>
     /// <param name="options">Options that configure the file logger.</param>
     /// <param name="paths">Provider of the application paths.</param>
-    public FileLoggerProvider(IOptions<FileLoggerOptions> options, IAppPathsProvider paths)
+    public FileLoggerProvider(IOptions<FileLoggerOptions> options, ISharedAppPathsProvider paths)
     {
         const string outputTempalte = "{Timestamp:yyyy-MM-dd HH:mm:ss:fff} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
 

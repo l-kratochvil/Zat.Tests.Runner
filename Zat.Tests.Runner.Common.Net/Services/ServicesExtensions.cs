@@ -13,15 +13,18 @@ public static class ServicesExtensions
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection InitSharedServices<TAppOptions>(
+        public IServiceCollection InitSharedServices<TAppOptions, TAppPathsProvider>(
             string appOptionsSectionName)
             where TAppOptions : AppOptionsBase
+            where TAppPathsProvider : class, ISharedAppPathsProvider
             => services
                 .InitAppOptions<TAppOptions>(appOptionsSectionName)
                 .InitLogging()
                 .AddScoped<WeakReferenceMessenger>()
                 .AddSingleton<GlobalWeakReferenceMessanger>()
-                .AddSingleton<IAppPathsProvider, AppPathsProvider>()
+                .AddSingleton<TAppPathsProvider>()
+                .AddSingleton<ISharedAppPathsProvider>(
+                    static provider => provider.GetRequiredService<TAppPathsProvider>())
                 .AddSingleton<ITestRunnerBridgeConnector, TestRunnerBridgeConnector>()
                 .AddSingleton<ITestLink, TestLink>()
                 .AddSingleton(_ => ITestLink.Config.Default)

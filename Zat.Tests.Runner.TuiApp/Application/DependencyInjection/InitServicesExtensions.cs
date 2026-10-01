@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Zat.Tests.Runner.Common.Net.Application.Logging;
 using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.Common.Services;
+using Zat.Tests.Runner.TuiApp.Application.Paths;
 using Zat.Tests.Runner.TuiApp.Services;
 
 internal static class InitServicesExtensions
@@ -16,7 +17,9 @@ internal static class InitServicesExtensions
             => hostBuilder.ConfigureServices(
                 services => services
                     .AddLogging(builder => builder.InitLogging())
-                    .InitSharedServices<AppOptions>(AppOptions.SectionName)
+                    .InitSharedServices<AppOptions, AppPathsProvider>(AppOptions.SectionName)
+                    .AddSingleton<IAppPathsProvider>(
+                        static provider => provider.GetRequiredService<AppPathsProvider>())
                     .AddSingleton(nunitTestRunnerProxy)
                     .AddSingleton<TestLinkResultHandler.IContext, TestLinkResultHandlerContext>());
     }

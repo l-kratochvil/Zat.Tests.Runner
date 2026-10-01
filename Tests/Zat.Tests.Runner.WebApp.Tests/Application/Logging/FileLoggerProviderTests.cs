@@ -9,6 +9,9 @@ using Moq;
 
 using NUnit.Framework;
 
+using Zat.Tests.Runner.Common.Net.Application.Logging;
+using Zat.Tests.Runner.Common.Net.Application.Paths;
+
 [TestFixture]
 public class FileLoggerProviderTests
 {
@@ -231,11 +234,11 @@ public class FileLoggerProviderTests
         Assert.That(unit.Dispose, Throws.Nothing);
     }
 
-    private static IAppPathsProvider CreatePaths(string logsPath)
+    private static ISharedAppPathsProvider CreatePaths(string logsPath)
     {
-        var paths = new Mock<IAppPathsProvider>();
+        var paths = new Mock<ISharedAppPathsProvider>();
         paths.SetupGet(provider => provider.Directories)
-            .Returns(new AppDirectoryPaths(logsPath, logsPath));
+            .Returns(new SharedAppDirectoryPaths(logsPath, logsPath));
 
         return paths.Object;
     }

@@ -7,8 +7,8 @@ using DevKit.Core.Extensions.Types;
 using NUnit.Framework;
 
 using Zat.Tests.Runner.Common.Model;
-using Zat.Tests.Runner.Common.Net.Application.Paths;
 using Zat.Tests.Runner.Common.Net.Services;
+using Zat.Tests.Runner.Common.Net.Tests.Application.Paths;
 
 [TestFixture]
 public class NUnitTestRunnerRpcTests
@@ -30,7 +30,7 @@ public class NUnitTestRunnerRpcTests
         TestAssemblyNet481Name,
         $"{TestAssemblyNet481Name}.dll");
 
-    private readonly AppPathsProvider appPathsProvider = new(TestContext.CurrentContext.TestDirectory);
+    private readonly TestAppPathsProvider appPathsProvider = new(TestContext.CurrentContext.TestDirectory);
 
     private NUnitTestRunnerProxyConnector connector = null!;
 

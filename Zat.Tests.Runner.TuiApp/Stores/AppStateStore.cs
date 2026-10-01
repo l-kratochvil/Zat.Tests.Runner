@@ -1,16 +1,11 @@
-﻿namespace Zat.Tests.Runner.TuiApp.Stores;
+namespace Zat.Tests.Runner.TuiApp.Stores;
 
+using Zat.Tests.Runner.TuiApp.Application.Paths;
 using Zat.Tests.Runner.TuiApp.Model;
 
-internal class AppStateStore : IJsonPersistanceStore<AppState>
+internal class AppStateStore(string jsonPath) : IJsonPersistanceStore<AppState>
 {
-    private static readonly string JsonPath = Paths.Files.AppState;
-
-    private readonly JsonPersistanceStore<AppState> jsonPersistanceStore = new(CreateDefaultAppState, JsonPath);
-
-    private AppStateStore()
-    {
-    }
+    private readonly JsonPersistanceStore<AppState> jsonPersistanceStore = new(CreateDefaultAppState, jsonPath);
 
     /// <inheritdoc/>
     public AppState Current
@@ -19,12 +14,13 @@ internal class AppStateStore : IJsonPersistanceStore<AppState>
     /// <summary>
     /// Creates a new instance of the AppStateStore.
     /// </summary>
+    /// <param name="paths">Provider of the application paths, naming the application state file.</param>
     /// <returns>A new instance.</returns>
-    public static AppStateStore Create()
+    public static AppStateStore Create(IAppPathsProvider paths)
         => JsonPersistanceStore<AppState>.InitStore(
-            JsonPath,
+            paths.Files.AppState,
             CreateDefaultAppState,
-            model => new AppStateStore().Visit(x => x.Update(model)));
+            model => new AppStateStore(paths.Files.AppState).Visit(x => x.Update(model)));
 
     /// <inheritdoc/>
     public void Update(Func<AppState, AppState> updator)
