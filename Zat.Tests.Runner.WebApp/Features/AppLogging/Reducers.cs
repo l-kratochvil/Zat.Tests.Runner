@@ -18,7 +18,7 @@ public static class Reducers
         => Updater
             .UpdateIfChanged(
                 current,
-                action.Entries,
-                (state, value) => state with { Entries = value })
+                action.NewEntry,
+                (state, value) => state with { Entries = [..state.Entries.Append(value)] })
             .Complete();
 }

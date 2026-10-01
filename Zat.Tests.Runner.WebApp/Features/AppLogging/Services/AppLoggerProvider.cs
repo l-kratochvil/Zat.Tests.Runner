@@ -1,16 +1,21 @@
 namespace Zat.Tests.Runner.WebApp.Features.AppLogging.Services;
 
-using Fluxor;
+using System.Collections.Concurrent;
+
+using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.WebApp.Shared.Model;
 using Zat.Tests.Runner.WebApp.Shared.Stores.AppLogging;
 
 public sealed class AppLoggerProvider(
-    IDispatcher dispatcher)
+    GlobalWeakReferenceMessanger globalMessanger)
     : ILoggerProvider
 {
+    private readonly ConcurrentDictionary<string, Logger> loggers = new();
+
     /// <inheritdoc/>
     public ILogger CreateLogger(string categoryName)
-        => new Logger(categoryName, dispatcher);
+        => this.loggers.GetOrAdd(
+            categoryName, _ => new Logger(categoryName, globalMessanger));
 
     /// <inheritdoc/>
     public void Dispose()
@@ -19,14 +24,16 @@ public sealed class AppLoggerProvider(
 
     private class Logger(
         string categoryName,
-        IDispatcher dispatcher)
+        GlobalWeakReferenceMessanger globalMessanger)
         : ILogger
     {
+        // TODO: Agent
         /// <inheritdoc/>
         public IDisposable BeginScope<TState>(TState state)
             where TState : notnull
             => throw new NotImplementedException();
 
+        // TODO: Agent
         /// <inheritdoc/>
         public bool IsEnabled(LogLevel logLevel)
             => throw new NotImplementedException();
@@ -38,7 +45,7 @@ public sealed class AppLoggerProvider(
             TState state,
             Exception? exception,
             Func<TState, Exception?, string> formatter)
-            => dispatcher.Dispatch(
+            => globalMessanger.Send(
                 new DataChangedAction(new ValueChange<LogEntry>(
                     new LogEntry(
                         Timestamp: DateTimeOffset.Now,

@@ -23,6 +23,7 @@ public abstract class ViewModelBase
     /// <inheritdoc/>
     public event Action<bool>? HasErrorsChanged;
 
+    /// <inheritdoc/>
     public event EventHandler? DataChanged;
 
     protected ViewModelBase()
@@ -37,6 +38,13 @@ public abstract class ViewModelBase
     /// <inheritdoc/>
     public Validity? GetValidity(string propertyName)
         => this.propertyValidities.GetValueOrDefault(propertyName);
+
+    /// <summary>
+    /// Announces a change of <paramref name="propertyName"/> made outside the view model.
+    /// </summary>
+    /// <param name="propertyName">The name of the property that changed.</param>
+    internal void NotifyPropertyChanged(string propertyName)
+        => this.OnPropertyChanged(propertyName);
 
     /// <summary>
     /// Initializes the validator for the view model.
@@ -99,11 +107,8 @@ public abstract class ViewModelBase
         if (oldHasErrors != newHasErrors)
         {
             this.HasErrorsChanged?.Invoke(newHasErrors);
+            this.OnPropertyChanged(nameof(this.HasErrors));
         }
-
-        // What is wrong with one value is often another value's doing, so a control showing any of
-        // them is told that there is something new to read rather than only the one just looked at.
-        this.OnPropertyChanged(nameof(this.HasErrors));
 
         return validity;
     }

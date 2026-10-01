@@ -1,7 +1,10 @@
 namespace Zat.Tests.Runner.Common.Net.Services;
 
+using CommunityToolkit.Mvvm.Messaging;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+
 using Zat.Tests.Runner.Common.Net.Application;
 using Zat.Tests.Runner.Common.Net.Application.Logging;
 using Zat.Tests.Runner.Common.Net.Application.Paths;
@@ -15,15 +18,17 @@ public static class ServicesExtensions
             where TAppOptions : AppOptionsBase
             => services
                 .InitAppOptions<TAppOptions>(appOptionsSectionName)
-                .AddSingleton<IAppPathsProvider, AppPathsProvider>()
                 .InitLogging()
+                .AddScoped<WeakReferenceMessenger>()
+                .AddSingleton<GlobalWeakReferenceMessanger>()
+                .AddSingleton<IAppPathsProvider, AppPathsProvider>()
                 .AddSingleton<ITestRunnerBridgeConnector, TestRunnerBridgeConnector>()
                 .AddSingleton<ITestLink, TestLink>()
                 .AddSingleton(_ => ITestLink.Config.Default)
                 .AddSingleton<ITestRunnerEngine, TestRunnerEngine>()
                 .AddSingleton<ITestResultHandler, TestLinkResultHandler>();
 
-        public IServiceCollection InitAppOptions<TOptions>(
+        private IServiceCollection InitAppOptions<TOptions>(
             string sectionName)
             where TOptions : AppOptionsBase
         {

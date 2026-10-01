@@ -43,25 +43,6 @@ public class NUnitTestRunnerRpcTests
     }
 
     [Test]
-    public async Task LoadTestAssemblyAsync_WithNet481Assembly()
-    {
-        var testAssemblyDllPath = TestAssemblyNet481DllPath;
-        if (!File.Exists(testAssemblyDllPath))
-        {
-            throw new FileNotFoundException(testAssemblyDllPath);
-        }
-
-        // Given
-        var unit = this.connector.Proxy;
-
-        // When
-        var result = await unit.LoadTestAssemblyAsync(testAssemblyDllPath);
-
-        // Then
-        Assert.That(result, Is.Not.Empty);
-    }
-
-    [Test]
     public async Task LoadTestAssemblyAsync_WithNet461Assembly()
     {
         var testAssemblyDllPath = TestAssemblyNet461DllPath;
@@ -81,8 +62,28 @@ public class NUnitTestRunnerRpcTests
     }
 
     [Test]
+    public async Task LoadTestAssemblyAsync_WithNet481Assembly()
+    {
+        var testAssemblyDllPath = TestAssemblyNet481DllPath;
+        if (!File.Exists(testAssemblyDllPath))
+        {
+            throw new FileNotFoundException(testAssemblyDllPath);
+        }
+
+        // Given
+        var unit = this.connector.Proxy;
+
+        // When
+        var result = await unit.LoadTestAssemblyAsync(testAssemblyDllPath);
+
+        // Then
+        Assert.That(result, Is.Not.Empty);
+    }
+
+    [Test]
     public async Task LoadTestAssemblyAsync_WithZatTestsAssembly()
     {
+        // TODO: "Test libs" folder content should be copied to the output folder of this test project, so that the test can run on any machine without manual setup.
         var zatTestsAssemblyPath = Path.Combine(@"C:\Automized tests\Test libs\", "Zat.Z2xxTests.dll");
 
         if (!File.Exists(zatTestsAssemblyPath))

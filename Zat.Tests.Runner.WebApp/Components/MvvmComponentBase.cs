@@ -59,14 +59,10 @@ public abstract class MvvmComponentBase<TDataContext> : FluxorComponent
     /// <inheritdoc/>
     protected override void OnInitialized()
     {
-        this.ViewModel.PropertyChanged += this.OnViewModelPropertyChanged;
-
-        // Is this necessary?
-        // if (this.ViewModel is INotifyValidityInfo notifyValidityInfo)
-        // {
-        //     notifyValidityInfo.HasErrorsChanged += this.OnViewModelHasErrorsChanged;
-        // }
         base.OnInitialized();
+
+        this.ViewModel.PropertyChanged += this.OnViewModelPropertyChanged;
+        this.ViewModel.DataChanged += this.OnViewModelDataChanged;
     }
 
     /// <inheritdoc/>
@@ -78,7 +74,6 @@ public abstract class MvvmComponentBase<TDataContext> : FluxorComponent
         if (disposing)
         {
             this.disposed = true;
-
             this.ViewModel.PropertyChanged -= this.OnViewModelPropertyChanged;
             this.ViewModel.DataChanged -= this.OnViewModelDataChanged;
         }

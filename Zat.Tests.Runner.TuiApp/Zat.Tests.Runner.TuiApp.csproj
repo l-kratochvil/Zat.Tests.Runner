@@ -3,13 +3,20 @@
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net10.0</TargetFramework>
-		<!-- The out-of-process NUnit proxy server is launched from this application, so its output
-         (Exchange) has to sit next to ours. -->
-		<IncludeNUnitTestRunnerProxyDirOutput>true</IncludeNUnitTestRunnerProxyDirOutput>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<None Include="Screens\IsBetaVersionPromptScreen.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="appsettings.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="appsettings.Development.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<DependentUpon>appsettings.json</DependentUpon>
+		</None>
 	</ItemGroup>
 
 	<ItemGroup>

@@ -1,8 +1,7 @@
 namespace Zat.Tests.Runner.WebApp.Features.TestConfiguration.Components;
 
 using System.Text.RegularExpressions;
-
-using DevKit.Core.Interfaces;
+using DevKit.Core.Extensions.Types;
 
 using FluentValidation;
 
@@ -12,24 +11,24 @@ using Zat.Tests.Runner.Common.Net.Application.Logging;
 using Zat.Tests.Runner.WebApp.Shared.Stores.AppSettings;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
 using Zat.Tests.Runner.WebApp.Shared.ViewModel;
+
 using Zat.Z2xxTests.Common.Model;
 
 /// <summary>
 /// The test configuration as the configurator shows it: the values being edited, which of them are
 /// asked for at all, and what is wrong with them.
 /// </summary>
-/// <remarks>
-/// Holds what the tester is typing, which the configuration itself must not: an IDE version is only
-/// written into the state once it has been found to be one, so the half-typed text has to live
-/// somewhere that is not the state. Knows nothing about Fluxor or the browser, so the rules of
-/// editing can be exercised on their own.
-/// </remarks>
-public partial class TestConfigurationViewModel : ViewModelBase, IInitializable
+public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposable
 {
-    private readonly IState<TestConfigurationState> state;
     private readonly IAppSettingsStore appSettingsStore;
     private readonly ILogger logger;
     private readonly IDispatcher dispatcher;
+    private readonly IDisposable[] disposables;
+
+    private readonly StateBinding<string?> runtimeVersion;
+    private readonly StateBinding<Version?> ideVersion;
+    private readonly StateBinding<HwAssemblyType?> testedHwAssembly;
+    private readonly StateBinding<bool> isTestLinkReportEnabled;
 
     public TestConfigurationViewModel(
         IState<TestConfigurationState> state,
@@ -37,10 +36,37 @@ public partial class TestConfigurationViewModel : ViewModelBase, IInitializable
         ILogger<LogSources.App> logger,
         IDispatcher dispatcher)
     {
-        this.state = state;
         this.appSettingsStore = appSettingsStore;
         this.logger = logger;
         this.dispatcher = dispatcher;
+
+        this.disposables =
+        [
+            this.runtimeVersion = this.BindToState(
+                state,
+                selectValue: s => s.RuntimeVersion,
+                property: vm => vm.RuntimeVersion,
+                writeValue: value => this.dispatcher.Dispatch(
+                    new DataChangedAction(NewRuntimeVersion: new ValueChange<string?>(value)))),
+            this.ideVersion = this.BindToState(
+                state,
+                selectValue: s => s.IdeVersion,
+                property: vm => vm.IdeVersion,
+                writeValue: value => this.dispatcher.Dispatch(
+                    new DataChangedAction(NewIdeVersion: new ValueChange<Version?>(value)))),
+            this.testedHwAssembly = this.BindToState(
+                state,
+                selectValue: s => s.TestedHwAssembly,
+                property: vm => vm.TestedHwAssembly,
+                writeValue: value => this.dispatcher.Dispatch(
+                    new DataChangedAction(NewTestedHwAssembly: new ValueChange<HwAssemblyType?>(value)))),
+            this.isTestLinkReportEnabled = this.BindToState(
+                state,
+                selectValue: s => s.IsTestLinkReportEnabled,
+                property: vm => vm.IsTestLinkReportEnabled,
+                writeValue: value => this.dispatcher.Dispatch(
+                    new DataChangedAction(NewIsTestLinkReportEnabled: new ValueChange<bool>(value)))),
+        ];
 
         this.HasErrorsChanged +=
             hasErrors => this.dispatcher.Dispatch(
@@ -76,66 +102,33 @@ public partial class TestConfigurationViewModel : ViewModelBase, IInitializable
     public IReadOnlyList<string> RuntimeVersions
         => field ??= this.InitRuntimeVersions();
 
-    public string RuntimeVersion
+    public string? RuntimeVersion
     {
-        get;
-        set => this.SetProperty(
-            field,
-            value,
-            value => this.dispatcher.Dispatch(
-                new DataChangedAction
-                {
-                    NewRuntimeVersion = new ValueChange<string?>(value),
-                }));
-    } = string.Empty;
+        get => this.runtimeVersion.Value;
+        set => this.runtimeVersion.Value = value;
+    }
 
     public Version? IdeVersion
     {
-        get;
-        set => this.SetProperty(
-            field,
-            value,
-            value => this.dispatcher.Dispatch(
-                new DataChangedAction
-                {
-                    NewIdeVersion = new ValueChange<Version?>(value),
-                }));
+        get => this.ideVersion.Value;
+        set => this.ideVersion.Value = value;
     }
 
     public HwAssemblyType? TestedHwAssembly
     {
-        get;
-        set => this.SetProperty(
-            field,
-            value,
-            value => this.dispatcher.Dispatch(
-                new DataChangedAction
-                {
-                    NewTestedHwAssembly = new ValueChange<HwAssemblyType?>(value),
-                }));
+        get => this.testedHwAssembly.Value;
+        set => this.testedHwAssembly.Value = value;
     }
 
     public bool IsTestLinkReportEnabled
     {
-        get;
-        set => this.SetProperty(
-            field,
-            value,
-            value => this.dispatcher.Dispatch(
-                new DataChangedAction
-                {
-                    NewIsTestLinkReportEnabled = new ValueChange<bool>(value),
-                }));
-    } = false;
+        get => this.isTestLinkReportEnabled.Value;
+        set => this.isTestLinkReportEnabled.Value = value;
+    }
 
     /// <inheritdoc/>
-    public void Initialize()
-    {
-        this.IdeVersion = this.state.Value.IdeVersion;
-        this.RuntimeVersion = this.state.Value.RuntimeVersion ?? string.Empty;
-        this.TestedHwAssembly = this.state.Value.TestedHwAssembly;
-        this.IsTestLinkReportEnabled = this.state.Value.IsTestLinkReportEnabled;
-    }
+    public void Dispose()
+        => this.disposables.DisposeAll();
 
     [GeneratedRegex(@"^\d+")]
     private static partial Regex LeadingNumber();

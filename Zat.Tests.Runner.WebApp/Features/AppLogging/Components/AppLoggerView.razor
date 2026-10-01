@@ -1,11 +1,14 @@
 @* Feature: AppLogging — "the user can see and filter what the application is doing".
    Shown in MainLayout, so the log is reachable from every screen. *@
 
-@using Microsoft.Extensions.Options
+@using Fluxor
+@using Fluxor.Blazor.Web.Components
+
 @using Zat.Tests.Runner.Common.Net.Application.Logging
 @using Zat.Tests.Runner.WebApp.Shared.Model
+@using Zat.Tests.Runner.WebApp.Shared.Stores.AppLogging
 
-@implements IAsyncDisposable
+@inherits FluxorComponent;
 
 <section class="app-log-panel @(this.isCollapsed ? "is-collapsed" : "is-expanded")">
     <header class="app-log-header">
@@ -66,11 +69,11 @@
     @if (!this.isCollapsed)
     {
         <div class="app-log-entries" @ref="this.entriesElement">
-            @foreach (var entry in this.filter.Apply(this.entries))
+            @foreach (var entry in this.filter.Apply(this.Entries))
             {
-                <div class="log-entry severity-@entry.Severity.ToString().ToLowerInvariant()">
+                <div class="log-entry severity-@entry.LogLevel.ToString().ToLowerInvariant()">
                     <span class="entry-time">@entry.Timestamp.ToString("HH:mm:ss.fff")</span>
-                    <span class="entry-severity">@entry.Severity</span>
+                    <span class="entry-severity">@entry.LogLevel</span>
                     <span class="entry-source">@entry.Source</span>
                     <span class="entry-message">@entry.Message</span>
                 </div>
@@ -85,32 +88,14 @@
 </section>
 
 @code {
-    private const int RefreshIntervalMilliseconds = 150;
-
     private const string ModulePath = "./Features/AppLogging/Components/AppLoggerView.razor.js";
+    private const byte MaxRefreshesPerSecond = 6;
 
     private readonly AppLoggerFilter filter = AppLoggerFilter.CreateDefault();
-    private readonly Guid weakReferenceMessangerToken = Guid.NewGuid();
-
-    private IReadOnlyList<LogEntry> entries = [];
     private ElementReference entriesElement;
     private JsModuleInterop? jsModuleInterop;
 
-    private System.Threading.Timer? refreshTimer;
-    private volatile bool hasNewEntries;
     private bool isCollapsed;
-
-    /// <summary>
-    /// Gets or sets the options of the file logger, read to show where the log file is.
-    /// </summary>
-    [Inject]
-    private IOptions<FileLoggerOptions> FileLoggerOptions { get; set; } = null!;
-
-    /// <summary>
-    /// Gets or sets the factory the JS module interop is created through.
-    /// </summary>
-    [Inject]
-    private IJsModuleInteropFactory JsModuleInteropFactory { get; set; } = null!;
 
     /// <summary>
     /// Raised after the panel collapse state changes.
@@ -118,84 +103,50 @@
     [Parameter]
     public EventCallback<bool> CollapsedChanged { get; set; }
 
+    [Inject]
+    private IDispatcher Dispatcher { get; set; } = null!;
+
+    [Inject]
+    private IState<AppLoggingState> AppLoggingState { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the factory the JS module interop is created through.
+    /// </summary>
+    [Inject]
+    private IJsModuleInteropFactory JsModuleInteropFactory { get; set; } = null!;
+
+    private IReadOnlyList<LogEntry> Entries 
+        => this.AppLoggingState.Value.Entries;
+
     private int ErrorCount 
-        => this.entries.Count(entry => entry.LogLevel == LogLevel.Error);
+        => this.Entries.Count(entry => entry.LogLevel == LogLevel.Error);
 
     private JsModuleInterop JsModuleInterop 
         => this.jsModuleInterop ??= this.JsModuleInteropFactory.Create(ModulePath);
 
     private IEnumerable<string> AvailableSources 
         => LogSources.All
-            .Concat(this.entries.Select(entry => entry.Source))
+            .Concat(this.Entries.Select(entry => entry.Source))
             .Distinct(StringComparer.OrdinalIgnoreCase);
 
     /// <inheritdoc/>
-    public async ValueTask DisposeAsync()
+    protected override async ValueTask DisposeAsyncCore(bool disposing)
     {
-        if (this.refreshTimer is not null)
-        {
-            await this.refreshTimer.DisposeAsync();
-        }
-
         // The module is only imported when the user jumps to the newest entry, so a panel nobody
         // scrolled has nothing to release.
         if (this.jsModuleInterop is not null)
         {
             await this.jsModuleInterop.DisposeAsync();
         }
+
+        await base.DisposeAsyncCore(disposing);
     }
 
     /// <inheritdoc/>
     protected override void OnInitialized()
     {
-        this.entries = this.LoggerHub.GetEntries();
-    }
-
-    /// <inheritdoc/>
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (!firstRender)
-        {
-            return;
-        }
-
-        // Subscribing here (and not in OnInitialized) keeps the prerendered instance out of the
-        // hub's subscriber list.
-        this.LoggerHub.EntryAppended += this.OnEntryAppended;
-        this.hasNewEntries = true;
-
-        // Entries arrive in bursts (test runner output), so the UI is refreshed on a timer
-        // instead of once per entry: one re-render per batch, not one per line.
-        this.refreshTimer = new System.Threading.Timer(
-            _ => this.Refresh(),
-            state: null,
-            dueTime: RefreshIntervalMilliseconds,
-            period: RefreshIntervalMilliseconds);
-    }
-
-    private void OnEntryAppended(LogEntry entry)
-    {
-        this.hasNewEntries = true;
-    }
-
-    private void Refresh()
-    {
-        if (!this.hasNewEntries)
-        {
-            return;
-        }
-
-        this.hasNewEntries = false;
-        this.entries = this.LoggerHub.GetEntries();
-
-        try
-        {
-            _ = this.InvokeAsync(this.StateHasChanged);
-        }
-        catch (ObjectDisposedException)
-        {
-            // The circuit is gone; the timer is disposed right after.
-        }
+        base.OnInitialized();
+        this.MaximumStateChangedNotificationsPerSecond = MaxRefreshesPerSecond;
     }
 
     private async Task ToggleCollapsedAsync()

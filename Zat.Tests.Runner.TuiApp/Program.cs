@@ -6,8 +6,16 @@ using Zat.Tests.Runner.TuiApp.Application.DependencyInjection;
 
 await using var nunitTestRunnerProxyConnector = await NUnitTestRunnerProxyConnector.ConnectAsync();
 
-var host = Host
-    .CreateDefaultBuilder()
+var hostBuilder = Host.CreateDefaultBuilder();
+
+#if DEBUG
+if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")))
+{
+    hostBuilder.UseEnvironment(Environments.Development);
+}
+#endif
+
+var host = hostBuilder
     .InitServices(nunitTestRunnerProxyConnector.Proxy)
     .InitScreens()
     .InitStores()

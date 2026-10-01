@@ -1,6 +1,7 @@
 namespace Zat.Tests.Runner.WebApp.Features.AppLogging.Components;
 
 using Zat.Tests.Runner.Common.Net.Application.Logging;
+using Zat.Tests.Runner.WebApp.Shared.Model;
 
 /// <summary>
 /// Which severities and log sources are shown in the log panel.
@@ -12,7 +13,7 @@ using Zat.Tests.Runner.Common.Net.Application.Logging;
 public sealed class AppLoggerFilter
 {
     private readonly HashSet<LogLevel> selectedLogLevels;
-    private readonly HashSet<string> hiddenSources = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<string> hiddenSources = [with(StringComparer.OrdinalIgnoreCase)];
 
     private AppLoggerFilter(IEnumerable<LogLevel> selectedLogLevels)
     {

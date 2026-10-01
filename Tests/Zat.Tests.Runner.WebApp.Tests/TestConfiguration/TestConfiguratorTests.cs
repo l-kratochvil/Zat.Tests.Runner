@@ -7,12 +7,15 @@ using Bunit;
 using Fluxor;
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 using Moq;
 
 using NUnit.Framework;
 
 using Zat.Tests.Runner.Common.Model;
+using Zat.Tests.Runner.Common.Net.Application.Logging;
+using Zat.Tests.Runner.WebApp.Features.TestConfiguration.Components;
 using Zat.Tests.Runner.WebApp.Shared.Stores.AppSettings;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
@@ -37,17 +40,15 @@ public class TestConfiguratorTests : Bunit.TestContext
     private const string IdeVersionSelector = ".input-ide-version";
 
     private TestDiscoveryState testSelection = new([]);
-    private TestConfigurationState configuration = new();
 
+    private TestConfigurationStoreFake store;
     private Mock<IAppSettingsStore> appSettingsStore;
     private Mock<ITestDiscoveryStore> testDiscoveryStore;
-    private Mock<IDispatcher> dispatcher;
 
     [SetUp]
     public void SetUp()
     {
-        var configurationState = new Mock<IState<TestConfigurationState>>();
-        configurationState.SetupGet(state => state.Value).Returns(() => this.configuration);
+        this.store = new TestConfigurationStoreFake();
 
         this.testDiscoveryStore = new Mock<ITestDiscoveryStore>();
         this.testDiscoveryStore.SetupGet(store => store.Current).Returns(() => this.testSelection);
@@ -57,13 +58,13 @@ public class TestConfiguratorTests : Bunit.TestContext
             .SetupGet(store => store.Current)
             .Returns(new AppSettingsState(@"C:\Ide"));
 
-        this.dispatcher = new Mock<IDispatcher>();
-
-        this.Services.AddSingleton(configurationState.Object);
+        this.Services.AddSingleton<IState<TestConfigurationState>>(this.store);
         this.Services.AddSingleton(this.testDiscoveryStore.Object);
         this.Services.AddSingleton(this.appSettingsStore.Object);
-        this.Services.AddSingleton(this.dispatcher.Object);
+        this.Services.AddSingleton(this.store.Dispatcher.Object);
         this.Services.AddSingleton(new Mock<IActionSubscriber>().Object);
+        this.Services.AddSingleton(new Mock<ILogger<LogSources.App>>().Object);
+        this.Services.AddScoped<TestConfigurationViewModel>();
     }
 
     [TearDown]
@@ -156,7 +157,7 @@ public class TestConfiguratorTests : Bunit.TestContext
         component.Find(TestLinkSelector).Change(true);
 
         // When:
-        component.Find(IdeVersionSelector).Input("nonsense");
+        component.Find(IdeVersionSelector).Change("nonsense");
 
         // Then:
         Assert.That(component.FindAll(".property-grid-row-message.is-error"), Is.Not.Empty);
@@ -184,7 +185,7 @@ public class TestConfiguratorTests : Bunit.TestContext
         // Pointing the install folder somewhere else can leave behind a version that is not
         // installed there. Keeping it would let a run start against an installation that is not on
         // the machine, while the combo box shows nothing chosen.
-        this.configuration = new TestConfigurationState() with { RuntimeVersion = "6" };
+        this.store.Value = new TestConfigurationState() with { RuntimeVersion = "6" };
 
         var component = this.RenderConfigurator();
 
@@ -192,7 +193,7 @@ public class TestConfiguratorTests : Bunit.TestContext
         this.RaiseAppSettingsChanged(component);
 
         // Then:
-        this.dispatcher.Verify(
+        this.store.Dispatcher.Verify(
             d => d.Dispatch(
                 It.Is<DataChangedAction>(action =>
                     action.NewRuntimeVersion != null && action.NewRuntimeVersion.Value == null)));
@@ -202,7 +203,7 @@ public class TestConfiguratorTests : Bunit.TestContext
     public void OnAppSettingsChanged__WhenTheChosenVersionIsInstalledThereToo__ThenShouldKeepIt()
     {
         // Given:
-        this.configuration = new TestConfigurationState() with { RuntimeVersion = "6" };
+        this.store.Value = new TestConfigurationState() with { RuntimeVersion = "6" };
 
         var component = this.RenderConfigurator();
 
@@ -210,7 +211,7 @@ public class TestConfiguratorTests : Bunit.TestContext
         this.RaiseAppSettingsChanged(component);
 
         // Then:
-        this.dispatcher.Verify(
+        this.store.Dispatcher.Verify(
             d => d.Dispatch(It.Is<DataChangedAction>(action => action.NewRuntimeVersion != null)),
             Times.Never);
     }
@@ -221,7 +222,7 @@ public class TestConfiguratorTests : Bunit.TestContext
         // Given:
         // Nothing has been chosen, and the state comes back from the browser without the answer,
         // which is not remembered with it.
-        this.configuration = new TestConfigurationState();
+        this.store.Value = new TestConfigurationState();
 
         // When:
         this.RenderConfigurator();
@@ -251,10 +252,10 @@ public class TestConfiguratorTests : Bunit.TestContext
         // Given:
         // A runtime test runs against a station, which nothing has been chosen for, so the same
         // configuration that was runnable a moment ago is not any more.
-        this.configuration = new TestConfigurationState() with { RuntimeVersion = "6" };
+        this.store.Value = new TestConfigurationState() with { RuntimeVersion = "6" };
 
         var component = this.RenderConfigurator();
-        this.dispatcher.Invocations.Clear();
+        this.store.Dispatcher.Invocations.Clear();
 
         // When:
         this.GivenSelectedTestCase(TestType.Runtime);

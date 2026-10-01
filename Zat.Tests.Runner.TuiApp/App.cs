@@ -26,7 +26,8 @@ internal class App
                 = await nunitTestRunnerProxy.LoadTestAssemblyAsync(
                     @"c:\Users\l-kratochvil\source\repos\Zat.Tests.Runner\Tests\NUnitTestAssembly.Net481\bin\Debug\net481\NUnitTestAssembly.Net481.dll");
 
-            await MainRenderAsync(host.Services.GetRequiredService<HomeScreen>());
+            using var scope = host.Services.CreateScope();
+            await MainRenderAsync(scope.ServiceProvider.GetRequiredService<HomeScreen>());
         }
         catch (Exception ex)
         {

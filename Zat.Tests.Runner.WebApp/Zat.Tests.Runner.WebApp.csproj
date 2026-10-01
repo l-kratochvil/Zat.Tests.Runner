@@ -5,9 +5,6 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
-		<!-- The out-of-process NUnit proxy server is launched from this application, so its output
-         (Exchange) has to sit next to ours. -->
-		<IncludeNUnitTestRunnerProxyDirOutput>true</IncludeNUnitTestRunnerProxyDirOutput>
 	</PropertyGroup>
 
 	<ItemGroup>
