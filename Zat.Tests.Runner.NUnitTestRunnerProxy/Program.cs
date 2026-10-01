@@ -4,11 +4,13 @@ using System.IO.Pipes;
 using DevKit.Core.Utils;
 
 using StreamJsonRpc;
-
+using Zat.Tests.Runner.Common;
 using Zat.Tests.Runner.NUnitTestRunnerProxy;
 
 #if DEBUG
-var debugRequested = args.Skip(1).Any(arg => string.Equals(arg, "--debug", StringComparison.OrdinalIgnoreCase));
+var debugRequested = args.Skip(1).Any(
+    arg => string.Equals(
+        arg, CommonConstants.ProcessArgs.Debug, StringComparison.OrdinalIgnoreCase));
 if (debugRequested && DebuggerUtils.NetDebuggerLaunchAllowed)
 {
     Debugger.Launch();
@@ -35,7 +37,9 @@ try
     rpc.AddLocalRpcTarget(new NUnitTestRunnerProxy(), new JsonRpcTargetOptions { DisposeOnDisconnect = true });
     rpc.StartListening();
 
+#pragma warning disable VSTHRD003 // Avoid awaiting foreign Tasks
     await rpc.Completion.ConfigureAwait(false);
+#pragma warning restore VSTHRD003 // Avoid awaiting foreign Tasks
     return 0;
 }
 catch (Exception ex)

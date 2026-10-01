@@ -64,7 +64,13 @@ public sealed class NUnitTestRunnerProxyConnector : IAsyncDisposable
         Process? serverProcess = null;
         try
         {
-            var arguments = launchDebugger ? $"{pipeName} --debug" : pipeName;
+            var arguments = pipeName;
+
+            if (launchDebugger)
+            {
+                arguments += $" {CommonConstants.ProcessArgs.Debug}";
+            }
+
             serverProcess = Process.Start(new ProcessStartInfo(serverPath, arguments)
             {
                 UseShellExecute = false,

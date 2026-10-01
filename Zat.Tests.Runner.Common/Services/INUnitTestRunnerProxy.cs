@@ -3,13 +3,14 @@ namespace Zat.Tests.Runner.Common.Services;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-
+using StreamJsonRpc;
 using Zat.Tests.Runner.Common.Model;
 
 /// <summary>
 /// Surface of the out-of-process NUnit test runner. Implemented by the .NET Framework
 /// proxy server and consumed by the application over a StreamJsonRpc named-pipe connection.
 /// </summary>
+[JsonRpcContract]
 public interface INUnitTestRunnerProxy
 {
     /// <summary>Loads the test assembly and returns its discovered test tree.</summary>

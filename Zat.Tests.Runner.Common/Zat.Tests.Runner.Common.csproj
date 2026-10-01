@@ -8,6 +8,8 @@
 	  <ProjectReference Include="..\Zat.Z2xxTests.Common\Zat.Z2xxTests.Common.csproj" >
 		  <PrivateAssets>all</PrivateAssets>
 	  </ProjectReference>
+
+    <PackageReference Include="StreamJsonRpc" Version="2.25.29" />
   </ItemGroup>
 
 </Project>

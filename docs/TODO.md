@@ -2,6 +2,7 @@
 
 ## HiPrio
 
+- Testy Zat.Z2xx okamžitě končí chybou: Problém v Castle.Core; Skrze VS test runner chodí
 - Dokončit vazbu na TestLink
 - Zautomatizování kroků testera - základní
 - Změna adresáře "Automized Tests":
