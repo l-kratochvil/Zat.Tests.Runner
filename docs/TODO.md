@@ -32,6 +32,7 @@
 - Email notifikace (po dokončení testu)
 - TuiApp:
   - Migrace do Terminal.Gui?
+  - Převést na Features (ať je struktura projektu s WebApp konzistentní)
 
 ## LoPrio
 

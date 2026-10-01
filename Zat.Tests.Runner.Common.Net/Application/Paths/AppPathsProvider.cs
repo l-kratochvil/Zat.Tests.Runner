@@ -14,8 +14,16 @@ public class AppPathsProvider : IAppPathsProvider, IInitializable
     /// </summary>
     /// <param name="sharedAppOptions">The shared application options.</param>
     public AppPathsProvider(IOptions<ISharedAppOptions> sharedAppOptions)
+        : this(sharedAppOptions.Value.LocalAppDataPath)
     {
-        var localAppDataPath = sharedAppOptions.Value.LocalAppDataPath;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AppPathsProvider"/> class.
+    /// </summary>
+    /// <param name="localAppDataPath">The local application data path.</param>
+    internal AppPathsProvider(string localAppDataPath)
+    {
         this.Extensions = new AppFileExtensions(
             Log: ".log");
 

@@ -102,13 +102,15 @@ public abstract class ViewModelBase
 
         var oldHasErrors = this.HasErrors;
         this.propertyValidities[propertyName] = validity;
-        var newHasErrors = this.HasErrors;
 
-        if (oldHasErrors != newHasErrors)
+        var newHasErrors = this.HasErrors;
+        if (newHasErrors == oldHasErrors)
         {
-            this.HasErrorsChanged?.Invoke(newHasErrors);
-            this.OnPropertyChanged(nameof(this.HasErrors));
+            return validity;
         }
+
+        this.HasErrorsChanged?.Invoke(newHasErrors);
+        this.OnPropertyChanged(nameof(this.HasErrors));
 
         return validity;
     }

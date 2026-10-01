@@ -8,7 +8,7 @@ using Fluxor;
 /// <summary>
 /// Ties properties of a <see cref="ViewModelBase"/> to values held in a Fluxor state.
 /// </summary>
-public static class ViewModelBindingExtensions
+public static class ViewModelBaseExtensions
 {
     /// <summary>
     /// Draws <paramref name="property"/> from the value <paramref name="selectValue"/> picks out of
@@ -80,6 +80,6 @@ public static class ViewModelBindingExtensions
         => property.Body is MemberExpression { Member: PropertyInfo info, Expression: ParameterExpression }
             ? info.Name
             : throw new ArgumentException(
-                $"Expression '{property}' must name a property of {typeof(TViewModel).Name}, e.g. vm => vm.Value.",
+                $"Expression '{property}' must name a property of {typeof(TViewModel).Name}",
                 nameof(property));
 }

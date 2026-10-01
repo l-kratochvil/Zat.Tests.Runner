@@ -2,6 +2,8 @@ namespace Zat.Tests.Runner.WebApp.Features.AppLogging.Services;
 
 using System.Collections.Concurrent;
 
+using Microsoft.Extensions.Logging.Abstractions;
+
 using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.WebApp.Shared.Model;
 using Zat.Tests.Runner.WebApp.Shared.Stores.AppLogging;
@@ -27,16 +29,14 @@ public sealed class AppLoggerProvider(
         GlobalWeakReferenceMessanger globalMessanger)
         : ILogger
     {
-        // TODO: Agent
         /// <inheritdoc/>
         public IDisposable BeginScope<TState>(TState state)
             where TState : notnull
-            => throw new NotImplementedException();
+            => NullLogger.Instance.BeginScope(state);
 
-        // TODO: Agent
         /// <inheritdoc/>
         public bool IsEnabled(LogLevel logLevel)
-            => throw new NotImplementedException();
+            => logLevel != LogLevel.None;
 
         /// <inheritdoc/>
         public void Log<TState>(

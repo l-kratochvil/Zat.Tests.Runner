@@ -61,7 +61,7 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
                         { FrameworkPackageSettings.WorkDirectory, Path.GetDirectoryName(assemblyDllPath) },
                     });
 
-                return testAssemblyElement.Tests.Any() ? [.. CollectTestSuiteEntities(testAssemblyElement.Tests[0])] : [];
+                return [.. CollectTestSuiteEntities(testAssemblyElement)];
             },
             cancellationToken);
 
@@ -94,12 +94,9 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
                 try
                 {
                     var result = this.runner.Run(TestListener.NULL, testFilter);
-                    var loadedTest = this.runner.LoadedTest;
 
                     return new ProxyTestResult(
-                        loadedTest.Tests.Any()
-                            ? [.. CollectTestSuiteResults(loadedTest.Tests[0], testFilter, IndexByFullName(result))]
-                            : []);
+                        [.. CollectTestSuiteResults(this.runner.LoadedTest, testFilter, IndexByFullName(result))]);
                 }
                 finally
                 {
@@ -195,7 +192,7 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
     private static IEnumerable<TestSuiteResult> CollectTestSuiteResults(
         ITest root, TestFilter testFilter, IReadOnlyDictionary<string, ITestResult> results)
     {
-        foreach (var testSuite in root.Tests.OfType<TestSuite>().Where(x => testFilter.Pass(x)))
+        foreach (var testSuite in FindTestSuites(root).Where(x => testFilter.Pass(x)))
         {
             var (status, detail) = CreateGroupOutcome(FindResult(results, testSuite));
             yield return new TestSuiteResult(
@@ -251,8 +248,30 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
             .GetAttribute<TestCaseAttribute>()?
             .TestName ?? testCase.Name;
 
+    /// <summary>
+    /// Finds the test suites under <paramref name="root"/>: every namespace level that directly holds a test fixture,
+    /// however deep it is nested.
+    /// </summary>
+    private static IEnumerable<TestSuite> FindTestSuites(ITest root)
+    {
+        foreach (var testSuite in root.Tests
+            .OfType<TestSuite>()
+            .Where(static x => x is not TestFixture and not ParameterizedFixtureSuite))
+        {
+            if (testSuite.Tests.OfType<TestFixture>().Any())
+            {
+                yield return testSuite;
+            }
+
+            foreach (var nestedTestSuite in FindTestSuites(testSuite))
+            {
+                yield return nestedTestSuite;
+            }
+        }
+    }
+
     private static IEnumerable<TestSuiteEntity> CollectTestSuiteEntities(ITest root)
-        => root.Tests.OfType<TestSuite>().Select(static x =>
+        => FindTestSuites(root).Select(static x =>
         {
             // TODO: Určit "je to runtime test" podle atributu (umístěného do Zat.Z2xxTests.Common)
             var testType = x.FullName.ToLower().Contains("runtimetests")

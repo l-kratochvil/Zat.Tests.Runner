@@ -1,11 +1,13 @@
 ﻿namespace Zat.Tests.Runner.Common.Net.Tests;
 
+using System.Reflection;
+
 using DevKit.Core.Extensions.Types;
 
 using NUnit.Framework;
 
-using System.Reflection;
-
+using Zat.Tests.Runner.Common.Model;
+using Zat.Tests.Runner.Common.Net.Application.Paths;
 using Zat.Tests.Runner.Common.Net.Services;
 
 [TestFixture]
@@ -27,6 +29,8 @@ public class NUnitTestRunnerRpcTests
         NUnitTestAssembliesDirPath,
         TestAssemblyNet481Name,
         $"{TestAssemblyNet481Name}.dll");
+
+    // private readonly AppPathsProvider appPathsProvider = new (TestContext.CurrentContext.TestDirectory);
 
     private NUnitTestRunnerProxyConnector connector = null!;
 
@@ -58,7 +62,7 @@ public class NUnitTestRunnerRpcTests
         var result = await unit.LoadTestAssemblyAsync(testAssemblyDllPath);
 
         // Then
-        Assert.That(result, Is.Not.Empty);
+        AssertTestTreeLoaded(result);
     }
 
     [Test]
@@ -77,7 +81,7 @@ public class NUnitTestRunnerRpcTests
         var result = await unit.LoadTestAssemblyAsync(testAssemblyDllPath);
 
         // Then
-        Assert.That(result, Is.Not.Empty);
+        AssertTestTreeLoaded(result);
     }
 
     [Test]
@@ -98,6 +102,19 @@ public class NUnitTestRunnerRpcTests
         var result = await unit.LoadTestAssemblyAsync(zatTestsAssemblyPath);
 
         // Then
-        Assert.That(result, Is.Not.Empty);
+        AssertTestTreeLoaded(result);
+    }
+
+    private static void AssertTestTreeLoaded(TestSuiteEntity[] testSuites)
+    {
+        var testFixtures = testSuites.SelectMany(x => x.TestFixtures).ToArray();
+        var testCases = testFixtures.SelectMany(x => x.TestCases).ToArray();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(testSuites, Is.Not.Empty);
+            Assert.That(testFixtures, Is.Not.Empty);
+            Assert.That(testCases, Is.Not.Empty);
+        });
     }
 }

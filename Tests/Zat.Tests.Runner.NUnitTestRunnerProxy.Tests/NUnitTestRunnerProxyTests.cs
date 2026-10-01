@@ -90,7 +90,13 @@ public class NUnitTestRunnerProxyTests
         var result = await unit.LoadTestAssemblyAsync(testAssemblyDllPath);
 
         // Then
-        Assert.That(result, Is.Not.Empty);
+        Assert.That(result.Select(x => x.Name), Is.EquivalentTo(new[] { "Net461", "Nested" }));
+
+        var nestedTestSuite = result.Single(x => x.Name == "Nested");
+        Assert.That(nestedTestSuite.TestFixtures.Select(x => x.Name), Is.EqualTo(new[] { "NestedTestSuite" }));
+        Assert.That(
+            nestedTestSuite.TestFixtures[0].TestCases.Select(x => x.Name),
+            Is.EqualTo(new[] { "NestedTestCase" }));
     }
 
     [Test]

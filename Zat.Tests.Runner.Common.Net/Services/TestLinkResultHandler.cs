@@ -4,6 +4,7 @@ using DevKit.Core.Extensions;
 
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Logging;
+
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Net.Application.Logging;
 using Zat.Tests.Runner.Common.Net.Model;
@@ -72,7 +73,7 @@ public class TestLinkResultHandler(
                     testCaseResult.Id);
             }
 
-            var testCaseExternalId = $"Z200-{testCaseResult.Id}";
+            var testCaseExternalId = testCaseResult.Id;
             var testCaseId = testLink.GetTestCaseByExternalId(testCaseExternalId).Id;
             var reportTestCaseResult = testLink.ReportTestCaseResult(
                 testCaseId: testCaseId,
