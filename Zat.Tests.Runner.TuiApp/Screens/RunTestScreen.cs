@@ -25,7 +25,7 @@ internal class RunTestScreen(
       ITestResultHandler
 {
     private readonly List<TestResultHandled> handledTestResults = [];
-    private readonly Stopwatch currentTestStopwatch = new();
+    private State state = new();
     private DateTime currentTestStartTime = DateTime.UtcNow;
 
     /// <inheritdoc/>
@@ -57,8 +57,8 @@ internal class RunTestScreen(
                 result,
                 oldTestStartTime,
                 DateTime.UtcNow,
-                this.currentTestStopwatch.Elapsed));
-        this.currentTestStopwatch.Restart();
+                this.state.Stopwatch.Elapsed));
+        this.state.Stopwatch.Restart();
     }
 
     /// <inheritdoc/>
@@ -68,14 +68,13 @@ internal class RunTestScreen(
             Main = async ct =>
             {
                 this.handledTestResults.Clear();
-
-                var state = new State();
                 var table = new Table()
                     .HideHeaders()
                     .AddColumn(string.Empty);
 
-                this.currentTestStopwatch.Start();
+                this.state = new State();
                 this.currentTestStartTime = DateTime.UtcNow;
+                this.state.Stopwatch.Restart();
 
                 var runTestTask = testRunnerEngine.RunTestAsync(
                     testRunEntities: testRunConfigStore.SelectedTestEntities,
@@ -87,7 +86,7 @@ internal class RunTestScreen(
 
                 var promptResult = await ShowLiveDataAsync(
                     table,
-                    state,
+                    this.state,
                     async (table, data, ctx, ct) =>
                     {
                         while (true)
@@ -142,8 +141,7 @@ internal class RunTestScreen(
 
                 await runTestTask;
 
-                this.currentTestStopwatch.Stop();
-                state.Stopwatch.Stop();
+                this.state.Stopwatch.Stop();
 
                 MarkupLine($"[aqua]{Resources.PressAnyKeyToContinue_Message.EscapeMarkup()}[/]");
 

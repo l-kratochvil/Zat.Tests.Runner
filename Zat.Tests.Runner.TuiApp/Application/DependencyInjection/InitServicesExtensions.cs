@@ -2,6 +2,8 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 
 using Zat.Tests.Runner.Common.Net.Application.Logging;
 using Zat.Tests.Runner.Common.Net.Services;
@@ -17,7 +19,7 @@ internal static class InitServicesExtensions
             INUnitTestRunnerProxy nunitTestRunnerProxy)
             => hostBuilder.ConfigureServices(
                 services => services
-                    .AddLogging(builder => builder.InitLogging())
+                    .AddLogging(builder => RemoveConsoleLogger(builder).InitLogging())
                     .InitSharedServices<
                         AppOptions,
                         AppPathsProvider,
@@ -27,5 +29,24 @@ internal static class InitServicesExtensions
                     .AddSingleton(nunitTestRunnerProxy)
                     .AddSingleton<TestLinkResultHandler.IContext, TestLinkResultHandlerContext>()
                     .AddSingleton<ITestResultHandler, TestLinkResultHandler>());
+    }
+
+    /// <summary>
+    /// Removes the <see cref="ConsoleLoggerProvider"/> registered by the default host: the TUI owns the
+    /// console and log lines written into it break its live rendering.
+    /// </summary>
+    private static ILoggingBuilder RemoveConsoleLogger(ILoggingBuilder builder)
+    {
+        var consoleLoggerDescriptors = builder.Services
+            .Where(x => x.ServiceType == typeof(ILoggerProvider) &&
+                        x.ImplementationType == typeof(ConsoleLoggerProvider))
+            .ToArray();
+
+        foreach (var descriptor in consoleLoggerDescriptors)
+        {
+            builder.Services.Remove(descriptor);
+        }
+
+        return builder;
     }
 }
