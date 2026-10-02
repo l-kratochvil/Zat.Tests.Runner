@@ -17,7 +17,7 @@ public class InitDependencyInjectionExtensionsTests
     private interface IService;
 
     [Test]
-    public void InitDependencyInjection__WhenAServiceImplementsTheInterface__ThenShouldInitialiseItWithoutASecondRegistration()
+    public void InitDependencyInjection__WhenServiceImplementsInterface__ThenShouldInitialiseItWithoutSecondRegistration()
     {
         // Given:
         // Asking for initialisation is what implementing the interface means, so nothing else has
@@ -52,7 +52,7 @@ public class InitDependencyInjectionExtensionsTests
     }
 
     [Test]
-    public void InitDependencyInjection__WhenAServiceDoesNotAskForIt__ThenShouldLeaveItAlone()
+    public void InitDependencyInjection__WhenServiceDoesNotAskForIt__ThenShouldLeaveItAlone()
     {
         // Given:
         // Initialising is not resolving: a service that never said it needs it is not built here
@@ -70,7 +70,7 @@ public class InitDependencyInjectionExtensionsTests
     }
 
     [Test]
-    public void InitDependencyInjection__WhenAServiceIsRegisteredAsAnOpenGeneric__ThenShouldPassItBy()
+    public void InitDependencyInjection__WhenServiceIsRegisteredAsOpenGeneric__ThenShouldPassItBy()
     {
         // Given:
         // The logging pipeline registers ILogger<> that way, and an open generic cannot be
@@ -85,7 +85,7 @@ public class InitDependencyInjectionExtensionsTests
     }
 
     [Test]
-    public void InitDependencyInjection__WhenAnInitialisableServiceIsScoped__ThenShouldSkipItRatherThanFail()
+    public void InitDependencyInjection__WhenInitialisableServiceIsScoped__ThenShouldSkipItRatherThanFail()
     {
         // Given:
         // A scoped service belongs to a circuit that does not exist yet at startup, so there is

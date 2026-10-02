@@ -15,7 +15,7 @@ public class ValidityTests
         => Assert.That(Validity.Valid.HasErrors, Is.False);
 
     [Test]
-    public void HasErrors__WhenAnErrorWasFound__ThenShouldSaySo()
+    public void HasErrors__WhenErrorWasFound__ThenShouldSaySo()
     {
         // Given:
         Validity unit = new([new Validity.Issue(GivenField, "Choose one.")]);
@@ -37,7 +37,7 @@ public class ValidityTests
     }
 
     [Test]
-    public void For__WhenAskedAboutAField__ThenShouldKeepOnlyWhatConcernsIt()
+    public void For__WhenAskedAboutField__ThenShouldKeepOnlyWhatConcernsIt()
     {
         // Given:
         Validity.Issue givenProblem = new(GivenField, "Choose one.");
@@ -51,7 +51,7 @@ public class ValidityTests
     }
 
     [Test]
-    public void For__WhenTheFieldHasNoProblems__ThenShouldBeValid()
+    public void For__WhenFieldHasNoProblems__ThenShouldBeValid()
     {
         // Given:
         Validity unit = new([new Validity.Issue(AnotherField, "Write it as x.y.")]);

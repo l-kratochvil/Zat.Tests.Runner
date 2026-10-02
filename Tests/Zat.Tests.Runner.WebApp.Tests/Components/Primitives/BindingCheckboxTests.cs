@@ -35,7 +35,7 @@ public class BindingCheckboxTests : Bunit.TestContext
 
     [TestCase(true)]
     [TestCase(false)]
-    public void Render__WhenTheViewModelHoldsATick__ThenShouldShowIt(bool givenTick)
+    public void Render__WhenViewModelHoldsTick__ThenShouldShowIt(bool givenTick)
     {
         // Given:
         this.viewModel.IsEnabled = givenTick;
@@ -49,7 +49,7 @@ public class BindingCheckboxTests : Bunit.TestContext
     }
 
     [Test]
-    public void Edit__WhenTheTesterTicksIt__ThenShouldWriteItToTheViewModel()
+    public void Edit__WhenTesterTicksIt__ThenShouldWriteItToViewModel()
     {
         // Given:
         var component = this.RenderCheckbox();
@@ -62,7 +62,7 @@ public class BindingCheckboxTests : Bunit.TestContext
     }
 
     [Test]
-    public void Edit__WhenTheTickHasBeenWritten__ThenShouldTellWhoeverAskedToHearOfIt()
+    public void Edit__WhenTickHasBeenWritten__ThenShouldTellWhoeverAskedToHearOfIt()
     {
         // Given:
         bool? told = null;
@@ -78,7 +78,7 @@ public class BindingCheckboxTests : Bunit.TestContext
     }
 
     [Test]
-    public void Edit__WhenTheBindingEventIsOnInput__ThenShouldWriteTheTickAsItIsMade()
+    public void Edit__WhenBindingEventIsOnInput__ThenShouldWriteTickAsItIsMade()
     {
         // Given:
         var component = this.RenderCheckbox(

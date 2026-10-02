@@ -27,7 +27,7 @@ public class BrowserLoggerTests
     }
 
     [Test]
-    public void Constructor__WhenTheLoggerIsCreated__ThenShouldUseTheBrowserCategory()
+    public void Constructor__WhenLoggerIsCreated__ThenShouldUseBrowserCategory()
     {
         // Given:
         var givenFactoryMock = new Mock<ILoggerFactory>();
@@ -45,7 +45,7 @@ public class BrowserLoggerTests
     [TestCase("warn", LogLevel.Warning)]
     [TestCase("error", LogLevel.Error)]
     [TestCase("ERROR", LogLevel.Error)]
-    public void Log__WhenTheLevelIsKnown__ThenShouldWriteAtTheMatchingLevel(
+    public void Log__WhenLevelIsKnown__ThenShouldWriteAtMatchingLevel(
         string givenLevel,
         LogLevel expectedLevel)
     {
@@ -59,7 +59,7 @@ public class BrowserLoggerTests
     [TestCase("verbose")]
     [TestCase("")]
     [TestCase(null)]
-    public void Log__WhenTheLevelIsUnknown__ThenShouldKeepTheRecordAsAWarning(string? givenLevel)
+    public void Log__WhenLevelIsUnknown__ThenShouldKeepRecordAsWarning(string? givenLevel)
     {
         // Given:
         // An unrecognized level is a fault of the calling script; dropping the record would hide
@@ -73,7 +73,7 @@ public class BrowserLoggerTests
     }
 
     [Test]
-    public void Log__WhenThereIsNoDetail__ThenShouldWriteTheModuleAndTheMessage()
+    public void Log__WhenThereIsNoDetail__ThenShouldWriteModuleAndMessage()
     {
         // When:
         this.unit.Log(new BrowserDiagnostic("info", GivenModule, GivenMessage, Detail: null));
@@ -83,7 +83,7 @@ public class BrowserLoggerTests
     }
 
     [Test]
-    public void Log__WhenTheDetailIsEmpty__ThenShouldWriteTheMessageAlone()
+    public void Log__WhenDetailIsEmpty__ThenShouldWriteMessageAlone()
     {
         // Given:
         // An empty detail is the same as none: a blank line would only make the file harder to read.
@@ -96,7 +96,7 @@ public class BrowserLoggerTests
     }
 
     [Test]
-    public void Log__WhenThereIsDetail__ThenShouldWriteItOnTheFollowingLines()
+    public void Log__WhenThereIsDetail__ThenShouldWriteItOnFollowingLines()
     {
         // Given:
         const string givenDetail = "at initialize (SplitterBar.razor.js:14:3)";
@@ -109,7 +109,7 @@ public class BrowserLoggerTests
     }
 
     [Test]
-    public void Log__WhenTheDiagnosticIsMissing__ThenShouldThrow()
+    public void Log__WhenDiagnosticIsMissing__ThenShouldThrow()
     {
         // When / Then:
         Assert.That(() => this.unit.Log(null!), Throws.ArgumentNullException);

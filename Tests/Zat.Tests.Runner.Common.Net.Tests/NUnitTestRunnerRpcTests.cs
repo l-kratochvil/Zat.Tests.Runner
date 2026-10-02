@@ -15,6 +15,7 @@ using Zat.Tests.Runner.Common.Services;
 [TestFixture]
 public class NUnitTestRunnerRpcTests
 {
+    private const bool LaunchDebugger = false; // Enable debugger launch only if necessary to not spawn "attach to process" prompts
     private const string TestAssemblyNet461Name = "NUnitTestAssembly.Net461";
     private const string TestAssemblyNet481Name = "NUnitTestAssembly.Net481";
     private const string Net481FailingTestCasePath = TestAssemblyNet481Name + ".SampleTestSuite.Fail";
@@ -40,7 +41,7 @@ public class NUnitTestRunnerRpcTests
     [SetUp]
     public async Task SetUp()
     {
-        this.connector = await NUnitTestRunnerProxyConnector.ConnectAsync(launchDebugger: !Debugger.IsAttached);
+        this.connector = await NUnitTestRunnerProxyConnector.ConnectAsync(launchDebugger: LaunchDebuggerIfRequired());
     }
 
     [TearDown]
@@ -162,4 +163,7 @@ public class NUnitTestRunnerRpcTests
             Assert.That(testCases, Is.Not.Empty);
         }
     }
+
+    private static bool LaunchDebuggerIfRequired()
+        => LaunchDebugger && !Debugger.IsAttached;
 }

@@ -1,4 +1,4 @@
-﻿namespace Zat.Tests.Runner.WebApp.Tests.TestExecution;
+namespace Zat.Tests.Runner.WebApp.Tests.TestExecution;
 
 using Bunit;
 
@@ -66,7 +66,7 @@ public class TestExecutionTests : Bunit.TestContext
         => this.Dispose();
 
     [Test]
-    public void Render__WhenNothingHasBeenClicked__ThenShouldOfferToStartTheRun()
+    public void Render__WhenNothingHasBeenClicked__ThenShouldOfferToStartRun()
     {
         // Given:
         this.GivenARunnableConfiguration();
@@ -123,7 +123,7 @@ public class TestExecutionTests : Bunit.TestContext
     }
 
     [Test]
-    public void Render__WhenNoTestIsSelected__ThenShouldNotLetTheRunStart()
+    public void Render__WhenNoTestIsSelected__ThenShouldNotLetRunStart()
     {
         // Given:
         // A run of nothing is not a run, and the reason sits on the button because that is what the
@@ -144,7 +144,7 @@ public class TestExecutionTests : Bunit.TestContext
     }
 
     [Test]
-    public void Render__WhenTheConfigurationCannotBeRunWith__ThenShouldNotLetTheRunStart()
+    public void Render__WhenConfigurationCannotBeRunWith__ThenShouldNotLetRunStart()
     {
         // Given:
         // What is wrong with it is not said here: the configurator is beside the button and says it
@@ -165,7 +165,7 @@ public class TestExecutionTests : Bunit.TestContext
     }
 
     [Test]
-    public void Render__WhenTheSelectionAndTheConfigurationAreBothThere__ThenShouldLetTheRunStart()
+    public void Render__WhenSelectionAndConfigurationAreBothThere__ThenShouldLetRunStart()
     {
         // Given:
         this.GivenARunnableConfiguration();

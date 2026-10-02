@@ -27,17 +27,18 @@
 ## MidPrio
 
 - Update nuget balíčků solutionu
-- WebApp: 
-    - Refactor TestDiscovery feature
-    - Rozšíření testů pro komponenty DataContext, BinindgInput, BindingSelect, BindingCheckbox
+- WebApp:
+  - Refactor TestDiscovery feature
+  - Rozšíření testů pro komponenty DataContext, BinindgInput, BindingSelect, BindingCheckbox
 - Email notifikace (po dokončení testu)
 - TuiApp:
   - Migrace do Terminal.Gui?
   - Převést na Features (ať je struktura projektu s WebApp konzistentní)
+  - Installer: Ať je součástí instalace test-runner.bat + zápis cesty k nemu do env variable Paths
 
 ## LoPrio
 
-- WebApp: 
+- WebApp:
   - Změna "Main" v menu na ikonku "home"
   - Playwright/vitest E2E tests
 - TuiApp:
@@ -48,6 +49,9 @@
 ## HiPrio - Detaily
 
 ### Dokončit vazbu na TestLink
+
+- Po dokončení Testlink vazby přepsat kapitoly, které byky automatizovany v dokument Automatizované testování
+- Dále v dokumentu uvést "povinnosti vývojáře testů": Musí nahrát knihovny testu do adresáře, kde je runner vyžaduje (neuvádět konkrétní cestu, jelikož ta se bude časem měnit)
 
 #### 1. Nahrávání přílohy k výsledku testu
 

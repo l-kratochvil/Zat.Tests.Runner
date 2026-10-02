@@ -6,20 +6,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Include="Screens\IsBetaVersionPromptScreen.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Update="appsettings.json">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="appsettings.Development.json">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<DependentUpon>appsettings.json</DependentUpon>
-		</None>
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
 		<PackageReference Include="Spectre.Console" Version="0.49.2-preview.0.44" />
 		<PackageReference Include="InputSimulatorPlus.NetStandard" Version="1.0.8" />
@@ -36,6 +22,23 @@
 		<ProjectReference Include="..\Zat.Tests.Runner.Common\Zat.Tests.Runner.Common.csproj" />
 	</ItemGroup>
 
+	<!-- Other files -->
+	<ItemGroup>
+		<Content Include="test-runner.bat" CopyToOutputDirectory="Always" />
+	</ItemGroup>
+
+	<!-- AppSettings -->
+	<ItemGroup>
+		<None Update="appsettings.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="appsettings.Development.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<DependentUpon>appsettings.json</DependentUpon>
+		</None>
+	</ItemGroup>
+
+	<!-- Resources -->
 	<ItemGroup>
 		<Compile Update="Properties\Resources.Designer.cs">
 			<DesignTime>True</DesignTime>

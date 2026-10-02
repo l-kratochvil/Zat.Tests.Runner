@@ -22,7 +22,7 @@ public class ViewModelBaseTests
     private const string GivenNonsense = "1234";
 
     [Test]
-    public void SetProperty__WhenNothingIsWrongWithTheEdit__ThenShouldHoldIt()
+    public void SetProperty__WhenNothingIsWrongWithEdit__ThenShouldHoldIt()
     {
         // Given:
         EditedModel unit = new();
@@ -39,7 +39,7 @@ public class ViewModelBaseTests
     }
 
     [Test]
-    public void SetProperty__WhenTheEditIsWrong__ThenShouldGoOnHoldingWhatItHad()
+    public void SetProperty__WhenEditIsWrong__ThenShouldGoOnHoldingWhatItHad()
     {
         // Given:
         EditedModel unit = new() { Name = GivenLetters };
@@ -52,7 +52,7 @@ public class ViewModelBaseTests
     }
 
     [Test]
-    public void SetProperty__WhenTheEditIsWrong__ThenShouldSayWhatIsWrongWithIt()
+    public void SetProperty__WhenEditIsWrong__ThenShouldSayWhatIsWrongWithIt()
     {
         // Given:
         EditedModel unit = new() { Name = GivenLetters };
@@ -71,7 +71,7 @@ public class ViewModelBaseTests
     }
 
     [Test]
-    public void SetProperty__WhenTheEditIsWrong__ThenShouldSayThePropertyMovedAllTheSame()
+    public void SetProperty__WhenEditIsWrong__ThenShouldSayPropertyMovedAllSame()
     {
         // Given:
         EditedModel unit = new() { Name = GivenLetters };
@@ -89,7 +89,7 @@ public class ViewModelBaseTests
     }
 
     [Test]
-    public void SetProperty__WhenAWrongEditIsFollowedByARightOne__ThenShouldHoldTheRightOne()
+    public void SetProperty__WhenWrongEditIsFollowedByRightOne__ThenShouldHoldRightOne()
     {
         // Given:
         // A property that starts out wrong is the ordinary case — a configuration nobody has filled
@@ -109,7 +109,7 @@ public class ViewModelBaseTests
     }
 
     [Test]
-    public void SetProperty__WhenTheEditIsWrong__ThenShouldTakeItBackOutOfWhereverItIsKept()
+    public void SetProperty__WhenEditIsWrong__ThenShouldTakeItBackOutOfWhereverItIsKept()
     {
         // Given:
         // Where the value is kept is the caller's to say, and a view model that hands it on must not
@@ -135,7 +135,7 @@ public class ViewModelBaseTests
     }
 
     [Test]
-    public void HasErrors__WhenAnEditIsTurnedDown__ThenShouldSaySoOnlyOnce()
+    public void HasErrors__WhenEditIsTurnedDown__ThenShouldSaySoOnlyOnce()
     {
         // Given:
         EditedModel unit = new() { Name = GivenLetters };

@@ -29,7 +29,7 @@ public class InputTests : Bunit.TestContext
         => this.Dispose();
 
     [Test]
-    public void Render__WhenAValueIsGiven__ThenShouldShowIt()
+    public void Render__WhenValueIsGiven__ThenShouldShowIt()
     {
         // When:
         var component = this.RenderInput(GivenVersion);
@@ -39,7 +39,7 @@ public class InputTests : Bunit.TestContext
     }
 
     [Test]
-    public void Edit__WhenNoValidatorIsGiven__ThenShouldTellTheCallerOfTheEdit()
+    public void Edit__WhenNoValidatorIsGiven__ThenShouldTellCallerOfEdit()
     {
         // Given:
         string? told = null;
@@ -56,7 +56,7 @@ public class InputTests : Bunit.TestContext
     }
 
     [Test]
-    public void Edit__WhenTheValueIsNotText__ThenShouldConvertItBeforeTellingTheCaller()
+    public void Edit__WhenValueIsNotText__ThenShouldConvertItBeforeTellingCaller()
     {
         // Given:
         int? told = null;
@@ -74,7 +74,7 @@ public class InputTests : Bunit.TestContext
     }
 
     [Test]
-    public void Edit__WhenTheValidatorFindsAnError__ThenShouldNotTellTheCaller()
+    public void Edit__WhenValidatorFindsError__ThenShouldNotTellCaller()
     {
         // Given:
         var told = false;
@@ -93,7 +93,7 @@ public class InputTests : Bunit.TestContext
     }
 
     [Test]
-    public void Edit__WhenTheValidatorFindsAnError__ThenShouldStillSayWhatIsWrongWithIt()
+    public void Edit__WhenValidatorFindsError__ThenShouldStillSayWhatIsWrongWithIt()
     {
         // Given:
         var component = this.RenderInput(
@@ -110,7 +110,7 @@ public class InputTests : Bunit.TestContext
     }
 
     [Test]
-    public void Edit__WhenTheValidatorFindsAnError_AndWriteOnErrorIsSet__ThenShouldTellTheCallerAnyway()
+    public void Edit__WhenValidatorFindsError_AndWriteOnErrorIsSet__ThenShouldTellCallerAnyway()
     {
         // Given:
         string? told = null;
@@ -130,7 +130,7 @@ public class InputTests : Bunit.TestContext
     }
 
     [Test]
-    public void Edit__WhenTheValidatorOnlyWarns__ThenShouldTellTheCaller()
+    public void Edit__WhenValidatorOnlyWarns__ThenShouldTellCaller()
     {
         // Given:
         string? told = null;
@@ -151,7 +151,7 @@ public class InputTests : Bunit.TestContext
     }
 
     [Test]
-    public void Render__WhenTheValueGivenIsAlreadyWrong__ThenShouldSaySoBeforeAnyEdit()
+    public void Render__WhenValueGivenIsAlreadyWrong__ThenShouldSaySoBeforeAnyEdit()
     {
         // When:
         var component = this.RenderInput(
@@ -163,7 +163,7 @@ public class InputTests : Bunit.TestContext
     }
 
     [Test]
-    public void Edit__WhenTheBindingEventIsOnInput__ThenShouldTellTheCallerWhileTheTesterTypes()
+    public void Edit__WhenBindingEventIsOnInput__ThenShouldTellCallerWhileTesterTypes()
     {
         // Given:
         string? told = null;

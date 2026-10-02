@@ -32,7 +32,7 @@ public class InitPathsExtensionsTests
     }
 
     [Test]
-    public void InitAppPaths__WhenTheApplicationDataPathIsConfigured__ThenShouldDeriveTheDirectoriesFromIt()
+    public void InitAppPaths__WhenApplicationDataPathIsConfigured__ThenShouldDeriveDirectoriesFromIt()
     {
         // When:
         using var provider = this.BuildProvider(this.dataPath);
@@ -47,7 +47,7 @@ public class InitPathsExtensionsTests
     }
 
     [Test]
-    public void InitAppPaths__WhenTheApplicationDataPathIsConfigured__ThenShouldDeriveTheFilesFromIt()
+    public void InitAppPaths__WhenApplicationDataPathIsConfigured__ThenShouldDeriveFilesFromIt()
     {
         // When:
         using var provider = this.BuildProvider(this.dataPath);
@@ -72,7 +72,7 @@ public class InitPathsExtensionsTests
     }
 
     [Test]
-    public void InitAppPaths__WhenTheApplicationDataPathNamesAnEnvironmentVariable__ThenShouldExpandIt()
+    public void InitAppPaths__WhenApplicationDataPathNamesEnvironmentVariable__ThenShouldExpandIt()
     {
         // Given:
         var expectedPath = Path.Combine(
@@ -88,7 +88,7 @@ public class InitPathsExtensionsTests
     }
 
     [Test]
-    public void InitAppPaths__WhenThePathsAreRead__ThenShouldCreateNothingOnDisk()
+    public void InitAppPaths__WhenPathsAreRead__ThenShouldCreateNothingOnDisk()
     {
         // When:
         using var provider = this.BuildProvider(this.dataPath);
@@ -101,7 +101,7 @@ public class InitPathsExtensionsTests
     }
 
     [Test]
-    public void InitAppPaths__WhenTheServicesAreInitialised__ThenShouldCreateTheDirectories()
+    public void InitAppPaths__WhenServicesAreInitialised__ThenShouldCreateDirectories()
     {
         // Given:
         using var provider = this.BuildProvider(this.dataPath);
@@ -119,7 +119,7 @@ public class InitPathsExtensionsTests
     }
 
     [Test]
-    public void InitAppPaths__WhenThePathsAreRegistered__ThenShouldRegisterThemOnce()
+    public void InitAppPaths__WhenPathsAreRegistered__ThenShouldRegisterThemOnce()
     {
         // Given:
         // One registration is all the paths need: what asks for initialisation says so by
@@ -133,7 +133,7 @@ public class InitPathsExtensionsTests
     }
 
     [Test]
-    public void InitAppPaths__WhenTheShippedSettingsAreRead__ThenShouldHoldTheApplicationDataPath()
+    public void InitAppPaths__WhenShippedSettingsAreRead__ThenShouldHoldApplicationDataPath()
     {
         // Given:
         // Nothing is defaulted in code any more, so the settings file shipped with the application
@@ -159,7 +159,7 @@ public class InitPathsExtensionsTests
     }
 
     [Test]
-    public Task InitAppPaths__WhenTheApplicationSectionHoldsAnUnknownKey__ThenShouldNotStart()
+    public Task InitAppPaths__WhenApplicationSectionHoldsUnknownKey__ThenShouldNotStart()
     {
         // Given:
         // A key nobody reads is a setting that silently did nothing, which is worse than a refusal.
@@ -176,7 +176,7 @@ public class InitPathsExtensionsTests
     }
 
     [Test]
-    public Task InitAppPaths__WhenTheApplicationDataPathIsEmpty__ThenShouldNotStart()
+    public Task InitAppPaths__WhenApplicationDataPathIsEmpty__ThenShouldNotStart()
     {
         // Then:
         return Assert.ThatAsync(
@@ -185,7 +185,7 @@ public class InitPathsExtensionsTests
     }
 
     [Test]
-    public Task InitAppPaths__WhenTheApplicationDataPathIsRelative__ThenShouldNotStart()
+    public Task InitAppPaths__WhenApplicationDataPathIsRelative__ThenShouldNotStart()
     {
         // Then:
         // Relative to what is a question nobody asking for a data folder wants to answer.
@@ -195,7 +195,7 @@ public class InitPathsExtensionsTests
     }
 
     [Test]
-    public async Task InitAppPaths__WhenTheApplicationDataPathIsAbsolute__ThenShouldStart()
+    public async Task InitAppPaths__WhenApplicationDataPathIsAbsolute__ThenShouldStart()
     {
         // When:
         await StartHostAsync(new Dictionary<string, string?> { ["App:LocalAppDataPath"] = this.dataPath });

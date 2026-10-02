@@ -16,14 +16,14 @@ public class StoreBaseTests
     }
 
     [Test]
-    public void Current__WhenNothingHasChangedTheState__ThenShouldBeTheDefaultOne()
+    public void Current__WhenNothingHasChangedState__ThenShouldBeDefaultOne()
     {
         // Then:
         Assert.That(this.unit.Current.Value, Is.EqualTo(TestStore.DefaultValue));
     }
 
     [Test]
-    public void Current__WhenItIsReadTwice__ThenShouldBuildTheDefaultStateOnlyOnce()
+    public void Current__WhenItIsReadTwice__ThenShouldBuildDefaultStateOnlyOnce()
     {
         // Given:
         // The default state is built on first use rather than in the constructor, which must not
@@ -39,7 +39,7 @@ public class StoreBaseTests
     }
 
     [Test]
-    public async Task UpdateAsync__WhenTheStateIsChanged__ThenShouldHandOutTheNewOne()
+    public async Task UpdateAsync__WhenStateIsChanged__ThenShouldHandOutNewOne()
     {
         // Given:
         const string expectedValue = "changed";
@@ -52,7 +52,7 @@ public class StoreBaseTests
     }
 
     [Test]
-    public async Task UpdateAsync__WhenTheStateIsChanged__ThenShouldSaySo()
+    public async Task UpdateAsync__WhenStateIsChanged__ThenShouldSaySo()
     {
         // Given:
         var changedCount = 0;
@@ -66,7 +66,7 @@ public class StoreBaseTests
     }
 
     [Test]
-    public void Changed__WhenNobodyIsListening__ThenShouldNotStopTheUpdate()
+    public void Changed__WhenNobodyIsListening__ThenShouldNotStopUpdate()
     {
         // When, Then:
         Assert.DoesNotThrowAsync(() => this.unit.UpdateAsync(state => state with { Value = "changed" }));

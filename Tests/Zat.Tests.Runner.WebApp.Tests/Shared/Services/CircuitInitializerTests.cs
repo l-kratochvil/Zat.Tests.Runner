@@ -46,7 +46,7 @@ public class CircuitInitializerTests
     }
 
     [Test]
-    public async Task OnCircuitOpenedAsync__WhenAGlobalLogMessageIsSent__ThenShouldDispatchItToTheCircuit()
+    public async Task OnCircuitOpenedAsync__WhenGlobalLogMessageIsSent__ThenShouldDispatchItToCircuit()
     {
         // Given:
         var givenAction = new DataChangedAction(null);
@@ -60,7 +60,7 @@ public class CircuitInitializerTests
     }
 
     [Test]
-    public async Task Dispose__WhenAGlobalLogMessageIsSentAfterwards__ThenShouldNotDispatchIt()
+    public async Task Dispose__WhenGlobalLogMessageIsSentAfterwards__ThenShouldNotDispatchIt()
     {
         // Given:
         // The circuit is gone, so its store must not be fed any more.
@@ -75,7 +75,7 @@ public class CircuitInitializerTests
     }
 
     [Test]
-    public async Task OnCircuitOpenedAsync__WhenAScopedServiceIsInitializable__ThenShouldInitializeIt()
+    public async Task OnCircuitOpenedAsync__WhenScopedServiceIsInitializable__ThenShouldInitializeIt()
     {
         // When:
         await this.unit.OnCircuitOpenedAsync(null!, CancellationToken.None);

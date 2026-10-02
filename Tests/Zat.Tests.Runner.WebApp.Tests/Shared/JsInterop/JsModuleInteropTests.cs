@@ -30,7 +30,7 @@ public class JsModuleInteropTests
     }
 
     [Test]
-    public async Task InvokeVoidSafeAsync__WhenTheFunctionSucceeds__ThenShouldInvokeItOnTheModule()
+    public async Task InvokeVoidSafeAsync__WhenFunctionSucceeds__ThenShouldInvokeItOnModule()
     {
         // Given:
         var givenModule = this.jsInterop.SetupModule(ModulePath);
@@ -45,7 +45,7 @@ public class JsModuleInteropTests
     }
 
     [Test]
-    public void InvokeVoidSafeAsync__WhenTheFunctionFails__ThenShouldNotThrow()
+    public void InvokeVoidSafeAsync__WhenFunctionFails__ThenShouldNotThrow()
     {
         // Given:
         var unit = this.CreateUnitWithFailingFunction(new InvalidOperationException("boom"));
@@ -55,7 +55,7 @@ public class JsModuleInteropTests
     }
 
     [Test]
-    public async Task InvokeVoidSafeAsync__WhenTheFunctionFails__ThenShouldReportItToTheLoggingPipeline()
+    public async Task InvokeVoidSafeAsync__WhenFunctionFails__ThenShouldReportItToLoggingPipeline()
     {
         // Given:
         var unit = this.CreateUnitWithFailingFunction(new InvalidOperationException("boom"));
@@ -68,7 +68,7 @@ public class JsModuleInteropTests
     }
 
     [Test]
-    public async Task InvokeVoidSafeAsync__WhenTheModuleCannotBeImported__ThenShouldReportItAndNotThrow()
+    public async Task InvokeVoidSafeAsync__WhenModuleCannotBeImported__ThenShouldReportItAndNotThrow()
     {
         // Given:
         // The module is never set up, so importing it fails the way a missing .razor.js would.
@@ -82,7 +82,7 @@ public class JsModuleInteropTests
     }
 
     [Test]
-    public async Task InvokeVoidSafeAsync__WhenTheImportFailedBefore__ThenShouldNotImportAgain()
+    public async Task InvokeVoidSafeAsync__WhenImportFailedBefore__ThenShouldNotImportAgain()
     {
         // Given:
         var unit = this.CreateUnit();
@@ -96,7 +96,7 @@ public class JsModuleInteropTests
     }
 
     [Test]
-    public async Task InvokeVoidSafeAsync__WhenTheBrowserIsAlreadyGone__ThenShouldStaySilent(
+    public async Task InvokeVoidSafeAsync__WhenBrowserIsAlreadyGone__ThenShouldStaySilent(
         [ValueSource(nameof(BrowserGoneExceptions))]
         Exception givenException)
     {
@@ -111,7 +111,7 @@ public class JsModuleInteropTests
     }
 
     [Test]
-    public void InvokeVoidSafeAsync__WhenTheBrowserIsAlreadyGone__ThenShouldNotThrow(
+    public void InvokeVoidSafeAsync__WhenBrowserIsAlreadyGone__ThenShouldNotThrow(
         [ValueSource(nameof(BrowserGoneExceptions))]
         Exception givenException)
     {
@@ -123,7 +123,7 @@ public class JsModuleInteropTests
     }
 
     [Test]
-    public void DisposeAsync__WhenNoCallWasEverMade__ThenShouldNotTouchTheBrowser()
+    public void DisposeAsync__WhenNoCallWasEverMade__ThenShouldNotTouchBrowser()
     {
         // Given:
         var unit = this.CreateUnit();
@@ -136,7 +136,7 @@ public class JsModuleInteropTests
     }
 
     [Test]
-    public async Task DisposeAsync__WhenTheImportFailed__ThenShouldNotThrowAndNotReportAgain()
+    public async Task DisposeAsync__WhenImportFailed__ThenShouldNotThrowAndNotReportAgain()
     {
         // Given:
         var unit = this.CreateUnit();

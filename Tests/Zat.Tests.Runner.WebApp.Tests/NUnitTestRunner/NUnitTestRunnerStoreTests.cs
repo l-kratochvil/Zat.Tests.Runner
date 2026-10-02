@@ -39,7 +39,7 @@ public class NUnitTestRunnerStoreTests
     }
 
     [Test]
-    public async Task StartAsync__WhenTheTestAssemblyIsRead__ThenShouldHoldWhatWasDiscovered()
+    public async Task StartAsync__WhenTestAssemblyIsRead__ThenShouldHoldWhatWasDiscovered()
     {
         // Given:
         TestSuiteEntity[] givenTestSuites = [CreateTestSuite()];
@@ -53,7 +53,7 @@ public class NUnitTestRunnerStoreTests
     }
 
     [Test]
-    public void StartAsync__WhenTheTestAssemblyCannotBeRead__ThenShouldNotThrow()
+    public void StartAsync__WhenTestAssemblyCannotBeRead__ThenShouldNotThrow()
     {
         // Given:
         // Discovery failing must not take the application down with it: the user would lose the
@@ -65,7 +65,7 @@ public class NUnitTestRunnerStoreTests
     }
 
     [Test]
-    public async Task StartAsync__WhenTheTestAssemblyCannotBeRead__ThenShouldLeaveNoTestsToChooseFrom()
+    public async Task StartAsync__WhenTestAssemblyCannotBeRead__ThenShouldLeaveNoTestsToChooseFrom()
     {
         // Given:
         this.SetUpFailingDiscovery(new InvalidOperationException("no runner"));
@@ -78,7 +78,7 @@ public class NUnitTestRunnerStoreTests
     }
 
     [Test]
-    public async Task StartAsync__WhenTheTestAssemblyCannotBeRead__ThenShouldWarnTheUser()
+    public async Task StartAsync__WhenTestAssemblyCannotBeRead__ThenShouldWarnUser()
     {
         // Given:
         var givenException = new InvalidOperationException("no runner");
@@ -97,7 +97,7 @@ public class NUnitTestRunnerStoreTests
     }
 
     [Test]
-    public async Task StartAsync__WhenTheTestAssemblyIsRead__ThenShouldReportWhatWasDiscovered()
+    public async Task StartAsync__WhenTestAssemblyIsRead__ThenShouldReportWhatWasDiscovered()
     {
         // Given:
         this.SetUpDiscovery([CreateTestSuite()]);

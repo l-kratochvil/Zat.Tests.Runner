@@ -41,7 +41,7 @@ public class BindingSelectTests : Bunit.TestContext
         => this.Dispose();
 
     [Test]
-    public void Render__WhenTheViewModelHoldsAnOfferedValue__ThenShouldPointTheBrowserAtItsPlace()
+    public void Render__WhenViewModelHoldsOfferedValue__ThenShouldPointBrowserAtItsPlace()
     {
         // Given:
         this.viewModel.Shading = Shade.Green;
@@ -56,7 +56,7 @@ public class BindingSelectTests : Bunit.TestContext
     }
 
     [Test]
-    public void Render__WhenTheViewModelHoldsNothingThatIsOffered__ThenShouldChooseNothing()
+    public void Render__WhenViewModelHoldsNothingThatIsOffered__ThenShouldChooseNothing()
     {
         // Given:
         this.viewModel.Shading = null;
@@ -69,7 +69,7 @@ public class BindingSelectTests : Bunit.TestContext
     }
 
     [Test]
-    public void Choose__WhenAnOfferedValueIsChosen__ThenShouldWriteTheValueAndNotItsPlace()
+    public void Choose__WhenOfferedValueIsChosen__ThenShouldWriteValueAndNotItsPlace()
     {
         // Given:
         var component = this.RenderSelect();
@@ -82,7 +82,7 @@ public class BindingSelectTests : Bunit.TestContext
     }
 
     [Test]
-    public void Choose__WhenThePlaceholderIsChosen__ThenShouldWriteNothing()
+    public void Choose__WhenPlaceholderIsChosen__ThenShouldWriteNothing()
     {
         // Given:
         this.viewModel.Shading = Shade.Green;
@@ -97,7 +97,7 @@ public class BindingSelectTests : Bunit.TestContext
     }
 
     [Test]
-    public void Render__WhenNoOptionLabelIsGiven__ThenShouldLetTheValueSpeakForItself()
+    public void Render__WhenNoOptionLabelIsGiven__ThenShouldLetValueSpeakForItself()
     {
         // When:
         var component = this.RenderSelect();
@@ -109,7 +109,7 @@ public class BindingSelectTests : Bunit.TestContext
     }
 
     [Test]
-    public void Render__WhenAnOptionLabelIsGiven__ThenShouldNameTheOfferedValuesWithIt()
+    public void Render__WhenOptionLabelIsGiven__ThenShouldNameOfferedValuesWithIt()
     {
         // When:
         var component = this.RenderSelect(
@@ -123,7 +123,7 @@ public class BindingSelectTests : Bunit.TestContext
     }
 
     [Test]
-    public void Render__WhenAPlaceholderIsOfferedForAValueTheViewModelMustHold__ThenShouldThrow()
+    public void Render__WhenPlaceholderIsOfferedForValueViewModelMustHold__ThenShouldThrow()
 
         // A value type holds a value even where the tester meant none, so there is nothing for the
         // placeholder to write back.

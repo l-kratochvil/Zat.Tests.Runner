@@ -51,7 +51,7 @@ public class BindingInputTests : Bunit.TestContext
         => this.Dispose();
 
     [Test]
-    public void Render__WhenTheViewModelHoldsAValue__ThenShouldShowIt()
+    public void Render__WhenViewModelHoldsValue__ThenShouldShowIt()
     {
         // Given:
         this.viewModel.Text = GivenVersion;
@@ -64,7 +64,7 @@ public class BindingInputTests : Bunit.TestContext
     }
 
     [Test]
-    public void Edit__WhenTheTesterHasFinishedTyping__ThenShouldWriteItToTheViewModel()
+    public void Edit__WhenTesterHasFinishedTyping__ThenShouldWriteItToViewModel()
     {
         // Given:
         var component = this.RenderTextInput();
@@ -81,7 +81,7 @@ public class BindingInputTests : Bunit.TestContext
     }
 
     [Test]
-    public void Edit__WhenTheEditHasBeenWritten__ThenShouldTellWhoeverAskedToHearOfIt()
+    public void Edit__WhenEditHasBeenWritten__ThenShouldTellWhoeverAskedToHearOfIt()
     {
         // Given:
         string? told = null;
@@ -97,7 +97,7 @@ public class BindingInputTests : Bunit.TestContext
     }
 
     [Test]
-    public void Edit__WhenWhatWasTypedCannotBeHeld__ThenShouldGoBackToTheValueThatIs()
+    public void Edit__WhenWhatWasTypedCannotBeHeld__ThenShouldGoBackToValueThatIs()
     {
         // Given:
         // The view model never sees the text, so the input is the only place it could be left — and
@@ -122,7 +122,7 @@ public class BindingInputTests : Bunit.TestContext
     }
 
     [Test]
-    public void Edit__WhenTheBindingEventIsOnInput__ThenShouldWriteWhileTheTesterIsStillTyping()
+    public void Edit__WhenBindingEventIsOnInput__ThenShouldWriteWhileTesterIsStillTyping()
     {
         // Given:
         var component = this.RenderTextInput(
@@ -136,7 +136,7 @@ public class BindingInputTests : Bunit.TestContext
     }
 
     [Test]
-    public void Edit__WhenTheBindingEventIsLeftUnset__ThenShouldNotListenWhileTheTesterIsStillTyping()
+    public void Edit__WhenBindingEventIsLeftUnset__ThenShouldNotListenWhileTesterIsStillTyping()
     {
         // Given:
         var component = this.RenderTextInput();
@@ -150,7 +150,7 @@ public class BindingInputTests : Bunit.TestContext
     }
 
     [Test]
-    public void Render__WhenTheViewModelSaysWhatIsWrongWithTheValue__ThenShouldShowIt()
+    public void Render__WhenViewModelSaysWhatIsWrongWithValue__ThenShouldShowIt()
     {
         // Given:
         this.viewModel.SaySomethingIsWrongWith(
@@ -165,7 +165,7 @@ public class BindingInputTests : Bunit.TestContext
     }
 
     [Test]
-    public void Binding__WhenItNamesAnythingOtherThanAPropertyOfTheViewModel__ThenShouldThrow()
+    public void Binding__WhenItNamesAnythingOtherThanPropertyOfViewModel__ThenShouldThrow()
 
         // A control writes the edit back to the view model it was cascaded, so a binding reaching
         // through a property is a mistake in the markup rather than something to find out about at
@@ -178,7 +178,7 @@ public class BindingInputTests : Bunit.TestContext
             Throws.InstanceOf<InvalidOperationException>());
 
     [Test]
-    public void Binding__WhenItNamesAPropertyThatCannotBeWrittenTo__ThenShouldThrow()
+    public void Binding__WhenItNamesPropertyThatCannotBeWrittenTo__ThenShouldThrow()
         => Assert.That(
             () => this.RenderComponent<BindingInput<EditedViewModel, string>>(
                 parameters => parameters
@@ -187,14 +187,14 @@ public class BindingInputTests : Bunit.TestContext
             Throws.InstanceOf<InvalidOperationException>());
 
     [Test]
-    public void Render__WhenTheControlStandsOutsideADataContext__ThenShouldThrow()
+    public void Render__WhenControlStandsOutsideDataContext__ThenShouldThrow()
         => Assert.That(
             () => this.RenderComponent<BindingInput<EditedViewModel, string?>>(
                 parameters => parameters.Add(input => input.Binding, model => model.Text)),
             Throws.InstanceOf<InvalidOperationException>());
 
     [Test]
-    public void Edit__WhenTheViewModelTurnsTheEditDown__ThenShouldGoBackToShowingWhatIsHeld()
+    public void Edit__WhenViewModelTurnsEditDown__ThenShouldGoBackToShowingWhatIsHeld()
     {
         // Given:
         // A view model that refuses an edit leaves its value where it was, so what sends the input

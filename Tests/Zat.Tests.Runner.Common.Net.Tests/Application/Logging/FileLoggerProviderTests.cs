@@ -54,7 +54,7 @@ public class FileLoggerProviderTests
     }
 
     [Test]
-    public void CreateLogger__WhenTheSameCategoryIsAskedForTwice__ThenShouldReturnTheSameLogger()
+    public void CreateLogger__WhenSameCategoryIsAskedForTwice__ThenShouldReturnSameLogger()
     {
         // Given:
         var expected = this.unit.CreateLogger(GivenCategory);
@@ -67,7 +67,7 @@ public class FileLoggerProviderTests
     }
 
     [Test]
-    public void CreateLogger__WhenADifferentCategoryIsAskedFor__ThenShouldReturnADifferentLogger()
+    public void CreateLogger__WhenDifferentCategoryIsAskedFor__ThenShouldReturnDifferentLogger()
     {
         // Given:
         const string givenOtherCategory = "Zat.Tests.Runner.TuiAppLog.Other";
@@ -81,7 +81,7 @@ public class FileLoggerProviderTests
     }
 
     [Test]
-    public void CreateLogger__WhenAnEntryIsLogged__ThenShouldWriteItIntoAFileInTheGivenDirectory()
+    public void CreateLogger__WhenEntryIsLogged__ThenShouldWriteItIntoFileInGivenDirectory()
     {
         // Given:
         const string givenMessage = "Application started.";

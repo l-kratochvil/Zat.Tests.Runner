@@ -11,7 +11,7 @@ using Zat.Z2xxTests.Common.Model;
 public class TestStationLabelsTests
 {
     [Test]
-    public void Offered__WhenTheStationsAreOffered__ThenShouldHoldEveryStationThereIs()
+    public void Offered__WhenStationsAreOffered__ThenShouldHoldEveryStationThereIs()
     {
         // Given:
         // The labels are written out one by one, so a station added to the domain would otherwise
@@ -25,7 +25,7 @@ public class TestStationLabelsTests
     }
 
     [Test]
-    public void Offered__WhenTheStationsAreOffered__ThenShouldLeaveOutTheUnknownOne()
+    public void Offered__WhenStationsAreOffered__ThenShouldLeaveOutUnknownOne()
     {
         // Given:
         // Unknown stands for a station nobody chose, which the empty choice already says.
@@ -35,7 +35,7 @@ public class TestStationLabelsTests
     }
 
     [Test]
-    public void For__WhenAStationIsOffered__ThenShouldNameIt()
+    public void For__WhenStationIsOffered__ThenShouldNameIt()
     {
         // Then:
         Assert.That(
@@ -46,7 +46,7 @@ public class TestStationLabelsTests
     [TestCase(HwAssemblyType.HW00, "HW00")]
     [TestCase(HwAssemblyType.HW02_BB1M, "HW02 - 1M")]
     [TestCase(HwAssemblyType.HW02_BB37M, "HW02 - 37M")]
-    public void For__WhenAStationIsNamed__ThenShouldReadAsItIsWrittenDown(
+    public void For__WhenStationIsNamed__ThenShouldReadAsItIsWrittenDown(
         HwAssemblyType givenStation, string expectedLabel)
     {
         // Then:
@@ -54,7 +54,7 @@ public class TestStationLabelsTests
     }
 
     [Test]
-    public void For__WhenAStationIsNotOffered__ThenShouldFallBackToItsName()
+    public void For__WhenStationIsNotOffered__ThenShouldFallBackToItsName()
     {
         // Given:
         // Nothing should ask, but a label that is missing must not take the screen down with it.

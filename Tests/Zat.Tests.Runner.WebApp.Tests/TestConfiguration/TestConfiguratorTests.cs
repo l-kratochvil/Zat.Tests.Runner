@@ -72,7 +72,7 @@ public class TestConfiguratorTests : Bunit.TestContext
         => this.Dispose();
 
     [Test]
-    public void Render__WhenTheConfiguratorIsShown__ThenShouldOfferTheInstalledRuntimeVersions()
+    public void Render__WhenConfiguratorIsShown__ThenShouldOfferInstalledRuntimeVersions()
     {
         // When:
         var component = this.RenderConfigurator();
@@ -83,7 +83,7 @@ public class TestConfiguratorTests : Bunit.TestContext
     }
 
     [Test]
-    public void Render__WhenNoRuntimeTestIsSelected__ThenShouldNotAskForATestStation()
+    public void Render__WhenNoRuntimeTestIsSelected__ThenShouldNotAskForTestStation()
     {
         // Given:
         // Only a runtime test runs against hardware, so for anything else the field is not shown at
@@ -98,7 +98,7 @@ public class TestConfiguratorTests : Bunit.TestContext
     }
 
     [Test]
-    public void Render__WhenARuntimeTestIsSelected__ThenShouldAskForATestStation()
+    public void Render__WhenRuntimeTestIsSelected__ThenShouldAskForTestStation()
     {
         // Given:
         this.GivenSelectedTestCase(TestType.Runtime);
@@ -111,7 +111,7 @@ public class TestConfiguratorTests : Bunit.TestContext
     }
 
     [Test]
-    public void Render__WhenTheResultDoesNotGoToTestLink__ThenShouldNotAskForTheIdeVersion()
+    public void Render__WhenResultDoesNotGoToTestLink__ThenShouldNotAskForIdeVersion()
     {
         // When:
         var component = this.RenderConfigurator();
@@ -121,7 +121,7 @@ public class TestConfiguratorTests : Bunit.TestContext
     }
 
     [Test]
-    public void OnTestLinkEnabled__WhenTheResultIsToGoToTestLink__ThenShouldAskForTheIdeVersion()
+    public void OnTestLinkEnabled__WhenResultIsToGoToTestLink__ThenShouldAskForIdeVersion()
     {
         // Given:
         // The version is what the result is filed under, so it is asked for exactly when there is
@@ -136,7 +136,7 @@ public class TestConfiguratorTests : Bunit.TestContext
     }
 
     [Test]
-    public void OnTestLinkDisabled__WhenTheResultIsNotToGoToTestLinkAfterAll__ThenShouldStopAsking()
+    public void OnTestLinkDisabled__WhenResultIsNotToGoToTestLinkAfterAll__ThenShouldStopAsking()
     {
         // Given:
         var component = this.RenderConfigurator();
@@ -150,7 +150,7 @@ public class TestConfiguratorTests : Bunit.TestContext
     }
 
     [Test]
-    public void OnIdeVersionTyped__WhenWhatWasTypedIsNotAVersion__ThenShouldSaySo()
+    public void OnIdeVersionTyped__WhenWhatWasTypedIsNotVersion__ThenShouldSaySo()
     {
         // Given:
         var component = this.RenderConfigurator();
@@ -164,7 +164,7 @@ public class TestConfiguratorTests : Bunit.TestContext
     }
 
     [Test]
-    public void OnAppSettingsChanged__WhenTheInstallFolderMoves__ThenShouldOfferWhatIsInstalledThere()
+    public void OnAppSettingsChanged__WhenInstallFolderMoves__ThenShouldOfferWhatIsInstalledThere()
     {
         // Given:
         var component = this.RenderConfigurator();
@@ -179,7 +179,7 @@ public class TestConfiguratorTests : Bunit.TestContext
     }
 
     [Test]
-    public void OnAppSettingsChanged__WhenTheChosenVersionIsNotInstalledThere__ThenShouldClearIt()
+    public void OnAppSettingsChanged__WhenChosenVersionIsNotInstalledThere__ThenShouldClearIt()
     {
         // Given:
         // Pointing the install folder somewhere else can leave behind a version that is not
@@ -200,7 +200,7 @@ public class TestConfiguratorTests : Bunit.TestContext
     }
 
     [Test]
-    public void OnAppSettingsChanged__WhenTheChosenVersionIsInstalledThereToo__ThenShouldKeepIt()
+    public void OnAppSettingsChanged__WhenChosenVersionIsInstalledThereToo__ThenShouldKeepIt()
     {
         // Given:
         this.store.Value = new TestConfigurationState() with { RuntimeVersion = "6" };
@@ -217,7 +217,7 @@ public class TestConfiguratorTests : Bunit.TestContext
     }
 
     [Test]
-    public void Render__WhenTheConfiguratorIsShown__ThenShouldSayWhetherTheConfigurationCanBeRunWith()
+    public void Render__WhenConfiguratorIsShown__ThenShouldSayWhetherConfigurationCanBeRunWith()
     {
         // Given:
         // Nothing has been chosen, and the state comes back from the browser without the answer,
@@ -232,7 +232,7 @@ public class TestConfiguratorTests : Bunit.TestContext
     }
 
     [Test]
-    public void OnRuntimeVersionChosen__WhenTheLastMissingValueIsGiven__ThenShouldSayItCanBeRunWith()
+    public void OnRuntimeVersionChosen__WhenLastMissingValueIsGiven__ThenShouldSayItCanBeRunWith()
     {
         // Given:
         // The run needs a runtime version and nothing else while no runtime test is selected, so
@@ -247,7 +247,7 @@ public class TestConfiguratorTests : Bunit.TestContext
     }
 
     [Test]
-    public void OnTestSelectionChanged__WhenARuntimeTestIsPicked__ThenShouldSayItCannotBeRunWith()
+    public void OnTestSelectionChanged__WhenRuntimeTestIsPicked__ThenShouldSayItCannotBeRunWith()
     {
         // Given:
         // A runtime test runs against a station, which nothing has been chosen for, so the same

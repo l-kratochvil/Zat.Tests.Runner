@@ -49,7 +49,7 @@ public class SplitterBarTests : Bunit.TestContext
         => this.Dispose();
 
     [Test]
-    public void OnAfterRenderAsync__WhenTheComponentIsFirstRendered__ThenShouldInitializeTheJsModuleWithTheHandleAndOptions()
+    public void OnAfterRenderAsync__WhenComponentIsFirstRendered__ThenShouldInitializeJsModuleWithHandleAndOptions()
     {
         // Given:
         var initialize = this.SetupVoidFunction(InitializeFunction);
@@ -76,7 +76,7 @@ public class SplitterBarTests : Bunit.TestContext
     }
 
     [Test]
-    public void OnAfterRenderAsync__WhenTheComponentIsRerendered__ThenShouldInitializeTheJsModuleOnlyOnce()
+    public void OnAfterRenderAsync__WhenComponentIsRerendered__ThenShouldInitializeJsModuleOnlyOnce()
     {
         // Given:
         var initialize = this.SetupVoidFunction(InitializeFunction);
@@ -90,7 +90,7 @@ public class SplitterBarTests : Bunit.TestContext
     }
 
     [Test]
-    public async Task DisposeAsync__WhenTheComponentWasInitialized__ThenShouldInvokeTheJsDisposeWithTheHandle()
+    public async Task DisposeAsync__WhenComponentWasInitialized__ThenShouldInvokeJsDisposeWithHandle()
     {
         // Given:
         this.SetupVoidFunction(InitializeFunction);
@@ -107,7 +107,7 @@ public class SplitterBarTests : Bunit.TestContext
     }
 
     [Test]
-    public void DisposeAsync__WhenTheComponentWasNeverRendered__ThenShouldNotThrow()
+    public void DisposeAsync__WhenComponentWasNeverRendered__ThenShouldNotThrow()
     {
         // Given:
         SplitterBar unit = new();

@@ -28,7 +28,7 @@ public class JsModuleInteropFactoryTests
     }
 
     [Test]
-    public async Task Create__WhenTheCreatedWrapperIsCalled__ThenShouldReachTheModuleAtTheGivenPath()
+    public async Task Create__WhenCreatedWrapperIsCalled__ThenShouldReachModuleAtGivenPath()
     {
         // Given:
         var givenModule = this.jsInterop.SetupModule(ModulePath);

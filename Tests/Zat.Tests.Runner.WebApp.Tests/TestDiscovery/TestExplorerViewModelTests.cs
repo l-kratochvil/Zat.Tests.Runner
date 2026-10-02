@@ -24,7 +24,7 @@ public class TestExplorerViewModelTests
     }
 
     [Test]
-    public void Toggle__WhenAFixtureIsSelected__ThenShouldSelectEveryTestCaseUnderIt()
+    public void Toggle__WhenFixtureIsSelected__ThenShouldSelectEveryTestCaseUnderIt()
     {
         // Given:
         string[] expectedPaths = [GivenFirstCasePath, GivenSecondCasePath];
@@ -37,7 +37,7 @@ public class TestExplorerViewModelTests
     }
 
     [Test]
-    public void Toggle__WhenASelectedFixtureIsToggledAgain__ThenShouldClearEveryTestCaseUnderIt()
+    public void Toggle__WhenSelectedFixtureIsToggledAgain__ThenShouldClearEveryTestCaseUnderIt()
     {
         // Given:
         var givenFixture = this.FindNode(GivenFirstFixturePath);
@@ -51,7 +51,7 @@ public class TestExplorerViewModelTests
     }
 
     [Test]
-    public void Toggle__WhenAPartlySelectedFixtureIsToggled__ThenShouldSelectTheRestInsteadOfClearingIt()
+    public void Toggle__WhenPartlySelectedFixtureIsToggled__ThenShouldSelectRestInsteadOfClearingIt()
     {
         // Given:
         // Completing beats undoing: the click after a partial selection is the one that says
@@ -67,7 +67,7 @@ public class TestExplorerViewModelTests
     }
 
     [TestCaseSource(nameof(CheckStateCases))]
-    public TestTreeNodeData.State CheckState__WhenTestCasesAreSelected__ThenShouldFollowThemOnTheFixture(
+    public TestTreeNodeData.State CheckState__WhenTestCasesAreSelected__ThenShouldFollowThemOnFixture(
         string[] givenSelectedPaths)
     {
         // When:
@@ -78,7 +78,7 @@ public class TestExplorerViewModelTests
     }
 
     [Test]
-    public void CheckState__WhenTheLastSelectedTestCaseIsCleared__ThenShouldClearTheGroupsAboveIt()
+    public void CheckState__WhenLastSelectedTestCaseIsCleared__ThenShouldClearGroupsAboveIt()
     {
         // Given:
         var givenTestCase = this.FindNode(GivenFirstCasePath);
@@ -96,7 +96,7 @@ public class TestExplorerViewModelTests
     }
 
     [Test]
-    public void CheckState__WhenOnlyOneFixtureIsFullySelected__ThenShouldLeaveTheSuitePartlySelected()
+    public void CheckState__WhenOnlyOneFixtureIsFullySelected__ThenShouldLeaveSuitePartlySelected()
     {
         // When:
         this.FindNode(GivenFirstFixturePath).Toggle();
@@ -106,7 +106,7 @@ public class TestExplorerViewModelTests
     }
 
     [Test]
-    public void SelectedTestCases__WhenTheWholeSuiteIsSelected__ThenShouldHoldTestCasesOnly()
+    public void SelectedTestCases__WhenWholeSuiteIsSelected__ThenShouldHoldTestCasesOnly()
     {
         // Given:
         // Groups are never part of the selection: a suite path would run everything under it, which
@@ -121,7 +121,7 @@ public class TestExplorerViewModelTests
     }
 
     [Test]
-    public void ApplySelection__WhenAPathMatchesNoTestCase__ThenShouldIgnoreIt()
+    public void ApplySelection__WhenPathMatchesNoTestCase__ThenShouldIgnoreIt()
     {
         // Given:
         // A selection remembered before the test assemblies changed restores as much of itself as
@@ -137,7 +137,7 @@ public class TestExplorerViewModelTests
     }
 
     [Test]
-    public void ApplySelection__WhenATestCaseIsSelected__ThenShouldOpenTheGroupsHidingIt()
+    public void ApplySelection__WhenTestCaseIsSelected__ThenShouldOpenGroupsHidingIt()
     {
         // Given:
         // A restored selection nobody can see is indistinguishable from none.

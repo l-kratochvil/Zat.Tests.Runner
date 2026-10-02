@@ -38,7 +38,7 @@ public class InitServicesExtensionTests
     }
 
     [Test]
-    public void InitFeatures__WhenHostedServicesAreResolved__ThenShouldRegisterOnlyTheSettingsStore()
+    public void InitFeatures__WhenHostedServicesAreResolved__ThenShouldRegisterOnlySettingsStore()
     {
         // Given:
         // The log file is owned by the logging pipeline, so it needs no lifecycle of its own. The
@@ -53,7 +53,7 @@ public class InitServicesExtensionTests
     }
 
     [Test]
-    public void InitSharedServices__WhenTheJsModuleInteropFactoryIsRegistered__ThenShouldBeScoped()
+    public void InitSharedServices__WhenJsModuleInteropFactoryIsRegistered__ThenShouldBeScoped()
     {
         // Given:
         // Scoped, because the JavaScript runtime it is built around belongs to a single circuit.

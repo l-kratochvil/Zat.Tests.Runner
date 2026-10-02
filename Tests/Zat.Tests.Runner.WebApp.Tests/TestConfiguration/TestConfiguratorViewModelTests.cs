@@ -37,7 +37,7 @@ public class TestConfiguratorViewModelTests
         => this.unit.Dispose();
 
     [Test]
-    public void Load__WhenAConfigurationIsOpened__ThenShouldShowWhatItHolds()
+    public void Load__WhenConfigurationIsOpened__ThenShouldShowWhatItHolds()
     {
         // Given:
         var state = new TestConfigurationState(
@@ -60,7 +60,7 @@ public class TestConfiguratorViewModelTests
     }
 
     [Test]
-    public void ValidityFor__WhenAConfigurationHasJustBeenOpened__ThenShouldSayNothingAboutItYet()
+    public void ValidityFor__WhenConfigurationHasJustBeenOpened__ThenShouldSayNothingAboutItYet()
     {
         // Given:
         // An empty configuration nobody has touched is not a mistake anyone made yet.
@@ -70,7 +70,7 @@ public class TestConfiguratorViewModelTests
     }
 
     [Test]
-    public void ValidityFor__WhenTheTesterHasBeenToAField__ThenShouldSayWhatIsWrongWithIt()
+    public void ValidityFor__WhenTesterHasBeenToField__ThenShouldSayWhatIsWrongWithIt()
     {
         // Given:
 
@@ -94,7 +94,7 @@ public class TestConfiguratorViewModelTests
     }
 
     [Test]
-    public void SetRuntimeVersion__WhenTheChoiceIsCleared__ThenShouldHoldNothingRatherThanEmptyText()
+    public void SetRuntimeVersion__WhenChoiceIsCleared__ThenShouldHoldNothingRatherThanEmptyText()
     {
         // Given:
         // The empty choice of the combo box arrives as an empty string, which is not a version
@@ -108,25 +108,25 @@ public class TestConfiguratorViewModelTests
     }
 
     [Test]
-    public void IsTestedHwAssemblyShown__WhenNoRuntimeTestIsSelected__ThenShouldNotAskForAStation()
+    public void IsTestedHwAssemblyShown__WhenNoRuntimeTestIsSelected__ThenShouldNotAskForStation()
     {
         // TODO
     }
 
     [Test]
-    public void SetRuntimeTestSelected__WhenARuntimeTestIsPicked__ThenShouldStartAskingForAStation()
+    public void SetRuntimeTestSelected__WhenRuntimeTestIsPicked__ThenShouldStartAskingForStation()
     {
         // TODO
     }
 
     [Test]
-    public void SetRuntimeTestSelected__WhenARuntimeTestIsPicked__ThenShouldMindTheMissingStation()
+    public void SetRuntimeTestSelected__WhenRuntimeTestIsPicked__ThenShouldMindMissingStation()
     {
         // TODO
     }
 
     [Test]
-    public void IsIdeVersionShown__WhenTestLinkIsTurnedOn__ThenShouldStartAskingForTheIdeVersion()
+    public void IsIdeVersionShown__WhenTestLinkIsTurnedOn__ThenShouldStartAskingForIdeVersion()
     {
         // TODO
     }
@@ -138,13 +138,13 @@ public class TestConfiguratorViewModelTests
     }
 
     [Test]
-    public void IdeVersion__WhenTheTextIsAVersion__ThenShouldHandItOverToBeKept()
+    public void IdeVersion__WhenTextIsVersion__ThenShouldHandItOverToBeKept()
     {
         // TODO
     }
 
     [Test]
-    public void IdeVersion__WhileTheTextIsBeingTyped__ThenShouldHoldNothingToKeepYet()
+    public void IdeVersion__WhileTextIsBeingTyped__ThenShouldHoldNothingToKeepYet()
     {
         // TODO
     }
@@ -162,7 +162,7 @@ public class TestConfiguratorViewModelTests
     }
 
     [Test]
-    public void RuntimeVersionsNote__WhenTheInstallFolderCannotBeRead__ThenShouldPointAtTheSettings()
+    public void RuntimeVersionsNote__WhenInstallFolderCannotBeRead__ThenShouldPointAtSettings()
     {
         // Given:
         // Nowhere to look is the tester's to fix in the settings, and is a different thing from an

@@ -31,7 +31,7 @@ public class PropertyGridRowTests : Bunit.TestContext
         => this.Dispose();
 
     [Test]
-    public void Render__WhenTheRowIsInAGrid__ThenShouldWrapTheLabelAndTheInputInOneLabelElement()
+    public void Render__WhenRowIsInGrid__ThenShouldWrapLabelAndInputInOneLabelElement()
     {
         // Given:
         // The input sitting inside the label is what binds the two without anybody writing an
@@ -51,7 +51,7 @@ public class PropertyGridRowTests : Bunit.TestContext
     }
 
     [Test]
-    public void Render__WhenTheRowIsOutsideAGrid__ThenShouldThrowRatherThanRender()
+    public void Render__WhenRowIsOutsideGrid__ThenShouldThrowRatherThanRender()
 
         // A row outside a grid has no columns to fall into, which would otherwise show up as a
         // quietly broken layout rather than as a mistake.
@@ -61,7 +61,7 @@ public class PropertyGridRowTests : Bunit.TestContext
             Throws.InstanceOf<InvalidOperationException>());
 
     [Test]
-    public void Render__WhenTheValidityHoldsAnError__ThenShouldShowItAsAnError()
+    public void Render__WhenValidityHoldsError__ThenShouldShowItAsError()
     {
         // Given:
         var validity = new Validity([new Validity.Issue(GivenFieldName, GivenMessage)]);
@@ -78,7 +78,7 @@ public class PropertyGridRowTests : Bunit.TestContext
     }
 
     [Test]
-    public void Render__WhenTheValidityHoldsAWarning__ThenShouldShowItDifferently()
+    public void Render__WhenValidityHoldsWarning__ThenShouldShowItDifferently()
     {
         // Given:
         var validity = new Validity(

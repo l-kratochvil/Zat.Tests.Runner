@@ -42,7 +42,7 @@ public class ViewModelBindingExtensionsTests
         => this.unit.Dispose();
 
     [Test]
-    public void BindToState__WhenTheBoundValueChanges__ThenShouldAnnounceTheProperty()
+    public void BindToState__WhenBoundValueChanges__ThenShouldAnnounceProperty()
     {
         // When:
         this.ChangeStateTo(this.state with { Name = GivenName });
@@ -52,7 +52,7 @@ public class ViewModelBindingExtensionsTests
     }
 
     [Test]
-    public void BindToState__WhenAnotherValueOfTheStateChanges__ThenShouldNotAnnounceTheProperty()
+    public void BindToState__WhenAnotherValueOfStateChanges__ThenShouldNotAnnounceProperty()
     {
         // When:
         this.ChangeStateTo(this.state with { Count = 1 });
@@ -62,7 +62,7 @@ public class ViewModelBindingExtensionsTests
     }
 
     [Test]
-    public void BindToState__WhenTheBindingIsDisposed__ThenShouldStopAnnouncing()
+    public void BindToState__WhenBindingIsDisposed__ThenShouldStopAnnouncing()
     {
         // Given:
         this.unit.Dispose();
@@ -75,7 +75,7 @@ public class ViewModelBindingExtensionsTests
     }
 
     [Test]
-    public void BindToState__WhenTheExpressionIsNotAProperty__ThenShouldRefuseIt()
+    public void BindToState__WhenExpressionIsNotProperty__ThenShouldRefuseIt()
     {
         // When:
         void Bind()
@@ -86,7 +86,7 @@ public class ViewModelBindingExtensionsTests
     }
 
     [Test]
-    public void Value__WhenRead__ThenShouldReturnWhatTheStateHoldsNow()
+    public void Value__WhenRead__ThenShouldReturnWhatStateHoldsNow()
     {
         // Given:
         // Read through rather than remembered, so even a change nobody announced is what is shown.
@@ -100,7 +100,7 @@ public class ViewModelBindingExtensionsTests
     }
 
     [Test]
-    public void Value__WhenWritten__ThenShouldHandItOverToTheState()
+    public void Value__WhenWritten__ThenShouldHandItOverToState()
     {
         // When:
         this.unit.Name = GivenName;
@@ -110,7 +110,7 @@ public class ViewModelBindingExtensionsTests
     }
 
     [Test]
-    public void Value__WhenWrittenWithWhatTheStateHolds__ThenShouldNotHandItOver()
+    public void Value__WhenWrittenWithWhatStateHolds__ThenShouldNotHandItOver()
     {
         // Given:
         this.state = this.state with { Name = GivenName };
@@ -123,7 +123,7 @@ public class ViewModelBindingExtensionsTests
     }
 
     [Test]
-    public void Value__WhenTheBindingIsReadOnly__ThenShouldRefuseTheWrite()
+    public void Value__WhenBindingIsReadOnly__ThenShouldRefuseWrite()
     {
         // Given:
         using var readOnly = new BoundViewModel(this.stateMock.Object, writeValue: null);
