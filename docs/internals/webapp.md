@@ -10,6 +10,7 @@ The mechanisms of `Zat.Tests.Runner.WebApp` that are not obvious from the code.
 
 - [TypeScript/JavaScript orchestration](#typescriptjavascript-orchestration)
 - [JavaScript interop](#javascript-interop)
+- [Circuit start](#circuit-start)
 - [The browser bridge](#the-browser-bridge)
 - [Resizable panes](#resizable-panes)
 
@@ -48,6 +49,13 @@ injected itself.
 
 The wrappers themselves are **not** registered. A component asks the factory for one, owns it, and
 disposes it, following the pattern in the
+
+## Circuit start
+
+Some of a circuit's work has to start before any component asks for it. For example, the log is
+written outside of any circuit and has to reach the store of every circuit. `CircuitInitializer`
+starts such work as the circuit opens. Prerendering runs in a scope of its own, which it does not
+reach.
 
 ## The browser bridge
 

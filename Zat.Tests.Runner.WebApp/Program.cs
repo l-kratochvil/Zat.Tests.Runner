@@ -1,5 +1,7 @@
 using System.Diagnostics;
 
+using Fluxor;
+
 using Microsoft.AspNetCore.Components.Server.Circuits;
 
 using Zat.Tests.Runner.Common.Net.Application.DependencyInjection;
@@ -26,7 +28,11 @@ builder.Logging.InitLogging();
 builder.Services.AddSingleton(nunitTestRunnerProxyConnector.Proxy);
 builder.Services.InitServices();
 builder.Services.InitFeatures();
-builder.Services.AddScoped<CircuitHandler>(provider => new ScopedServicesInitializer(provider, builder.Services));
+builder.Services.AddScoped<CircuitHandler>(provider => new CircuitInitializer(
+    provider,
+    builder.Services,
+    provider.GetRequiredService<GlobalWeakReferenceMessanger>(),
+    provider.GetRequiredService<IDispatcher>()));
 
 var app = builder.Build();
 
