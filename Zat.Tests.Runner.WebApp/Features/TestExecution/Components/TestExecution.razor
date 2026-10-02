@@ -3,6 +3,7 @@
 @using CommunityToolkit.Mvvm.Input
 @using DevKit.Mvvm.ViewModel.Commands;
 @using Fluxor;
+@using Zat.Tests.Runner.Common.Net.Model
 @using Zat.Tests.Runner.Common.Net.Services
 @using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration
 @using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery
@@ -12,7 +13,7 @@
 @implements IDisposable
 
 <button type="button"
-        class="@(this.isRunning ? "btn btn-sm btn-danger" : "btn btn-sm btn-success")"
+        class="@(this.TestRunnerEngine.State is TestRunState.Stopped ? "btn btn-sm btn-success" : "btn btn-sm btn-danger")"
         disabled="@(!this.CurrentCommand.CanExecute(null))"
         title="@(string.Join(Environment.NewLine, this.ExecutionBlockingReasons))"
         @onclick="@(() => this.CurrentCommand.Execute(null))">
@@ -21,11 +22,6 @@
 
 @code {
     // TODO: Move most code to viewmodel (see TestConfigurationViewModel)
-
-    // TODO: Get this value from INUnitTestRunnerProxy?
-    private bool isRunning;
-
-    private CancellationTokenSource? testRunCts;
 
     [Inject]
     private ITestRunnerEngine TestRunnerEngine { get; set; } = null!;
@@ -39,15 +35,29 @@
     [Inject]
     private ITestDiscoveryStore TestDiscoveryStore { get; set; } = null!;
 
+    // The test run belongs to the environment rather than to this client, so whatever is offered follows the
+    // engine's state, whoever changed it.
     private ExtendedCommand CurrentCommand
-        => this.isRunning ? this.StopTestCommand : this.StartTestCommand;
+        => this.TestRunnerEngine.State switch
+        {
+            TestRunState.Running => this.StopTestCommand,
+            TestRunState.Stopping => this.StoppingTestCommand,
+            _ => this.StartTestCommand,
+        };
 
     private ExtendedCommand StopTestCommand
         => field ??= new ExtendedCommand(
                 command: new RelayCommand(
                     execute: this.TestRunnerEngine.StopTestRun,
-                    canExecute: () => this.isRunning),
+                    canExecute: () => this.TestRunnerEngine.State is TestRunState.Running),
             "Stop");
+
+    private ExtendedCommand StoppingTestCommand
+        => field ??= new ExtendedCommand(
+                command: new RelayCommand(
+                    execute: () => { },
+                    canExecute: () => false),
+            "Stopping…");
 
     private ExtendedCommand StartTestCommand
         => field ??= new ExtendedCommand(
@@ -56,28 +66,26 @@
                     {
                         throw new NotImplementedException("TODO (see comments)");
 
-                        this.testRunCts = new CancellationTokenSource();
-
                         // TODO: 
                         // Start (using var) RPC server (see NUnitTestRunnerProxy.Program)
                         // Use registred mockable service
 
+                        // CancellationToken.None: the test run must finish even when this client goes away.
                         await this.TestRunnerEngine.RunTestAsync(
                             testRunEntities: this.TestDiscoveryStore.Current.SelectedTestCases,
                             config: new ITestRunnerEngine.Config(
                                 IsDebug: false, // TODO
                                 TestedRuntimeVersion: this.TestConfigurationState.Value.RuntimeVersion,
                                 TestedHwAssemblyTypes: [], // TODO
-                                TestResultHandlers: this.TestResultHandlers));
+                                TestResultHandlers: this.TestResultHandlers),
+                            cancellationToken: CancellationToken.None);
 
                         // TODO: Report result:
                         // - The report feature should handle testlink reporting and showing it in the UI
                         // - Maybe it uses fluxor Effect?
-
-                        this.isRunning = true;
                     },
                 canExecute: () => 
-                    !this.isRunning && 
+                    this.TestRunnerEngine.State is TestRunState.Stopped && 
                     TestsSelected &&
                     !this.ConfigurationHasErrors),
             "Start");
@@ -106,7 +114,10 @@
 
     /// <inheritdoc/>
     public void Dispose()
-        => this.TestDiscoveryStore.Changed -= this.OnTestDiscoveryStoreChanged;
+    {
+        this.TestDiscoveryStore.Changed -= this.OnTestDiscoveryStoreChanged;
+        this.TestRunnerEngine.StateChanged -= this.OnTestRunStateChanged;
+    }
 
     /// <inheritdoc/>
     protected override void OnInitialized()
@@ -116,6 +127,9 @@
         // Whether a run may start follows from the selection and from the configuration, so the
         // button is redrawn whenever either of them moves.
         this.TestDiscoveryStore.Changed += this.OnTestDiscoveryStoreChanged;
+
+        // Another client may start or stop the test run at any time.
+        this.TestRunnerEngine.StateChanged += this.OnTestRunStateChanged;
 
         this.SubscribeToAction<StatusChangedAction>(action => 
         {
@@ -129,6 +143,9 @@
     }
 
     private void OnTestDiscoveryStoreChanged(TestDiscoveryState state)
+        => this.OnDependencyChanged();
+
+    private void OnTestRunStateChanged(TestRunState state)
         => this.OnDependencyChanged();
 
     private void OnDependencyChanged()

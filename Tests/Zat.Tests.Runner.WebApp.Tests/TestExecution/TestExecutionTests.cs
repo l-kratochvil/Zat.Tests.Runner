@@ -1,4 +1,4 @@
-namespace Zat.Tests.Runner.WebApp.Tests.TestExecution;
+﻿namespace Zat.Tests.Runner.WebApp.Tests.TestExecution;
 
 using Bunit;
 
@@ -11,7 +11,8 @@ using Moq;
 using NUnit.Framework;
 
 using Zat.Tests.Runner.Common.Model;
-using Zat.Tests.Runner.Common.Services;
+using Zat.Tests.Runner.Common.Net.Model;
+using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
 
@@ -33,9 +34,13 @@ public class TestExecutionTests : Bunit.TestContext
 
     private const string StartLabel = "Start";
     private const string StopLabel = "Stop";
+    private const string StoppingLabel = "Stopping…";
+
+    private readonly Mock<ITestRunnerEngine> testRunnerEngine = new();
 
     private TestConfigurationState configuration = new();
     private TestDiscoveryState testSelection = new([]);
+    private TestRunState testRunState = TestRunState.Stopped;
 
     [SetUp]
     public void SetUp()
@@ -46,13 +51,13 @@ public class TestExecutionTests : Bunit.TestContext
         var testDiscoveryStore = new Mock<ITestDiscoveryStore>();
         testDiscoveryStore.SetupGet(store => store.Current).Returns(() => this.testSelection);
 
+        this.testRunnerEngine.SetupGet(engine => engine.State).Returns(() => this.testRunState);
+
         this.Services.AddSingleton(configurationState.Object);
         this.Services.AddSingleton(testDiscoveryStore.Object);
+        this.Services.AddSingleton(this.testRunnerEngine.Object);
 
-        // The button reaches for both of these as soon as it is drawn — the runner because a click
-        // would need it, the subscriber because the button is a Fluxor component — so neither can
-        // be left out of a fixture that only asks what stops a run.
-        this.Services.AddSingleton(new Mock<INUnitTestRunnerProxy>().Object);
+        // The button is a Fluxor component, so it reaches for the subscriber as soon as it is drawn.
         this.Services.AddSingleton(new Mock<IActionSubscriber>().Object);
     }
 
@@ -74,10 +79,8 @@ public class TestExecutionTests : Bunit.TestContext
         Assert.That(Label(component), Is.EqualTo(StartLabel));
     }
 
-    [TestCase(1, StopLabel)]
-    [TestCase(2, StartLabel)]
-    public void OnToggle__WhenTheButtonIsClicked__ThenShouldOfferTheOppositeAction(
-        int givenClicks, string expectedLabel)
+    [Test]
+    public void OnTestRunStateChanged__WhenAnotherClientStartsTestRun__ThenShouldOfferToStopIt()
     {
         // Given:
         this.GivenARunnableConfiguration();
@@ -86,13 +89,37 @@ public class TestExecutionTests : Bunit.TestContext
             this.RenderComponent<TestExecutionComponent>();
 
         // When:
-        for (var click = 0; click < givenClicks; click++)
-        {
-            component.Find(ButtonSelector).Click();
-        }
+        this.testRunState = TestRunState.Running;
+        this.testRunnerEngine.Raise(engine => engine.StateChanged += null, TestRunState.Running);
 
         // Then:
-        Assert.That(Label(component), Is.EqualTo(expectedLabel));
+        component.WaitForAssertion(() =>
+        {
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(Label(component), Is.EqualTo(StopLabel));
+                Assert.That(IsDisabled(component), Is.False);
+            }
+        });
+    }
+
+    [Test]
+    public void Render__WhenTestRunIsStopping__ThenShouldNotLetAnythingBeClicked()
+    {
+        // Given:
+        this.GivenARunnableConfiguration();
+        this.testRunState = TestRunState.Stopping;
+
+        // When:
+        var component =
+            this.RenderComponent<TestExecutionComponent>();
+
+        // Then:
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(Label(component), Is.EqualTo(StoppingLabel));
+            Assert.That(IsDisabled(component), Is.True);
+        }
     }
 
     [Test]
@@ -112,7 +139,7 @@ public class TestExecutionTests : Bunit.TestContext
         using (Assert.EnterMultipleScope())
         {
             Assert.That(IsDisabled(component), Is.True);
-            Assert.That(Reason(component), Does.Contain("Select the tests"));
+            Assert.That(Reason(component), Does.Contain("No tests selected"));
         }
     }
 
@@ -133,7 +160,7 @@ public class TestExecutionTests : Bunit.TestContext
         using (Assert.EnterMultipleScope())
         {
             Assert.That(IsDisabled(component), Is.True);
-            Assert.That(Reason(component), Does.Contain("Complete the test configuration"));
+            Assert.That(Reason(component), Does.Contain("Configuration has errors"));
         }
     }
 

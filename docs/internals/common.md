@@ -6,6 +6,7 @@ obvious from the code.
 ## Contents
 
 - [The NUnit test runner proxy](#the-nunit-test-runner-proxy)
+- [One test run at a time](#one-test-run-at-a-time)
 
 ## The NUnit test runner proxy
 
@@ -27,3 +28,9 @@ Exchange targets in `Directory.Build.*`) so the application can launch it.
 The `NUnit` package of `Zat.Tests.Runner.NUnitTestRunnerProxy` should be at the same version the
 test assemblies reference. The proxy runs tests in-process, so a test assembly binds to the proxy's
 `nunit.framework`; a mismatch may lead to problems when loading the tested assembly.
+
+## One test run at a time
+
+Only one test run may be in progress on the environment, because the test station it runs against
+can't be shared. `ITestRunnerEngine` is therefore a singleton that refuses a second start, and the
+state of its test run is shared by every client: any of them sees it and may stop it.

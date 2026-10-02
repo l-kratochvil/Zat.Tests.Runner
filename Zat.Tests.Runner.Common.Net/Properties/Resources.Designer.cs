@@ -86,5 +86,32 @@ namespace Zat.Tests.Runner.Common.Net.Properties {
                 return ResourceManager.GetString("RuntimeTests", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Test run started..
+        /// </summary>
+        public static string TestRun_Started {
+            get {
+                return ResourceManager.GetString("TestRun_Started", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Test run stopped..
+        /// </summary>
+        public static string TestRun_Stopped {
+            get {
+                return ResourceManager.GetString("TestRun_Stopped", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Test run stopping..
+        /// </summary>
+        public static string TestRun_Stopping {
+            get {
+                return ResourceManager.GetString("TestRun_Stopping", resourceCulture);
+            }
+        }
     }
 }

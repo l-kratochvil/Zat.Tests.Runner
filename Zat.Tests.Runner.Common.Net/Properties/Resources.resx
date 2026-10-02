@@ -126,4 +126,13 @@
   <data name="RuntimeTests" xml:space="preserve">
     <value>Runtime tests</value>
   </data>
+  <data name="TestRun_Started" xml:space="preserve">
+    <value>Test run started.</value>
+  </data>
+  <data name="TestRun_Stopped" xml:space="preserve">
+    <value>Test run stopped.</value>
+  </data>
+  <data name="TestRun_Stopping" xml:space="preserve">
+    <value>Test run stopping.</value>
+  </data>
 </root>

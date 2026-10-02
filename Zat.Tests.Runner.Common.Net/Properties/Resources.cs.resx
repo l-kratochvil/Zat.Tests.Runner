@@ -126,4 +126,13 @@
   <data name="RuntimeTests" xml:space="preserve">
     <value>Testy Runtime</value>
   </data>
+  <data name="TestRun_Started" xml:space="preserve">
+    <value>Test run spuštěn.</value>
+  </data>
+  <data name="TestRun_Stopped" xml:space="preserve">
+    <value>Test run zastaven.</value>
+  </data>
+  <data name="TestRun_Stopping" xml:space="preserve">
+    <value>Test run se zastavuje.</value>
+  </data>
 </root>
