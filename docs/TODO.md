@@ -2,9 +2,10 @@
 
 ## HiPrio
 
-- Testy Zat.Z2xx okamžitě končí chybou: Problém v Castle.Core; Skrze VS test runner chodí
+- Po zastavení testy běží dál!
 - Dokončit vazbu na TestLink
 - Zautomatizování kroků testera - základní
+- Otestovat bridge mezi runnerem a Z2xxTests
 - Změna adresáře "Automized Tests":
   - Přesunout do Program Data / Roaming AppData
   - Přejmenovat na Zat.Tests
@@ -50,7 +51,7 @@
 
 ### Dokončit vazbu na TestLink
 
-- Po dokončení Testlink vazby přepsat kapitoly, které byky automatizovany v dokument Automatizované testování
+- Po dokončení Testlink vazby přepsat kapitoly, které byky automatizovany v dokument Automatizované testování - kapitola 2.9.3
 - Dále v dokumentu uvést "povinnosti vývojáře testů": Musí nahrát knihovny testu do adresáře, kde je runner vyžaduje (neuvádět konkrétní cestu, jelikož ta se bude časem měnit)
 
 #### 1. Nahrávání přílohy k výsledku testu
@@ -94,29 +95,8 @@
 ### Lokalizace textů
 
 - Použít nějaký balíček, nebo vytvořit vlastní?
-- V user settings se nastaví jazyk a podle něho se aplikace lokalizuje
+- V AppSettings skupina Uživatelská nastavení se nastaví jazyk a podle něho se aplikace lokalizuje
 - Použít oficiální doporučené řešení IStringLocalizer
-
-```cs
-  class Localization // DI služba
-  {
-    private Dictionary<EntryKey, string> texts;
-    private Dictionary<EntryKey, string> formats;
-
-    enum Language { En, Cs } // Nastaví se v settings (settings bude mít 2 kategorie: a. Global (sdílené pro všechny uživatele; např nastav je test prostředí); b. User
-
-    enum Text { TextA, TextB }
-    enum Format { FormatorA, FormatorB }
-
-    string this[Text text]
-      => texts[new EntryKey(Language, Text);
-
-    string this[Format text]
-      => formats[new EntryKey(Language, Text);
-
-    record EntryKey(Language, Text);
-}
-```
 
 ### Zautomatizování kroků testera - základní
 
