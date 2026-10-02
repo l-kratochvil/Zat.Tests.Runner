@@ -6,6 +6,7 @@ using Zat.Tests.Runner.Common.Services;
 /// Represents a test result obtained from a <see cref="INUnitTestRunnerProxy"/>: a tree mirroring the test tree.
 /// </summary>
 /// <param name="TestSuiteResults">Test suite results.</param>
+[Serializable]
 public record ProxyTestResult(TestSuiteResult[] TestSuiteResults)
 {
     /// <summary>

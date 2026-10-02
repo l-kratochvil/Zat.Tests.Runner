@@ -5,6 +5,7 @@
 /// </summary>
 /// <param name="Message">The message.</param>
 /// <param name="StackTrace">The stack trace.</param>
+[Serializable]
 public record Detail(
     string Message,
     string? StackTrace)

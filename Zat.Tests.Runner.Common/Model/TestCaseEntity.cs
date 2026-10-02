@@ -1,6 +1,7 @@
 ﻿namespace Zat.Tests.Runner.Common.Model;
 
 // TODO: Rnm TestCase
+[Serializable]
 public class TestCaseEntity(
     TestType testType,
     string id,

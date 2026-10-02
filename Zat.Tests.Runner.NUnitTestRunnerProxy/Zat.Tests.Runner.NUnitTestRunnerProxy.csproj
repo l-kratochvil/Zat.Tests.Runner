@@ -4,7 +4,7 @@
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net481</TargetFramework>
 		<!-- Zat.Z2xxTests.dll (and other runtime test assemblies) are x86. Because the
-         proxy loads test assemblies in-process (NUnitTestAssemblyRunner), the
+         proxy loads test assemblies into its own process (an AppDomain per test assembly), the
          test host must run as a 32-bit process; otherwise loading throws
          BadImageFormatException and no tests are discovered. -->
 		<PlatformTarget>x86</PlatformTarget>

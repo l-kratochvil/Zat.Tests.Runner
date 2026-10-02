@@ -7,6 +7,7 @@
 /// <param name="EntityName">The execution path of the test suite.</param>
 /// <param name="Status">The status of the test suite.</param>
 /// <param name="Detail">The detail of the outcome.</param>
+[Serializable]
 public record TestSuiteResult(
     TestFixtureResult[] TestFixtureResults,
     string EntityName,
