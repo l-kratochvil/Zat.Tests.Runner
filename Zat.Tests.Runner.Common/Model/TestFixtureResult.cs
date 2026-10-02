@@ -7,6 +7,7 @@
 /// <param name="EntityName">The execution path of the test fixture.</param>
 /// <param name="Status">The status of the test fixture.</param>
 /// <param name="Detail">The detail of the outcome.</param>
+[Serializable]
 public record TestFixtureResult(
     TestCaseResult[] TestCaseResults,
     string EntityName,

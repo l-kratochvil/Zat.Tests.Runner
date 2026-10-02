@@ -1,6 +1,7 @@
 ﻿namespace Zat.Tests.Runner.Common.Model;
 
 // TODO: Rnm TestSuite
+[Serializable]
 public class TestSuiteEntity(
     TestFixtureEntity[] testFixtures,
     TestType testType,

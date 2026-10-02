@@ -2,10 +2,7 @@ namespace Zat.Tests.Runner.NUnitTestRunnerProxy;
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
-using DevKit.Core.Extensions;
 using DevKit.Core.Extensions.Types;
 
 using NUnit;
@@ -15,7 +12,6 @@ using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 
 using Zat.Tests.Runner.Common.Model;
-using Zat.Tests.Runner.Common.Services;
 
 using NUnitTestStatus = NUnit.Framework.Interfaces.TestStatus;
 using TestCaseResult = Zat.Tests.Runner.Common.Model.TestCaseResult;
@@ -24,50 +20,54 @@ using TestStatus = Zat.Tests.Runner.Common.Model.TestStatus;
 using TestSuiteResult = Zat.Tests.Runner.Common.Model.TestSuiteResult;
 
 /// <summary>
-/// Out-of-process NUnit test runner. Hosts the .NET Framework <see cref="ITestAssemblyRunner"/>
-/// and is exposed to the application over StreamJsonRpc.
+/// Discovers and runs the tests of one test assembly inside the AppDomain of that test assembly, see
+/// <see cref="TestAssemblyDomain"/>. Everything it accepts and returns crosses the AppDomain boundary, so it is
+/// either a primitive or <see cref="SerializableAttribute"/>.
 /// </summary>
-public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
+public sealed class TestAssemblyRunner : MarshalByRefObject
 {
     private const string NotRunMessage = "Not run";
 
     private readonly NUnitTestAssemblyRunner runner = new(new DefaultTestAssemblyBuilder());
 
-    /// <inheritdoc/>
-    public Task<bool> GetIsAssemblyLoadedAsync(CancellationToken cancellationToken = default)
-        => this.runner.IsTestLoaded.AsTask();
+    /// <summary>Gets a value indicating whether the test assembly is loaded.</summary>
+    public bool IsTestLoaded
+        => this.runner.IsTestLoaded;
 
-    /// <inheritdoc/>
-    public Task<bool> GetIsTestRunningAsync(CancellationToken cancellationToken = default)
-        => this.runner.IsTestRunning.AsTask();
+    /// <summary>Gets a value indicating whether a test run is in progress.</summary>
+    public bool IsTestRunning
+        => this.runner.IsTestRunning;
 
-    /// <inheritdoc/>
-    public Task<TestSuiteEntity[]> LoadTestAssemblyAsync(
-        string assemblyDllPath, CancellationToken cancellationToken = default)
-        => Task.Run<TestSuiteEntity[]>(
-            () =>
+    /// <summary>Lives as long as its AppDomain instead of expiring after the default remoting lease.</summary>
+    /// <returns><see langword="null"/>, meaning an infinite lease.</returns>
+    public override object? InitializeLifetimeService()
+        => null;
+
+    /// <summary>Loads the test assembly and returns its discovered test tree.</summary>
+    /// <param name="assemblyDllPath">The path of the test assembly.</param>
+    /// <returns>The test suites of the test assembly.</returns>
+    public TestSuiteEntity[] Load(string assemblyDllPath)
+    {
+        // NOTE: this runner calls Assembly.Load and therefore requires the
+        // test assembly's bitness to match this host. Runtime test libraries
+        // such as Zat.Z2xxTests.dll are x86, so this host must run as a 32-bit
+        // process (see <PlatformTarget>x86</PlatformTarget> in the proxy/test
+        // project); otherwise the assembly is reported as NotRunnable with a
+        // BadImageFormatException and no tests are discovered.
+        var testAssemblyElement = this.runner.Load(
+            assemblyDllPath,
+            new Dictionary<string, object>
             {
-                // Discover tests through the in-process NUnitTestAssemblyRunner.
-                // NOTE: this runner calls Assembly.Load and therefore requires the
-                // test assembly's bitness to match this host. Runtime test libraries
-                // such as Zat.Z2xxTests.dll are x86, so this host must run as a 32-bit
-                // process (see <PlatformTarget>x86</PlatformTarget> in the proxy/test
-                // project); otherwise the assembly is reported as NotRunnable with a
-                // BadImageFormatException and no tests are discovered.
-                var testAssemblyElement = this.runner.Load(
-                    assemblyDllPath,
-                    new Dictionary<string, object>
-                    {
-                        { FrameworkPackageSettings.WorkDirectory, Path.GetDirectoryName(assemblyDllPath) },
-                    });
+                { FrameworkPackageSettings.WorkDirectory, Path.GetDirectoryName(assemblyDllPath) },
+            });
 
-                return [.. CollectTestSuiteEntities(testAssemblyElement)];
-            },
-            cancellationToken);
+        return [.. CollectTestSuiteEntities(testAssemblyElement)];
+    }
 
-    /// <inheritdoc/>
-    public Task<ProxyTestResult> RunTestAsync(
-        IEnumerable<TestEntity> testRunEntities, CancellationToken cancellationToken = default)
+    /// <summary>Runs the test entities identified by <paramref name="executionPaths"/>.</summary>
+    /// <param name="executionPaths">The execution paths of the test entities to run.</param>
+    /// <returns>The result tree of the run.</returns>
+    public ProxyTestResult Run(string[] executionPaths)
     {
         if (!this.runner.IsTestLoaded)
         {
@@ -78,33 +78,22 @@ public sealed class NUnitTestRunnerProxy : INUnitTestRunnerProxy
         // (Multiple <test> elements directly under <filter> would be combined with AND.)
         var testFilterNode = new TNode("filter");
         var orNode = testFilterNode.AddElement("or");
-        foreach (var testEntity in testRunEntities)
+        foreach (var executionPath in executionPaths)
         {
-            orNode.AddElement("test", testEntity.ExecutionPath);
+            orNode.AddElement("test", executionPath);
         }
 
         var testFilter = TestFilter.FromXml(testFilterNode);
 
-        // Cancellation forcibly aborts the in-progress run.
-        var cancellationRegistration = cancellationToken.Register(() => this.runner.StopRun(force: true));
+        var result = this.runner.Run(TestListener.NULL, testFilter);
 
-        return Task.Run(
-            () =>
-            {
-                try
-                {
-                    var result = this.runner.Run(TestListener.NULL, testFilter);
-
-                    return new ProxyTestResult(
-                        [.. CollectTestSuiteResults(this.runner.LoadedTest, testFilter, IndexByFullName(result))]);
-                }
-                finally
-                {
-                    cancellationRegistration.Dispose();
-                }
-            },
-            cancellationToken);
+        return new ProxyTestResult(
+            [.. CollectTestSuiteResults(this.runner.LoadedTest, testFilter, IndexByFullName(result))]);
     }
+
+    /// <summary>Forcibly aborts the in-progress run.</summary>
+    public void StopRun()
+        => this.runner.StopRun(force: true);
 
     /// <summary>
     /// Maps an NUnit <paramref name="resultState"/> to a <see cref="TestStatus"/>; an outcome not known here maps to

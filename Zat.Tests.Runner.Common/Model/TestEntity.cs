@@ -1,5 +1,6 @@
 ﻿namespace Zat.Tests.Runner.Common.Model;
 
+[Serializable]
 public class TestEntity(
     TestType testType,
     string name,

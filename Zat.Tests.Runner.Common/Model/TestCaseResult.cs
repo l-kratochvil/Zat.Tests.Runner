@@ -7,6 +7,7 @@
 /// <param name="EntityName">The execution path of the test case.</param>
 /// <param name="Status">The status of the test case.</param>
 /// <param name="Detail">The detail of the outcome.</param>
+[Serializable]
 public record TestCaseResult(
     string Id,
     string EntityName,

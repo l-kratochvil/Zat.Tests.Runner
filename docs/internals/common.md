@@ -6,6 +6,7 @@ obvious from the code.
 ## Contents
 
 - [The NUnit test runner proxy](#the-nunit-test-runner-proxy)
+  - [Each test assembly runs in its own AppDomain](#each-test-assembly-runs-in-its-own-appdomain)
 
 ## The NUnit test runner proxy
 
@@ -22,8 +23,16 @@ StreamJsonRpc. It lives until the application closes the connection; the applica
 on exit as a fallback. The build copies the proxy into the application's output directory (the
 Exchange targets in `Directory.Build.*`) so the application can launch it.
 
+### Each test assembly runs in its own AppDomain
+
+The proxy loads a test assembly into an AppDomain set up as if the test assembly were the
+application: its directory is the application base and its `.dll.config` the configuration file.
+Only so do the binding redirects and settings of the test assembly apply; in the proxy's own
+AppDomain the proxy's `.exe.config` would be used instead. Loading another test assembly unloads the
+AppDomain of the previous one.
+
 ### NUnit version matches the test assemblies
 
 The `NUnit` package of `Zat.Tests.Runner.NUnitTestRunnerProxy` should be at the same version the
-test assemblies reference. The proxy runs tests in-process, so a test assembly binds to the proxy's
-`nunit.framework`; a mismatch may lead to problems when loading the tested assembly.
+test assemblies reference. The proxy and the test assembly share one `nunit.framework` inside the
+AppDomain of the test assembly; a mismatch may lead to problems when loading the tested assembly.

@@ -7,6 +7,7 @@
 /// <param name="EntityName">The execution path of the test entity.</param>
 /// <param name="Status">The status of the test entity.</param>
 /// <param name="Detail">The detail of the outcome, <see langword="null"/> when there is nothing to say.</param>
+[Serializable]
 public abstract record TestEntityResult(
     string EntityName,
     TestStatus Status,
