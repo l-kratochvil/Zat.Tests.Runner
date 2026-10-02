@@ -82,6 +82,52 @@ public class TestRunnerEngineTests
     }
 
     [Test]
+    public async Task RunTestAsync__WhenTestRunCompletes__ThenShouldHandItsResult()
+    {
+        // Given:
+        await this.GivenTestAssemblyLoadedAsync();
+
+        // When:
+        var results = await this.unit.RunTestAsync([ApplicationTestCase()], this.Config());
+
+        // Then:
+        var handledResult = results.Single();
+        using (Assert.EnterMultipleScope())
+        {
+            this.resultHandlerMock.Verify(x => x.Handle(handledResult), Times.Once);
+            Assert.That(
+                handledResult.TestCaseResults.Select(x => (x.EntityName, x.Status)),
+                Is.EqualTo(new[] { (PassingTestCasePath, TestStatus.Passed) }));
+        }
+    }
+
+    [Test]
+    public async Task RunTestAsync__WhenCallerCancelsDuringSubRun__ThenShouldStopWithoutHandlingAnyResult()
+    {
+        // Given:
+        await this.GivenTestAssemblyLoadedAsync();
+
+        using var callerCts = new CancellationTokenSource();
+        this.bridgeConnectorMock
+            .Setup(x => x.Connect(It.IsAny<TestConfig>()))
+            .Callback(callerCts.Cancel)
+            .Returns(() => new Disposer(() => { }));
+
+        // When:
+        var results = await this.unit.RunTestAsync([ApplicationTestCase()], this.Config(), callerCts.Token);
+
+        // Then:
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(results, Is.Empty);
+            this.resultHandlerMock.Verify(x => x.Handle(It.IsAny<TestResult>()), Times.Never);
+            Assert.That(
+                this.reportedStates,
+                Is.EqualTo(new[] { TestRunState.Running, TestRunState.Stopping, TestRunState.Stopped }));
+        }
+    }
+
+    [Test]
     public async Task RunTestAsync__WhenAnotherTestRunIsInProgress__ThenShouldRefuseToStart()
     {
         // Given:
@@ -145,6 +191,8 @@ public class TestRunnerEngineTests
         using (Assert.EnterMultipleScope())
         {
             Assert.That(results.Select(x => x.TestedHwAssemblyType), Is.EqualTo(new[] { HwAssemblyType.HW00 }));
+            this.resultHandlerMock.Verify(x => x.Handle(results[0]), Times.Once);
+            this.resultHandlerMock.Verify(x => x.Handle(It.IsAny<TestResult>()), Times.Once);
             Assert.That(
                 this.reportedStates,
                 Is.EqualTo(new[] { TestRunState.Running, TestRunState.Stopping, TestRunState.Stopped }));
