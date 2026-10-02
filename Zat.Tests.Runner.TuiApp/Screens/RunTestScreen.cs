@@ -25,8 +25,7 @@ internal class RunTestScreen(
       ITestResultHandler
 {
     private readonly List<TestResultHandled> handledTestResults = [];
-    private readonly State state = new();
-
+    private State state = new();
     private DateTime currentTestStartTime = DateTime.UtcNow;
 
     /// <inheritdoc/>
@@ -73,6 +72,7 @@ internal class RunTestScreen(
                     .HideHeaders()
                     .AddColumn(string.Empty);
 
+                this.state = new State();
                 this.currentTestStartTime = DateTime.UtcNow;
                 this.state.Stopwatch.Restart();
 
