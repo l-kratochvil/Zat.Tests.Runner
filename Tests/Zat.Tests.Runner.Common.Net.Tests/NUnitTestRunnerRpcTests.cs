@@ -10,12 +10,14 @@ using NUnit.Framework;
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.Common.Net.Tests.Application.Paths;
+using Zat.Tests.Runner.Common.Services;
 
 [TestFixture]
 public class NUnitTestRunnerRpcTests
 {
     private const string TestAssemblyNet461Name = "NUnitTestAssembly.Net461";
     private const string TestAssemblyNet481Name = "NUnitTestAssembly.Net481";
+    private const string Net481FailingTestCasePath = TestAssemblyNet481Name + ".SampleTestSuite.Fail";
 
     private static readonly string NUnitTestAssembliesDirPath = Path.Combine(
         Assembly.GetExecutingAssembly().GetAssemblyDirectoryPath(),
@@ -47,42 +49,58 @@ public class NUnitTestRunnerRpcTests
         await this.connector.DisposeAsync();
     }
 
-    [Test]
-    public async Task LoadTestAssemblyAsync_WithNet461Assembly()
+    [TestCaseSource(nameof(TestAssemblyCases))]
+    public async Task LoadTestAssemblyAsync__WhenLoadingTestAssembly__ThenShouldReturnTestTree(string testAssemblyDllPath)
     {
-        var testAssemblyDllPath = TestAssemblyNet461DllPath;
-        if (!File.Exists(testAssemblyDllPath))
-        {
-            throw new FileNotFoundException(testAssemblyDllPath);
-        }
-
         // Given
         var unit = this.connector.Proxy;
 
         // When
-        var result = await unit.LoadTestAssemblyAsync(testAssemblyDllPath);
+        var result = await LoadTestAssemblyAsync(unit, testAssemblyDllPath);
 
         // Then
         AssertTestTreeLoaded(result);
     }
 
-    [Test]
-    public async Task LoadTestAssemblyAsync_WithNet481Assembly()
+    [TestCaseSource(nameof(TestAssemblyCases))]
+    public async Task RunTestAsync__WhenRunWithAllTestCases__ThenShouldReturnResultOfEveryTestCase(string testAssemblyDllPath)
     {
-        var testAssemblyDllPath = TestAssemblyNet481DllPath;
-        if (!File.Exists(testAssemblyDllPath))
-        {
-            throw new FileNotFoundException(testAssemblyDllPath);
-        }
-
         // Given
         var unit = this.connector.Proxy;
+        var testCases = GetTestCases(await LoadTestAssemblyAsync(unit, testAssemblyDllPath));
 
         // When
-        var result = await unit.LoadTestAssemblyAsync(testAssemblyDllPath);
+        var result = await unit.RunTestAsync(testCases);
 
         // Then
-        AssertTestTreeLoaded(result);
+        var testCaseResults = GetTestCaseResults(result);
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(
+                testCaseResults.Select(x => (x.EntityName, x.Id)),
+                Is.EquivalentTo(testCases.Select(x => (x.ExecutionPath, x.Id))));
+            Assert.That(testCaseResults, Has.None.Matches<TestCaseResult>(x => x.Status == TestStatus.Unknown));
+        }
+    }
+
+    [Test]
+    public async Task RunTestAsync__WhenRunWithFailingTestCase__ThenShouldReturnFailureDetail()
+    {
+        // Given
+        var unit = this.connector.Proxy;
+        var testCase = GetTestCases(await LoadTestAssemblyAsync(unit, TestAssemblyNet481DllPath))
+            .Single(x => x.ExecutionPath == Net481FailingTestCasePath);
+
+        // When
+        var result = await unit.RunTestAsync([testCase]);
+
+        // Then
+        var testCaseResult = GetTestCaseResults(result).Single();
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(testCaseResult.Status, Is.EqualTo(TestStatus.Failure));
+            Assert.That(testCaseResult.Detail?.Message, Does.Contain("FAILURE REASON"));
+        }
     }
 
     [Test]
@@ -105,6 +123,28 @@ public class NUnitTestRunnerRpcTests
         // Then
         AssertTestTreeLoaded(result);
     }
+
+    private static IEnumerable<TestCaseData> TestAssemblyCases()
+    {
+        yield return new TestCaseData(TestAssemblyNet461DllPath).SetArgDisplayNames(TestAssemblyNet461Name);
+        yield return new TestCaseData(TestAssemblyNet481DllPath).SetArgDisplayNames(TestAssemblyNet481Name);
+    }
+
+    private static Task<TestSuiteEntity[]> LoadTestAssemblyAsync(INUnitTestRunnerProxy proxy, string testAssemblyDllPath)
+        => File.Exists(testAssemblyDllPath)
+            ? proxy.LoadTestAssemblyAsync(testAssemblyDllPath)
+            : throw new FileNotFoundException(testAssemblyDllPath);
+
+    private static TestCaseEntity[] GetTestCases(TestSuiteEntity[] testSuites)
+        => [.. testSuites.SelectMany(x => x.TestFixtures).SelectMany(x => x.TestCases)];
+
+    private static TestCaseResult[] GetTestCaseResults(ProxyTestResult result)
+        =>
+        [
+            .. result.TestSuiteResults
+                .SelectMany(x => x.TestFixtureResults)
+                .SelectMany(x => x.TestCaseResults)
+        ];
 
     private static void AssertTestTreeLoaded(TestSuiteEntity[] testSuites)
     {
