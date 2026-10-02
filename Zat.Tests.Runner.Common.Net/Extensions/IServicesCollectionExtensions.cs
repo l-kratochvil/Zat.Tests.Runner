@@ -17,16 +17,5 @@ public static class IServicesCollectionExtensions
 
             return services;
         }
-
-        public IServiceCollection AddScopedLoggerProvider<TLoggerProvider>()
-            where TLoggerProvider : class, ILoggerProvider
-        {
-            services
-                .AddScoped<TLoggerProvider>()
-                .AddScoped<ILoggerProvider>(
-                    provider => provider.GetRequiredService<TLoggerProvider>());
-
-            return services;
-        }
     }
 }

@@ -1,4 +1,4 @@
-namespace Zat.Tests.Runner.WebApp.Tests.Application.Paths;
+namespace Zat.Tests.Runner.Common.Net.Tests.Services;
 
 using System.IO;
 
@@ -10,8 +10,7 @@ using Microsoft.Extensions.Options;
 using NUnit.Framework;
 
 using Zat.Tests.Runner.Common.Net.Application.DependencyInjection;
-using Zat.Tests.Runner.WebApp.Application.DependencyInjection;
-using Zat.Tests.Runner.WebApp.Application.Paths;
+using Zat.Tests.Runner.Common.Net.Application.Paths;
 
 [TestFixture]
 public class InitPathsExtensionsTests
@@ -37,7 +36,7 @@ public class InitPathsExtensionsTests
     {
         // When:
         using var provider = this.BuildProvider(this.dataPath);
-        var result = provider.GetRequiredService<IAppPathsProvider>();
+        var result = provider.GetRequiredService<ISharedAppPathsProvider>();
 
         // Then:
         using (Assert.EnterMultipleScope())
@@ -52,7 +51,7 @@ public class InitPathsExtensionsTests
     {
         // When:
         using var provider = this.BuildProvider(this.dataPath);
-        var result = provider.GetRequiredService<IAppPathsProvider>();
+        var result = provider.GetRequiredService<ISharedAppPathsProvider>();
 
         // Then:
         Assert.That(result.Files.UserSettings, Is.EqualTo(Path.Combine(this.dataPath, "user-settings.json")));
@@ -68,7 +67,7 @@ public class InitPathsExtensionsTests
 
         // Then:
         Assert.That(
-            provider.GetRequiredService<IAppPathsProvider>,
+            provider.GetRequiredService<ISharedAppPathsProvider>,
             Throws.InstanceOf<OptionsValidationException>());
     }
 
@@ -82,7 +81,7 @@ public class InitPathsExtensionsTests
 
         // When:
         using var provider = this.BuildProvider(@"%LOCALAPPDATA%\Elsewhere");
-        var result = provider.GetRequiredService<IAppPathsProvider>();
+        var result = provider.GetRequiredService<ISharedAppPathsProvider>();
 
         // Then:
         Assert.That(result.Directories.AppData, Is.EqualTo(expectedPath));
@@ -93,7 +92,7 @@ public class InitPathsExtensionsTests
     {
         // When:
         using var provider = this.BuildProvider(this.dataPath);
-        var paths = provider.GetRequiredService<IAppPathsProvider>();
+        var paths = provider.GetRequiredService<ISharedAppPathsProvider>();
         _ = paths.Directories.Logs;
         _ = paths.Files.UserSettings;
 
@@ -106,7 +105,7 @@ public class InitPathsExtensionsTests
     {
         // Given:
         using var provider = this.BuildProvider(this.dataPath);
-        var paths = provider.GetRequiredService<IAppPathsProvider>();
+        var paths = provider.GetRequiredService<ISharedAppPathsProvider>();
 
         // When:
         provider.InitInitializableServices(this.services);
@@ -129,7 +128,7 @@ public class InitPathsExtensionsTests
 
         // Then:
         Assert.That(
-            this.services.Where(descriptor => descriptor.ImplementationType == typeof(AppPathsProvider)),
+            this.services.Where(descriptor => descriptor.ImplementationType == typeof(AppPathsProviderBase<,,,,>)),
             Has.Exactly(1).Items);
     }
 
@@ -149,7 +148,7 @@ public class InitPathsExtensionsTests
         using var provider = givenServices.BuildServiceProvider();
 
         // When:
-        var result = provider.GetRequiredService<IAppPathsProvider>();
+        var result = provider.GetRequiredService<ISharedAppPathsProvider>();
 
         // Then:
         Assert.That(
@@ -209,7 +208,7 @@ public class InitPathsExtensionsTests
     {
         var builder = Host.CreateEmptyApplicationBuilder(settings: null);
         builder.Configuration.AddInMemoryCollection(configuration);
-        builder.Services.InitServices();
+        // TODO - Fix (was commented out): builder.Services.InitServices();
 
         using var host = builder.Build();
         await host.StartAsync();
@@ -227,7 +226,7 @@ public class InitPathsExtensionsTests
 
         this.services = [];
         this.services.AddSingleton(configuration);
-        this.services.InitServices();
+        // TODO - Fix (was commented out): this.services.InitServices();
 
         return this.services.BuildServiceProvider();
     }

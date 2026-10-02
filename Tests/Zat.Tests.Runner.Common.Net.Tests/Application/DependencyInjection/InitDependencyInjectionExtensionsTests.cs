@@ -28,7 +28,7 @@ public class InitDependencyInjectionExtensionsTests
         using var provider = services.BuildServiceProvider();
 
         // When:
-        provider.InitInitializableServices(services);
+        provider.InitInitializableServices(services, ServiceLifetime.Singleton);
 
         // Then:
         Assert.That(((Service)provider.GetRequiredService<IService>()).InitializeCount, Is.EqualTo(1));
@@ -45,7 +45,7 @@ public class InitDependencyInjectionExtensionsTests
         using var provider = services.BuildServiceProvider();
 
         // When:
-        provider.InitInitializableServices(services);
+        provider.InitInitializableServices(services, ServiceLifetime.Singleton);
 
         // Then:
         Assert.That(provider.GetRequiredService<Service>().InitializeCount, Is.EqualTo(1));
@@ -63,7 +63,7 @@ public class InitDependencyInjectionExtensionsTests
         using var provider = services.BuildServiceProvider();
 
         // When:
-        provider.InitInitializableServices(services);
+        provider.InitInitializableServices(services, ServiceLifetime.Singleton);
 
         // Then:
         Assert.That(PlainService.ConstructedCount, Is.Zero);
@@ -81,7 +81,7 @@ public class InitDependencyInjectionExtensionsTests
         using var provider = services.BuildServiceProvider();
 
         // Then:
-        Assert.That(() => provider.InitInitializableServices(services), Throws.Nothing);
+        Assert.That(() => provider.InitInitializableServices(services, ServiceLifetime.Singleton), Throws.Nothing);
     }
 
     [Test]
@@ -96,7 +96,7 @@ public class InitDependencyInjectionExtensionsTests
         using var provider = services.BuildServiceProvider();
 
         // Then:
-        Assert.That(() => provider.InitInitializableServices(services), Throws.Nothing);
+        Assert.That(() => provider.InitInitializableServices(services, ServiceLifetime.Scoped), Throws.Nothing);
     }
 
     private sealed class Service : IService, IInitializable

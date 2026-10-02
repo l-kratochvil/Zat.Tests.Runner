@@ -34,6 +34,6 @@ var host = hostBuilder
         })
     .Build();
 
-host.Services.InitInitializableServices(registeredServices);
+host.Services.InitInitializableServices(registeredServices, ServiceLifetime.Singleton);
 
 await App.RunAsync(host);

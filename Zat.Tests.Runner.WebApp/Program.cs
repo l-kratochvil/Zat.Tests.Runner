@@ -1,10 +1,13 @@
 using System.Diagnostics;
 
+using Microsoft.AspNetCore.Components.Server.Circuits;
+
 using Zat.Tests.Runner.Common.Net.Application.DependencyInjection;
 using Zat.Tests.Runner.Common.Net.Application.Logging;
 using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.WebApp.Application.DependencyInjection;
 using Zat.Tests.Runner.WebApp.Components;
+using Zat.Tests.Runner.WebApp.Shared.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,11 +26,12 @@ builder.Logging.InitLogging();
 builder.Services.AddSingleton(nunitTestRunnerProxyConnector.Proxy);
 builder.Services.InitServices();
 builder.Services.InitFeatures();
+builder.Services.AddScoped<CircuitHandler>(provider => new ScopedServicesInitializer(provider, builder.Services));
 
 var app = builder.Build();
 
 // Setting up the filesystem is startup work, so it happens here and not in a constructor.
-app.Services.InitInitializableServices(builder.Services);
+app.Services.InitInitializableServices(builder.Services, ServiceLifetime.Singleton);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

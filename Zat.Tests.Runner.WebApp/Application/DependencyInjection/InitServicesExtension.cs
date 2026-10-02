@@ -48,7 +48,6 @@ public static class InitServicesExtension
                 .AddScoped<ITestResultHandler, TestResultHandler>()
                 .AddScoped<TestLinkResultHandler.IContext, TestLinkResultHandlerContext>()
                 .AddScoped<WeakReferenceMessenger>()
-                .AddScoped<MidlewareInitializer>()
                 .AddSingleton<BrowserLogger>();
 
         private IServiceCollection InitNUnitTestRunner()

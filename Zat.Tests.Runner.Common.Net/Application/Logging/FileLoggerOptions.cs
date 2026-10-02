@@ -8,5 +8,5 @@ public sealed class FileLoggerOptions
     /// <summary>
     /// Gets how many log files are kept on disk.
     /// </summary>
-    public int RetainedFileCount { get; init; } = 0;
+    public int RetainedFileCount { get; init; } = 5;
 }

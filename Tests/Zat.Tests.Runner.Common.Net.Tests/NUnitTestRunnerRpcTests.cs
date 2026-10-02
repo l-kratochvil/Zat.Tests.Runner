@@ -55,11 +55,8 @@ public class NUnitTestRunnerRpcTests
         // Given
         var unit = this.connector.Proxy;
 
-        // When
-        var result = await LoadTestAssemblyAsync(unit, testAssemblyDllPath);
-
-        // Then
-        AssertTestTreeLoaded(result);
+        // When & Then
+        await AssertTestAssemblyLoadedAsync(unit, testAssemblyDllPath);
     }
 
     [TestCaseSource(nameof(TestAssemblyCases))]
@@ -117,17 +114,24 @@ public class NUnitTestRunnerRpcTests
         // Given
         var unit = this.connector.Proxy;
 
-        // When
-        var result = await unit.LoadTestAssemblyAsync(zatTestsAssemblyPath);
-
-        // Then
-        AssertTestTreeLoaded(result);
+        // When & Then
+        await AssertTestAssemblyLoadedAsync(unit, zatTestsAssemblyPath);
     }
 
     private static IEnumerable<TestCaseData> TestAssemblyCases()
     {
         yield return new TestCaseData(TestAssemblyNet461DllPath).SetArgDisplayNames(TestAssemblyNet461Name);
         yield return new TestCaseData(TestAssemblyNet481DllPath).SetArgDisplayNames(TestAssemblyNet481Name);
+    }
+
+    private static async Task AssertTestAssemblyLoadedAsync(
+        INUnitTestRunnerProxy proxy,
+        string testAssemblyDllPath)
+    {
+        var result = await LoadTestAssemblyAsync(proxy, testAssemblyDllPath);
+
+        // Then
+        AssertTestTreeLoaded(result);
     }
 
     private static Task<TestSuiteEntity[]> LoadTestAssemblyAsync(INUnitTestRunnerProxy proxy, string testAssemblyDllPath)

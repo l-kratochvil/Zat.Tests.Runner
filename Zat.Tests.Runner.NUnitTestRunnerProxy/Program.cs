@@ -8,9 +8,9 @@ using Zat.Tests.Runner.Common;
 using Zat.Tests.Runner.NUnitTestRunnerProxy;
 
 #if DEBUG
-var debugRequested = args.Skip(1).Any(
-    arg => string.Equals(
-        arg, CommonConstants.ProcessArgs.Debug, StringComparison.OrdinalIgnoreCase));
+var debugRequested = args
+    .Skip(1)
+    .Contains(CommonConstants.ProcessArgs.Debug, StringComparer.OrdinalIgnoreCase);
 if (debugRequested && DebuggerUtils.NetDebuggerLaunchAllowed)
 {
     Debugger.Launch();

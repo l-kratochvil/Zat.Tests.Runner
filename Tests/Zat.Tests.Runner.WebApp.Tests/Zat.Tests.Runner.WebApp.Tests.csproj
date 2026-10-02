@@ -19,4 +19,8 @@
 		<None Include="..\..\Zat.Tests.Runner.WebApp\appsettings.json" Link="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Application\Paths\" />
+	</ItemGroup>
+
 </Project>

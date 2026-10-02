@@ -26,14 +26,20 @@ public static class CoreExtensions
         /// </para>
         /// </remarks>
         /// <param name="services">Registrations the initialisable services are looked for in.</param>
-        public void InitInitializableServices(IServiceCollection services)
+        /// <param name="serviceLifetime">The lifetime of the services to initialise.</param>
+        public void InitInitializableServices(IServiceCollection services, ServiceLifetime serviceLifetime)
         {
+            if (serviceLifetime is ServiceLifetime.Transient)
+            {
+                throw new NotSupportedException("Initializing transient services is not supported");
+            }
+
             var initialized = new HashSet<object>(ReferenceEqualityComparer.Instance);
 
             foreach (var service in services
-                         .Where(static descriptor => descriptor.Lifetime is ServiceLifetime.Singleton
-                                                     && !descriptor.IsKeyedService
-                                                     && IsInitializable(descriptor))
+                         .Where(descriptor => descriptor.Lifetime == serviceLifetime
+                                              && !descriptor.IsKeyedService
+                                              && IsInitializable(descriptor))
 #pragma warning disable SA1101 // StyleCop mistakes the extension receiver for an instance member.
                          .Select(descriptor => provider.GetRequiredService(descriptor.ServiceType))
 #pragma warning restore SA1101
