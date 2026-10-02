@@ -19,8 +19,12 @@ This is a single-context repo:
 ├── CONTEXT.md          ← created lazily by /domain-modeling
 ├── docs/ADR/
 │   └── ADR-0001-initial.md
-├── Zat.Tests.Runner.App/
+├── docs/internals/     ← index, common, webapp
+├── docs/rules/         ← index; common + per application
+├── docs/specs/
 ├── Zat.Tests.Runner.Common/
+├── Zat.Tests.Runner.Common.Net/
+├── Zat.Tests.Runner.TuiApp/
 ├── Zat.Tests.Runner.WebApp/
 └── Zat.Tests.Runner.NUnitTestRunnerProxy/
 ```

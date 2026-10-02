@@ -11,6 +11,7 @@
 	</PropertyGroup>
 	
 	<ItemGroup>
+		<!-- NUnit should be at the same version the test assemblies reference. See docs/internals/common.md. -->
 		<PackageReference Include="NUnit" Version="3.14.0" />
 		<PackageReference Include="StreamJsonRpc" Version="2.21.10" />
 	</ItemGroup>
