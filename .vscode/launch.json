@@ -37,6 +37,16 @@
         "uriFormat": "%s",
         "webRoot": "${workspaceFolder}/Zat.Tests.Runner.WebApp/wwwroot"
       }
+    },
+    {
+      // Spectre.Console needs a real console handle; the Debug Console (internalConsole) has none.
+      "name": "TuiApp",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-tuiapp",
+      "program": "${workspaceFolder}/Zat.Tests.Runner.TuiApp/bin/Debug/net10.0/Zat.Tests.Runner.TuiApp.dll",
+      "cwd": "${workspaceFolder}/Zat.Tests.Runner.TuiApp/bin/Debug/net10.0",
+      "console": "integratedTerminal"
     }
   ]
 }

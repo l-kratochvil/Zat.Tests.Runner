@@ -7,10 +7,11 @@
       "request": "launch",
       "preLaunchTask": "build",
       // Assembly name must be the same as the root dir name
-      "program": "${workspaceFolder}/bin/Debug/net8.0/${workspaceFolderBasename}.dll",
+      "program": "${workspaceFolder}/bin/Debug/net10.0/${workspaceFolderBasename}.dll",
       "args": [],
-      "cwd": "${workspaceFolder}",
-      "console": "internalConsole",
+      "cwd": "${workspaceFolder}/bin/Debug/net10.0",
+      // Spectre.Console needs a real console handle; the Debug Console (internalConsole) has none.
+      "console": "integratedTerminal",
       "stopAtEntry": false
     }
   ]
