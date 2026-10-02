@@ -31,6 +31,9 @@
     private ITestRunnerEngine TestRunnerEngine { get; set; } = null!;
 
     [Inject]
+    private IEnumerable<ITestResultHandler> TestResultHandlers { get; set; } = null!;
+
+    [Inject]
     private IState<TestConfigurationState> TestConfigurationState { get; set; } = null!;
 
     [Inject]
@@ -65,7 +68,7 @@
                                 IsDebug: false, // TODO
                                 TestedRuntimeVersion: this.TestConfigurationState.Value.RuntimeVersion,
                                 TestedHwAssemblyTypes: [], // TODO
-                                TestResultHandlers: [])); // TODO
+                                TestResultHandlers: this.TestResultHandlers));
 
                         // TODO: Report result:
                         // - The report feature should handle testlink reporting and showing it in the UI

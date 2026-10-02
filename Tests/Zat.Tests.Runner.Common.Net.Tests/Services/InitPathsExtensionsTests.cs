@@ -108,7 +108,7 @@ public class InitPathsExtensionsTests
         var paths = provider.GetRequiredService<ISharedAppPathsProvider>();
 
         // When:
-        provider.InitInitializableServices(this.services);
+        provider.InitInitializableServices(this.services, ServiceLifetime.Singleton);
 
         // Then:
         using (Assert.EnterMultipleScope())

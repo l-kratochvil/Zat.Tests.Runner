@@ -14,11 +14,14 @@ public interface ITestRunnerEngine
 
     void StopTestRun();
 
-    void RegisterTestResultHandler(ITestResultHandler handler);
-
+    /// <summary>
+    /// Configuration of a single test run.
+    /// </summary>
+    /// <param name="TestResultHandlers">Handlers of this run's results; the engine owns none of its
+    /// own, so each application decides who handles them and with what lifetime.</param>
     public record Config(
         bool IsDebug,
         string? TestedRuntimeVersion,
         HwAssemblyType[]? TestedHwAssemblyTypes,
-        IEnumerable<ITestResultHandler>? TestResultHandlers = null);
+        IEnumerable<ITestResultHandler> TestResultHandlers);
 }

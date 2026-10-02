@@ -25,6 +25,7 @@ internal static class InitServicesExtensions
                     .AddSingleton<IAppPathsProvider>(
                         static provider => provider.GetRequiredService<AppPathsProvider>())
                     .AddSingleton(nunitTestRunnerProxy)
-                    .AddSingleton<TestLinkResultHandler.IContext, TestLinkResultHandlerContext>());
+                    .AddSingleton<TestLinkResultHandler.IContext, TestLinkResultHandlerContext>()
+                    .AddSingleton<ITestResultHandler, TestLinkResultHandler>());
     }
 }

@@ -46,6 +46,7 @@ public static class InitServicesExtension
                 .InitNUnitTestRunner()
                 .AddScoped<IJsModuleInteropFactory, JsModuleInteropFactory>()
                 .AddScoped<ITestResultHandler, TestResultHandler>()
+                .AddScoped<ITestResultHandler, TestLinkResultHandler>()
                 .AddScoped<TestLinkResultHandler.IContext, TestLinkResultHandlerContext>()
                 .AddScoped<WeakReferenceMessenger>()
                 .AddSingleton<BrowserLogger>();

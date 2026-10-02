@@ -38,8 +38,7 @@ public static class ServicesExtensions
                 .AddSingleton<ITestRunnerBridgeConnector, TestRunnerBridgeConnector>()
                 .AddSingleton<ITestLink, TestLink>()
                 .AddSingleton(_ => ITestLink.Config.Default)
-                .AddSingleton<ITestRunnerEngine, TestRunnerEngine>()
-                .AddSingleton<ITestResultHandler, TestLinkResultHandler>();
+                .AddSingleton<ITestRunnerEngine, TestRunnerEngine>();
 
         private IServiceCollection InitAppOptions<TOptions>(
             string sectionName)

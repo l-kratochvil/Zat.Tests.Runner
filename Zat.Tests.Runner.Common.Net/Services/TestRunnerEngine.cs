@@ -11,12 +11,9 @@ using Zat.Z2xxTests.Common.Model;
 
 public class TestRunnerEngine(
     ITestRunnerBridgeConnector testRunnerBridgeConnector,
-    INUnitTestRunnerProxy nunitTestRunnerProxy,
-    IEnumerable<ITestResultHandler> testResultHandlers)
+    INUnitTestRunnerProxy nunitTestRunnerProxy)
     : ITestRunnerEngine
 {
-    private IEnumerable<ITestResultHandler> testResultHandlers = testResultHandlers;
-
     private CancellationTokenSource? runTestCts;
 
     /// <inheritdoc />
@@ -29,12 +26,7 @@ public class TestRunnerEngine(
     {
         var testRunResults = new List<TestResult>();
 
-        ITestResultHandler[] finalTestResultHandlers =
-        [
-            ..config.TestResultHandlers is not null
-                ? this.testResultHandlers.Concat(config.TestResultHandlers)
-                : this.testResultHandlers
-        ];
+        ITestResultHandler[] finalTestResultHandlers = [.. config.TestResultHandlers];
 
         var testEntitiesGroupedByType = testRunEntities
             .GroupBy(x => x.TestType)
@@ -89,10 +81,6 @@ public class TestRunnerEngine(
     /// <inheritdoc />
     public void StopTestRun()
         => this.runTestCts?.Cancel();
-
-    /// <inheritdoc />
-    public void RegisterTestResultHandler(ITestResultHandler handler)
-        => this.testResultHandlers = this.testResultHandlers.Append(handler);
 
     private async Task<TestResult> RunTestsAsync(
         IEnumerable<TestEntity> testRunEntities,

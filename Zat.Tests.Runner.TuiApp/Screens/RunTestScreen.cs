@@ -17,6 +17,7 @@ using Zat.Tests.Runner.TuiApp.Stores;
 internal class RunTestScreen(
     TestRunConfigStore testRunConfigStore,
     ITestRunnerEngine testRunnerEngine,
+    IEnumerable<ITestResultHandler> testResultHandlers,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
@@ -82,7 +83,7 @@ internal class RunTestScreen(
                         IsDebug: testRunConfigStore.IsDebugModeEnabled ?? false,
                         TestedRuntimeVersion: testRunConfigStore.RuntimeVersion,
                         TestedHwAssemblyTypes: testRunConfigStore.HwAssemblyTypes,
-                        TestResultHandlers: [this]));
+                        TestResultHandlers: [.. testResultHandlers, this]));
 
                 var promptResult = await ShowLiveDataAsync(
                     table,
