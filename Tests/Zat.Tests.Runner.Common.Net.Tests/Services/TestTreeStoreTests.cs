@@ -27,6 +27,7 @@ public class TestTreeStoreTests
     private const string TestAssemblyDllPath = TestLibsPath + @"\Zat.Z2xxTests.dll";
 
     private readonly Mock<INUnitTestRunnerProxy> proxyMock = new();
+    private readonly Mock<INUnitTestRunnerProxyConnection> connectionMock = new();
     private readonly FakeDirectoryWatcher directoryWatcher = new();
     private readonly FakeTimeProvider timeProvider = new();
     private readonly List<TestTreeChange> reportedChanges = [];
@@ -36,14 +37,13 @@ public class TestTreeStoreTests
     [SetUp]
     public void SetUp()
     {
-        var connectionMock = new Mock<INUnitTestRunnerProxyConnection>();
-        connectionMock.SetupGet(x => x.Proxy).Returns(this.proxyMock.Object);
-        connectionMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
+        this.connectionMock.SetupGet(x => x.Proxy).Returns(this.proxyMock.Object);
+        this.connectionMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
 
         var connectorMock = new Mock<INUnitTestRunnerProxyConnector>();
         connectorMock
             .Setup(x => x.ConnectAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(connectionMock.Object);
+            .ReturnsAsync(this.connectionMock.Object);
 
         var appPathsProviderMock = new Mock<ISharedAppPathsProvider>();
         appPathsProviderMock
@@ -74,6 +74,20 @@ public class TestTreeStoreTests
 
         // Then:
         Assert.That(this.unit.TestSuites, Is.EqualTo(testSuites));
+    }
+
+    [Test]
+    public async Task DiscoverAsync__WhenTestAssemblyIsRead__ThenShouldEndConnectionToProxy()
+    {
+        // Given:
+        // Nothing may keep the proxy server running once discovery is done.
+        this.GivenTestAssemblyHolds("A");
+
+        // When:
+        await this.unit.DiscoverAsync();
+
+        // Then:
+        this.connectionMock.Verify(x => x.DisposeAsync(), Times.Once);
     }
 
     [Test]

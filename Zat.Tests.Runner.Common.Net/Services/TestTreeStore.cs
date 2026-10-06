@@ -72,6 +72,12 @@ public sealed class TestTreeStore(
         }
     }
 
+    private static HashSet<string> ExecutionPaths(IEnumerable<TestSuiteEntity> testSuites)
+        => testSuites
+            .AllTestEntities()
+            .Select(testEntity => testEntity.ExecutionPath)
+            .ToHashSet(StringComparer.Ordinal);
+
     private void StartWatching()
     {
         lock (this.watchingLock)
@@ -159,10 +165,4 @@ public sealed class TestTreeStore(
 
         return executionPathsChanged;
     }
-
-    private static HashSet<string> ExecutionPaths(IEnumerable<TestSuiteEntity> testSuites)
-        => testSuites
-            .AllTestEntities()
-            .Select(testEntity => testEntity.ExecutionPath)
-            .ToHashSet(StringComparer.Ordinal);
 }
