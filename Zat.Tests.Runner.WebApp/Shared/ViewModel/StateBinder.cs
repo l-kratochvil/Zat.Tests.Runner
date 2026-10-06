@@ -6,7 +6,8 @@ using DevKit.Core.Extensions.Types;
 using Fluxor;
 
 public sealed class StateBinder<TViewModel, TState>(
-    IState<TState> state, TViewModel viewmodel)
+    TViewModel viewmodel,
+    IState<TState> state)
     : IDisposable
     where TViewModel : ViewModelBase
 {
