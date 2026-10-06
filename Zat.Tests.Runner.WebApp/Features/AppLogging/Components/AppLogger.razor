@@ -1,31 +1,24 @@
 @* Feature: AppLogging — "the user can see and filter what the application is doing".
    Shown in MainLayout, so the log is reachable from every screen. *@
 
-@using Fluxor
-@using Fluxor.Blazor.Web.Components
+@inherits Zat.Tests.Runner.WebApp.Components.MvvmComponentBase<AppLoggerViewModel>
 
-@using Zat.Tests.Runner.Common.Net.Application.Logging
-@using Zat.Tests.Runner.WebApp.Shared.Model
-@using Zat.Tests.Runner.WebApp.Shared.Stores.AppLogging
-
-@inherits FluxorComponent;
-
-<section class="app-log-panel @(this.isCollapsed ? "is-collapsed" : "is-expanded")">
+<section class="app-log-panel @(this.ViewModel.IsCollapsed ? "is-collapsed" : "is-expanded")">
     <header class="app-log-header">
         <button type="button"
                 class="btn btn-sm btn-outline-secondary toggle-button"
-                title="@(this.isCollapsed ? "Expand the log" : "Collapse the log")"
+                title="@(this.ViewModel.IsCollapsed ? "Expand the log" : "Collapse the log")"
                 @onclick="this.ToggleCollapsedAsync">
-            @(this.isCollapsed ? "▲" : "▼")
+            @(this.ViewModel.IsCollapsed ? "▲" : "▼")
         </button>
 
         <span class="pane-title">Log</span>
 
-        @if (this.isCollapsed)
+        @if (this.ViewModel.IsCollapsed)
         {
             @* Collapsed means "no log content" — only the error count stays as a summary indicator. *@
-            <span class="error-count @(this.ErrorCount > 0 ? "has-errors" : null)">
-                @this.ErrorCount error(s)
+            <span class="error-count @(this.ViewModel.ErrorCount > 0 ? "has-errors" : null)">
+                @this.ViewModel.ErrorCount error(s)
             </span>
         }
         else
@@ -37,21 +30,21 @@
                         <label class="form-check-label filter-option">
                             <input type="checkbox"
                                    class="form-check-input"
-                                   checked="@this.filter.IsSelected(severity)"
-                                   @onchange="args => this.filter.SetSelected(severity, (bool)args.Value!)" />
+                                   checked="@this.ViewModel.IsSelected(severity)"
+                                   @onchange="args => this.ViewModel.SetSelected(severity, (bool)args.Value!)" />
                             @severity
                         </label>
                     }
                 </span>
 
                 <span class="filter-group">
-                    @foreach (var source in this.AvailableSources)
+                    @foreach (var source in this.ViewModel.AvailableSources)
                     {
                         <label class="form-check-label filter-option">
                             <input type="checkbox"
                                    class="form-check-input"
-                                   checked="@this.filter.IsSelected(source)"
-                                   @onchange="args => this.filter.SetSelected(source, (bool)args.Value!)" />
+                                   checked="@this.ViewModel.IsSelected(source)"
+                                   @onchange="args => this.ViewModel.SetSelected(source, (bool)args.Value!)" />
                             @source
                         </label>
                     }
@@ -66,10 +59,10 @@
         }
     </header>
 
-    @if (!this.isCollapsed)
+    @if (!this.ViewModel.IsCollapsed)
     {
         <div class="app-log-entries" @ref="this.entriesElement">
-            @foreach (var entry in this.filter.Apply(this.Entries))
+            @foreach (var entry in this.ViewModel.Entries)
             {
                 <div class="log-entry severity-@entry.LogLevel.ToString().ToLowerInvariant()">
                     <span class="entry-time">@entry.Timestamp.ToString("HH:mm:ss.fff")</span>
@@ -88,14 +81,13 @@
 </section>
 
 @code {
-    private const string ModulePath = "./Features/AppLogging/Components/AppLoggerView.razor.js";
-    private const byte MaxRefreshesPerSecond = 6;
+    private const string ModulePath = "./Features/AppLogging/Components/AppLogger.razor.js";
 
-    private readonly AppLoggerFilter filter = AppLoggerFilter.CreateDefault();
     private ElementReference entriesElement;
     private JsModuleInterop? jsModuleInterop;
 
-    private bool isCollapsed;
+    [Inject]
+    protected override AppLoggerViewModel ViewModel { get; set; } = null!;
 
     /// <summary>
     /// Raised after the panel collapse state changes.
@@ -103,11 +95,12 @@
     [Parameter]
     public EventCallback<bool> CollapsedChanged { get; set; }
 
-    [Inject]
-    private IDispatcher Dispatcher { get; set; } = null!;
-
-    [Inject]
-    private IState<AppLoggingState> AppLoggingState { get; set; } = null!;
+    /// <inheritdoc/>
+    /// <remarks>
+    /// The log can grow faster than anybody reads it, and every entry would otherwise be a render.
+    /// </remarks>
+    protected override byte MaxRendersPerSecond
+        => 6;
 
     /// <summary>
     /// Gets or sets the factory the JS module interop is created through.
@@ -115,22 +108,11 @@
     [Inject]
     private IJsModuleInteropFactory JsModuleInteropFactory { get; set; } = null!;
 
-    private IReadOnlyList<LogEntry> Entries 
-        => this.AppLoggingState.Value.Entries;
-
-    private int ErrorCount 
-        => this.Entries.Count(entry => entry.LogLevel == LogLevel.Error);
-
-    private JsModuleInterop JsModuleInterop 
+    private JsModuleInterop JsModuleInterop
         => this.jsModuleInterop ??= this.JsModuleInteropFactory.Create(ModulePath);
 
-    private IEnumerable<string> AvailableSources 
-        => LogSources.All
-            .Concat(this.Entries.Select(entry => entry.Source))
-            .Distinct(StringComparer.OrdinalIgnoreCase);
-
     /// <inheritdoc/>
-    protected override async ValueTask DisposeAsyncCore(bool disposing)
+    public override async ValueTask DisposeAsync()
     {
         // The module is only imported when the user jumps to the newest entry, so a panel nobody
         // scrolled has nothing to release.
@@ -139,20 +121,14 @@
             await this.jsModuleInterop.DisposeAsync();
         }
 
-        await base.DisposeAsyncCore(disposing);
+        await base.DisposeAsync();
     }
 
-    /// <inheritdoc/>
-    protected override void OnInitialized()
+    private Task ToggleCollapsedAsync()
     {
-        base.OnInitialized();
-        this.MaximumStateChangedNotificationsPerSecond = MaxRefreshesPerSecond;
-    }
+        this.ViewModel.ToggleCollapsed();
 
-    private async Task ToggleCollapsedAsync()
-    {
-        this.isCollapsed = !this.isCollapsed;
-        await this.CollapsedChanged.InvokeAsync(this.isCollapsed);
+        return this.CollapsedChanged.InvokeAsync(this.ViewModel.IsCollapsed);
     }
 
     private Task ScrollToNewestAsync()

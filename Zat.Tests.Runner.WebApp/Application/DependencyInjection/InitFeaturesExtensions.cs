@@ -2,6 +2,7 @@ namespace Zat.Tests.Runner.WebApp.Application.DependencyInjection;
 
 using Microsoft.Extensions.DependencyInjection;
 using Zat.Tests.Runner.Common.Net.Extensions;
+using Zat.Tests.Runner.WebApp.Features.AppLogging.Components;
 using Zat.Tests.Runner.WebApp.Features.AppLogging.Services;
 using Zat.Tests.Runner.WebApp.Features.AppSettings.Services;
 using Zat.Tests.Runner.WebApp.Features.TestConfiguration.Components;
@@ -49,6 +50,7 @@ public static class InitFeaturesExtensions
 
         private IServiceCollection InitAppLogging()
             => services
-                .AddSingletonLoggerProvider<AppLoggerProvider>();
+                .AddSingletonLoggerProvider<AppLoggerProvider>()
+                .AddScoped<AppLoggerViewModel>();
     }
 }
