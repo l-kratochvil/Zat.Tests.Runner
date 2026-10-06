@@ -1,6 +1,8 @@
 namespace Zat.Tests.Runner.WebApp.Features.TestConfiguration.Components;
 
+using System.ComponentModel;
 using System.Text.RegularExpressions;
+
 using DevKit.Core.Extensions.Types;
 
 using FluentValidation;
@@ -20,6 +22,21 @@ using Zat.Z2xxTests.Common.Model;
 /// </summary>
 public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposable
 {
+    // Values asked for only while another one is set, so their validity follows that one.
+    private static readonly IReadOnlyDictionary<string, string[]> ConditionalProperties =
+        new Dictionary<string, string[]>
+        {
+            [nameof(IsTestLinkReportEnabled)] =
+            [
+                nameof(IdeVersion),
+                nameof(IdeReleaseDate),
+                nameof(RuntimeReleaseDate),
+                nameof(BetaVersion),
+            ],
+            [nameof(IsBetaVersion)] = [nameof(BetaVersion)],
+            [nameof(IsRuntimeTest)] = [nameof(TestedHwAssembly)],
+        };
+
     private readonly IAppSettingsStore appSettingsStore;
     private readonly ILogger logger;
     private readonly IDispatcher dispatcher;
@@ -29,6 +46,11 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
     private readonly StateBinding<Version?> ideVersion;
     private readonly StateBinding<HwAssemblyType?> testedHwAssembly;
     private readonly StateBinding<bool> isTestLinkReportEnabled;
+    private readonly StateBinding<string?> ideReleaseDate;
+    private readonly StateBinding<string?> runtimeReleaseDate;
+    private readonly StateBinding<bool> isBetaVersion;
+    private readonly StateBinding<string?> betaVersion;
+    private readonly StateBinding<bool> isDebugModeEnabled;
 
     public TestConfigurationViewModel(
         IState<TestConfigurationState> state,
@@ -66,6 +88,36 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
                 property: vm => vm.IsTestLinkReportEnabled,
                 writeValue: value => this.dispatcher.Dispatch(
                     new DataChangedAction(NewIsTestLinkReportEnabled: new ValueChange<bool>(value)))),
+            this.ideReleaseDate = this.BindToState(
+                state,
+                selectValue: s => s.IdeReleaseDate,
+                property: vm => vm.IdeReleaseDate,
+                writeValue: value => this.dispatcher.Dispatch(
+                    new DataChangedAction(NewIdeReleaseDate: new ValueChange<string?>(value)))),
+            this.runtimeReleaseDate = this.BindToState(
+                state,
+                selectValue: s => s.RuntimeReleaseDate,
+                property: vm => vm.RuntimeReleaseDate,
+                writeValue: value => this.dispatcher.Dispatch(
+                    new DataChangedAction(NewRuntimeReleaseDate: new ValueChange<string?>(value)))),
+            this.isBetaVersion = this.BindToState(
+                state,
+                selectValue: s => s.IsBetaVersion,
+                property: vm => vm.IsBetaVersion,
+                writeValue: value => this.dispatcher.Dispatch(
+                    new DataChangedAction(NewIsBetaVersion: new ValueChange<bool>(value)))),
+            this.betaVersion = this.BindToState(
+                state,
+                selectValue: s => s.BetaVersion,
+                property: vm => vm.BetaVersion,
+                writeValue: value => this.dispatcher.Dispatch(
+                    new DataChangedAction(NewBetaVersion: new ValueChange<string?>(value)))),
+            this.isDebugModeEnabled = this.BindToState(
+                state,
+                selectValue: s => s.IsDebugModeEnabled,
+                property: vm => vm.IsDebugModeEnabled,
+                writeValue: value => this.dispatcher.Dispatch(
+                    new DataChangedAction(NewIsDebugModeEnabled: new ValueChange<bool>(value)))),
         ];
 
         this.HasErrorsChanged +=
@@ -86,13 +138,33 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
                 .NotNull()
                 .WithMessage("IDE version required.")
                 .Must(x => x is not null && IdeVersionFormat().IsMatch(x.ToString()))
-                .WithMessage("Write the IDE version as x.y or x.y.z, for example 6.1 or 6.1.4.");
+                .WithMessage("Write the IDE version as x.y or x.y.z, for example 6.1 or 6.1.4.")
+                .When(x => x.IsTestLinkReportEnabled);
 
             validator
                 .RuleFor(x => x.TestedHwAssembly)
                 .NotNull()
                 .NotEqual(HwAssemblyType.Unknown)
-                .WithMessage("Tested hardware assembly is required.");
+                .WithMessage("Tested hardware assembly is required.")
+                .When(x => x.IsRuntimeTest);
+
+            validator
+                .RuleFor(x => x.IdeReleaseDate)
+                .Must(BeDateOrNothing)
+                .When(x => x.IsTestLinkReportEnabled)
+                .WithMessage("Write the IDE release date as a date, for example 2026-10-01.");
+
+            validator
+                .RuleFor(x => x.RuntimeReleaseDate)
+                .Must(BeDateOrNothing)
+                .When(x => x.IsTestLinkReportEnabled)
+                .WithMessage("Write the runtime release date as a date, for example 2026-10-01.");
+
+            validator
+                .RuleFor(x => x.BetaVersion)
+                .Must(x => string.IsNullOrEmpty(x) || int.TryParse(x, out _))
+                .When(x => x.IsTestLinkReportEnabled && x.IsBetaVersion)
+                .WithMessage("Write the beta number as a whole number, for example 3.");
         });
     }
 
@@ -126,12 +198,66 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
         set => this.isTestLinkReportEnabled.Value = value;
     }
 
+    public string? IdeReleaseDate
+    {
+        get => this.ideReleaseDate.Value;
+        set => this.ideReleaseDate.Value = value;
+    }
+
+    public string? RuntimeReleaseDate
+    {
+        get => this.runtimeReleaseDate.Value;
+        set => this.runtimeReleaseDate.Value = value;
+    }
+
+    public bool IsBetaVersion
+    {
+        get => this.isBetaVersion.Value;
+        set => this.isBetaVersion.Value = value;
+    }
+
+    public string? BetaVersion
+    {
+        get => this.betaVersion.Value;
+        set => this.betaVersion.Value = value;
+    }
+
+    public bool IsDebugModeEnabled
+    {
+        get => this.isDebugModeEnabled.Value;
+        set => this.isDebugModeEnabled.Value = value;
+    }
+
     /// <inheritdoc/>
     public void Dispose()
         => this.disposables.DisposeAll();
 
+    /// <inheritdoc/>
+    protected override void OnPropertyChanged(PropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+
+        if (e.PropertyName is null
+            || !ConditionalProperties.TryGetValue(e.PropertyName, out var conditionalProperties))
+        {
+            return;
+        }
+
+        // Only what has been validated already, so a value nobody has been to stays unmarked.
+        foreach (var conditionalProperty in conditionalProperties)
+        {
+            if (this.GetValidity(conditionalProperty) is not null)
+            {
+                this.ValidateProperty(conditionalProperty);
+            }
+        }
+    }
+
     [GeneratedRegex(@"^\d+")]
     private static partial Regex LeadingNumber();
+
+    private static bool BeDateOrNothing(string? text)
+        => string.IsNullOrEmpty(text) || DateTime.TryParse(text, out _);
 
     // Semantic versioning with the patch left out, which is how the IDE versions are written down.
     [GeneratedRegex(@"^\d+\.\d+(\.\d+)?$")]

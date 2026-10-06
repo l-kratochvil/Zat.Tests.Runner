@@ -38,6 +38,11 @@ public class TestConfiguratorTests : Bunit.TestContext
     private const string TestStationSelector = ".input-hw-assembly-type";
     private const string TestLinkSelector = ".input-report-to-testlink";
     private const string IdeVersionSelector = ".input-ide-version";
+    private const string IdeReleaseDateSelector = ".input-ide-release-date";
+    private const string RuntimeReleaseDateSelector = ".input-runtime-release-date";
+    private const string BetaSelector = ".input-is-beta-version";
+    private const string BetaNumberSelector = ".input-beta-version";
+    private const string DebugModeSelector = ".input-debug-mode";
 
     private TestDiscoveryState testSelection = new([]);
 
@@ -118,6 +123,56 @@ public class TestConfiguratorTests : Bunit.TestContext
 
         // Then:
         Assert.That(component.FindAll(IdeVersionSelector), Is.Empty);
+    }
+
+    [Test]
+    public void Render__WhenResultDoesNotGoToTestLink__ThenShouldAskOnlyForDebugMode()
+    {
+        // When:
+        var component = this.RenderConfigurator();
+
+        // Then:
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(component.FindAll(IdeReleaseDateSelector), Is.Empty);
+            Assert.That(component.FindAll(RuntimeReleaseDateSelector), Is.Empty);
+            Assert.That(component.FindAll(BetaSelector), Is.Empty);
+            Assert.That(component.FindAll(BetaNumberSelector), Is.Empty);
+            Assert.That(component.FindAll(DebugModeSelector), Has.Exactly(1).Items);
+        }
+    }
+
+    [Test]
+    public void OnTestLinkEnabled__WhenResultIsToGoToTestLink__ThenShouldAskForWhatIsNotedThere()
+    {
+        // Given:
+        var component = this.RenderConfigurator();
+
+        // When:
+        component.Find(TestLinkSelector).Change(true);
+
+        // Then:
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(component.FindAll(IdeReleaseDateSelector), Has.Exactly(1).Items);
+            Assert.That(component.FindAll(RuntimeReleaseDateSelector), Has.Exactly(1).Items);
+            Assert.That(component.FindAll(BetaSelector), Has.Exactly(1).Items);
+            Assert.That(component.FindAll(BetaNumberSelector), Is.Empty);
+        }
+    }
+
+    [Test]
+    public void OnBetaEnabled__WhenTestedBuildIsBeta__ThenShouldAskForBetaNumber()
+    {
+        // Given:
+        var component = this.RenderConfigurator();
+        component.Find(TestLinkSelector).Change(true);
+
+        // When:
+        component.Find(BetaSelector).Change(true);
+
+        // Then:
+        Assert.That(component.FindAll(BetaNumberSelector), Has.Exactly(1).Items);
     }
 
     [Test]
