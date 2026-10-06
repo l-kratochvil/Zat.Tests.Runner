@@ -1,34 +1,38 @@
 namespace Zat.Tests.Runner.WebApp.Shared.Services;
 
+using Fluxor;
 using Zat.Tests.Runner.Common.Net.Services;
+using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
 
-internal class TestLinkResultHandlerContext : TestLinkResultHandler.IContext
+internal class TestLinkResultHandlerContext(
+    IState<TestConfigurationState> testConfigurationState)
+    : TestLinkResultHandler.IContext
 {
     /// <inheritdoc/>
     public bool IsTestLinkReportingEnabled
-        => throw new NotImplementedException();
+        => testConfigurationState.Value.IsTestLinkReportEnabled;
 
     /// <inheritdoc/>
     public bool IsDebuggingEnabled
-        => throw new NotImplementedException();
+        => testConfigurationState.Value.IsDebugModeEnabled;
 
     /// <inheritdoc/>
     public string? IdeVersion
-        => throw new NotImplementedException();
+        => testConfigurationState.Value.IdeVersion?.ToString();
 
     /// <inheritdoc/>
     public string? IdeReleaseDate
-        => throw new NotImplementedException();
+        => testConfigurationState.Value.IdeReleaseDate;
 
     /// <inheritdoc/>
     public string? RuntimeVersion
-        => throw new NotImplementedException();
+        => testConfigurationState.Value.RuntimeVersion;
 
     /// <inheritdoc/>
     public string? RuntimeReleaseDate
-        => throw new NotImplementedException();
+        => testConfigurationState.Value.RuntimeReleaseDate;
 
     /// <inheritdoc/>
     public string? BetaVersion
-        => throw new NotImplementedException();
+        => testConfigurationState.Value.BetaVersion;
 }

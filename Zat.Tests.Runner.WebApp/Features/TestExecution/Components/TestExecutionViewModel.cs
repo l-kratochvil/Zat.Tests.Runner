@@ -128,19 +128,13 @@ public sealed partial class TestExecutionViewModel : ViewModelBase, IDisposable
 
     private async Task StartTestRunAsync()
     {
-        throw new NotImplementedException("TODO (see comments)");
 
-        // TODO:
-        // Start (using var) RPC server (see NUnitTestRunnerProxy.Program)
-        // Use registred mockable service
-
-        // CancellationToken.None: the test run must finish even when this client goes away.
         await this.testRunnerEngine.RunTestAsync(
             testRunEntities: this.SelectedTestCases(),
             config: new ITestRunnerEngine.Config(
-                IsDebug: false, // TODO
+                IsDebug: this.configurationState.Value.IsDebugModeEnabled,
                 TestedRuntimeVersion: this.configurationState.Value.RuntimeVersion,
-                TestedHwAssemblyTypes: [], // TODO
+                TestedHwAssemblyTypes: [this.configurationState.Value.TestedHwAssembly ?? Z2xxTests.Common.Model.HwAssemblyType.Unknown], 
                 TestResultHandlers: this.testResultHandlers,
                 TestAssemblyDllPath: this.appPathsProvider.Files.MainAssemblyDll),
             cancellationToken: CancellationToken.None);

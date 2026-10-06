@@ -17,14 +17,9 @@
   - Odstranit legacy runner (ve vlastním commitu na main)
   - Po dokončení merge develop -> main (sumární commit)
 - WebApp:
-  - Vytvořit viewmodely pro features (viz TestConfigurationViewModel):
-    - TestExecution: OK
-    - TestDiscovery: ...
-    - AppLogging: ...
-    - TestResultReporting: ...
   - Rework BindingSelect
   - Vylepšit pojmenování pro "fluxor stores" a "stores StoreBase": Obojí fungujou jinak, ale zároveň obojí je store
-  - TestDiscovery: Nahradit store za Fluxor
+  - TestConfiguration: Musí umožnovat vybrat vícero (comobobox) HwAssemblyType (TestedHwAssemblyType umožňuje pouze jeden. Musí se hlídat navolené možnosti stejně jako u TuiApp (nesmí být navoleno zároven BB1M a BB37M)
   - Při načtení se nevalidule viewmodel
   - Vyřešit Deploy
   - Kompletní code-review + refactor celé projektu WebApp (včetně testů) a docs

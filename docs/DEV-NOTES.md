@@ -39,10 +39,6 @@
   1. UI (button disabled)
   2. Před skutečným spuštěním
 
-#### TestDiscovery
-
-- Nahradit store za Fluxor
-
 ### Vzdálený přístup k aplikaci
 
 - Test. PC bude muset mít statickou IP a vlastní doménu
