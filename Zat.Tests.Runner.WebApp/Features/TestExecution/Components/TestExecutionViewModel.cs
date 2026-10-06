@@ -137,7 +137,7 @@ public sealed partial class TestExecutionViewModel : ViewModelBase, IDisposable
                 TestedRuntimeVersion: this.configurationState.Value.RuntimeVersion,
                 TestedHwAssemblyTypes: [], // TODO
                 TestResultHandlers: this.testResultHandlers,
-                TestAssemblyDllPath: this.appPathsProvider.Files.Test),
+                TestAssemblyDllPath: this.appPathsProvider.Files.MainAssemblyDll),
             cancellationToken: CancellationToken.None);
 
         // TODO: Report result:
