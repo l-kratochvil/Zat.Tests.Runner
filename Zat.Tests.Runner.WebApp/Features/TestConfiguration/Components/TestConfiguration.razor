@@ -45,7 +45,43 @@
                         Binding="@(vm => vm.IdeVersion)"
                         Placeholder="X.Y.Z" />               
                 </PropertyGridRow>
+
+                <PropertyGridRow Label="IDE release date">
+                    <BindingInput
+                        Class="input-ide-release-date"
+                        Binding="@(vm => vm.IdeReleaseDate)"
+                        Placeholder="DD.MM.YYYY" />
+                </PropertyGridRow>
+
+                <PropertyGridRow Label="Runtime release date">
+                    <BindingInput
+                        Class="input-runtime-release-date"
+                        Binding="@(vm => vm.RuntimeReleaseDate)"
+                        Placeholder="DD.MM.YYYY" />
+                </PropertyGridRow>
+
+                <PropertyGridRow Label="Beta version">
+                    <BindingCheckbox
+                        Class="input-is-beta-version"
+                        Binding="@(vm => vm.IsBetaVersion)" />
+                </PropertyGridRow>
+
+                @if (this.ViewModel.IsBetaVersion)
+                {
+                    <PropertyGridRow Label="Beta number">
+                        <BindingInput
+                            Class="input-beta-version"
+                            Binding="@(vm => vm.BetaVersion)"
+                            Placeholder="N" />
+                    </PropertyGridRow>
+                }
             }
+
+            <PropertyGridRow Label="Debug mode">
+                <BindingCheckbox
+                    Class="input-debug-mode"
+                    Binding="@(vm => vm.IsDebugModeEnabled)" />
+            </PropertyGridRow>
         </PropertyGrid>
     </DataContext>
 </section>

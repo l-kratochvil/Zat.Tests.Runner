@@ -41,13 +41,16 @@ public class TestConfiguratorViewModelTests
     public void Load__WhenConfigurationIsOpened__ThenShouldShowWhatItHolds()
     {
         // Given:
-        var state = new TestConfigurationState() with
-        {
-            IsTestLinkReportEnabled = true,
-            IdeVersion = new Version(6, 1),
-            RuntimeVersion = "6",
-            TestedHwAssembly = HwAssemblyType.HW01,
-        };
+        var state = new TestConfigurationState(
+            IsTestLinkReportEnabled: true,
+            IsBetaVersion: true,
+            IsDebugModeEnabled: true,
+            IdeVersion: new Version(6, 1),
+            TestedHwAssembly: HwAssemblyType.HW01,
+            RuntimeVersion: "6",
+            RuntimeReleaseDate: "30.09.2026",
+            IdeReleaseDate: "01.10.2026",
+            BetaVersion: "3");
 
         // When:
         this.store.ChangeTo(state);
@@ -59,6 +62,11 @@ public class TestConfiguratorViewModelTests
             Assert.That(this.unit.TestedHwAssembly, Is.EqualTo(HwAssemblyType.HW01));
             Assert.That(this.unit.IsTestLinkReportEnabled, Is.True);
             Assert.That(this.unit.IdeVersion, Is.EqualTo(new Version(6, 1)));
+            Assert.That(this.unit.IdeReleaseDate, Is.EqualTo("01.10.2026"));
+            Assert.That(this.unit.RuntimeReleaseDate, Is.EqualTo("30.09.2026"));
+            Assert.That(this.unit.IsBetaVersion, Is.True);
+            Assert.That(this.unit.BetaVersion, Is.EqualTo("3"));
+            Assert.That(this.unit.IsDebugModeEnabled, Is.True);
         }
     }
 
@@ -204,6 +212,101 @@ public class TestConfiguratorViewModelTests
     public void IdeVersion__WhileTextIsBeingTyped__ThenShouldHoldNothingToKeepYet()
     {
         // TODO
+    }
+
+    [TestCase("01.10.2026", false)]
+    [TestCase("1.10.2026", false)]
+    [TestCase("1.1.2026", false)]
+    [TestCase("", false)]
+    [TestCase("yesterday", true)]
+    [TestCase("2026-10-01", true)]
+    [TestCase("1.10.26", true)]
+    [TestCase("31.13.2026", true)]
+    public void ValidityFor__WhenTestLinkIsOn_AndIdeReleaseDateIsTyped__ThenShouldMindTextThatIsNotDate(
+        string givenText, bool expectedHasErrors)
+    {
+        // Given:
+        this.unit.IsTestLinkReportEnabled = true;
+
+        // When:
+        this.unit.IdeReleaseDate = givenText;
+
+        // Then:
+        Assert.That(
+            this.unit.GetValidity(nameof(TestConfigurationViewModel.IdeReleaseDate))?.HasErrors,
+            Is.EqualTo(expectedHasErrors));
+    }
+
+    [TestCase("30.09.2026", false)]
+    [TestCase("2026-09-30", true)]
+    public void ValidityFor__WhenTestLinkIsOn_AndRuntimeReleaseDateIsTyped__ThenShouldMindTextThatIsNotDate(
+        string givenText, bool expectedHasErrors)
+    {
+        // Given:
+        this.unit.IsTestLinkReportEnabled = true;
+
+        // When:
+        this.unit.RuntimeReleaseDate = givenText;
+
+        // Then:
+        Assert.That(
+            this.unit.GetValidity(nameof(TestConfigurationViewModel.RuntimeReleaseDate))?.HasErrors,
+            Is.EqualTo(expectedHasErrors));
+    }
+
+    [Test]
+    public void ValidityFor__WhenTestLinkIsTurnedOff__ThenShouldNoLongerMindWhatIsNotAskedFor()
+    {
+        // Given:
+        this.unit.IsTestLinkReportEnabled = true;
+        this.unit.IdeVersion = new Version(1, 2, 3, 4);
+        this.unit.IdeReleaseDate = "yesterday";
+
+        // When:
+        this.unit.IsTestLinkReportEnabled = false;
+
+        // Then:
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(this.unit.GetValidity(nameof(TestConfigurationViewModel.IdeVersion))?.HasErrors, Is.False);
+            Assert.That(this.unit.GetValidity(nameof(TestConfigurationViewModel.IdeReleaseDate))?.HasErrors, Is.False);
+            Assert.That(this.unit.HasErrors, Is.False);
+        }
+    }
+
+    [TestCase(true, "beta", true)]
+    [TestCase(true, "3", false)]
+    [TestCase(true, "", false)]
+    [TestCase(false, "beta", false)]
+    public void ValidityFor__WhenBetaNumberIsTyped__ThenShouldMindTextThatIsNotWholeNumberOfBeta(
+        bool givenIsBetaVersion, string givenText, bool expectedHasErrors)
+    {
+        // Given:
+        this.unit.IsTestLinkReportEnabled = true;
+        this.unit.IsBetaVersion = givenIsBetaVersion;
+
+        // When:
+        this.unit.BetaVersion = givenText;
+
+        // Then:
+        Assert.That(
+            this.unit.GetValidity(nameof(TestConfigurationViewModel.BetaVersion))?.HasErrors,
+            Is.EqualTo(expectedHasErrors));
+    }
+
+    [Test]
+    public void ValidityFor__WhenBetaIsTurnedOff__ThenShouldNoLongerMindBetaNumber()
+    {
+        // Given:
+        this.unit.IsTestLinkReportEnabled = true;
+        this.unit.IsBetaVersion = true;
+        this.unit.BetaVersion = "beta";
+
+        // When:
+        this.unit.IsBetaVersion = false;
+
+        // Then:
+        Assert.That(this.unit.HasErrors, Is.False);
     }
 
     [Test]

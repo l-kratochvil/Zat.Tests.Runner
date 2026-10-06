@@ -34,6 +34,21 @@ public static class Reducers
             .UpdateIfChanged(
                 action.NewTestedHwAssembly,
                 (state, value) => state with { TestedHwAssembly = value })
+            .UpdateIfChanged(
+                action.NewIdeReleaseDate,
+                (state, value) => state with { IdeReleaseDate = value })
+            .UpdateIfChanged(
+                action.NewRuntimeReleaseDate,
+                (state, value) => state with { RuntimeReleaseDate = value })
+            .UpdateIfChanged(
+                action.NewIsBetaVersion,
+                (state, value) => state with { IsBetaVersion = value })
+            .UpdateIfChanged(
+                action.NewBetaVersion,
+                (state, value) => state with { BetaVersion = value })
+            .UpdateIfChanged(
+                action.NewIsDebugModeEnabled,
+                (state, value) => state with { IsDebugModeEnabled = value })
             .Complete();
 
     [ReducerMethod]
