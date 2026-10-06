@@ -151,6 +151,50 @@ public class ViewModelBaseTests
         Assert.That(announced, Is.EqualTo(new[] { true }));
     }
 
+    [Test]
+    public void ChainValidation__WhenConditionIsTurnedOff__ThenShouldStopMindingChainedValue()
+    {
+        // Given:
+        ChainedModel unit = new() { IsAsked = true, Name = GivenNonsense };
+
+        // When:
+        unit.IsAsked = false;
+
+        // Then:
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(unit.GetValidity(nameof(ChainedModel.Name))?.HasErrors, Is.False);
+            Assert.That(unit.HasErrors, Is.False);
+        }
+    }
+
+    [Test]
+    public void ChainValidation__WhenConditionIsTurnedOn__ThenShouldMindChainedValueAgain()
+    {
+        // Given:
+        ChainedModel unit = new() { Name = GivenNonsense };
+
+        // When:
+        unit.IsAsked = true;
+
+        // Then:
+        Assert.That(unit.HasErrors, Is.True);
+    }
+
+    [Test]
+    public void ChainValidation__WhenChainedValueWasNeverLookedAt__ThenShouldStillSayNothingAboutIt()
+    {
+        // Given:
+        // A value nobody has been to yet is not a mistake anyone made, whatever it is chained to.
+        ChainedModel unit = new();
+
+        // When:
+        unit.IsAsked = true;
+
+        // Then:
+        Assert.That(unit.GetValidity(nameof(ChainedModel.Name)), Is.Null);
+    }
+
     /// <summary>
     /// A view model holding one value of its own.
     /// </summary>
@@ -165,6 +209,38 @@ public class ViewModelBaseTests
                     .RuleFor(model => model.Name)
                     .Matches("^[a-z]+$")
                     .WithMessage("Letters only."));
+
+        public string Name
+        {
+            get => this.name;
+            set => this.SetProperty(ref this.name, value);
+        }
+    }
+
+    /// <summary>
+    /// A view model asking for a value only while it is told to.
+    /// </summary>
+    private sealed class ChainedModel : ViewModelBase
+    {
+        private bool isAsked;
+        private string name = string.Empty;
+
+        public ChainedModel()
+            => this.InitValidator(
+                this,
+                validator => validator
+                    .RuleFor(static model => model.Name)
+                    .Matches("^[a-z]+$")
+                    .WithMessage("Letters only.")
+                    .When(static model => model.IsAsked),
+                chains => chains
+                    .Chain(rootProperty: static model => model.IsAsked, static model => model.Name));
+
+        public bool IsAsked
+        {
+            get => this.isAsked;
+            set => this.SetProperty(ref this.isAsked, value);
+        }
 
         public string Name
         {

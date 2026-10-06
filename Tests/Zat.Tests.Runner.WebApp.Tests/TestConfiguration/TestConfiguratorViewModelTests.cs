@@ -47,8 +47,8 @@ public class TestConfiguratorViewModelTests
             IdeVersion: new Version(6, 1),
             TestedHwAssembly: HwAssemblyType.HW01,
             RuntimeVersion: "6",
-            RuntimeReleaseDate: "2026-09-30",
-            IdeReleaseDate: "2026-10-01",
+            RuntimeReleaseDate: "30.09.2026",
+            IdeReleaseDate: "01.10.2026",
             BetaVersion: "3");
 
         // When:
@@ -61,8 +61,8 @@ public class TestConfiguratorViewModelTests
             Assert.That(this.unit.TestedHwAssembly, Is.EqualTo(HwAssemblyType.HW01));
             Assert.That(this.unit.IsTestLinkReportEnabled, Is.True);
             Assert.That(this.unit.IdeVersion, Is.EqualTo(new Version(6, 1)));
-            Assert.That(this.unit.IdeReleaseDate, Is.EqualTo("2026-10-01"));
-            Assert.That(this.unit.RuntimeReleaseDate, Is.EqualTo("2026-09-30"));
+            Assert.That(this.unit.IdeReleaseDate, Is.EqualTo("01.10.2026"));
+            Assert.That(this.unit.RuntimeReleaseDate, Is.EqualTo("30.09.2026"));
             Assert.That(this.unit.IsBetaVersion, Is.True);
             Assert.That(this.unit.BetaVersion, Is.EqualTo("3"));
             Assert.That(this.unit.IsDebugModeEnabled, Is.True);
@@ -159,21 +159,44 @@ public class TestConfiguratorViewModelTests
         // TODO
     }
 
-    [TestCase(nameof(TestConfigurationViewModel.IdeReleaseDate), "yesterday", true)]
-    [TestCase(nameof(TestConfigurationViewModel.IdeReleaseDate), "2026-10-01", false)]
-    [TestCase(nameof(TestConfigurationViewModel.RuntimeReleaseDate), "31.13.2026", true)]
-    [TestCase(nameof(TestConfigurationViewModel.RuntimeReleaseDate), "2026-09-30", false)]
-    public void ValidityFor__WhenTestLinkIsOn_AndReleaseDateIsTyped__ThenShouldMindTextThatIsNotDate(
-        string givenProperty, string givenText, bool expectedHasErrors)
+    [TestCase("01.10.2026", false)]
+    [TestCase("1.10.2026", false)]
+    [TestCase("1.1.2026", false)]
+    [TestCase("", false)]
+    [TestCase("yesterday", true)]
+    [TestCase("2026-10-01", true)]
+    [TestCase("1.10.26", true)]
+    [TestCase("31.13.2026", true)]
+    public void ValidityFor__WhenTestLinkIsOn_AndIdeReleaseDateIsTyped__ThenShouldMindTextThatIsNotDate(
+        string givenText, bool expectedHasErrors)
     {
         // Given:
         this.unit.IsTestLinkReportEnabled = true;
 
         // When:
-        this.SetText(givenProperty, givenText);
+        this.unit.IdeReleaseDate = givenText;
 
         // Then:
-        Assert.That(this.unit.GetValidity(givenProperty)?.HasErrors, Is.EqualTo(expectedHasErrors));
+        Assert.That(
+            this.unit.GetValidity(nameof(TestConfigurationViewModel.IdeReleaseDate))?.HasErrors,
+            Is.EqualTo(expectedHasErrors));
+    }
+
+    [TestCase("30.09.2026", false)]
+    [TestCase("2026-09-30", true)]
+    public void ValidityFor__WhenTestLinkIsOn_AndRuntimeReleaseDateIsTyped__ThenShouldMindTextThatIsNotDate(
+        string givenText, bool expectedHasErrors)
+    {
+        // Given:
+        this.unit.IsTestLinkReportEnabled = true;
+
+        // When:
+        this.unit.RuntimeReleaseDate = givenText;
+
+        // Then:
+        Assert.That(
+            this.unit.GetValidity(nameof(TestConfigurationViewModel.RuntimeReleaseDate))?.HasErrors,
+            Is.EqualTo(expectedHasErrors));
     }
 
     [Test]
@@ -256,23 +279,5 @@ public class TestConfiguratorViewModelTests
     public void Load__WhenNothingWasGiven__ThenShouldRefuseRatherThanEditNothing()
     {
         // TODO
-    }
-
-    private void SetText(string property, string? text)
-    {
-        switch (property)
-        {
-            case nameof(TestConfigurationViewModel.IdeReleaseDate):
-                this.unit.IdeReleaseDate = text;
-                break;
-            case nameof(TestConfigurationViewModel.RuntimeReleaseDate):
-                this.unit.RuntimeReleaseDate = text;
-                break;
-            case nameof(TestConfigurationViewModel.BetaVersion):
-                this.unit.BetaVersion = text;
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(property), property, "Not a text field.");
-        }
     }
 }

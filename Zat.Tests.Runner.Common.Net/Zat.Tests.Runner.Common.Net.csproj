@@ -31,6 +31,14 @@
 			<PrivateAssets>all</PrivateAssets>
 		</ProjectReference>
 		<ProjectReference Include="..\Zat.Z2xxTests.Common\Zat.Z2xxTests.Common.csproj" />
+		<!-- Build-only reference: fills the Exchange with the proxy output even when a single
+         project (not the solution) is built, e.g. from VS Code or dotnet run. -->
+		<ProjectReference Include="..\Zat.Tests.Runner.NUnitTestRunnerProxy\Zat.Tests.Runner.NUnitTestRunnerProxy.csproj">
+			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+			<SkipGetTargetFrameworkProperties>true</SkipGetTargetFrameworkProperties>
+			<GlobalPropertiesToRemove>TargetFramework;RuntimeIdentifier;SelfContained</GlobalPropertiesToRemove>
+			<Private>false</Private>
+		</ProjectReference>
 	</ItemGroup>
 
 	<ItemGroup>
