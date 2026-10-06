@@ -15,9 +15,9 @@ using NUnit.Framework;
 
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Net.Application.Logging;
+using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.WebApp.Features.TestConfiguration.Components;
 using Zat.Tests.Runner.WebApp.Shared.Stores.AppSettings;
-using Zat.Tests.Runner.WebApp.Shared.Stores.NUnitTestRunner;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
 using Zat.Tests.Runner.WebApp.Tests.TestDiscovery;
@@ -63,8 +63,8 @@ public class TestConfiguratorTests : Bunit.TestContext
         this.testSelectionState = new Mock<IState<TestDiscoveryState>>();
         this.testSelectionState.SetupGet(state => state.Value).Returns(() => this.testSelection);
 
-        var testRunnerStore = new Mock<INUnitTestRunnerStore>();
-        testRunnerStore.SetupGet(store => store.LoadedTestSuites).Returns(() => this.loadedTestSuites);
+        var testTreeStore = new Mock<ITestTreeStore>();
+        testTreeStore.SetupGet(store => store.TestSuites).Returns(() => this.loadedTestSuites);
 
         this.appSettingsStore = new Mock<IAppSettingsStore>();
         this.appSettingsStore
@@ -73,7 +73,7 @@ public class TestConfiguratorTests : Bunit.TestContext
 
         this.Services.AddSingleton<IState<TestConfigurationState>>(this.store);
         this.Services.AddSingleton(this.testSelectionState.Object);
-        this.Services.AddSingleton(testRunnerStore.Object);
+        this.Services.AddSingleton(testTreeStore.Object);
         this.Services.AddSingleton(this.appSettingsStore.Object);
         this.Services.AddSingleton(this.store.Dispatcher.Object);
         this.Services.AddSingleton(new Mock<IActionSubscriber>().Object);

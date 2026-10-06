@@ -11,7 +11,6 @@ using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Net.Model;
 using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.WebApp.Application.Paths;
-using Zat.Tests.Runner.WebApp.Shared.Stores.NUnitTestRunner;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
 using Zat.Tests.Runner.WebApp.Shared.ViewModel;
@@ -26,7 +25,7 @@ public sealed partial class TestExecutionViewModel : ViewModelBase, IDisposable
     private readonly IEnumerable<ITestResultHandler> testResultHandlers;
     private readonly IState<TestConfigurationState> configurationState;
     private readonly IState<TestDiscoveryState> testSelectionState;
-    private readonly INUnitTestRunnerStore testRunnerStore;
+    private readonly ITestTreeStore testTreeStore;
     private readonly IAppPathsProvider appPathsProvider;
 
     public TestExecutionViewModel(
@@ -35,13 +34,13 @@ public sealed partial class TestExecutionViewModel : ViewModelBase, IDisposable
         IState<TestConfigurationState> configurationState,
         IAppPathsProvider appPathsProvider,
         IState<TestDiscoveryState> testSelectionState,
-        INUnitTestRunnerStore testRunnerStore)
+        ITestTreeStore testTreeStore)
     {
         this.testRunnerEngine = testRunnerEngine;
         this.testResultHandlers = testResultHandlers;
         this.configurationState = configurationState;
         this.testSelectionState = testSelectionState;
-        this.testRunnerStore = testRunnerStore;
+        this.testTreeStore = testTreeStore;
         this.appPathsProvider = appPathsProvider;
 
         // The test run belongs to the environment rather than to this client, so another client may
@@ -166,7 +165,7 @@ public sealed partial class TestExecutionViewModel : ViewModelBase, IDisposable
         => this.TestsSelected = this.SelectedTestCases().Count > 0;
 
     private IReadOnlyList<TestCaseEntity> SelectedTestCases()
-        => this.testSelectionState.Value.SelectedTestCases(this.testRunnerStore.LoadedTestSuites);
+        => this.testSelectionState.Value.SelectedTestCases(this.testTreeStore.TestSuites);
 
     private void UpdateConfigurationHasErrors()
         => this.ConfigurationHasErrors = this.configurationState.Value.HasErrors;

@@ -5,7 +5,7 @@ using System.Linq;
 using Fluxor;
 
 using Zat.Tests.Runner.Common.Model;
-using Zat.Tests.Runner.WebApp.Shared.Stores.NUnitTestRunner;
+using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
 using Zat.Tests.Runner.WebApp.Shared.ViewModel;
 
@@ -15,30 +15,34 @@ using Zat.Tests.Runner.WebApp.Shared.ViewModel;
 /// </summary>
 /// <remarks>
 /// The tree follows the test selection in the state, which is also how the selection the browser
-/// remembers arrives, and every change the user makes in the tree is put back into the state.
+/// remembers arrives, and every change the user makes in the tree is put back into the state. It
+/// follows the test tree as well, which changes whenever the test assembly does.
 /// </remarks>
 public sealed class TestExplorerViewModel : ViewModelBase, IDisposable
 {
+    private readonly ITestTreeStore testTreeStore;
     private readonly IState<TestDiscoveryState> state;
     private readonly IDispatcher dispatcher;
 
     public TestExplorerViewModel(
-        INUnitTestRunnerStore testRunnerStore,
+        ITestTreeStore testTreeStore,
         IState<TestDiscoveryState> state,
         IDispatcher dispatcher)
     {
+        this.testTreeStore = testTreeStore;
         this.state = state;
         this.dispatcher = dispatcher;
 
-        this.Roots = [..testRunnerStore.LoadedTestSuites.Select(TestTreeNodeData.Create)];
+        this.Roots = CreateRoots(testTreeStore.TestSuites);
 
+        this.testTreeStore.Changed += this.OnTestTreeChanged;
         this.state.StateChanged += this.OnStateChanged;
 
         this.ApplySelection(this.state.Value.SelectedExecutionPaths);
     }
 
     /// <summary>Gets the nodes standing for the discovered test suites.</summary>
-    public IReadOnlyList<TestTreeNodeData> Roots { get; }
+    public IReadOnlyList<TestTreeNodeData> Roots { get; private set; }
 
     /// <summary>Gets a value indicating whether there is any test to show.</summary>
     public bool IsEmpty
@@ -79,7 +83,23 @@ public sealed class TestExplorerViewModel : ViewModelBase, IDisposable
 
     /// <inheritdoc/>
     public void Dispose()
-        => this.state.StateChanged -= this.OnStateChanged;
+    {
+        this.testTreeStore.Changed -= this.OnTestTreeChanged;
+        this.state.StateChanged -= this.OnStateChanged;
+    }
+
+    private static IReadOnlyList<TestTreeNodeData> CreateRoots(IEnumerable<TestSuiteEntity> testSuites)
+        => [..testSuites.Select(TestTreeNodeData.Create)];
+
+    private void OnTestTreeChanged(TestTreeChange change)
+    {
+        this.Roots = CreateRoots(change.TestSuites);
+        this.ApplySelection(this.state.Value.SelectedExecutionPaths);
+
+        this.OnPropertyChanged(nameof(this.Roots));
+        this.OnPropertyChanged(nameof(this.IsEmpty));
+        this.OnPropertyChanged(nameof(this.SelectedTestCases));
+    }
 
     private void OnStateChanged(object? sender, EventArgs e)
     {
