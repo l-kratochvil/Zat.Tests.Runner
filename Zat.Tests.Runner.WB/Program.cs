@@ -1,7 +1,11 @@
 ﻿using System.Diagnostics;
 
+using Microsoft.Extensions.Logging;
+
+using Moq;
+
 using Zat.Tests.Runner.Common.Model;
-using Zat.Tests.Runner.Common.Net.Model;
+using Zat.Tests.Runner.Common.Net.Application.Logging;
 using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Z2xxTests.Common;
 
@@ -39,7 +43,10 @@ if (testCases.Length == 0)
     return 1;
 }
 
-var engine = new TestRunnerEngine(new TestRunnerBridgeConnector(), connector.Proxy);
+var engine = new TestRunnerEngine(
+    new TestRunnerBridgeConnector(),
+    connector.Proxy,
+    new Mock<ILogger<LogSources.TestRun>>().Object);
 
 var results = await engine.RunTestAsync(
     testCases,

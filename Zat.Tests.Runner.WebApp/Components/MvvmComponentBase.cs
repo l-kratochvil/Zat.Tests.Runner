@@ -2,8 +2,6 @@ namespace Zat.Tests.Runner.WebApp.Components;
 
 using System.ComponentModel;
 
-using Fluxor.Blazor.Web.Components;
-
 using Microsoft.AspNetCore.Components;
 
 using Zat.Tests.Runner.WebApp.Shared.ViewModel;
@@ -12,7 +10,7 @@ using Zat.Tests.Runner.WebApp.Shared.ViewModel;
 /// A component that redraws itself whenever the view model it is drawn from reports a change.
 /// </summary>
 /// <typeparam name="TDataContext">The view model the component is drawn from.</typeparam>
-public abstract class MvvmComponentBase<TDataContext> : FluxorComponent
+public abstract class MvvmComponentBase<TDataContext> : ComponentBase, IDisposable
     where TDataContext : class, INotifyPropertyChanged, INotifyDataInfo
 {
     private int renderPending;
@@ -44,6 +42,13 @@ public abstract class MvvmComponentBase<TDataContext> : FluxorComponent
     [CascadingParameter]
     private TDataContext? DataContext { get; set; }
 
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        this.Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
     /// <summary>
     /// Says whether a change of the named property is one this component is drawn from.
     /// </summary>
@@ -65,20 +70,22 @@ public abstract class MvvmComponentBase<TDataContext> : FluxorComponent
         this.ViewModel.DataChanged += this.OnViewModelDataChanged;
     }
 
-    /// <inheritdoc/>
-    protected override async ValueTask DisposeAsyncCore(bool disposing)
+    /// <summary>
+    /// Stops listening to the view model, so that nothing is drawn after the component is gone.
+    /// </summary>
+    /// <param name="disposing">
+    /// <see langword="true"/> when called from <see cref="Dispose()"/>; otherwise, <see langword="false"/>.
+    /// </param>
+    protected virtual void Dispose(bool disposing)
     {
-        // The renderer disposes of a component that is IAsyncDisposable — which FluxorComponent is
-        // — through that alone, so everything this class owns is let go of here. An IDisposable of
-        // its own would never be called.
-        if (disposing)
+        if (!disposing || this.disposed)
         {
-            this.disposed = true;
-            this.ViewModel.PropertyChanged -= this.OnViewModelPropertyChanged;
-            this.ViewModel.DataChanged -= this.OnViewModelDataChanged;
+            return;
         }
 
-        await base.DisposeAsyncCore(disposing);
+        this.disposed = true;
+        this.ViewModel.PropertyChanged -= this.OnViewModelPropertyChanged;
+        this.ViewModel.DataChanged -= this.OnViewModelDataChanged;
     }
 
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)

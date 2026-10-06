@@ -1,153 +1,18 @@
 @* Feature: TestExecution — "the user can execute a test". *@
 
-@using CommunityToolkit.Mvvm.Input
-@using DevKit.Mvvm.ViewModel.Commands;
-@using Fluxor;
 @using Zat.Tests.Runner.Common.Net.Model
-@using Zat.Tests.Runner.Common.Net.Services
-@using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration
-@using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery
 
-
-@inherits Fluxor.Blazor.Web.Components.FluxorComponent
-@implements IDisposable
+@inherits Zat.Tests.Runner.WebApp.Components.MvvmComponentBase<TestExecutionViewModel>
 
 <button type="button"
-        class="@(this.TestRunnerEngine.State is TestRunState.Stopped ? "btn btn-sm btn-success" : "btn btn-sm btn-danger")"
-        disabled="@(!this.CurrentCommand.CanExecute(null))"
-        title="@(string.Join(Environment.NewLine, this.ExecutionBlockingReasons))"
-        @onclick="@(() => this.CurrentCommand.Execute(null))">
-    @(this.CurrentCommand.DisplayText)
+        class="@(this.ViewModel.TestRunState is TestRunState.Stopped ? "btn btn-sm btn-success" : "btn btn-sm btn-danger")"
+        disabled="@(!this.ViewModel.CurrentCommand.CanExecute(null))"
+        title="@(string.Join(Environment.NewLine, this.ViewModel.ExecutionBlockingReasons))"
+        @onclick="@(() => this.ViewModel.CurrentCommand.Execute(null))">
+    @(this.ViewModel.CurrentCommand.DisplayText)
 </button>
 
 @code {
-    // TODO: Move most code to viewmodel (see TestConfigurationViewModel)
-
     [Inject]
-    private ITestRunnerEngine TestRunnerEngine { get; set; } = null!;
-
-    [Inject]
-    private IEnumerable<ITestResultHandler> TestResultHandlers { get; set; } = null!;
-
-    [Inject]
-    private IState<TestConfigurationState> TestConfigurationState { get; set; } = null!;
-
-    [Inject]
-    private ITestDiscoveryStore TestDiscoveryStore { get; set; } = null!;
-
-    // The test run belongs to the environment rather than to this client, so whatever is offered follows the
-    // engine's state, whoever changed it.
-    private ExtendedCommand CurrentCommand
-        => this.TestRunnerEngine.State switch
-        {
-            TestRunState.Running => this.StopTestCommand,
-            TestRunState.Stopping => this.StoppingTestCommand,
-            _ => this.StartTestCommand,
-        };
-
-    private ExtendedCommand StopTestCommand
-        => field ??= new ExtendedCommand(
-                command: new RelayCommand(
-                    execute: this.TestRunnerEngine.StopTestRun,
-                    canExecute: () => this.TestRunnerEngine.State is TestRunState.Running),
-            "Stop");
-
-    private ExtendedCommand StoppingTestCommand
-        => field ??= new ExtendedCommand(
-                command: new RelayCommand(
-                    execute: () => { },
-                    canExecute: () => false),
-            "Stopping…");
-
-    private ExtendedCommand StartTestCommand
-        => field ??= new ExtendedCommand(
-                command: new AsyncRelayCommand(
-                    async () => 
-                    {
-                        throw new NotImplementedException("TODO (see comments)");
-
-                        // TODO: 
-                        // Start (using var) RPC server (see NUnitTestRunnerProxy.Program)
-                        // Use registred mockable service
-
-                        // CancellationToken.None: the test run must finish even when this client goes away.
-                        await this.TestRunnerEngine.RunTestAsync(
-                            testRunEntities: this.TestDiscoveryStore.Current.SelectedTestCases,
-                            config: new ITestRunnerEngine.Config(
-                                IsDebug: false, // TODO
-                                TestedRuntimeVersion: this.TestConfigurationState.Value.RuntimeVersion,
-                                TestedHwAssemblyTypes: [], // TODO
-                                TestResultHandlers: this.TestResultHandlers),
-                            cancellationToken: CancellationToken.None);
-
-                        // TODO: Report result:
-                        // - The report feature should handle testlink reporting and showing it in the UI
-                        // - Maybe it uses fluxor Effect?
-                    },
-                canExecute: () => 
-                    this.TestRunnerEngine.State is TestRunState.Stopped && 
-                    TestsSelected &&
-                    !this.ConfigurationHasErrors),
-            "Start");
-
-    private IEnumerable<string> ExecutionBlockingReasons
-    {
-        get
-        {
-            if (!TestsSelected)
-            {
-                yield return "No tests selected";
-            }
-
-            if (ConfigurationHasErrors)
-            {
-                yield return "Configuration has errors";
-            }
-        }
-    }
-
-    private bool ConfigurationHasErrors 
-        => this.TestConfigurationState.Value.HasErrors;
-
-    private bool TestsSelected 
-        => this.TestDiscoveryStore.Current.SelectedTestCases.Count > 0;
-
-    /// <inheritdoc/>
-    public void Dispose()
-    {
-        this.TestDiscoveryStore.Changed -= this.OnTestDiscoveryStoreChanged;
-        this.TestRunnerEngine.StateChanged -= this.OnTestRunStateChanged;
-    }
-
-    /// <inheritdoc/>
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-
-        // Whether a run may start follows from the selection and from the configuration, so the
-        // button is redrawn whenever either of them moves.
-        this.TestDiscoveryStore.Changed += this.OnTestDiscoveryStoreChanged;
-
-        // Another client may start or stop the test run at any time.
-        this.TestRunnerEngine.StateChanged += this.OnTestRunStateChanged;
-
-        this.SubscribeToAction<StatusChangedAction>(action => 
-        {
-            if (action.NewHasErrors is null)
-            {
-                return;
-            }
-
-            this.OnDependencyChanged();
-        });
-    }
-
-    private void OnTestDiscoveryStoreChanged(TestDiscoveryState state)
-        => this.OnDependencyChanged();
-
-    private void OnTestRunStateChanged(TestRunState state)
-        => this.OnDependencyChanged();
-
-    private void OnDependencyChanged()
-        => this.InvokeAsync(this.StateHasChanged);
+    protected override TestExecutionViewModel ViewModel { get; set; } = null!;
 }

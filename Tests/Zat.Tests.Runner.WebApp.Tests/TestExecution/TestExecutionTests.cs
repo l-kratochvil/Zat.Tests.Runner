@@ -13,18 +13,18 @@ using NUnit.Framework;
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Net.Model;
 using Zat.Tests.Runner.Common.Net.Services;
+using Zat.Tests.Runner.WebApp.Features.TestExecution.Components;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
 
 using TestExecutionComponent = Features.TestExecution.Components.TestExecution;
 
 /// <summary>
-/// What the button offers and what stops it, which is all it does.
+/// That the button shows what its view model offers and is redrawn when that changes.
 /// </summary>
 /// <remarks>
-/// Whether a configuration can be run with is not asked here: the button only reads the answer the
-/// configurator put into the state, and the rules behind it are exercised in
-/// <see cref="TestConfiguration.TestConfigurationValidatorTests"/>.
+/// What is offered and what stops a test run from starting is decided by the view model and
+/// exercised in <see cref="TestExecutionViewModelTests"/>.
 /// </remarks>
 [TestFixture]
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
@@ -37,6 +37,7 @@ public class TestExecutionTests : Bunit.TestContext
     private const string StoppingLabel = "Stopping…";
 
     private readonly Mock<ITestRunnerEngine> testRunnerEngine = new();
+    private readonly Mock<IState<TestConfigurationState>> configurationState = new();
 
     private TestConfigurationState configuration = new();
     private TestDiscoveryState testSelection = new([]);
@@ -45,20 +46,17 @@ public class TestExecutionTests : Bunit.TestContext
     [SetUp]
     public void SetUp()
     {
-        var configurationState = new Mock<IState<TestConfigurationState>>();
-        configurationState.SetupGet(state => state.Value).Returns(() => this.configuration);
+        this.configurationState.SetupGet(state => state.Value).Returns(() => this.configuration);
 
         var testDiscoveryStore = new Mock<ITestDiscoveryStore>();
         testDiscoveryStore.SetupGet(store => store.Current).Returns(() => this.testSelection);
 
         this.testRunnerEngine.SetupGet(engine => engine.State).Returns(() => this.testRunState);
 
-        this.Services.AddSingleton(configurationState.Object);
+        this.Services.AddSingleton(this.configurationState.Object);
         this.Services.AddSingleton(testDiscoveryStore.Object);
         this.Services.AddSingleton(this.testRunnerEngine.Object);
-
-        // The button is a Fluxor component, so it reaches for the subscriber as soon as it is drawn.
-        this.Services.AddSingleton(new Mock<IActionSubscriber>().Object);
+        this.Services.AddScoped<TestExecutionViewModel>();
     }
 
     [TearDown]
@@ -104,6 +102,24 @@ public class TestExecutionTests : Bunit.TestContext
     }
 
     [Test]
+    public void OnConfigurationChanged__WhenConfigurationTurnsRunnable__ThenShouldLetRunStart()
+    {
+        // Given:
+        this.GivenSelectedTestCase(TestType.Application);
+        this.configuration = new TestConfigurationState { HasErrors = true };
+
+        var component =
+            this.RenderComponent<TestExecutionComponent>();
+
+        // When:
+        this.configuration = ConfigurationSaidToBeRunnable();
+        this.configurationState.Raise(state => state.StateChanged += null, EventArgs.Empty);
+
+        // Then:
+        component.WaitForAssertion(() => Assert.That(IsDisabled(component), Is.False));
+    }
+
+    [Test]
     public void Render__WhenTestRunIsStopping__ThenShouldNotLetAnythingBeClicked()
     {
         // Given:
@@ -126,8 +142,6 @@ public class TestExecutionTests : Bunit.TestContext
     public void Render__WhenNoTestIsSelected__ThenShouldNotLetRunStart()
     {
         // Given:
-        // A run of nothing is not a run, and the reason sits on the button because that is what the
-        // tester is looking at rather than the explorer beside it.
         this.configuration = ConfigurationSaidToBeRunnable();
         this.testSelection = new TestDiscoveryState([]);
 
@@ -141,41 +155,6 @@ public class TestExecutionTests : Bunit.TestContext
             Assert.That(IsDisabled(component), Is.True);
             Assert.That(Reason(component), Does.Contain("No tests selected"));
         }
-    }
-
-    [Test]
-    public void Render__WhenConfigurationCannotBeRunWith__ThenShouldNotLetRunStart()
-    {
-        // Given:
-        // What is wrong with it is not said here: the configurator is beside the button and says it
-        // field by field.
-        this.configuration = new TestConfigurationState { HasErrors = true };
-        this.GivenSelectedTestCase(TestType.Application);
-
-        // When:
-        var component =
-            this.RenderComponent<TestExecutionComponent>();
-
-        // Then:
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.That(IsDisabled(component), Is.True);
-            Assert.That(Reason(component), Does.Contain("Configuration has errors"));
-        }
-    }
-
-    [Test]
-    public void Render__WhenSelectionAndConfigurationAreBothThere__ThenShouldLetRunStart()
-    {
-        // Given:
-        this.GivenARunnableConfiguration();
-
-        // When:
-        var component =
-            this.RenderComponent<TestExecutionComponent>();
-
-        // Then:
-        Assert.That(IsDisabled(component), Is.False);
     }
 
     private static TestConfigurationState ConfigurationSaidToBeRunnable()
