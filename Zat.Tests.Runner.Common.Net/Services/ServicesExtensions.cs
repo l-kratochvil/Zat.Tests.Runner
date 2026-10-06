@@ -42,7 +42,10 @@ public static class ServicesExtensions
                     new NUnitTestRunnerProxyConnector(launchDebugger: !Debugger.IsAttached))
                 .AddSingleton<ITestLink, TestLink>()
                 .AddSingleton(_ => ITestLink.Config.Default)
-                .AddSingleton<ITestRunnerEngine, TestRunnerEngine>();
+                .AddSingleton<ITestRunnerEngine, TestRunnerEngine>()
+                .AddSingleton(TimeProvider.System)
+                .AddSingleton<IDirectoryWatcher, FileSystemDirectoryWatcher>()
+                .AddSingleton<ITestTreeStore, TestTreeStore>();
 
         private IServiceCollection InitAppOptions<TOptions>(
             string sectionName)

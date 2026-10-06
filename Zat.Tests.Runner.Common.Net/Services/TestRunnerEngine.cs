@@ -194,10 +194,7 @@ public class TestRunnerEngine(
     private static string[] FindMissingExecutionPaths(SubRun[] subRuns, TestSuiteEntity[] testTree)
     {
         var existingExecutionPaths = testTree
-            .SelectMany(testSuite => testSuite.TestFixtures
-                .SelectMany(testFixture => testFixture.TestCases)
-                .Concat<TestEntity>(testSuite.TestFixtures)
-                .Append(testSuite))
+            .AllTestEntities()
             .Select(testEntity => testEntity.ExecutionPath)
             .ToHashSet(StringComparer.Ordinal);
 
