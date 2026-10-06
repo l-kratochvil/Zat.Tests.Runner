@@ -34,6 +34,11 @@ public class TestRunnerEngine(
         get;
         private set
         {
+            if (field == value)
+            {
+                return;
+            }
+            
             field = value;
 
             logger.Log(

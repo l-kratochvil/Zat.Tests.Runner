@@ -24,12 +24,26 @@ using Zat.Z2xxTests.Common.Model;
 [FeatureState]
 public record TestConfigurationState(
     bool IsTestLinkReportEnabled,
+    bool IsBetaVersion,
+    bool IsDebugModeEnabled,
     Version? IdeVersion,
+    HwAssemblyType? TestedHwAssembly,
     string? RuntimeVersion,
-    HwAssemblyType? TestedHwAssembly)
+    string? RuntimeReleaseDate,
+    string? IdeReleasDate,
+    string? BetaVersion)
 {
     public TestConfigurationState()
-        : this(false, null, null, null)
+        : this(
+            IsTestLinkReportEnabled: false,
+            IsBetaVersion: false,
+            IsDebugModeEnabled: false,
+            IdeVersion: null,
+            TestedHwAssembly: null,
+            RuntimeVersion: null,
+            RuntimeReleaseDate: null,
+            IdeReleasDate: null,
+            BetaVersion: null)
     {
     }
 

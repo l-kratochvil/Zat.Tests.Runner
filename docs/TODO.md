@@ -2,7 +2,8 @@
 
 ## HiPrio
 
-- Po zastavení testy běží dál!
+- TuiApp:
+  - Po zastavení testy běží dál!
 - Dokončit vazbu na TestLink
 - Zautomatizování kroků testera - základní
 - Otestovat bridge mezi runnerem a Z2xxTests
@@ -10,15 +11,18 @@
   - Přesunout do Program Data / Roaming AppData
   - Přejmenovat na Zat.Tests
   - Přejmenovat adresář "Test libs" (test-libs? runner-libs?)
+- Na počátku kontrolovat spojení se stanicemi: Viz legacy runner RunTest (TestEnvironmentUtils.CheckTestStationsConnection)
 - TuiApp:
   - Implementovat výpis při startu testu (viz [test-run-start_output](test-run-start_output.png))
   - Odstranit legacy runner (ve vlastním commitu na main)
+  - Po dokončení merge develop -> main (sumární commit)
 - WebApp:
+  - Konfigurace testu stejná jako u TuiApp
+  - Vytvořit viewmodely pro features (viz TestConfigurationViewModel)
   - Rework BindingSelect
   - Vylepšit pojmenování pro "fluxor stores" a "stores StoreBase": Obojí fungujou jinak, ale zároveň obojí je store
   - TestDiscovery: Nahradit store za Fluxor
-  - Vytvořit viewmodely pro features (viz TestConfigurationViewModel)
-  - Konfigurace testu stejná jako u TuiApp
+  - Při načtení se nevalidule viewmodel
   - Vyřešit Deploy
   - Kompletní code-review + refactor celé projektu WebApp (včetně testů) a docs
   - Lokalizace textů

@@ -125,13 +125,46 @@ public class ViewModelBaseTests
     }
 
     [Test]
-    public void HasErrors__WhenNothingHasBeenLookedAtYet__ThenShouldSayNothingIsWrong()
+    public void InitValidator__WhenHeldValueIsWrong__ThenShouldSayWhatIsWrongWithItRightAway()
     {
-        // Given:
-        EditedModel unit = new();
+        // When:
+        // A configuration nobody has filled in yet is wrong before anything is edited, and the
+        // tester has to see it so as not to run with it.
+        EditedModel unit = new(GivenNonsense);
 
         // Then:
-        Assert.That(unit.HasErrors, Is.False);
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(unit.HasErrors, Is.True);
+            Assert.That(unit.GetValidity(nameof(EditedModel.Name))?.Issues, Has.Exactly(1).Items);
+        }
+    }
+
+    [Test]
+    public void InitValidator__WhenHeldValueIsRight__ThenShouldSayNothingIsWrong()
+    {
+        // When:
+        EditedModel unit = new(GivenLetters);
+
+        // Then:
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(unit.HasErrors, Is.False);
+            Assert.That(unit.GetValidity(nameof(EditedModel.Name))?.Issues, Is.Empty);
+        }
+    }
+
+    [Test]
+    public void InitValidator__WhenHeldValueIsWrong__ThenShouldTellWhoeverHandsItOn()
+    {
+        // Given:
+        List<bool> announced = [];
+
+        // When:
+        _ = new EditedModel(GivenNonsense, hasErrorsChanged: announced.Add);
+
+        // Then:
+        Assert.That(announced, Is.EqualTo(new[] { true }));
     }
 
     [Test]
@@ -156,15 +189,24 @@ public class ViewModelBaseTests
     /// </summary>
     private sealed class EditedModel : ViewModelBase
     {
-        private string name = string.Empty;
+        private string name;
 
-        public EditedModel()
-            => this.InitValidator(
+        public EditedModel(string name = "", Action<bool>? hasErrorsChanged = null)
+        {
+            this.name = name;
+
+            if (hasErrorsChanged is not null)
+            {
+                this.HasErrorsChanged += hasErrorsChanged;
+            }
+
+            this.InitValidator(
                 this,
                 validator => validator
                     .RuleFor(model => model.Name)
                     .Matches("^[a-z]+$")
                     .WithMessage("Letters only."));
+        }
 
         public string Name
         {

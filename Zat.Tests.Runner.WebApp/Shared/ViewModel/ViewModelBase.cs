@@ -20,6 +20,8 @@ public abstract class ViewModelBase
 
     private IValidator? validator;
 
+    private IReadOnlyList<string> validatedPropertyNames = [];
+
     /// <inheritdoc/>
     public event Action<bool>? HasErrorsChanged;
 
@@ -47,8 +49,13 @@ public abstract class ViewModelBase
         => this.OnPropertyChanged(propertyName);
 
     /// <summary>
-    /// Initializes the validator for the view model.
+    /// Initializes the validator for the view model and validates every property it has rules for,
+    /// so that what is wrong with the values held from the start is known before anything is edited.
     /// </summary>
+    /// <remarks>
+    /// <see cref="HasErrorsChanged"/> is raised from here when the values held are wrong, so whoever
+    /// hands it on subscribes before calling this.
+    /// </remarks>
     /// <typeparam name="TValidated">The type of the view model being validated.</typeparam>
     /// <param name="validated">The instance of the view model being validated.</param>
     /// <param name="initialized">An action to initialize the inline validator.</param>
@@ -68,50 +75,55 @@ public abstract class ViewModelBase
 
         initialized(inlineValidator);
 
+        this.validatedPropertyNames =
+        [
+            ..inlineValidator.CreateDescriptor().GetMembersWithValidators().Select(x => x.Key)
+        ];
         this.validator = inlineValidator;
+
+        this.Validate();
     }
 
     /// <inheritdoc/>
+    /// <remarks>
+    /// Validated before the change is announced, so that whoever redraws on it already reads what is
+    /// wrong with the new value. The whole view model is validated, because a rule of one property
+    /// may hang on another.
+    /// </remarks>
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
     {
-        base.OnPropertyChanged(e);
-        this.ValidateProperty(e.PropertyName);
-    }
-
-    /// <summary>
-    /// Validates the specified property using the view model's validator.
-    /// </summary>
-    /// <param name="propertyName">The name of the property to validate.</param>
-    /// <returns>The validity result of the property.</returns>
-    protected Validity ValidateProperty(string? propertyName)
-    {
-        if (this.validator is null || propertyName is null)
+        if (e.PropertyName != nameof(this.HasErrors))
         {
-            return Validity.Valid;
+            this.Validate();
         }
 
-        var validity = ValidationContext<object>
-            .CreateWithOptions(this, x => x.IncludeProperties(propertyName))
+        base.OnPropertyChanged(e);
+    }
+
+    private void Validate()
+    {
+        if (this.validator is null)
+        {
+            return;
+        }
+
+        var validity = new ValidationContext<object>(this)
             .Pipe(this.validator.Validate)
             .ToValidity();
 
-        if (this.propertyValidities.TryGetValue(propertyName, out var looked) && looked == validity)
-        {
-            return validity;
-        }
-
         var oldHasErrors = this.HasErrors;
-        this.propertyValidities[propertyName] = validity;
+        foreach (var propertyName in this.validatedPropertyNames)
+        {
+            this.propertyValidities[propertyName] = validity.For(propertyName);
+        }
 
         var newHasErrors = this.HasErrors;
         if (newHasErrors == oldHasErrors)
         {
-            return validity;
+            return;
         }
 
         this.HasErrorsChanged?.Invoke(newHasErrors);
         this.OnPropertyChanged(nameof(this.HasErrors));
-
-        return validity;
     }
 }

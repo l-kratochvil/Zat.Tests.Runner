@@ -10,6 +10,7 @@ using Zat.Tests.Runner.Common.Net.Application.Logging;
 using Zat.Tests.Runner.WebApp.Features.TestConfiguration.Components;
 using Zat.Tests.Runner.WebApp.Shared.Stores.AppSettings;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
+using Zat.Tests.Runner.WebApp.Shared.Validation;
 using Zat.Z2xxTests.Common.Model;
 
 [TestFixture]
@@ -40,11 +41,13 @@ public class TestConfiguratorViewModelTests
     public void Load__WhenConfigurationIsOpened__ThenShouldShowWhatItHolds()
     {
         // Given:
-        var state = new TestConfigurationState(
-            IsTestLinkReportEnabled: true,
-            IdeVersion: new Version(6, 1),
-            RuntimeVersion: "6",
-            TestedHwAssembly: HwAssemblyType.HW01);
+        var state = new TestConfigurationState() with
+        {
+            IsTestLinkReportEnabled = true,
+            IdeVersion = new Version(6, 1),
+            RuntimeVersion = "6",
+            TestedHwAssembly = HwAssemblyType.HW01,
+        };
 
         // When:
         this.store.ChangeTo(state);
@@ -60,29 +63,83 @@ public class TestConfiguratorViewModelTests
     }
 
     [Test]
-    public void ValidityFor__WhenConfigurationHasJustBeenOpened__ThenShouldSayNothingAboutItYet()
+    public void ValidityFor__WhenConfigurationHasJustBeenOpened__ThenShouldSayWhatIsWrongWithIt()
     {
         // Given:
-        // An empty configuration nobody has touched is not a mistake anyone made yet.
+        // An empty configuration cannot be run with, so the tester is told so before touching it.
 
         // Then:
-        Assert.That(this.unit.HasErrors, Is.False);
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(this.unit.HasErrors, Is.True);
+            Assert.That(this.store.Value.HasErrors, Is.True);
+            Assert.That(
+                this.unit.GetValidity(nameof(TestConfigurationViewModel.RuntimeVersion))?.HasErrors,
+                Is.True);
+        }
+    }
+
+    [Test]
+    public void ValidityFor__WhenFieldIsNotAskedFor__ThenShouldNotHoldRunBack()
+    {
+        // Given:
+        // Neither TestLink nor a runtime test is chosen, so the IDE version and the test station are
+        // hidden and nobody could fill them in.
+        this.store.ChangeTo(new TestConfigurationState() with { RuntimeVersion = "6" });
+
+        // Then:
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(this.unit.HasErrors, Is.False);
+            Assert.That(this.store.Value.HasErrors, Is.False);
+        }
+    }
+
+    [Test]
+    public void ValidityFor__WhenTestLinkIsTurnedOn__ThenShouldAskForIdeVersion()
+    {
+        // Given:
+        this.store.ChangeTo(new TestConfigurationState() with { RuntimeVersion = "6" });
+
+        // When:
+        this.unit.IsTestLinkReportEnabled = true;
+
+        // Then:
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(this.unit.HasErrors, Is.True);
+            Assert.That(
+                this.unit.GetValidity(nameof(TestConfigurationViewModel.IdeVersion))?.HasErrors,
+                Is.True);
+        }
+    }
+
+    [Test]
+    public void ValidityFor__WhenChangeOfFieldIsAnnounced__ThenShouldAlreadySayWhatIsWrongWithNewValue()
+    {
+        // Given:
+        // A control redraws as soon as it hears of the change, and while another field stays wrong
+        // nothing else would make it redraw again.
+        this.unit.IsTestLinkReportEnabled = true;
+
+        Validity? announced = null;
+        this.unit.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(TestConfigurationViewModel.RuntimeVersion))
+            {
+                announced = this.unit.GetValidity(nameof(TestConfigurationViewModel.RuntimeVersion));
+            }
+        };
+
+        // When:
+        this.unit.RuntimeVersion = "6";
+
+        // Then:
+        Assert.That(announced?.HasErrors, Is.False);
     }
 
     [Test]
     public void ValidityFor__WhenTesterHasBeenToField__ThenShouldSayWhatIsWrongWithIt()
-    {
-        // Given:
-
-        // When:
-        // TODO
-
-        // Then:
-        // TODO
-    }
-
-    [Test]
-    public void ValidityFor__WhenAnotherFieldWasTouched__ThenShouldStillSayNothingAboutThisOne()
     {
         // Given:
 
