@@ -34,16 +34,19 @@ public interface ITestRunnerEngine
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Stops the test run in progress, whoever started it; does nothing when none is.
+    /// Stops the test run in progress, whoever started it; does nothing when none is. A test run that doesn't
+    /// stop in time is ended forcibly, together with whatever its test cases started.
     /// </summary>
     void StopTestRun();
 
     /// <summary>
     /// Configuration of a single test run.
     /// </summary>
+    /// <param name="TestAssemblyDllPath">The test assembly the test run entities come from.</param>
     /// <param name="TestResultHandlers">Handlers of this run's results; the engine owns none of its
     /// own, so each application decides who handles them and with what lifetime.</param>
     public record Config(
+        string TestAssemblyDllPath,
         bool IsDebug,
         string? TestedRuntimeVersion,
         HwAssemblyType[]? TestedHwAssemblyTypes,

@@ -17,7 +17,7 @@ using Zat.Tests.Runner.WebApp.Features.TestExecution.Components;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
 
-using TestExecutionComponent = Features.TestExecution.Components.TestExecution;
+using TestExecutionComponent = Zat.Tests.Runner.WebApp.Features.TestExecution.Components.TestExecution;
 
 /// <summary>
 /// That the button shows what its view model offers and is redrawn when that changes.

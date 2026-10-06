@@ -9,6 +9,7 @@ using Fluxor;
 
 using Zat.Tests.Runner.Common.Net.Model;
 using Zat.Tests.Runner.Common.Net.Services;
+using Zat.Tests.Runner.WebApp.Application.Paths;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
 using Zat.Tests.Runner.WebApp.Shared.ViewModel;
@@ -23,17 +24,20 @@ public sealed partial class TestExecutionViewModel : ViewModelBase, IDisposable
     private readonly IEnumerable<ITestResultHandler> testResultHandlers;
     private readonly IState<TestConfigurationState> configurationState;
     private readonly ITestDiscoveryStore testDiscoveryStore;
+    private readonly IAppPathsProvider appPathsProvider;
 
     public TestExecutionViewModel(
         ITestRunnerEngine testRunnerEngine,
         IEnumerable<ITestResultHandler> testResultHandlers,
         IState<TestConfigurationState> configurationState,
+        IAppPathsProvider appPathsProvider,
         ITestDiscoveryStore testDiscoveryStore)
     {
         this.testRunnerEngine = testRunnerEngine;
         this.testResultHandlers = testResultHandlers;
         this.configurationState = configurationState;
         this.testDiscoveryStore = testDiscoveryStore;
+        this.appPathsProvider = appPathsProvider;
 
         // The test run belongs to the environment rather than to this client, so another client may
         // start or stop it at any time.
@@ -132,7 +136,8 @@ public sealed partial class TestExecutionViewModel : ViewModelBase, IDisposable
                 IsDebug: false, // TODO
                 TestedRuntimeVersion: this.configurationState.Value.RuntimeVersion,
                 TestedHwAssemblyTypes: [], // TODO
-                TestResultHandlers: this.testResultHandlers),
+                TestResultHandlers: this.testResultHandlers,
+                TestAssemblyDllPath: this.appPathsProvider.Files.Test),
             cancellationToken: CancellationToken.None);
 
         // TODO: Report result:

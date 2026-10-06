@@ -3,7 +3,7 @@ namespace Zat.Tests.Runner.WebApp.Shared.Stores.NUnitTestRunner;
 using Microsoft.Extensions.Hosting;
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Net.Application.Logging;
-using Zat.Tests.Runner.Common.Services;
+using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.WebApp.Application.Paths;
 
 /// <summary>
@@ -13,10 +13,10 @@ using Zat.Tests.Runner.WebApp.Application.Paths;
 /// Discovery runs during startup, so <see cref="LoadedTestSuites"/> is ready before the first
 /// browser connects.
 /// </remarks>
-/// <param name="proxy">Proxy the test assembly is discovered through.</param>
+/// <param name="proxyConnector">Connects to the proxy the test assembly is discovered through.</param>
 /// <param name="logger">Creates the log discovery failures are reported to.</param>
 public sealed class NUnitTestRunnerStore(
-    INUnitTestRunnerProxy proxy,
+    INUnitTestRunnerProxyConnector proxyConnector,
     ILogger<LogSources.TestRun> logger,
     IAppPathsProvider appPathsProvider)
     : INUnitTestRunnerStore, IHostedService
@@ -44,7 +44,10 @@ public sealed class NUnitTestRunnerStore(
             //    @"c:\Users\l-kratochvil\source\repos\Zat.Tests.Runner\Tests\NUnitTestAssembly.Net481\bin\Debug\net481\NUnitTestAssembly.Net481.dll";
             var testAssemblyPath = appPathsProvider.Files.MainAssemblyDll;
 
-            this.LoadedTestSuites = await proxy.LoadTestAssemblyAsync(testAssemblyPath, cancellationToken);
+            await using (var connection = await proxyConnector.ConnectAsync(cancellationToken))
+            {
+                this.LoadedTestSuites = await connection.Proxy.LoadTestAssemblyAsync(testAssemblyPath, cancellationToken);
+            }
 
             logger.Log(
                 LogLevel.Information,

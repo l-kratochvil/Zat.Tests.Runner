@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-using Zat.Tests.Runner.Common.Services;
+using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.TuiApp.Application.Paths;
 using Zat.Tests.Runner.TuiApp.Screens;
 using Zat.Tests.Runner.TuiApp.Stores;
@@ -19,11 +19,15 @@ internal class App
     {
         try
         {
-            var nunitTestRunnerProxy = host.Services.GetRequiredService<INUnitTestRunnerProxy>();
+            var nunitTestRunnerProxyConnector = host.Services.GetRequiredService<INUnitTestRunnerProxyConnector>();
             var paths = host.Services.GetRequiredService<IAppPathsProvider>();
 
             var testRunConfigStore = host.Services.GetRequiredService<TestRunConfigStore>();
-            testRunConfigStore.LoadedTestSuites = await nunitTestRunnerProxy.LoadTestAssemblyAsync(paths.Files.MainAssemblyDll);
+            await using (var connection = await nunitTestRunnerProxyConnector.ConnectAsync())
+            {
+                testRunConfigStore.LoadedTestSuites = await connection.Proxy.LoadTestAssemblyAsync(paths.Files.MainAssemblyDll);
+            }
+
             using var scope = host.Services.CreateScope();
             await MainRenderAsync(scope.ServiceProvider.GetRequiredService<HomeScreen>());
         }

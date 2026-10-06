@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 using Fluxor;
 
 using Microsoft.AspNetCore.Components.Server.Circuits;
@@ -13,19 +11,12 @@ using Zat.Tests.Runner.WebApp.Shared.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// The NUnit runner lives in a process of its own, started here so that it is reachable for as long
-// as the application is. Failing to reach it at all means the build did not put the server next to
-// us or that it cannot run here, which is a fault of the installation rather than of the test run:
-// starting up and pretending there are simply no tests would hide it.
-await using var nunitTestRunnerProxyConnector = await NUnitTestRunnerProxyConnector.ConnectAsync(launchDebugger: !Debugger.IsAttached);
-
 // Add services to the container.
 builder.Services
     .AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Logging.InitLogging();
-builder.Services.AddSingleton(nunitTestRunnerProxyConnector.Proxy);
 builder.Services.InitServices();
 builder.Services.InitFeatures();
 builder.Services.AddScoped<CircuitHandler>(provider => new CircuitInitializer(
@@ -36,7 +27,9 @@ builder.Services.AddScoped<CircuitHandler>(provider => new CircuitInitializer(
 
 var app = builder.Build();
 
-// Setting up the filesystem is startup work, so it happens here and not in a constructor.
+// Setting up the filesystem is startup work, so it happens here and not in a constructor. A missing
+// NUnit proxy server is a fault of the installation, so it stops the start-up here as well rather
+// than passing for a test assembly with no tests.
 app.Services.InitInitializableServices(builder.Services, ServiceLifetime.Singleton);
 
 // Configure the HTTP request pipeline.

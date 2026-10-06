@@ -11,6 +11,7 @@ using WindowsInput.Native;
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Net.Model;
 using Zat.Tests.Runner.Common.Net.Services;
+using Zat.Tests.Runner.TuiApp.Application.Paths;
 using Zat.Tests.Runner.TuiApp.Common;
 using Zat.Tests.Runner.TuiApp.Stores;
 
@@ -18,6 +19,7 @@ internal class RunTestScreen(
     TestRunConfigStore testRunConfigStore,
     ITestRunnerEngine testRunnerEngine,
     IEnumerable<ITestResultHandler> testResultHandlers,
+    IAppPathsProvider appPathsProvider,
     Lazy<HomeScreen> homeScreen,
     Lazy<ExitScreen> exitScreen,
     Lazy<SettingsScreen> settingsScreen)
@@ -79,6 +81,7 @@ internal class RunTestScreen(
                 var runTestTask = testRunnerEngine.RunTestAsync(
                     testRunEntities: testRunConfigStore.SelectedTestEntities,
                     config: new ITestRunnerEngine.Config(
+                        TestAssemblyDllPath: appPathsProvider.Files.MainAssemblyDll,
                         IsDebug: testRunConfigStore.IsDebugModeEnabled ?? false,
                         TestedRuntimeVersion: testRunConfigStore.RuntimeVersion,
                         TestedHwAssemblyTypes: testRunConfigStore.HwAssemblyTypes,

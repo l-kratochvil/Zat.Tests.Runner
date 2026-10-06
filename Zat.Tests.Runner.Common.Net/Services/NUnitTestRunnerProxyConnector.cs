@@ -1,57 +1,42 @@
 namespace Zat.Tests.Runner.Common.Net.Services;
 
-using System;
 using System.Diagnostics;
-using System.IO;
 using System.IO.Pipes;
-using System.Threading;
-using System.Threading.Tasks;
+
+using DevKit.Core.Interfaces;
 
 using StreamJsonRpc;
 
 using Zat.Tests.Runner.Common.Services;
 
 /// <summary>
-/// Owns the out-of-process NUnit proxy server: launches it, establishes a StreamJsonRpc connection over a
-/// named pipe and exposes a strongly-typed <see cref="INUnitTestRunnerProxy"/>. Disposing tears the connection
-/// down and stops the server process.
+/// Launches the out-of-process NUnit proxy server on demand and connects to it over a StreamJsonRpc named pipe.
 /// </summary>
-public sealed class NUnitTestRunnerProxyConnector : IAsyncDisposable
+/// <remarks>
+/// Initialising checks only that the server is installed, so a broken installation stops the application at
+/// start-up rather than at the first test run, without the cost of starting the server.
+/// </remarks>
+/// <param name="launchDebugger">When <see langword="true"/>, passes <c>--debug</c> to the server so a Debug build
+/// asks for a debugger on start-up.</param>
+public sealed class NUnitTestRunnerProxyConnector(bool launchDebugger)
+    : INUnitTestRunnerProxyConnector, IInitializable
 {
     // The server and its .NET Framework dependencies are copied here by the build (Exchange output).
     private const string ServerRelativePath = @"Zat.Tests.Runner.NUnitTestRunnerProxy\Zat.Tests.Runner.NUnitTestRunnerProxy.exe";
 
     private static readonly TimeSpan ConnectTimeout = TimeSpan.FromSeconds(60);
 
-    private readonly Process serverProcess;
-    private readonly NamedPipeServerStream pipe;
-    private readonly JsonRpc rpc;
+    private static string ServerPath => Path.Combine(AppContext.BaseDirectory, ServerRelativePath);
 
-    /// <summary>The remote NUnit test runner.</summary>
-    public INUnitTestRunnerProxy Proxy { get; }
+    /// <inheritdoc/>
+    /// <exception cref="FileNotFoundException">The proxy server executable is missing.</exception>
+    public void Initialize()
+        => EnsureServerExists();
 
-    private NUnitTestRunnerProxyConnector(
-        Process serverProcess,
-        NamedPipeServerStream pipe,
-        JsonRpc rpc,
-        INUnitTestRunnerProxy proxy)
+    /// <inheritdoc/>
+    public async Task<INUnitTestRunnerProxyConnection> ConnectAsync(CancellationToken cancellationToken = default)
     {
-        this.serverProcess = serverProcess;
-        this.pipe = pipe;
-        this.rpc = rpc;
-        this.Proxy = proxy;
-    }
-
-    /// <summary>Launches the proxy server and connects to it.</summary>
-    /// <param name="launchDebugger">When <see langword="true"/>, passes <c>--debug</c> to the server so a Debug build asks for a debugger on start-up.</param>
-    /// <param name="cancellationToken">Cancels the connection attempt.</param>
-    public static async Task<NUnitTestRunnerProxyConnector> ConnectAsync(bool launchDebugger = false, CancellationToken cancellationToken = default)
-    {
-        var serverPath = Path.Combine(AppContext.BaseDirectory, ServerRelativePath);
-        if (!File.Exists(serverPath))
-        {
-            throw new FileNotFoundException($"NUnit proxy server executable was not found: {serverPath}", serverPath);
-        }
+        EnsureServerExists();
 
         var pipeName = $"Zat.Tests.RunnerProxy_{Guid.NewGuid():N}";
         var pipe = new NamedPipeServerStream(
@@ -64,18 +49,15 @@ public sealed class NUnitTestRunnerProxyConnector : IAsyncDisposable
         Process? serverProcess = null;
         try
         {
-            var arguments = pipeName;
+            var arguments = launchDebugger
+                ? $"{pipeName} {CommonConstants.ProcessArgs.Debug}"
+                : pipeName;
 
-            if (launchDebugger)
-            {
-                arguments += $" {CommonConstants.ProcessArgs.Debug}";
-            }
-
-            serverProcess = Process.Start(new ProcessStartInfo(serverPath, arguments)
+            serverProcess = Process.Start(new ProcessStartInfo(ServerPath, arguments)
             {
                 UseShellExecute = false,
                 CreateNoWindow = true,
-                WorkingDirectory = Path.GetDirectoryName(serverPath)!,
+                WorkingDirectory = Path.GetDirectoryName(ServerPath)!,
             }) ?? throw new InvalidOperationException("Failed to start the NUnit proxy server process.");
 
             using var connectTimeout = new CancellationTokenSource(ConnectTimeout);
@@ -89,48 +71,22 @@ public sealed class NUnitTestRunnerProxyConnector : IAsyncDisposable
             var proxy = rpc.Attach<INUnitTestRunnerProxy>();
             rpc.StartListening();
 
-            return new NUnitTestRunnerProxyConnector(serverProcess, pipe, rpc, proxy);
+            return new NUnitTestRunnerProxyConnection(serverProcess, pipe, rpc, proxy);
         }
         catch
         {
             await pipe.DisposeAsync().ConfigureAwait(false);
-            KillProcess(serverProcess);
+            await NUnitTestRunnerProxyConnection.KillAsync(serverProcess).ConfigureAwait(false);
+            serverProcess?.Dispose();
             throw;
         }
     }
 
-    /// <inheritdoc/>
-    public async ValueTask DisposeAsync()
+    private static void EnsureServerExists()
     {
-        // Closing the RPC connection lets the server observe the disconnect and exit gracefully.
-        try { this.rpc.Dispose(); }
-        catch
+        if (!File.Exists(ServerPath))
         {
-            /* best effort */
-        }
-
-        try { await this.pipe.DisposeAsync().ConfigureAwait(false); }
-        catch
-        {
-            /* best effort */
-        }
-
-        KillProcess(this.serverProcess);
-        this.serverProcess.Dispose();
-    }
-
-    private static void KillProcess(Process? process)
-    {
-        try
-        {
-            if (process is { HasExited: false })
-            {
-                process.Kill();
-            }
-        }
-        catch
-        {
-            // Ignore cleanup failures.
+            throw new FileNotFoundException($"NUnit proxy server executable was not found: {ServerPath}", ServerPath);
         }
     }
 }

@@ -1,14 +1,9 @@
-using System.Diagnostics;
-
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 using Zat.Tests.Runner.Common.Net.Application.DependencyInjection;
-using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.TuiApp;
 using Zat.Tests.Runner.TuiApp.Application.DependencyInjection;
-
-await using var nunitTestRunnerProxyConnector = await NUnitTestRunnerProxyConnector.ConnectAsync(launchDebugger: !Debugger.IsAttached);
 
 var hostBuilder = Host.CreateDefaultBuilder();
 
@@ -22,7 +17,7 @@ if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT"
 IServiceCollection registeredServices = new ServiceCollection();
 
 var host = hostBuilder
-    .InitServices(nunitTestRunnerProxyConnector.Proxy)
+    .InitServices()
     .InitScreens()
     .InitStores()
     .ConfigureServices(services => registeredServices = services)

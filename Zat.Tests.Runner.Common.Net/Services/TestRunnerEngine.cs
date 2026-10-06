@@ -15,10 +15,16 @@ using Zat.Z2xxTests.Common.Model;
 
 public class TestRunnerEngine(
     ITestRunnerBridgeConnector testRunnerBridgeConnector,
-    INUnitTestRunnerProxy nunitTestRunnerProxy,
+    INUnitTestRunnerProxyConnector nunitTestRunnerProxyConnector,
     ILogger<LogSources.TestRun> logger)
     : ITestRunnerEngine
 {
+    /// <summary>
+    /// How long a stopped test run waits for the proxy to give in. Then the engine stops waiting and ends the
+    /// connection, which kills the proxy server along with whatever the test cases started.
+    /// </summary>
+    internal static readonly TimeSpan StopTimeout = TimeSpan.FromSeconds(5);
+
     // Every change of State happens under this lock, so a check and the change it allows can't interleave with
     // another one, and StateChanged reports the changes in the order they happened.
     private readonly Lock stateLock = new();
@@ -88,10 +94,24 @@ public class TestRunnerEngine(
 
             var testRunResults = new List<TestResult>();
 
-            foreach (var subRun in subRuns.TakeWhile(_ => !runCts.IsCancellationRequested))
+            try
             {
-                (await this.RunSubRunAsync(subRun, resultHandlers, runCts.Token))
-                    .VisitIfNotNull(testRunResults.Add);
+                // The whole test run gets a proxy server of its own, so ending the connection is sure to end the
+                // test run as well.
+                await using var connection = await nunitTestRunnerProxyConnector.ConnectAsync(runCts.Token);
+                await WaitUnlessAbandonedAsync(
+                    connection.Proxy.LoadTestAssemblyAsync(config.TestAssemblyDllPath, runCts.Token),
+                    runCts.Token);
+
+                foreach (var subRun in subRuns.TakeWhile(_ => !runCts.IsCancellationRequested))
+                {
+                    (await this.RunSubRunAsync(connection.Proxy, subRun, resultHandlers, runCts.Token))
+                        .VisitIfNotNull(testRunResults.Add);
+                }
+            }
+            catch (OperationCanceledException) when (runCts.IsCancellationRequested)
+            {
+                // Stopped before the proxy got to any test case.
             }
 
             return [.. testRunResults];
@@ -153,6 +173,22 @@ public class TestRunnerEngine(
         return [.. subRuns];
     }
 
+    /// <summary>
+    /// Awaits <paramref name="task"/>, but no longer than <see cref="StopTimeout"/> after
+    /// <paramref name="stopToken"/> was cancelled.
+    /// </summary>
+    /// <remarks>
+    /// The proxy learns about the stop from the token it was handed. This only limits how long it gets to comply.
+    /// </remarks>
+    /// <exception cref="OperationCanceledException">The proxy did not give in to the stop in time.</exception>
+    private static async Task<T> WaitUnlessAbandonedAsync<T>(Task<T> task, CancellationToken stopToken)
+    {
+        using var abandonCts = new CancellationTokenSource();
+        using var stopRegistration = stopToken.Register(() => abandonCts.CancelAfter(StopTimeout));
+
+        return await task.WaitAsync(abandonCts.Token);
+    }
+
     private void OnStopRequested()
     {
         lock (this.stateLock)
@@ -167,6 +203,7 @@ public class TestRunnerEngine(
     /// <returns>The test result of <paramref name="subRun"/>, or <see langword="null"/> when it was stopped before
     /// the proxy got to any of its test cases.</returns>
     private async Task<TestResult?> RunSubRunAsync(
+        INUnitTestRunnerProxy proxy,
         SubRun subRun,
         ITestResultHandler[] resultHandlers,
         CancellationToken cancellationToken)
@@ -176,7 +213,9 @@ public class TestRunnerEngine(
         ProxyTestResult proxyTestResult;
         try
         {
-            proxyTestResult = await nunitTestRunnerProxy.RunTestAsync(subRun.TestEntities, cancellationToken);
+            proxyTestResult = await WaitUnlessAbandonedAsync(
+                proxy.RunTestAsync(subRun.TestEntities, cancellationToken),
+                cancellationToken);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {

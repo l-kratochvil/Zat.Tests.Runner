@@ -17,8 +17,11 @@
   - Odstranit legacy runner (ve vlastním commitu na main)
   - Po dokončení merge develop -> main (sumární commit)
 - WebApp:
-  - Konfigurace testu stejná jako u TuiApp
-  - Vytvořit viewmodely pro features (viz TestConfigurationViewModel)
+  - Vytvořit viewmodely pro features (viz TestConfigurationViewModel):
+    - TestExecution: OK
+    - TestDiscovery: ...
+    - AppLogging: ...
+    - TestResultReporting: ...
   - Rework BindingSelect
   - Vylepšit pojmenování pro "fluxor stores" a "stores StoreBase": Obojí fungujou jinak, ale zároveň obojí je store
   - TestDiscovery: Nahradit store za Fluxor
