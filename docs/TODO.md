@@ -2,34 +2,31 @@
 
 ## HiPrio
 
-- TuiApp:
-  - Po zastavení testy běží dál!
 - Dokončit vazbu na TestLink
 - Zautomatizování kroků testera - základní
 - Otestovat bridge mezi runnerem a Z2xxTests
-- Změna adresáře "Automized Tests":
-  - Přesunout do Program Data / Roaming AppData
-  - Přejmenovat na Zat.Tests
-  - Přejmenovat adresář "Test libs" (test-libs? runner-libs?)
 - Na počátku kontrolovat spojení se stanicemi: Viz legacy runner RunTest (TestEnvironmentUtils.CheckTestStationsConnection)
 - TuiApp:
   - Implementovat výpis při startu testu (viz [test-run-start_output](test-run-start_output.png))
   - Odstranit legacy runner (ve vlastním commitu na main)
-  - Po dokončení merge develop -> main (sumární commit)
 - WebApp:
   - Rework BindingSelect
   - Vylepšit pojmenování pro "fluxor stores" a "stores StoreBase": Obojí fungujou jinak, ale zároveň obojí je store
   - TestConfiguration: Musí umožnovat vybrat vícero (comobobox) HwAssemblyType (TestedHwAssemblyType umožňuje pouze jeden. Musí se hlídat navolené možnosti stejně jako u TuiApp (nesmí být navoleno zároven BB1M a BB37M)
-  - Při načtení se nevalidule viewmodel
   - Vyřešit Deploy
   - Kompletní code-review + refactor celé projektu WebApp (včetně testů) a docs
   - Lokalizace textů
-  - Vylepšení vzhledu
+- Po dokončení merge develop -> main (sumární commit)
+- Změna adresáře "Automized Tests":
+  - Přesunout do Program Data / Roaming AppData
+  - Přejmenovat na Zat.Tests
+  - Přejmenovat adresář "Test libs" (test-libs? runner-libs?)
 - Vyřešit code todos
 
 ## MidPrio
 
 - Update nuget balíčků solutionu
+- Vylepšení vzhledu
 - WebApp:
   - Refactor TestDiscovery feature
   - Rozšíření testů pro komponenty DataContext, BinindgInput, BindingSelect, BindingCheckbox
@@ -104,6 +101,8 @@
 
 - Tzn. automatizovat kapitolu 2.9.3 z dokumentu Automatizované testování
 
+## MidPrio - Detaily
+
 ### Vylepšení vzhledu
 
 - Nasylovat:
@@ -111,8 +110,6 @@
   - Toggle uzlu + Checkbox
 - Použít prototype (ať prototyp ukáže varianty redesignu) + ladění v integrated browser
 - Po schválení prorotypu nastylovat komplet
-
-## MidPrio - Detaily
 
 ### Migrace do Terminal.Gui
 
