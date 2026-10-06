@@ -547,6 +547,15 @@ namespace Zat.Tests.Runner.TuiApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Runner Errors.
+        /// </summary>
+        public static string TestRunReport_RunnerErrors_SectionHeader {
+            get {
+                return ResourceManager.GetString("TestRunReport_RunnerErrors_SectionHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed.
         /// </summary>
         public static string TestRunReport_Status_Failed {

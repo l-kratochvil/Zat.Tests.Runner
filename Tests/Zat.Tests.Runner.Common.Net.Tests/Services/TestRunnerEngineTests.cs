@@ -80,7 +80,7 @@ public class TestRunnerEngineTests
         var results = await this.unit.RunTestAsync([ApplicationTestCase()], this.Config());
 
         // Then:
-        var handledResult = results.Single();
+        var handledResult = results.Value.Single();
         using (Assert.EnterMultipleScope())
         {
             this.resultHandlerMock.Verify(x => x.Handle(handledResult), Times.Once);
@@ -106,7 +106,7 @@ public class TestRunnerEngineTests
         // Then:
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(results, Is.Empty);
+            Assert.That(results.Value, Is.Empty);
             this.resultHandlerMock.Verify(x => x.Handle(It.IsAny<TestResult>()), Times.Never);
             Assert.That(
                 this.reportedStates,
@@ -137,6 +137,29 @@ public class TestRunnerEngineTests
 
         // Then:
         Assert.ThrowsAsync<InvalidOperationException>(() => secondStart!);
+    }
+
+    [Test]
+    public async Task RunTestAsync__WhenTestAssemblyLacksSelectedTestEntity__ThenShouldFailWithoutRunningAnything()
+    {
+        // Given:
+        const string missingTestCasePath = TestAssemblyName + ".SampleTestSuite.Missing";
+        var missingTestCase = new TestEntity(TestType.Application, name: "Missing", executionPath: missingTestCasePath);
+
+        // When:
+        var results = await this.unit.RunTestAsync([ApplicationTestCase(), missingTestCase], this.Config());
+
+        // Then:
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(results.IsFailure, Is.True);
+            Assert.That(
+                results.IsFailure ? results.Error : string.Empty,
+                Does.Contain(missingTestCasePath).And.Not.Contain(PassingTestCasePath));
+            this.bridgeConnectorMock.Verify(x => x.Connect(It.IsAny<TestConfig>()), Times.Never);
+            this.resultHandlerMock.Verify(x => x.Handle(It.IsAny<TestResult>()), Times.Never);
+            Assert.That(this.reportedStates, Is.EqualTo(new[] { TestRunState.Running, TestRunState.Stopped }));
+        }
     }
 
     [Test]
@@ -182,8 +205,8 @@ public class TestRunnerEngineTests
         // Then:
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(results.Select(x => x.TestedHwAssemblyType), Is.EqualTo(new[] { HwAssemblyType.HW00 }));
-            this.resultHandlerMock.Verify(x => x.Handle(results[0]), Times.Once);
+            Assert.That(results.Value.Select(x => x.TestedHwAssemblyType), Is.EqualTo(new[] { HwAssemblyType.HW00 }));
+            this.resultHandlerMock.Verify(x => x.Handle(results.Value[0]), Times.Once);
             this.resultHandlerMock.Verify(x => x.Handle(It.IsAny<TestResult>()), Times.Once);
             Assert.That(
                 this.reportedStates,
@@ -207,7 +230,7 @@ public class TestRunnerEngineTests
         using (Assert.EnterMultipleScope())
         {
             // The proxy was handed the stop, so it did not run the test case at all.
-            Assert.That(results, Is.Empty);
+            Assert.That(results.Value, Is.Empty);
             this.resultHandlerMock.Verify(x => x.Handle(It.IsAny<TestResult>()), Times.Never);
             Assert.That(this.unit.State, Is.EqualTo(TestRunState.Stopped));
         }
@@ -237,7 +260,7 @@ public class TestRunnerEngineTests
         // Then:
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(results, Is.Empty);
+            Assert.That(results.Value, Is.Empty);
             this.resultHandlerMock.Verify(x => x.Handle(It.IsAny<TestResult>()), Times.Never);
             Assert.That(unit.State, Is.EqualTo(TestRunState.Stopped));
             connectionMock.Verify(x => x.DisposeAsync(), Times.Once);
@@ -248,9 +271,25 @@ public class TestRunnerEngineTests
         Mock<INUnitTestRunnerProxyConnection> connectionMock,
         Mock<INUnitTestRunnerProxy> proxyMock)
     {
+        // The test assembly holds the test case the tests select, so the test run gets to the proxy.
+        TestSuiteEntity[] testTree =
+        [
+            new(
+                [
+                    new(
+                        [ApplicationTestCase(id: "Pass")],
+                        TestType.Application,
+                        name: "SampleTestSuite",
+                        executionPath: TestAssemblyName + ".SampleTestSuite"),
+                ],
+                TestType.Application,
+                name: TestAssemblyName,
+                executionPath: TestAssemblyName),
+        ];
+
         proxyMock
             .Setup(x => x.LoadTestAssemblyAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync([]);
+            .ReturnsAsync(testTree);
 
         connectionMock.SetupGet(x => x.Proxy).Returns(proxyMock.Object);
         connectionMock.Setup(x => x.DisposeAsync()).Returns(ValueTask.CompletedTask);
@@ -265,6 +304,9 @@ public class TestRunnerEngineTests
 
     private static TestEntity ApplicationTestCase()
         => new(TestType.Application, name: "Pass", executionPath: PassingTestCasePath);
+
+    private static TestCaseEntity ApplicationTestCase(string id)
+        => new(TestType.Application, id: id, name: "Pass", executionPath: PassingTestCasePath);
 
     // The proxy runs by execution path alone, so a test case of the test assembly can stand in for a runtime one.
     private static TestEntity RuntimeTestCase()

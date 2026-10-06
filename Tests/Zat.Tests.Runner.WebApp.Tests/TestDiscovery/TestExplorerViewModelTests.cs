@@ -5,8 +5,8 @@ using Moq;
 using NUnit.Framework;
 
 using Zat.Tests.Runner.Common.Model;
+using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.WebApp.Features.TestDiscovery.Components;
-using Zat.Tests.Runner.WebApp.Shared.Stores.NUnitTestRunner;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
 
 [TestFixture]
@@ -19,7 +19,7 @@ public class TestExplorerViewModelTests
     private const string GivenSecondCasePath = "Suite.FirstFixture.SecondCase";
     private const string GivenThirdCasePath = "Suite.SecondFixture.ThirdCase";
 
-    private Mock<INUnitTestRunnerStore> testRunnerStore;
+    private Mock<ITestTreeStore> testTreeStore;
     private TestDiscoveryStoreFake testSelection;
 
     private TestExplorerViewModel unit;
@@ -27,8 +27,8 @@ public class TestExplorerViewModelTests
     [SetUp]
     public void SetUp()
     {
-        this.testRunnerStore = new Mock<INUnitTestRunnerStore>();
-        this.testRunnerStore.SetupGet(store => store.LoadedTestSuites).Returns([CreateTestSuite()]);
+        this.testTreeStore = new Mock<ITestTreeStore>();
+        this.testTreeStore.SetupGet(store => store.TestSuites).Returns([CreateTestSuite()]);
 
         this.testSelection = new TestDiscoveryStoreFake();
 
@@ -238,6 +238,29 @@ public class TestExplorerViewModelTests
     }
 
     [Test]
+    public void OnTestTreeChanged__WhenTestAssemblyWasReadAgain__ThenShouldShowNewTestTree()
+    {
+        // Given:
+        const string givenNewSuitePath = "NewSuite";
+        TestSuiteEntity[] givenTestSuites =
+            [new([], TestType.Application, name: "New suite", executionPath: givenNewSuitePath)];
+        var announcedProperties = new List<string?>();
+        this.unit.PropertyChanged += (_, e) => announcedProperties.Add(e.PropertyName);
+
+        // When:
+        this.testTreeStore.Raise(
+            store => store.Changed += null,
+            new TestTreeChange(givenTestSuites, ExecutionPathsChanged: true));
+
+        // Then:
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(this.unit.Roots.Select(root => root.ExecutionPath), Is.EqualTo(new[] { givenNewSuitePath }));
+            Assert.That(announcedProperties, Does.Contain(nameof(TestExplorerViewModel.Roots)));
+        }
+    }
+
+    [Test]
     public void ApplySelection__WhenTestCaseIsSelected__ThenShouldOpenGroupsHidingIt()
     {
         // Given:
@@ -302,7 +325,7 @@ public class TestExplorerViewModelTests
             executionPath: executionPath);
 
     private TestExplorerViewModel CreateUnit()
-        => new(this.testRunnerStore.Object, this.testSelection, this.testSelection.Dispatcher.Object);
+        => new(this.testTreeStore.Object, this.testSelection, this.testSelection.Dispatcher.Object);
 
     private TestTreeNodeData FindNode(string executionPath)
         => this.unit.Roots

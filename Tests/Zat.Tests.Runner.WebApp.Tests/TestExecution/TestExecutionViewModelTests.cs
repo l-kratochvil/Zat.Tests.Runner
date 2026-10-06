@@ -9,7 +9,6 @@ using Zat.Tests.Runner.Common.Net.Model;
 using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.WebApp.Application.Paths;
 using Zat.Tests.Runner.WebApp.Features.TestExecution.Components;
-using Zat.Tests.Runner.WebApp.Shared.Stores.NUnitTestRunner;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
 using Zat.Tests.Runner.WebApp.Tests.TestConfiguration;
@@ -33,7 +32,7 @@ public class TestExecutionViewModelTests
     private const string GivenTestCasePath = "Suite.Fixture.Test";
 
     private Mock<ITestRunnerEngine> testRunnerEngine;
-    private Mock<INUnitTestRunnerStore> testRunnerStore;
+    private Mock<ITestTreeStore> testTreeStore;
     private TestDiscoveryStoreFake testSelection;
     private TestConfigurationStoreFake configuration;
 
@@ -49,9 +48,9 @@ public class TestExecutionViewModelTests
         this.testRunnerEngine = new Mock<ITestRunnerEngine>();
         this.testRunnerEngine.SetupGet(engine => engine.State).Returns(() => this.testRunState);
 
-        this.testRunnerStore = new Mock<INUnitTestRunnerStore>();
-        this.testRunnerStore
-            .SetupGet(store => store.LoadedTestSuites)
+        this.testTreeStore = new Mock<ITestTreeStore>();
+        this.testTreeStore
+            .SetupGet(store => store.TestSuites)
             .Returns([TestSuites.WithOneTestCase(TestType.Application, GivenTestCasePath)]);
 
         this.testSelection = new TestDiscoveryStoreFake();
@@ -63,7 +62,7 @@ public class TestExecutionViewModelTests
             this.configuration,
             new Mock<IAppPathsProvider>().Object,
             this.testSelection,
-            this.testRunnerStore.Object);
+            this.testTreeStore.Object);
     }
 
     [TearDown]

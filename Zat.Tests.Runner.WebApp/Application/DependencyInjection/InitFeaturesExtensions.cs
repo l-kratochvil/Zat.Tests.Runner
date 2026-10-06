@@ -7,6 +7,7 @@ using Zat.Tests.Runner.WebApp.Features.AppLogging.Services;
 using Zat.Tests.Runner.WebApp.Features.AppSettings.Services;
 using Zat.Tests.Runner.WebApp.Features.TestConfiguration.Components;
 using Zat.Tests.Runner.WebApp.Features.TestDiscovery.Components;
+using Zat.Tests.Runner.WebApp.Features.TestDiscovery.Services;
 using Zat.Tests.Runner.WebApp.Features.TestExecution.Components;
 using Zat.Tests.Runner.WebApp.Shared.Stores.AppSettings;
 
@@ -27,7 +28,8 @@ public static class InitFeaturesExtensions
 
         private IServiceCollection InitTestDiscovery()
             => services
-                .AddScoped<TestExplorerViewModel>();
+                .AddScoped<TestExplorerViewModel>()
+                .AddScoped<TestSelectionReset>();
 
         /// <remarks>
         /// The settings describe one machine, so one <see cref="AppSettingsStore"/> is shared across

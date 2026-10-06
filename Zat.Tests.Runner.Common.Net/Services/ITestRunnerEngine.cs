@@ -1,5 +1,7 @@
 ﻿namespace Zat.Tests.Runner.Common.Net.Services;
 
+using CSharpFunctionalExtensions;
+
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Net.Model;
 using Zat.Z2xxTests.Common.Model;
@@ -23,12 +25,17 @@ public interface ITestRunnerEngine
     /// <summary>
     /// Runs <paramref name="testRunEntities"/>.
     /// </summary>
+    /// <remarks>
+    /// The test assembly is read again for the test run, so it may no longer hold all of
+    /// <paramref name="testRunEntities"/>; then nothing runs, as NUnit would quietly skip the missing ones.
+    /// </remarks>
     /// <param name="testRunEntities">The test entities to run.</param>
     /// <param name="config">The configuration of this test run.</param>
     /// <param name="cancellationToken">Stops the test run, the same as <see cref="StopTestRun"/>.</param>
-    /// <returns>The test results gathered until the test run ended or was stopped.</returns>
+    /// <returns>The test results gathered until the test run ended or was stopped, or a failure naming the test
+    /// entities the test assembly no longer holds. A failure of what runs the tests is thrown instead.</returns>
     /// <exception cref="InvalidOperationException">Another test run is in progress.</exception>
-    Task<TestResult[]> RunTestAsync(
+    Task<Result<TestResult[]>> RunTestAsync(
         IEnumerable<TestEntity> testRunEntities,
         Config config,
         CancellationToken cancellationToken = default);

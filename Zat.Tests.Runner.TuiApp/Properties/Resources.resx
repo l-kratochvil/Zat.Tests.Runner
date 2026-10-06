@@ -180,6 +180,9 @@
   <data name="TestRunReport_ErrorsFailuresWarnings_SectionHeader" xml:space="preserve">
     <value>Errors, Failures and Warnings</value>
   </data>
+  <data name="TestRunReport_RunnerErrors_SectionHeader" xml:space="preserve">
+    <value>Runner Errors</value>
+  </data>
   <data name="TestRunReport_Summary_SectionHeader" xml:space="preserve">
     <value>Test Run Summary</value>
   </data>

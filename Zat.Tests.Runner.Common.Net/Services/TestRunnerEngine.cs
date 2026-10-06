@@ -2,6 +2,8 @@
 
 using System.Collections.Generic;
 
+using CSharpFunctionalExtensions;
+
 using DevKit.Core.Extensions.Functional;
 
 using Microsoft.Extensions.Logging;
@@ -62,7 +64,7 @@ public class TestRunnerEngine(
     }
 
     /// <inheritdoc />
-    public async Task<TestResult[]> RunTestAsync(
+    public async Task<Result<TestResult[]>> RunTestAsync(
         IEnumerable<TestEntity> testRunEntities,
         ITestRunnerEngine.Config config,
         CancellationToken cancellationToken = default)
@@ -99,9 +101,23 @@ public class TestRunnerEngine(
                 // The whole test run gets a proxy server of its own, so ending the connection is sure to end the
                 // test run as well.
                 await using var connection = await nunitTestRunnerProxyConnector.ConnectAsync(runCts.Token);
-                await WaitUnlessAbandonedAsync(
+                var testTree = await WaitUnlessAbandonedAsync(
                     connection.Proxy.LoadTestAssemblyAsync(config.TestAssemblyDllPath, runCts.Token),
                     runCts.Token);
+
+                // The test assembly may have changed since the test run entities were discovered from it. NUnit
+                // would quietly skip whatever is gone, so the test run doesn't start at all.
+                var missingExecutionPaths = FindMissingExecutionPaths(subRuns, testTree);
+                if (missingExecutionPaths.Length > 0)
+                {
+                    var error = string.Format(
+                        Resources.TestRun_TestEntitiesMissing_Format,
+                        config.TestAssemblyDllPath,
+                        string.Join(Environment.NewLine, missingExecutionPaths));
+                    logger.Log(LogLevel.Error, "{Error}", error);
+
+                    return Result.Failure<TestResult[]>(error);
+                }
 
                 foreach (var subRun in subRuns.TakeWhile(_ => !runCts.IsCancellationRequested))
                 {
@@ -114,7 +130,7 @@ public class TestRunnerEngine(
                 // Stopped before the proxy got to any test case.
             }
 
-            return [.. testRunResults];
+            return Result.Success<TestResult[]>([.. testRunResults]);
         }
         finally
         {
@@ -171,6 +187,25 @@ public class TestRunnerEngine(
         }
 
         return [.. subRuns];
+    }
+
+    /// <returns>The execution paths of the test entities <paramref name="subRuns"/> run that
+    /// <paramref name="testTree"/> doesn't hold, in the order they were selected.</returns>
+    private static string[] FindMissingExecutionPaths(SubRun[] subRuns, TestSuiteEntity[] testTree)
+    {
+        var existingExecutionPaths = testTree
+            .AllTestEntities()
+            .Select(testEntity => testEntity.ExecutionPath)
+            .ToHashSet(StringComparer.Ordinal);
+
+        return
+        [
+            .. subRuns
+                .SelectMany(subRun => subRun.TestEntities)
+                .Select(testEntity => testEntity.ExecutionPath)
+                .Distinct(StringComparer.Ordinal)
+                .Where(executionPath => !existingExecutionPaths.Contains(executionPath)),
+        ];
     }
 
     /// <summary>

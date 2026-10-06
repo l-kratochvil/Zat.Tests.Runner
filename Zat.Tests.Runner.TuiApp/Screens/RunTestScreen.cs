@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 
+using CSharpFunctionalExtensions;
+
 using DevKit.Core.Utils;
 
 using WindowsInput.Native;
@@ -142,7 +144,7 @@ internal class RunTestScreen(
                     return interuptedShowPrompt;
                 }
 
-                await runTestTask;
+                await RenderTestRunOutcomeAsync(runTestTask);
 
                 this.state.Stopwatch.Stop();
 
@@ -153,6 +155,34 @@ internal class RunTestScreen(
                 return CompletedShowPrompt.Default;
             },
         };
+
+    /// <summary>
+    /// Shows why the test run of <paramref name="runTestTask"/> did not run the selected tests, if it didn't. What
+    /// it ran is already shown by the time it ends.
+    /// </summary>
+    /// <remarks>
+    /// A failure of what runs the tests is shown on its own, so the tester can tell it from the tests failing, and
+    /// the application goes on rather than ending with it.
+    /// </remarks>
+    private static async Task RenderTestRunOutcomeAsync(Task<Result<TestResult[]>> runTestTask)
+    {
+        try
+        {
+            var result = await runTestTask;
+            if (result.IsFailure)
+            {
+                MarkupLine(string.Empty);
+                MarkupLine($"[red]{result.Error.EscapeMarkup()}[/]");
+            }
+        }
+        catch (Exception exception)
+        {
+            MarkupLine(string.Empty);
+            MarkupLine($"[red]{Resources.TestRunReport_RunnerErrors_SectionHeader.EscapeMarkup()}[/]");
+            MarkupLine(string.Empty);
+            WriteException(exception);
+        }
+    }
 
     private static void RenderNotRunSection(StringBuilder sb, TestResult result)
     {

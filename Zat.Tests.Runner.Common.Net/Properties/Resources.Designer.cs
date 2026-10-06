@@ -113,5 +113,15 @@ namespace Zat.Tests.Runner.Common.Net.Properties {
                 return ResourceManager.GetString("TestRun_Stopping", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The test run did not start: the test assembly {0} changed and no longer holds these selected tests:
+        ///{1}.
+        /// </summary>
+        public static string TestRun_TestEntitiesMissing_Format {
+            get {
+                return ResourceManager.GetString("TestRun_TestEntitiesMissing_Format", resourceCulture);
+            }
+        }
     }
 }

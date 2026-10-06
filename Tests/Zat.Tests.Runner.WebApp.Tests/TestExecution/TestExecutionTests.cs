@@ -15,7 +15,6 @@ using Zat.Tests.Runner.Common.Net.Model;
 using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.WebApp.Application.Paths;
 using Zat.Tests.Runner.WebApp.Features.TestExecution.Components;
-using Zat.Tests.Runner.WebApp.Shared.Stores.NUnitTestRunner;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
 using Zat.Tests.Runner.WebApp.Tests.TestDiscovery;
@@ -55,16 +54,16 @@ public class TestExecutionTests : Bunit.TestContext
         this.configurationState.SetupGet(state => state.Value).Returns(() => this.configuration);
         this.testSelectionState.SetupGet(state => state.Value).Returns(() => this.testSelection);
 
-        var testRunnerStore = new Mock<INUnitTestRunnerStore>();
-        testRunnerStore
-            .SetupGet(store => store.LoadedTestSuites)
+        var testTreeStore = new Mock<ITestTreeStore>();
+        testTreeStore
+            .SetupGet(store => store.TestSuites)
             .Returns([TestSuites.WithOneTestCase(TestType.Application, GivenTestCasePath)]);
 
         this.testRunnerEngine.SetupGet(engine => engine.State).Returns(() => this.testRunState);
 
         this.Services.AddSingleton(this.configurationState.Object);
         this.Services.AddSingleton(this.testSelectionState.Object);
-        this.Services.AddSingleton(testRunnerStore.Object);
+        this.Services.AddSingleton(testTreeStore.Object);
         this.Services.AddSingleton(new Mock<IAppPathsProvider>().Object);
         this.Services.AddSingleton(this.testRunnerEngine.Object);
         this.Services.AddScoped<TestExecutionViewModel>();

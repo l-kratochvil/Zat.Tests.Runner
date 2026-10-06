@@ -7,6 +7,7 @@ obvious from the code.
 
 - [The NUnit test runner proxy](#the-nunit-test-runner-proxy)
 - [One test run at a time](#one-test-run-at-a-time)
+- [The test tree follows the test assembly](#the-test-tree-follows-the-test-assembly)
 - [Each test assembly runs in its own AppDomain](#each-test-assembly-runs-in-its-own-appdomain)
 
 ## The NUnit test runner proxy
@@ -46,3 +47,11 @@ test assemblies reference. The proxy runs tests in-process, so a test assembly b
 Only one test run may be in progress on the environment, because the test station it runs against
 can't be shared. `ITestRunnerEngine` is therefore a singleton that refuses a second start, and the
 state of its test run is shared by every client: any of them sees it and may stop it.
+
+## The test tree follows the test assembly
+
+The test assembly may be deployed again while the application runs, so `ITestTreeStore` discovers
+the test tree again once its directory stays unchanged for a moment. When the new test tree holds
+other test entities, every test selection is cleared, as it may no longer be what the user chose.
+A test run still reads the test assembly on its own, and refuses to start when it no longer holds
+the test selection, because NUnit would quietly skip what is missing.

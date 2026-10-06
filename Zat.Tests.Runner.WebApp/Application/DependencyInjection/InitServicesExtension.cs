@@ -15,7 +15,6 @@ using Zat.Tests.Runner.WebApp.Features.TestResultReporting.Services;
 using Zat.Tests.Runner.WebApp.Shared.JsInterop;
 using Zat.Tests.Runner.WebApp.Shared.Services;
 using Zat.Tests.Runner.WebApp.Shared.Stores;
-using Zat.Tests.Runner.WebApp.Shared.Stores.NUnitTestRunner;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
 
@@ -44,7 +43,7 @@ public static class InitServicesExtension
                 .AddSingleton<IAppPathsProvider>(
                     static provider => provider.GetRequiredService<AppPathsProvider>())
                 .InitFluxor()
-                .InitNUnitTestRunner()
+                .InitTestTreeDiscovery()
                 .AddScoped<IJsModuleInteropFactory, JsModuleInteropFactory>()
                 .AddScoped<ITestResultHandler, TestResultHandler>()
                 .AddScoped<ITestResultHandler, TestLinkResultHandler>()
@@ -52,12 +51,9 @@ public static class InitServicesExtension
                 .AddScoped<WeakReferenceMessenger>()
                 .AddSingleton<BrowserLogger>();
 
-        private IServiceCollection InitNUnitTestRunner()
+        private IServiceCollection InitTestTreeDiscovery()
             => services
-                .AddSingleton<NUnitTestRunnerStore>()
-                .AddSingleton<INUnitTestRunnerStore>(
-                    static provider => provider.GetRequiredService<NUnitTestRunnerStore>())
-                .AddHostedService(static provider => provider.GetRequiredService<NUnitTestRunnerStore>());
+                .AddHostedService<TestTreeDiscovery>();
 
         private IServiceCollection InitFluxor()
             => services
