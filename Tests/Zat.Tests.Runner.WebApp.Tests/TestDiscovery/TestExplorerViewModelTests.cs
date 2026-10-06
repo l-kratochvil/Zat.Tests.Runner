@@ -1,9 +1,13 @@
 namespace Zat.Tests.Runner.WebApp.Tests.TestDiscovery;
 
+using Moq;
+
 using NUnit.Framework;
 
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.WebApp.Features.TestDiscovery.Components;
+using Zat.Tests.Runner.WebApp.Shared.Stores.NUnitTestRunner;
+using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
 
 [TestFixture]
 public class TestExplorerViewModelTests
@@ -15,12 +19,109 @@ public class TestExplorerViewModelTests
     private const string GivenSecondCasePath = "Suite.FirstFixture.SecondCase";
     private const string GivenThirdCasePath = "Suite.SecondFixture.ThirdCase";
 
+    private Mock<INUnitTestRunnerStore> testRunnerStore;
+    private TestDiscoveryStoreFake testSelection;
+
     private TestExplorerViewModel unit;
 
     [SetUp]
     public void SetUp()
     {
-        this.unit = new TestExplorerViewModel([CreateTestSuite()]);
+        this.testRunnerStore = new Mock<INUnitTestRunnerStore>();
+        this.testRunnerStore.SetupGet(store => store.LoadedTestSuites).Returns([CreateTestSuite()]);
+
+        this.testSelection = new TestDiscoveryStoreFake();
+
+        this.unit = this.CreateUnit();
+    }
+
+    [TearDown]
+    public void TearDown()
+        => this.unit.Dispose();
+
+    [Test]
+    public void Constructor__WhenStateAlreadyHoldsSelection__ThenShouldShowIt()
+    {
+        // Given:
+        // A view model made after the browser restored the selection is not told of it again.
+        string[] expectedPaths = [GivenFirstCasePath];
+        this.unit.Dispose();
+        this.testSelection.Value = new TestDiscoveryState(expectedPaths);
+
+        // When:
+        this.unit = this.CreateUnit();
+
+        // Then:
+        Assert.That(this.SelectedPaths(), Is.EqualTo(expectedPaths));
+    }
+
+    [Test]
+    public void OnSelectionChanged__WhenTestCasesAreToggled__ThenShouldPutTheirPathsIntoState()
+    {
+        // Given:
+        string[] expectedPaths = [GivenFirstCasePath, GivenSecondCasePath];
+        this.FindNode(GivenFirstFixturePath).Toggle();
+
+        // When:
+        this.unit.OnSelectionChanged();
+
+        // Then:
+        Assert.That(this.testSelection.Value.SelectedExecutionPaths, Is.EqualTo(expectedPaths));
+    }
+
+    [Test]
+    public void OnSelectionChanged__WhenClosedGroupIsToggled__ThenShouldLeaveItClosed()
+    {
+        // Given:
+        // The selection the tree put into the state comes back to it; opening groups is for a
+        // selection restored from elsewhere, not for one the user is making right now.
+        var givenFixture = this.FindNode(GivenSecondFixturePath);
+        givenFixture.IsExpanded = false;
+        givenFixture.Toggle();
+
+        // When:
+        this.unit.OnSelectionChanged();
+
+        // Then:
+        Assert.That(givenFixture.IsExpanded, Is.False);
+    }
+
+    [Test]
+    public void OnStateChanged__WhenSelectionIsRestored__ThenShouldSelectItsTestCases()
+    {
+        // Given:
+        string[] expectedPaths = [GivenFirstCasePath, GivenThirdCasePath];
+
+        // When:
+        this.testSelection.ChangeTo(new TestDiscoveryState(expectedPaths));
+
+        // Then:
+        Assert.That(this.SelectedPaths(), Is.EqualTo(expectedPaths));
+    }
+
+    [Test]
+    public void OnStateChanged__WhenSelectionIsRestored__ThenShouldAnnounceIt()
+    {
+        // Given:
+        var announced = new List<string?>();
+        this.unit.PropertyChanged += (_, e) => announced.Add(e.PropertyName);
+
+        // When:
+        this.testSelection.ChangeTo(new TestDiscoveryState([GivenFirstCasePath]));
+
+        // Then:
+        Assert.That(announced, Does.Contain(nameof(TestExplorerViewModel.SelectedTestCases)));
+    }
+
+    [Test]
+    public void Dispose__WhenStateChangesAfterwards__ThenShouldIgnoreIt()
+    {
+        // When:
+        this.unit.Dispose();
+        this.testSelection.ChangeTo(new TestDiscoveryState([GivenFirstCasePath]));
+
+        // Then:
+        Assert.That(this.SelectedPaths(), Is.Empty);
     }
 
     [Test]
@@ -199,6 +300,9 @@ public class TestExplorerViewModelTests
             id: executionPath,
             name: name,
             executionPath: executionPath);
+
+    private TestExplorerViewModel CreateUnit()
+        => new(this.testRunnerStore.Object, this.testSelection, this.testSelection.Dispatcher.Object);
 
     private TestTreeNodeData FindNode(string executionPath)
         => this.unit.Roots

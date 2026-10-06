@@ -1,7 +1,6 @@
 ﻿@* Feature: TestDiscovery — "the user can browse and select tests to run". *@
 
-@using Zat.Tests.Runner.WebApp.Features.TestDiscovery.Services
-@using Zat.Tests.Runner.WebApp.Shared.Stores.NUnitTestRunner
+@inherits Zat.Tests.Runner.WebApp.Components.MvvmComponentBase<TestExplorerViewModel>
 
 <section class="test-explorer">
     <div class="pane-header">
@@ -9,35 +8,24 @@
         @this.HeaderActions
     </div>
 
-    @if (this.viewModel.IsEmpty)
+    @if (this.ViewModel.IsEmpty)
     {
         <p class="placeholder-note">No tests loaded</p>
     }
     else
     {
         <ul class="test-tree">
-            @foreach (var root in this.viewModel.Roots)
+            @foreach (var root in this.ViewModel.Roots)
             {
-                <TestTreeNode Data="root" @key="root.ExecutionPath" SelectionChanged="this.OnSelectionChangedAsync" />
+                <TestTreeNode Data="root" @key="root.ExecutionPath" SelectionChanged="this.ViewModel.OnSelectionChanged" />
             }
         </ul>
     }
 </section>
 
 @code {
-    private TestExplorerViewModel viewModel = new([]);
-
-    /// <summary>
-    /// Gets or sets the store the loaded test suites are read from.
-    /// </summary>
     [Inject]
-    private INUnitTestRunnerStore TestRunnerStore { get; set; } = null!;
-
-    /// <summary>
-    /// Gets or sets the store the test selection is read from and saved to.
-    /// </summary>
-    [Inject]
-    private TestDiscoveryStore Store { get; set; } = null!;
+    protected override TestExplorerViewModel ViewModel { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets what is drawn in the header row beside the title, such as the button that
@@ -45,34 +33,4 @@
     /// </summary>
     [Parameter]
     public RenderFragment? HeaderActions { get; set; }
-
-    /// <inheritdoc/>
-    protected override void OnInitialized()
-    {
-        this.viewModel = new TestExplorerViewModel(this.TestRunnerStore.LoadedTestSuites);
-    }
-
-    /// <inheritdoc/>
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender)
-        {
-            return;
-        }
-
-        // What the user selected last is kept in the browser, which a circuit can only reach once
-        // it is interactive. The tree is therefore drawn unselected first and marked up afterwards.
-        // The remembered selection arrives as execution paths, and the tree is the only thing that
-        // can turn them back into test cases, so the resolving happens here and not in the store.
-        this.viewModel.ApplySelection(await this.Store.ReadRememberedPathsAsync());
-        this.Store.RestoreSelection(this.viewModel.SelectedTestCases);
-
-        this.StateHasChanged();
-    }
-
-    private Task OnSelectionChangedAsync()
-        => this.Store.UpdateAsync(state => state with
-        {
-            SelectedTestCases = this.viewModel.SelectedTestCases,
-        });
 }

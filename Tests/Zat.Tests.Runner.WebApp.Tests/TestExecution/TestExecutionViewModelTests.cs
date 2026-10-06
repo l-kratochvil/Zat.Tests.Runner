@@ -7,10 +7,13 @@ using NUnit.Framework;
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Net.Model;
 using Zat.Tests.Runner.Common.Net.Services;
+using Zat.Tests.Runner.WebApp.Application.Paths;
 using Zat.Tests.Runner.WebApp.Features.TestExecution.Components;
+using Zat.Tests.Runner.WebApp.Shared.Stores.NUnitTestRunner;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
 using Zat.Tests.Runner.WebApp.Tests.TestConfiguration;
+using Zat.Tests.Runner.WebApp.Tests.TestDiscovery;
 
 /// <summary>
 /// What the tester can do with the test run and what keeps a new one from starting.
@@ -27,11 +30,13 @@ public class TestExecutionViewModelTests
     private const string StopLabel = "Stop";
     private const string StoppingLabel = "Stopping…";
 
+    private const string GivenTestCasePath = "Suite.Fixture.Test";
+
     private Mock<ITestRunnerEngine> testRunnerEngine;
-    private Mock<ITestDiscoveryStore> testDiscoveryStore;
+    private Mock<INUnitTestRunnerStore> testRunnerStore;
+    private TestDiscoveryStoreFake testSelection;
     private TestConfigurationStoreFake configuration;
 
-    private TestDiscoveryState testSelection;
     private TestRunState testRunState;
 
     private TestExecutionViewModel unit;
@@ -39,22 +44,26 @@ public class TestExecutionViewModelTests
     [SetUp]
     public void SetUp()
     {
-        this.testSelection = new TestDiscoveryState([]);
         this.testRunState = TestRunState.Stopped;
 
         this.testRunnerEngine = new Mock<ITestRunnerEngine>();
         this.testRunnerEngine.SetupGet(engine => engine.State).Returns(() => this.testRunState);
 
-        this.testDiscoveryStore = new Mock<ITestDiscoveryStore>();
-        this.testDiscoveryStore.SetupGet(store => store.Current).Returns(() => this.testSelection);
+        this.testRunnerStore = new Mock<INUnitTestRunnerStore>();
+        this.testRunnerStore
+            .SetupGet(store => store.LoadedTestSuites)
+            .Returns([TestSuites.WithOneTestCase(TestType.Application, GivenTestCasePath)]);
 
+        this.testSelection = new TestDiscoveryStoreFake();
         this.configuration = new TestConfigurationStoreFake();
 
         this.unit = new TestExecutionViewModel(
             this.testRunnerEngine.Object,
             [],
             this.configuration,
-            this.testDiscoveryStore.Object);
+            new Mock<IAppPathsProvider>().Object,
+            this.testSelection,
+            this.testRunnerStore.Object);
     }
 
     [TearDown]
@@ -186,8 +195,7 @@ public class TestExecutionViewModelTests
         var announced = this.RecordAnnouncedProperties();
 
         // When:
-        this.GivenSelectedTestCase();
-        this.testDiscoveryStore.Raise(store => store.Changed += null, this.testSelection);
+        this.testSelection.ChangeTo(new TestDiscoveryState([GivenTestCasePath]));
 
         // Then:
         using (Assert.EnterMultipleScope())
@@ -195,6 +203,21 @@ public class TestExecutionViewModelTests
             Assert.That(announced, Does.Contain(nameof(TestExecutionViewModel.ExecutionBlockingReasons)));
             Assert.That(this.unit.TestsSelected, Is.True);
         }
+    }
+
+    [Test]
+    public void OnTestSelectionChanged__WhenSelectedPathMatchesNoTestCase__ThenShouldNotCountIt()
+    {
+        // Given:
+        // A selection remembered before the test assemblies changed may name a test that is gone,
+        // and a run of nothing is not a run.
+        this.GivenARunnableConfiguration();
+
+        // When:
+        this.testSelection.ChangeTo(new TestDiscoveryState(["Suite.Fixture.RemovedTest"]));
+
+        // Then:
+        Assert.That(this.unit.TestsSelected, Is.False);
     }
 
     [Test]
@@ -224,7 +247,7 @@ public class TestExecutionViewModelTests
         // When:
         this.unit.Dispose();
         this.testRunnerEngine.Raise(engine => engine.StateChanged += null, TestRunState.Running);
-        this.testDiscoveryStore.Raise(store => store.Changed += null, this.testSelection);
+        this.testSelection.ChangeTo(new TestDiscoveryState([GivenTestCasePath]));
         this.configuration.ChangeTo(new TestConfigurationState { HasErrors = true });
 
         // Then:
@@ -245,6 +268,5 @@ public class TestExecutionViewModelTests
     }
 
     private void GivenSelectedTestCase()
-        => this.testSelection = new TestDiscoveryState(
-            [new TestCaseEntity(TestType.Application, id: "1", name: "Test", executionPath: "Suite.Fixture.Test")]);
+        => this.testSelection.Value = new TestDiscoveryState([GivenTestCasePath]);
 }

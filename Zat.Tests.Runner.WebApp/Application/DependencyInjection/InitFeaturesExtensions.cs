@@ -5,10 +5,9 @@ using Zat.Tests.Runner.Common.Net.Extensions;
 using Zat.Tests.Runner.WebApp.Features.AppLogging.Services;
 using Zat.Tests.Runner.WebApp.Features.AppSettings.Services;
 using Zat.Tests.Runner.WebApp.Features.TestConfiguration.Components;
-using Zat.Tests.Runner.WebApp.Features.TestDiscovery.Services;
+using Zat.Tests.Runner.WebApp.Features.TestDiscovery.Components;
 using Zat.Tests.Runner.WebApp.Features.TestExecution.Components;
 using Zat.Tests.Runner.WebApp.Shared.Stores.AppSettings;
-using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
 
 /// <summary>
 /// Feature-by-feature registration of application services.
@@ -27,9 +26,7 @@ public static class InitFeaturesExtensions
 
         private IServiceCollection InitTestDiscovery()
             => services
-                .AddScoped<TestDiscoveryStore>()
-                .AddScoped<ITestDiscoveryStore>(
-                    provider => provider.GetRequiredService<TestDiscoveryStore>());
+                .AddScoped<TestExplorerViewModel>();
 
         /// <remarks>
         /// The settings describe one machine, so one <see cref="AppSettingsStore"/> is shared across

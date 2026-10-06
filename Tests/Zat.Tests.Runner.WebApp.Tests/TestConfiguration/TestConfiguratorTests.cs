@@ -17,8 +17,10 @@ using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Net.Application.Logging;
 using Zat.Tests.Runner.WebApp.Features.TestConfiguration.Components;
 using Zat.Tests.Runner.WebApp.Shared.Stores.AppSettings;
+using Zat.Tests.Runner.WebApp.Shared.Stores.NUnitTestRunner;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
+using Zat.Tests.Runner.WebApp.Tests.TestDiscovery;
 
 using TestConfigurationComponent = Features.TestConfiguration.Components.TestConfiguration;
 
@@ -44,19 +46,25 @@ public class TestConfiguratorTests : Bunit.TestContext
     private const string BetaNumberSelector = ".input-beta-version";
     private const string DebugModeSelector = ".input-debug-mode";
 
-    private TestDiscoveryState testSelection = new([]);
+    private const string GivenTestCasePath = "Suite.Fixture.Test";
+
+    private TestDiscoveryState testSelection = new();
+    private IReadOnlyList<TestSuiteEntity> loadedTestSuites = [];
 
     private TestConfigurationStoreFake store;
     private Mock<IAppSettingsStore> appSettingsStore;
-    private Mock<ITestDiscoveryStore> testDiscoveryStore;
+    private Mock<IState<TestDiscoveryState>> testSelectionState;
 
     [SetUp]
     public void SetUp()
     {
         this.store = new TestConfigurationStoreFake();
 
-        this.testDiscoveryStore = new Mock<ITestDiscoveryStore>();
-        this.testDiscoveryStore.SetupGet(store => store.Current).Returns(() => this.testSelection);
+        this.testSelectionState = new Mock<IState<TestDiscoveryState>>();
+        this.testSelectionState.SetupGet(state => state.Value).Returns(() => this.testSelection);
+
+        var testRunnerStore = new Mock<INUnitTestRunnerStore>();
+        testRunnerStore.SetupGet(store => store.LoadedTestSuites).Returns(() => this.loadedTestSuites);
 
         this.appSettingsStore = new Mock<IAppSettingsStore>();
         this.appSettingsStore
@@ -64,7 +72,8 @@ public class TestConfiguratorTests : Bunit.TestContext
             .Returns(new AppSettingsState(@"C:\Ide"));
 
         this.Services.AddSingleton<IState<TestConfigurationState>>(this.store);
-        this.Services.AddSingleton(this.testDiscoveryStore.Object);
+        this.Services.AddSingleton(this.testSelectionState.Object);
+        this.Services.AddSingleton(testRunnerStore.Object);
         this.Services.AddSingleton(this.appSettingsStore.Object);
         this.Services.AddSingleton(this.store.Dispatcher.Object);
         this.Services.AddSingleton(new Mock<IActionSubscriber>().Object);
@@ -334,12 +343,14 @@ public class TestConfiguratorTests : Bunit.TestContext
 
     private void RaiseTestSelectionChanged(IRenderedComponent<TestConfigurationComponent> component)
     {
-        this.testDiscoveryStore.Raise(store => store.Changed += null);
+        this.testSelectionState.Raise(state => state.StateChanged += null, EventArgs.Empty);
 
         component.WaitForState(() => true);
     }
 
     private void GivenSelectedTestCase(TestType testType)
-        => this.testSelection = new TestDiscoveryState(
-            [new TestCaseEntity(testType, id: "1", name: "Test", executionPath: "Suite.Fixture.Test")]);
+    {
+        this.loadedTestSuites = [TestSuites.WithOneTestCase(testType, GivenTestCasePath)];
+        this.testSelection = new TestDiscoveryState([GivenTestCasePath]);
+    }
 }

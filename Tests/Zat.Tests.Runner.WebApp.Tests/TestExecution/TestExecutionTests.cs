@@ -13,9 +13,12 @@ using NUnit.Framework;
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Net.Model;
 using Zat.Tests.Runner.Common.Net.Services;
+using Zat.Tests.Runner.WebApp.Application.Paths;
 using Zat.Tests.Runner.WebApp.Features.TestExecution.Components;
+using Zat.Tests.Runner.WebApp.Shared.Stores.NUnitTestRunner;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
+using Zat.Tests.Runner.WebApp.Tests.TestDiscovery;
 
 using TestExecutionComponent = Zat.Tests.Runner.WebApp.Features.TestExecution.Components.TestExecution;
 
@@ -36,25 +39,33 @@ public class TestExecutionTests : Bunit.TestContext
     private const string StopLabel = "Stop";
     private const string StoppingLabel = "Stopping…";
 
+    private const string GivenTestCasePath = "Suite.Fixture.Test";
+
     private readonly Mock<ITestRunnerEngine> testRunnerEngine = new();
     private readonly Mock<IState<TestConfigurationState>> configurationState = new();
+    private readonly Mock<IState<TestDiscoveryState>> testSelectionState = new();
 
     private TestConfigurationState configuration = new();
-    private TestDiscoveryState testSelection = new([]);
+    private TestDiscoveryState testSelection = new();
     private TestRunState testRunState = TestRunState.Stopped;
 
     [SetUp]
     public void SetUp()
     {
         this.configurationState.SetupGet(state => state.Value).Returns(() => this.configuration);
+        this.testSelectionState.SetupGet(state => state.Value).Returns(() => this.testSelection);
 
-        var testDiscoveryStore = new Mock<ITestDiscoveryStore>();
-        testDiscoveryStore.SetupGet(store => store.Current).Returns(() => this.testSelection);
+        var testRunnerStore = new Mock<INUnitTestRunnerStore>();
+        testRunnerStore
+            .SetupGet(store => store.LoadedTestSuites)
+            .Returns([TestSuites.WithOneTestCase(TestType.Application, GivenTestCasePath)]);
 
         this.testRunnerEngine.SetupGet(engine => engine.State).Returns(() => this.testRunState);
 
         this.Services.AddSingleton(this.configurationState.Object);
-        this.Services.AddSingleton(testDiscoveryStore.Object);
+        this.Services.AddSingleton(this.testSelectionState.Object);
+        this.Services.AddSingleton(testRunnerStore.Object);
+        this.Services.AddSingleton(new Mock<IAppPathsProvider>().Object);
         this.Services.AddSingleton(this.testRunnerEngine.Object);
         this.Services.AddScoped<TestExecutionViewModel>();
     }
@@ -105,7 +116,7 @@ public class TestExecutionTests : Bunit.TestContext
     public void OnConfigurationChanged__WhenConfigurationTurnsRunnable__ThenShouldLetRunStart()
     {
         // Given:
-        this.GivenSelectedTestCase(TestType.Application);
+        this.GivenSelectedTestCase();
         this.configuration = new TestConfigurationState { HasErrors = true };
 
         var component =
@@ -143,7 +154,7 @@ public class TestExecutionTests : Bunit.TestContext
     {
         // Given:
         this.configuration = ConfigurationSaidToBeRunnable();
-        this.testSelection = new TestDiscoveryState([]);
+        this.testSelection = new TestDiscoveryState();
 
         // When:
         var component =
@@ -172,10 +183,9 @@ public class TestExecutionTests : Bunit.TestContext
     private void GivenARunnableConfiguration()
     {
         this.configuration = ConfigurationSaidToBeRunnable();
-        this.GivenSelectedTestCase(TestType.Application);
+        this.GivenSelectedTestCase();
     }
 
-    private void GivenSelectedTestCase(TestType testType)
-        => this.testSelection = new TestDiscoveryState(
-            [new TestCaseEntity(testType, id: "1", name: "Test", executionPath: "Suite.Fixture.Test")]);
+    private void GivenSelectedTestCase()
+        => this.testSelection = new TestDiscoveryState([GivenTestCasePath]);
 }

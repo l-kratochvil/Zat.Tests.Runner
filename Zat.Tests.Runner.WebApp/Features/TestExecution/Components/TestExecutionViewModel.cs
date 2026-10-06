@@ -7,9 +7,11 @@ using DevKit.Mvvm.ViewModel.Commands;
 
 using Fluxor;
 
+using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Net.Model;
 using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.WebApp.Application.Paths;
+using Zat.Tests.Runner.WebApp.Shared.Stores.NUnitTestRunner;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
 using Zat.Tests.Runner.WebApp.Shared.ViewModel;
@@ -23,7 +25,8 @@ public sealed partial class TestExecutionViewModel : ViewModelBase, IDisposable
     private readonly ITestRunnerEngine testRunnerEngine;
     private readonly IEnumerable<ITestResultHandler> testResultHandlers;
     private readonly IState<TestConfigurationState> configurationState;
-    private readonly ITestDiscoveryStore testDiscoveryStore;
+    private readonly IState<TestDiscoveryState> testSelectionState;
+    private readonly INUnitTestRunnerStore testRunnerStore;
     private readonly IAppPathsProvider appPathsProvider;
 
     public TestExecutionViewModel(
@@ -31,18 +34,20 @@ public sealed partial class TestExecutionViewModel : ViewModelBase, IDisposable
         IEnumerable<ITestResultHandler> testResultHandlers,
         IState<TestConfigurationState> configurationState,
         IAppPathsProvider appPathsProvider,
-        ITestDiscoveryStore testDiscoveryStore)
+        IState<TestDiscoveryState> testSelectionState,
+        INUnitTestRunnerStore testRunnerStore)
     {
         this.testRunnerEngine = testRunnerEngine;
         this.testResultHandlers = testResultHandlers;
         this.configurationState = configurationState;
-        this.testDiscoveryStore = testDiscoveryStore;
+        this.testSelectionState = testSelectionState;
+        this.testRunnerStore = testRunnerStore;
         this.appPathsProvider = appPathsProvider;
 
         // The test run belongs to the environment rather than to this client, so another client may
         // start or stop it at any time.
         this.testRunnerEngine.StateChanged += this.OnTestRunnerEngineStateChanged;
-        this.testDiscoveryStore.Changed += this.OnTestSelectionChanged;
+        this.testSelectionState.StateChanged += this.OnTestSelectionChanged;
         this.configurationState.StateChanged += this.OnConfigurationChanged;
 
         this.UpdateTestsSelected();
@@ -117,7 +122,7 @@ public sealed partial class TestExecutionViewModel : ViewModelBase, IDisposable
     public void Dispose()
     {
         this.testRunnerEngine.StateChanged -= this.OnTestRunnerEngineStateChanged;
-        this.testDiscoveryStore.Changed -= this.OnTestSelectionChanged;
+        this.testSelectionState.StateChanged -= this.OnTestSelectionChanged;
         this.configurationState.StateChanged -= this.OnConfigurationChanged;
     }
 
@@ -131,7 +136,7 @@ public sealed partial class TestExecutionViewModel : ViewModelBase, IDisposable
 
         // CancellationToken.None: the test run must finish even when this client goes away.
         await this.testRunnerEngine.RunTestAsync(
-            testRunEntities: this.testDiscoveryStore.Current.SelectedTestCases,
+            testRunEntities: this.SelectedTestCases(),
             config: new ITestRunnerEngine.Config(
                 IsDebug: false, // TODO
                 TestedRuntimeVersion: this.configurationState.Value.RuntimeVersion,
@@ -148,7 +153,7 @@ public sealed partial class TestExecutionViewModel : ViewModelBase, IDisposable
     private void OnTestRunnerEngineStateChanged(TestRunState state)
         => this.UpdateTestRunState(this.testRunnerEngine.State);
 
-    private void OnTestSelectionChanged(TestDiscoveryState state)
+    private void OnTestSelectionChanged(object? sender, EventArgs e)
         => this.UpdateTestsSelected();
 
     private void OnConfigurationChanged(object? sender, EventArgs e)
@@ -158,7 +163,10 @@ public sealed partial class TestExecutionViewModel : ViewModelBase, IDisposable
         => this.TestRunState = state;
 
     private void UpdateTestsSelected()
-        => this.TestsSelected = this.testDiscoveryStore.Current.SelectedTestCases.Count > 0;
+        => this.TestsSelected = this.SelectedTestCases().Count > 0;
+
+    private IReadOnlyList<TestCaseEntity> SelectedTestCases()
+        => this.testSelectionState.Value.SelectedTestCases(this.testRunnerStore.LoadedTestSuites);
 
     private void UpdateConfigurationHasErrors()
         => this.ConfigurationHasErrors = this.configurationState.Value.HasErrors;

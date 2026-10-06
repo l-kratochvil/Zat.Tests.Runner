@@ -2,21 +2,43 @@ namespace Zat.Tests.Runner.WebApp.Features.TestDiscovery.Components;
 
 using System.Linq;
 
+using Fluxor;
+
 using Zat.Tests.Runner.Common.Model;
+using Zat.Tests.Runner.WebApp.Shared.Stores.NUnitTestRunner;
+using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
+using Zat.Tests.Runner.WebApp.Shared.ViewModel;
 
 /// <summary>
 /// The test tree as the explorer shows it: the discovered test suites turned into nodes, and the
 /// selection made in them.
 /// </summary>
 /// <remarks>
-/// Holds nothing but UI state and knows nothing about where the selection is kept, so the rules of
-/// selecting can be exercised on their own.
+/// The tree follows the test selection in the state, which is also how the selection the browser
+/// remembers arrives, and every change the user makes in the tree is put back into the state.
 /// </remarks>
-/// <param name="testSuites">Test suites to show.</param>
-public sealed class TestExplorerViewModel(IEnumerable<TestSuiteEntity> testSuites)
+public sealed class TestExplorerViewModel : ViewModelBase, IDisposable
 {
+    private readonly IState<TestDiscoveryState> state;
+    private readonly IDispatcher dispatcher;
+
+    public TestExplorerViewModel(
+        INUnitTestRunnerStore testRunnerStore,
+        IState<TestDiscoveryState> state,
+        IDispatcher dispatcher)
+    {
+        this.state = state;
+        this.dispatcher = dispatcher;
+
+        this.Roots = [..testRunnerStore.LoadedTestSuites.Select(TestTreeNodeData.Create)];
+
+        this.state.StateChanged += this.OnStateChanged;
+
+        this.ApplySelection(this.state.Value.SelectedExecutionPaths);
+    }
+
     /// <summary>Gets the nodes standing for the discovered test suites.</summary>
-    public IReadOnlyList<TestTreeNodeData> Roots { get; } = [..testSuites.Select(TestTreeNodeData.Create)];
+    public IReadOnlyList<TestTreeNodeData> Roots { get; }
 
     /// <summary>Gets a value indicating whether there is any test to show.</summary>
     public bool IsEmpty
@@ -46,12 +68,42 @@ public sealed class TestExplorerViewModel(IEnumerable<TestSuiteEntity> testSuite
         this.ExpandTowardsSelection();
     }
 
+    /// <summary>
+    /// Puts what the user selected in the tree into the test selection.
+    /// </summary>
+    public void OnSelectionChanged()
+        => this.dispatcher.Dispatch(
+            new SelectionChangedAction(
+                NewSelectedExecutionPaths: new ValueChange<IReadOnlyList<string>>(
+                    [..this.SelectedExecutionPaths()])));
+
+    /// <inheritdoc/>
+    public void Dispose()
+        => this.state.StateChanged -= this.OnStateChanged;
+
+    private void OnStateChanged(object? sender, EventArgs e)
+    {
+        var selectedPaths = this.state.Value.SelectedExecutionPaths;
+
+        // What the tree itself put into the state comes back here as well. Applying it again would
+        // open a closed group the user has just selected, so only a selection made elsewhere is.
+        if (!this.SelectedExecutionPaths().ToHashSet(StringComparer.Ordinal).SetEquals(selectedPaths))
+        {
+            this.ApplySelection(selectedPaths);
+        }
+
+        this.OnPropertyChanged(nameof(this.SelectedTestCases));
+    }
+
     private IEnumerable<TestTreeNodeData> AllNodes()
         => this.Roots.SelectMany(root => root.SelfAndDescendants());
 
     private IEnumerable<TestTreeNodeData> SelectedTestCaseNodes()
         => this.AllNodes().Where(
             node => node.IsTestCase && node.CheckState == TestTreeNodeData.State.Checked);
+
+    private IEnumerable<string> SelectedExecutionPaths()
+        => this.SelectedTestCaseNodes().Select(node => node.ExecutionPath);
 
     private void ExpandTowardsSelection()
     {

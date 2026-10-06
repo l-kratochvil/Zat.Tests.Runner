@@ -59,7 +59,7 @@
 
     /// <summary>
     /// Raised after the user changed what is selected, anywhere beneath this node. Handled by the
-    /// explorer, which owns both the tree and the store the selection is kept in.
+    /// explorer, which owns the tree and puts the selection into the state.
     /// </summary>
     [Parameter]
     public EventCallback SelectionChanged { get; set; }

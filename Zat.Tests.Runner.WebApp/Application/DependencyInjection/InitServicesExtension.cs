@@ -17,6 +17,7 @@ using Zat.Tests.Runner.WebApp.Shared.Services;
 using Zat.Tests.Runner.WebApp.Shared.Stores;
 using Zat.Tests.Runner.WebApp.Shared.Stores.NUnitTestRunner;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
+using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
 
 /// <summary>
 /// Registration of services shared across features.
@@ -69,7 +70,11 @@ public static class InitServicesExtension
                             // matched against the name of the feature, which Fluxor derives from
                             // the full name of the state.
                             options.UseInclusionApproach();
-                            options.SetWhiteList([typeof(TestConfigurationState).FullName]);
+                            options.SetWhiteList(
+                            [
+                                typeof(TestConfigurationState).FullName,
+                                typeof(TestDiscoveryState).FullName,
+                            ]);
                         }))
                 .AddScoped<IStringStateStorage, LocalStringStateStorage>()
                 .AddScoped<IStoreHandler, JsonStoreHandler>();
