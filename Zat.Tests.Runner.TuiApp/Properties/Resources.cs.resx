@@ -180,6 +180,9 @@
   <data name="TestRunReport_ErrorsFailuresWarnings_SectionHeader" xml:space="preserve">
     <value>Chyby, selhání a varování</value>
   </data>
+  <data name="TestRunReport_RunnerErrors_SectionHeader" xml:space="preserve">
+    <value>Chyby runneru</value>
+  </data>
   <data name="TestRunReport_Summary_SectionHeader" xml:space="preserve">
     <value>Souhrn běhu testů</value>
   </data>
