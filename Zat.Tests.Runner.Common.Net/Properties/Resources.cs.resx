@@ -135,4 +135,8 @@
   <data name="TestRun_Stopping" xml:space="preserve">
     <value>Test run se zastavuje.</value>
   </data>
+  <data name="TestRun_TestEntitiesMissing_Format" xml:space="preserve">
+    <value>Test run se nespustil: test assembly {0} se změnila a už neobsahuje tyto vybrané testy:
+{1}</value>
+  </data>
 </root>
