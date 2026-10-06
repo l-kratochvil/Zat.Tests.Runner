@@ -1,5 +1,7 @@
 namespace Zat.Tests.Runner.Common.Net.Services;
 
+using System.Diagnostics;
+
 using CommunityToolkit.Mvvm.Messaging;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -36,6 +38,8 @@ public static class ServicesExtensions
                 .AddScoped<WeakReferenceMessenger>()
                 .AddSingleton<GlobalWeakReferenceMessanger>()
                 .AddSingleton<ITestRunnerBridgeConnector, TestRunnerBridgeConnector>()
+                .AddSingleton<INUnitTestRunnerProxyConnector>(
+                    new NUnitTestRunnerProxyConnector(launchDebugger: !Debugger.IsAttached))
                 .AddSingleton<ITestLink, TestLink>()
                 .AddSingleton(_ => ITestLink.Config.Default)
                 .AddSingleton<ITestRunnerEngine, TestRunnerEngine>();

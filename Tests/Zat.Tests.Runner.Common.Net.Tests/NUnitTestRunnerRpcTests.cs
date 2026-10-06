@@ -36,25 +36,25 @@ public class NUnitTestRunnerRpcTests
 
     private readonly TestAppPathsProvider appPathsProvider = new(TestContext.CurrentContext.TestDirectory);
 
-    private NUnitTestRunnerProxyConnector connector = null!;
+    private INUnitTestRunnerProxyConnection connection = null!;
 
     [SetUp]
     public async Task SetUp()
     {
-        this.connector = await NUnitTestRunnerProxyConnector.ConnectAsync(launchDebugger: LaunchDebuggerIfRequired());
+        this.connection = await new NUnitTestRunnerProxyConnector(launchDebugger: LaunchDebuggerIfRequired()).ConnectAsync();
     }
 
     [TearDown]
     public async Task TearDown()
     {
-        await this.connector.DisposeAsync();
+        await this.connection.DisposeAsync();
     }
 
     [TestCaseSource(nameof(TestAssemblyCases))]
     public async Task LoadTestAssemblyAsync__WhenLoadingTestAssembly__ThenShouldReturnTestTree(string testAssemblyDllPath)
     {
         // Given
-        var unit = this.connector.Proxy;
+        var unit = this.connection.Proxy;
 
         // When & Then
         await AssertTestAssemblyLoadedAsync(unit, testAssemblyDllPath);
@@ -64,7 +64,7 @@ public class NUnitTestRunnerRpcTests
     public async Task RunTestAsync__WhenRunWithAllTestCases__ThenShouldReturnResultOfEveryTestCase(string testAssemblyDllPath)
     {
         // Given
-        var unit = this.connector.Proxy;
+        var unit = this.connection.Proxy;
         var testCases = GetTestCases(await LoadTestAssemblyAsync(unit, testAssemblyDllPath));
 
         // When
@@ -85,7 +85,7 @@ public class NUnitTestRunnerRpcTests
     public async Task RunTestAsync__WhenRunWithFailingTestCase__ThenShouldReturnFailureDetail()
     {
         // Given
-        var unit = this.connector.Proxy;
+        var unit = this.connection.Proxy;
         var testCase = GetTestCases(await LoadTestAssemblyAsync(unit, TestAssemblyNet481DllPath))
             .Single(x => x.ExecutionPath == Net481FailingTestCasePath);
 
@@ -113,7 +113,7 @@ public class NUnitTestRunnerRpcTests
         }
 
         // Given
-        var unit = this.connector.Proxy;
+        var unit = this.connection.Proxy;
 
         // When & Then
         await AssertTestAssemblyLoadedAsync(unit, zatTestsAssemblyPath);

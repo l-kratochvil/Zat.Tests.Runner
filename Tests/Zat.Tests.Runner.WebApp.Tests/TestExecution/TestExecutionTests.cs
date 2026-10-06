@@ -13,10 +13,11 @@ using NUnit.Framework;
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Net.Model;
 using Zat.Tests.Runner.Common.Net.Services;
+using Zat.Tests.Runner.WebApp.Application.Paths;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
 
-using TestExecutionComponent = Features.TestExecution.Components.TestExecution;
+using TestExecutionComponent = Zat.Tests.Runner.WebApp.Features.TestExecution.Components.TestExecution;
 
 /// <summary>
 /// What the button offers and what stops it, which is all it does.
@@ -56,6 +57,7 @@ public class TestExecutionTests : Bunit.TestContext
         this.Services.AddSingleton(configurationState.Object);
         this.Services.AddSingleton(testDiscoveryStore.Object);
         this.Services.AddSingleton(this.testRunnerEngine.Object);
+        this.Services.AddSingleton(new Mock<IAppPathsProvider>().Object);
 
         // The button is a Fluxor component, so it reaches for the subscriber as soon as it is drawn.
         this.Services.AddSingleton(new Mock<IActionSubscriber>().Object);

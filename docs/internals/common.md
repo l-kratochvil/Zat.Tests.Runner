@@ -20,9 +20,12 @@ application talks to over RPC.
 
 The application creates a uniquely named pipe, launches the proxy and passes it the pipe name as the
 first argument. The proxy connects as the client and serves `INUnitTestRunnerProxy` over
-StreamJsonRpc. It lives until the application closes the connection; the application also kills it
-on exit as a fallback. The build copies the proxy into the application's output directory (the
-Exchange targets in `Directory.Build.*`) so the application can launch it.
+StreamJsonRpc. A proxy is launched only for as long as it is needed, one for discovery and one for
+each test run, and ending the connection kills its whole process tree. A stuck test case can't
+outlive the test run that way: a stopped test run that doesn't give in within a few seconds is
+ended by ending its connection. The build copies the proxy into the application's output directory
+(the Exchange targets in `Directory.Build.*`) so the application can launch it; a missing proxy
+stops the application at start-up.
 
 ### Each test assembly runs in its own AppDomain
 

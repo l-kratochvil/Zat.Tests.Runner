@@ -7,6 +7,8 @@ using NUnit.Framework;
 
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Net.Application.Logging;
+using Zat.Tests.Runner.Common.Net.Application.Paths;
+using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.Common.Services;
 using Zat.Tests.Runner.WebApp.Application.Paths;
 using Zat.Tests.Runner.WebApp.Shared.Stores.NUnitTestRunner;
@@ -15,6 +17,7 @@ using Zat.Tests.Runner.WebApp.Shared.Stores.NUnitTestRunner;
 public class NUnitTestRunnerStoreTests
 {
     private Mock<INUnitTestRunnerProxy> proxyMock;
+    private Mock<INUnitTestRunnerProxyConnection> connectionMock;
     private Mock<ILogger<LogSources.TestRun>> loggerMock;
     private NUnitTestRunnerStore unit;
 
@@ -22,11 +25,23 @@ public class NUnitTestRunnerStoreTests
     public void SetUp()
     {
         this.proxyMock = new Mock<INUnitTestRunnerProxy>();
+        this.connectionMock = new Mock<INUnitTestRunnerProxyConnection>();
+        this.connectionMock.SetupGet(connection => connection.Proxy).Returns(this.proxyMock.Object);
+        this.connectionMock.Setup(connection => connection.DisposeAsync()).Returns(ValueTask.CompletedTask);
+
+        var connectorMock = new Mock<INUnitTestRunnerProxyConnector>();
+        connectorMock
+            .Setup(connector => connector.ConnectAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(this.connectionMock.Object);
+
         this.loggerMock = new Mock<ILogger<LogSources.TestRun>>();
         var appPathsProviderMock = new Mock<IAppPathsProvider>();
+        appPathsProviderMock
+            .SetupGet(provider => provider.Files)
+            .Returns(new SharedAppFilePaths(UserSettings: "user-settings.json", MainAssemblyDll: "main-assembly.dll"));
 
         this.unit = new NUnitTestRunnerStore(
-            this.proxyMock.Object,
+            connectorMock.Object,
             this.loggerMock.Object,
             appPathsProviderMock.Object);
     }
@@ -50,6 +65,20 @@ public class NUnitTestRunnerStoreTests
 
         // Then:
         Assert.That(this.unit.LoadedTestSuites, Is.EqualTo(givenTestSuites));
+    }
+
+    [Test]
+    public async Task StartAsync__WhenTestAssemblyIsRead__ThenShouldEndConnectionToProxy()
+    {
+        // Given:
+        // Nothing may keep the proxy server running once discovery is done.
+        this.SetUpDiscovery([CreateTestSuite()]);
+
+        // When:
+        await this.unit.StartAsync(CancellationToken.None);
+
+        // Then:
+        this.connectionMock.Verify(connection => connection.DisposeAsync(), Times.Once);
     }
 
     [Test]

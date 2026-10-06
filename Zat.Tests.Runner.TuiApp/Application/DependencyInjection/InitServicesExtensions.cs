@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging.Console;
 
 using Zat.Tests.Runner.Common.Net.Application.Logging;
 using Zat.Tests.Runner.Common.Net.Services;
-using Zat.Tests.Runner.Common.Services;
 using Zat.Tests.Runner.TuiApp.Application.Paths;
 using Zat.Tests.Runner.TuiApp.Services;
 
@@ -15,8 +14,7 @@ internal static class InitServicesExtensions
 {
     extension(IHostBuilder hostBuilder)
     {
-        public IHostBuilder InitServices(
-            INUnitTestRunnerProxy nunitTestRunnerProxy)
+        public IHostBuilder InitServices()
             => hostBuilder.ConfigureServices(
                 services => services
                     .AddLogging(builder => RemoveConsoleLogger(builder).InitLogging())
@@ -26,7 +24,6 @@ internal static class InitServicesExtensions
                         IAppPathsProvider>(AppOptions.SectionName)
                     .AddSingleton<IAppPathsProvider>(
                         static provider => provider.GetRequiredService<AppPathsProvider>())
-                    .AddSingleton(nunitTestRunnerProxy)
                     .AddSingleton<TestLinkResultHandler.IContext, TestLinkResultHandlerContext>()
                     .AddSingleton<ITestResultHandler, TestLinkResultHandler>());
     }
