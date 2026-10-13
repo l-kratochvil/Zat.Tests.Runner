@@ -1,19 +1,11 @@
 # Agent skills
 
-**Before your first reply, read `AGENTS-SHARED.md`** by its path (symlink, glob skips it); it is part
-of these instructions. If it can't be read, tell the user.
-
-For extra context see `CONTEXT.md`.
+If more context is needed see [CONTEXT.md](`CONTEXT.md`).
 
 ## Issue tracker
 
 Read `docs/agents/issue-tracker.md` before creating, reading, commenting on, labelling, or closing
 an issue or PR.
-
-## Triage labels
-
-Read `docs/agents/triage-labels.md` before applying a triage label — it holds the canonical label
-strings.
 
 ## Domain docs
 
@@ -32,7 +24,7 @@ Write the subject in format `< prefix > - < project-name > - < file-name >: < im
 - **< file-name >**: Name the single edited production file; use it when the change touches that one
   production file and the tests it drove, drop this part otherwise.
 
-**Example**
+**Example:**
 
 ```text
 Fix - App - NUnitZat.Tests.RunnerProxyConnector.cs: Fix hang on proxy process exit

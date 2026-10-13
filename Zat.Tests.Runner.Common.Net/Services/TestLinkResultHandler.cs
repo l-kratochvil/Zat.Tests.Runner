@@ -137,7 +137,7 @@ public class TestLinkResultHandler(
 
             if (context.BetaVersion is not null)
             {
-                buildName += $"(beta{context.BetaVersion})";
+                buildName += $" (Beta{context.BetaVersion})";
             }
 
             if (testResult.TestType is TestType.Runtime)
