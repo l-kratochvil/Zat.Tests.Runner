@@ -1,11 +1,32 @@
 # Agent skills
 
-If more context is needed see [CONTEXT.md](`CONTEXT.md`).
+## Docs
+
+For basic information about the solution and an index of its docs see `README.md`
+
+Domain knowledge lives in `GLOSSARY.md` and `docs/ADR/` at the repo root. Read `docs/agents/domain.md` before exploring the codebase, and when writing a glossary term or an ADR.
+
+## Code changes
+
+### Commit subject
+
+Write the subject in format `< prefix > - < project-name > - < file-name >: < imperative-summary >`:
+
+- **< prefix >**: Is required. Supports one of these options: a. `Feat`: for a new capability; b. `Fix`: for a defect; c. `Change`: for reworked behaviour; d. `Dev`: for work that leaves behaviour intact (refactoring, docs, warnings, tooling)
+- **< project-name >**: It's the project name minus the `Zat.SystemTest.` base prefix (`Zat.SystemTest.Common.Net` → `Common.Net`); drop this part when the change spans the solution.
+- **< file-name >**: Name the single edited production file; use it when the change touches that one production file and the tests it drove, drop this part otherwise.
+
+**Example:**
+
+```text
+Fix - App - NUnitZat.Tests.RunnerProxyConnector.cs: Fix hang on proxy process exit
+Feat - WebApp - TestExplorer.razor: Add test suite filter to discovery tree
+Dev: Update agents context
+```
 
 ## Issue tracker
 
-Before creating, reading, commenting on, labelling, assigning or closing an issue or a PR, run
-`/manage-github-issues` with repo `l-kratochvil/Zat.Tests.Runner`.
+Before creating, reading, commenting on, labelling, assigning or closing an issue or a PR, run `/manage-github-issues` with repo `l-kratochvil/Zat.Tests.Runner`.
 
 ### Matt Pocock skills
 
@@ -25,28 +46,3 @@ These skills speak of an issue tracker; map their wording onto the operations of
 - **Frontier**: the map's ready sub-issues; the first one wins.
 - **Claim**: assign the ticket to `@me` — the session's first write.
 - **Resolve**: comment the answer on the ticket, close it, then append a context pointer (gist + link) to the map's Decisions-so-far.
-
-## Domain docs
-
-Domain knowledge lives in `CONTEXT.md` at the repo root. Read
-`docs/agents/domain.md` before exploring the codebase, and when writing a glossary term or an ADR.
-
-## Code changes
-
-### Commit subject
-
-Write the subject in format `< prefix > - < project-name > - < file-name >: < imperative-summary >`:
-
-- **< prefix >**: Is required. Supports one of these options: a. `Feat`: for a new capability; b. `Fix`: for a defect; c. `Change`: for reworked behaviour; d. `Dev`: for work that leaves behaviour intact (refactoring, docs, warnings, tooling)
-- **< project-name >**: It's the project name minus the `Zat.SystemTest.` base prefix
-  (`Zat.SystemTest.Common.Net` → `Common.Net`); drop this part when the change spans the solution.
-- **< file-name >**: Name the single edited production file; use it when the change touches that one
-  production file and the tests it drove, drop this part otherwise.
-
-**Example:**
-
-```text
-Fix - App - NUnitZat.Tests.RunnerProxyConnector.cs: Fix hang on proxy process exit
-Feat - WebApp - TestExplorer.razor: Add test suite filter to discovery tree
-Dev: Update agents context
-```
