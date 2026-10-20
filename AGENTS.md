@@ -4,8 +4,27 @@ If more context is needed see [CONTEXT.md](`CONTEXT.md`).
 
 ## Issue tracker
 
-Read `docs/agents/issue-tracker.md` before creating, reading, commenting on, labelling, or closing
-an issue or PR.
+Before creating, reading, commenting on, labelling, assigning or closing an issue or a PR, run
+`/manage-github-issues` with repo `l-kratochvil/Zat.Tests.Runner`.
+
+### Matt Pocock skills
+
+These skills speak of an issue tracker; map their wording onto the operations of `/manage-github-issues`:
+
+- **"Publish to the issue tracker"**: create an issue.
+- **"Fetch the relevant ticket"**: read the issue with its comments.
+- **PRs as a request surface: no.** `/triage` handles issues only, never external PRs.
+
+#### Wayfinding
+
+`/wayfinder` keeps its **map** as one issue with **child** issues as tickets:
+
+- **Map**: an issue labelled `wayfinder:map`, its body holding the Notes / Decisions-so-far / Fog sections.
+- **Child ticket**: an issue labelled `wayfinder:<type>` (`research`/`prototype`/`grilling`/`task`), made a sub-issue of the map.
+- **Blocking**: mark the child as blocked by each blocker; it is unblocked once every blocker is closed.
+- **Frontier**: the map's ready sub-issues; the first one wins.
+- **Claim**: assign the ticket to `@me` — the session's first write.
+- **Resolve**: comment the answer on the ticket, close it, then append a context pointer (gist + link) to the map's Decisions-so-far.
 
 ## Domain docs
 
