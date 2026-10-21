@@ -90,7 +90,6 @@ public class EmailResultHandler(
             body.AppendLine().AppendLine($"== {MakeSubRunTitle(subRunResult)} ==");
             AppendSummary(body, subRunResult);
             AppendNotRunSection(body, subRunResult);
-            AppendProblemsSection(body, subRunResult);
         }
 
         body.AppendLine().AppendLine(Resources.EmailResult_FullResultsInTestLink);
@@ -132,22 +131,6 @@ public class EmailResultHandler(
                 (TestStatus.Unknown, Resources.EmailResult_Status_Unknown),
             ]);
 
-    private static void AppendProblemsSection(StringBuilder body, TestResult result)
-        => AppendEntrySection(
-            body,
-            Resources.EmailResult_ErrorsFailuresWarnings_SectionHeader,
-            GetReportedResults(result),
-            [
-                (TestStatus.Error, Resources.EmailResult_Label_Error),
-                (TestStatus.Invalid, Resources.EmailResult_Label_Invalid),
-                (TestStatus.Failure, Resources.EmailResult_Label_Failed),
-                (TestStatus.Warning, Resources.EmailResult_Label_Warning),
-            ]);
-
-    /// <summary>
-    /// Lists the <paramref name="reportedResults"/> of the given statuses in the order of
-    /// <paramref name="labelsByStatus"/>, each by its test case ID and message.
-    /// </summary>
     private static void AppendEntrySection(
         StringBuilder body,
         string header,

@@ -80,6 +80,7 @@ internal class RunTestScreen(
                 this.currentTestStartTime = DateTime.UtcNow;
                 this.state.Stopwatch.Restart();
 
+                // ReSharper disable once MethodSupportsCancellation
                 var runTestTask = testRunnerEngine.RunTestAsync(
                     testRunEntities: testRunConfigStore.SelectedTestEntities,
                     config: new ITestRunnerEngine.Config(
@@ -87,8 +88,7 @@ internal class RunTestScreen(
                         IsDebug: testRunConfigStore.IsDebugModeEnabled ?? false,
                         TestedRuntimeVersion: testRunConfigStore.RuntimeVersion,
                         TestedHwAssemblyTypes: testRunConfigStore.HwAssemblyTypes,
-                        TestResultHandlers: [.. testResultHandlers, this]),
-                    ct);
+                        TestResultHandlers: [.. testResultHandlers, this]));
 
                 var promptResult = await ShowLiveDataAsync(
                     table,

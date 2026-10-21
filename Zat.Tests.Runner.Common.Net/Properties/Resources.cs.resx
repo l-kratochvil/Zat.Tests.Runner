@@ -149,7 +149,7 @@
     <value>Žádný sub-run nedoběhl.</value>
   </data>
   <data name="EmailResult_ApplicationTests" xml:space="preserve">
-    <value>Aplikační testy</value>
+    <value>Testy aplikací</value>
   </data>
   <data name="EmailResult_TestsNotRun_SectionHeader" xml:space="preserve">
     <value>Nespuštěné testy</value>
