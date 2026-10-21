@@ -49,7 +49,7 @@ public class EmailResultHandlerTests
     public void HandleTestRunResult__WhenNotificationIsEnabled__ThenShouldSendOneEmailToConfiguredAddresses()
     {
         // When:
-        this.unit.HandleTestRunResult(new TestRunResult([SubRun(TestStatus.Passed)], false));
+        this.unit.HandleTestRunResult(new TestRunResult([SubRun(TestStatus.Passed)], false, TimeSpan.Zero));
 
         // Then:
         var (config, message) = this.sentEmails.Single();
@@ -68,7 +68,7 @@ public class EmailResultHandlerTests
         this.SetupHandlerContext(enabled: false, "first@zat.cz");
 
         // When:
-        this.unit.HandleTestRunResult(new TestRunResult([SubRun(TestStatus.Passed)], false));
+        this.unit.HandleTestRunResult(new TestRunResult([SubRun(TestStatus.Passed)], false, TimeSpan.Zero));
 
         // Then:
         Assert.That(this.sentEmails, Is.Empty);
@@ -81,7 +81,7 @@ public class EmailResultHandlerTests
         this.SetupHandlerContext(enabled: true);
 
         // When:
-        this.unit.HandleTestRunResult(new TestRunResult([SubRun(TestStatus.Passed)], false));
+        this.unit.HandleTestRunResult(new TestRunResult([SubRun(TestStatus.Passed)], false, TimeSpan.Zero));
 
         // Then:
         Assert.That(this.sentEmails, Is.Empty);
@@ -94,7 +94,7 @@ public class EmailResultHandlerTests
         this.SetupHandlerContext(enabled: true, "not-an-email", "first@zat.cz", "someone@example.com");
 
         // When:
-        this.unit.HandleTestRunResult(new TestRunResult([SubRun(TestStatus.Passed)], false));
+        this.unit.HandleTestRunResult(new TestRunResult([SubRun(TestStatus.Passed)], false, TimeSpan.Zero));
 
         // Then:
         Assert.That(this.sentEmails.Single().Message.To, Is.EqualTo(new[] { "first@zat.cz" }));
@@ -107,7 +107,7 @@ public class EmailResultHandlerTests
         this.SetupHandlerContext(enabled: true, "not-an-email", "someone@example.com");
 
         // When:
-        this.unit.HandleTestRunResult(new TestRunResult([SubRun(TestStatus.Passed)], false));
+        this.unit.HandleTestRunResult(new TestRunResult([SubRun(TestStatus.Passed)], false, TimeSpan.Zero));
 
         // Then:
         Assert.That(this.sentEmails, Is.Empty);
@@ -122,7 +122,8 @@ public class EmailResultHandlerTests
                 SubRun(TestStatus.Passed, TestStatus.Failure),
                 SubRun(TestStatus.Passed, TestStatus.Passed, TestStatus.Skipped),
             ],
-            false));
+            false,
+            TimeSpan.Zero));
 
         // Then:
         var subject = this.sentEmails.Single().Message.Subject;
@@ -137,34 +138,38 @@ public class EmailResultHandlerTests
     public void HandleTestRunResult__WhenTestRunWasStoppedByUser__ThenSubjectShouldSaySo()
     {
         // When:
-        this.unit.HandleTestRunResult(new TestRunResult([SubRun(TestStatus.Passed)], true));
+        this.unit.HandleTestRunResult(new TestRunResult([SubRun(TestStatus.Passed)], true, TimeSpan.Zero));
 
         // Then:
         Assert.That(this.sentEmails.Single().Message.Subject, Does.Contain(Resources.EmailResult_StoppedByUser));
     }
 
     [Test]
-    public void HandleTestRunResult__WhenTestCaseFailed__ThenBodyShouldListItWithItsMessage()
+    public void HandleTestRunResult__WhenTestCaseFailed__ThenBodyShouldListItByIdWithItsMessage()
     {
         // When:
         const string passingTestCaseId = "TC-1";
         const string failingTestCaseId = "TC-2";
+        const string failingEntityName = "Suite.Fixture.Failing";
 
         this.unit.HandleTestRunResult(new TestRunResult(
             [
                 SubRun(
                     new TestCaseResult(
-                        passingTestCaseId, "Passing", TestStatus.Passed),
+                        passingTestCaseId, "Suite.Fixture.Passing", TestStatus.Passed),
                     new TestCaseResult(
-                        failingTestCaseId, "Failing", TestStatus.Failure, new Detail("Button not found", null))),
+                        failingTestCaseId, failingEntityName, TestStatus.Failure, new Detail("Button not found", "at X"))),
             ],
-            false));
+            false,
+            TimeSpan.Zero));
 
         // Then:
         var body = this.sentEmails.Single().Message.Body;
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(body, Does.Contain(failingTestCaseId).And.Contain("Button not found"));
+            Assert.That(body, Does.Contain($"{Resources.EmailResult_Label_Failed} : {failingTestCaseId}"));
+            Assert.That(body, Does.Contain("Button not found"));
+            Assert.That(body, Does.Not.Contain(failingEntityName).And.Not.Contain("at X"));
             Assert.That(body, Does.Not.Contain(passingTestCaseId));
         }
     }
@@ -179,7 +184,7 @@ public class EmailResultHandlerTests
 
         // Then:
         Assert.That(
-            () => this.unit.HandleTestRunResult(new TestRunResult([SubRun(TestStatus.Passed)], false)),
+            () => this.unit.HandleTestRunResult(new TestRunResult([SubRun(TestStatus.Passed)], false, TimeSpan.Zero)),
             Throws.Nothing);
     }
 

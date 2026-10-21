@@ -140,7 +140,7 @@
 {1}</value>
   </data>
   <data name="EmailResult_Subject_Format" xml:space="preserve">
-    <value>Zat.Tests.Runner: prošlo {0}/{1} testovacích případů</value>
+    <value>Test dokončen - shrnutí: prošlo {0}/{1} testovacích případů</value>
   </data>
   <data name="EmailResult_StoppedByUser" xml:space="preserve">
     <value>(zastaveno uživatelem)</value>
@@ -151,7 +151,100 @@
   <data name="EmailResult_ApplicationTests" xml:space="preserve">
     <value>Aplikační testy</value>
   </data>
-  <data name="EmailResult_FailedTestCases" xml:space="preserve">
-    <value>Neúspěšné testovací případy:</value>
+  <data name="EmailResult_TestsNotRun_SectionHeader" xml:space="preserve">
+    <value>Nespuštěné testy</value>
+  </data>
+  <data name="EmailResult_ErrorsFailuresWarnings_SectionHeader" xml:space="preserve">
+    <value>Chyby, selhání a varování</value>
+  </data>
+  <data name="EmailResult_Label_Ignored" xml:space="preserve">
+    <value>Ignorováno</value>
+  </data>
+  <data name="EmailResult_Label_Explicit" xml:space="preserve">
+    <value>Explicitní</value>
+  </data>
+  <data name="EmailResult_Label_Skipped" xml:space="preserve">
+    <value>Přeskočeno</value>
+  </data>
+  <data name="EmailResult_Label_Error" xml:space="preserve">
+    <value>Chyba</value>
+  </data>
+  <data name="EmailResult_Label_Invalid" xml:space="preserve">
+    <value>Neplatný</value>
+  </data>
+  <data name="EmailResult_Label_Failed" xml:space="preserve">
+    <value>Selhal</value>
+  </data>
+  <data name="EmailResult_Label_Warning" xml:space="preserve">
+    <value>Varování</value>
+  </data>
+  <data name="EmailResult_Summary_OverallResult" xml:space="preserve">
+    <value>Celkový výsledek</value>
+  </data>
+  <data name="EmailResult_Summary_TestCount" xml:space="preserve">
+    <value>Počet testů</value>
+  </data>
+  <data name="EmailResult_Summary_Passed" xml:space="preserve">
+    <value>Úspěšné</value>
+  </data>
+  <data name="EmailResult_Summary_Failed" xml:space="preserve">
+    <value>Neúspěšné</value>
+  </data>
+  <data name="EmailResult_Summary_Warnings" xml:space="preserve">
+    <value>Varování</value>
+  </data>
+  <data name="EmailResult_Summary_Inconclusive" xml:space="preserve">
+    <value>Neprůkazné</value>
+  </data>
+  <data name="EmailResult_Summary_Skipped" xml:space="preserve">
+    <value>Přeskočené</value>
+  </data>
+  <data name="EmailResult_Summary_FailedTests" xml:space="preserve">
+    <value>Neúspěšné testy</value>
+  </data>
+  <data name="EmailResult_Summary_Failures" xml:space="preserve">
+    <value>Selhání</value>
+  </data>
+  <data name="EmailResult_Summary_Errors" xml:space="preserve">
+    <value>Chyby</value>
+  </data>
+  <data name="EmailResult_Summary_Invalid" xml:space="preserve">
+    <value>Neplatné</value>
+  </data>
+  <data name="EmailResult_Summary_SkippedTests" xml:space="preserve">
+    <value>Přeskočené testy</value>
+  </data>
+  <data name="EmailResult_Summary_Ignored" xml:space="preserve">
+    <value>Ignorované</value>
+  </data>
+  <data name="EmailResult_Summary_Explicit" xml:space="preserve">
+    <value>Explicitní</value>
+  </data>
+  <data name="EmailResult_Summary_Other" xml:space="preserve">
+    <value>Ostatní</value>
+  </data>
+  <data name="EmailResult_Summary_Duration" xml:space="preserve">
+    <value>Doba trvání</value>
+  </data>
+  <data name="EmailResult_Status_Passed" xml:space="preserve">
+    <value>Úspěšné</value>
+  </data>
+  <data name="EmailResult_Status_Failed" xml:space="preserve">
+    <value>Neúspěšné</value>
+  </data>
+  <data name="EmailResult_Status_Skipped" xml:space="preserve">
+    <value>Přeskočené</value>
+  </data>
+  <data name="EmailResult_Status_Inconclusive" xml:space="preserve">
+    <value>Neprůkazné</value>
+  </data>
+  <data name="EmailResult_Status_Warning" xml:space="preserve">
+    <value>Varování</value>
+  </data>
+  <data name="EmailResult_Status_Unknown" xml:space="preserve">
+    <value>Neznámé</value>
+  </data>
+  <data name="EmailResult_FullResultsInTestLink" xml:space="preserve">
+    <value>Kompletní výsledky s detaily najdete v aplikaci TestLink.</value>
   </data>
 </root>

@@ -3,6 +3,8 @@
 using System;
 using System.Collections.Generic;
 
+using CSharpFunctionalExtensions;
+
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.TuiApp.Common;
 using Zat.Tests.Runner.TuiApp.Stores;
@@ -46,7 +48,7 @@ internal sealed class HomeScreen(
                     .Title(string.Empty) // The console is buggy if no title is set
                     .PageSize(10)
                     .MoreChoicesText(SharedTexts.MoreChoicesHelpText)
-                    .AddChoices(choices)
+                    .AddChoiceTree(choices)
                     .UseConverter(choice => choice.Text)
                     .HighlightStyle(new Style(foreground: Color.Aqua, decoration: Spectre.Console.Decoration.Bold));
 
@@ -165,11 +167,12 @@ internal sealed class HomeScreen(
             yield break;
         }
 
-        // Enable TestLink reporting choice
+        // Enable TestLink reporting choice with its dependent choices
         if (Choice.InitChoice<IScreen>(
                 enableTestLinkReportingPromptScreen,
                 Resources.EnableTestLinkReporting_PromptText,
                 testRunConfigStore.IsTestLinkReportingEnabled)
+            .Map(choice => choice with { Children = [.. this.GetTestLinkReportingChoices()] })
             .TryGetValue(out var enableTestLinkReportingPromptScreenChoice))
         {
             yield return enableTestLinkReportingPromptScreenChoice;
@@ -181,87 +184,26 @@ internal sealed class HomeScreen(
             yield break;
         }
 
-        if (testRunConfigStore.IsTestLinkReportingEnabled.HasValue &&
-            testRunConfigStore.IsTestLinkReportingEnabled.Value)
+        // REQUIRED: IDE version when TestLink reporting is enabled
+        if (testRunConfigStore is
+            {
+                IsTestLinkReportingEnabled: true,
+                IdeVersion: null
+            })
         {
-            // IDE version choice
-            if (Choice.InitChoice<IScreen>(
-                    ideVersionPromptScreen,
-                    Resources.IdeVersion_ChoiceText,
-                    testRunConfigStore.IdeVersion)
-                .TryGetValue(out var ideVersionChoice))
-            {
-                yield return ideVersionChoice;
-            }
-
-            // IDE release date choice
-            if (Choice.InitChoice<IScreen>(
-                    ideReleaseDatePromptScreen,
-                    Resources.IdeReleaseDate_ChoiceText,
-                    testRunConfigStore.IdeReleaseDate)
-                .TryGetValue(out var ideReleaseDateChoice))
-            {
-                yield return ideReleaseDateChoice;
-            }
-
-            // Runtime release date choice
-            if (Choice.InitChoice<IScreen>(
-                    runtimeReleaseDatePromptScreen,
-                    Resources.RuntimeReleaseDate_ChoiceText,
-                    testRunConfigStore.RuntimeReleaseDate)
-                .TryGetValue(out var runtimeReleaseDateChoice))
-            {
-                yield return runtimeReleaseDateChoice;
-            }
-
-            // Enable is beta version flag choice
-            if (Choice.InitChoice<IScreen>(
-                    isBetaVersionPromptScreen,
-                    Resources.IsBetaVersion_PromptText,
-                    testRunConfigStore.IsBetaVersion)
-                .TryGetValue(out var isBetaVersionPromptScreenChoice))
-            {
-                yield return isBetaVersionPromptScreenChoice;
-            }
-
-            // Beta version choice
-            if (Choice.InitChoice<IScreen>(
-                    betaVersionPromptScreen,
-                    Resources.BetaVersion_ChoiceText,
-                    testRunConfigStore.BetaVersion,
-                    () => testRunConfigStore.IsBetaVersion ?? false)
-                .TryGetValue(out var betaVersionPromptScreenChoice))
-            {
-                yield return betaVersionPromptScreenChoice;
-            }
-
-            // REQUIRED: IDE version
-            if (testRunConfigStore.IdeVersion is null)
-            {
-                yield break;
-            }
+            yield break;
         }
 
-        // Enable email notification choice; not required, as it is enabled unless switched off
+        // Enable email notification choice with its dependent choices; not required, as it is enabled unless switched off
         var isEmailNotificationEnabled = testRunConfigStore.IsEmailNotificationEnabled ?? true;
         if (Choice.InitChoice<IScreen>(
                 enableEmailNotificationPromptScreen,
                 Resources.EnableEmailNotification_PromptText,
                 isEmailNotificationEnabled)
+            .Map(choice => choice with { Children = [.. this.GetEmailNotificationChoices(isEmailNotificationEnabled)] })
             .TryGetValue(out var enableEmailNotificationPromptScreenChoice))
         {
             yield return enableEmailNotificationPromptScreenChoice;
-        }
-
-        // Email addresses choice
-        if (Choice.InitChoice<IScreen>(
-                emailAddressesScreen,
-                Resources.EmailAddresses_ChoiceText,
-                FormatEmailAddresses(testRunConfigStore.EmailAddresses),
-                () => isEmailNotificationEnabled)
-            .TryGetValue(out var emailAddressesChoice))
-        {
-            yield return emailAddressesChoice;
         }
 
         // Enable debug mode choice
@@ -284,5 +226,80 @@ internal sealed class HomeScreen(
         yield return new Choice<IScreen>(
             runTestScreen,
             displayText: Resources.RunTest_ChoiceText);
+    }
+
+    private IEnumerable<Choice<IScreen>> GetTestLinkReportingChoices()
+    {
+        if (testRunConfigStore.IsTestLinkReportingEnabled is not true)
+        {
+            yield break;
+        }
+
+        // IDE version choice
+        if (Choice.InitChoice<IScreen>(
+                ideVersionPromptScreen,
+                Resources.IdeVersion_ChoiceText,
+                testRunConfigStore.IdeVersion)
+            .TryGetValue(out var ideVersionChoice))
+        {
+            yield return ideVersionChoice;
+        }
+
+        // IDE release date choice
+        if (Choice.InitChoice<IScreen>(
+                ideReleaseDatePromptScreen,
+                Resources.IdeReleaseDate_ChoiceText,
+                testRunConfigStore.IdeReleaseDate)
+            .TryGetValue(out var ideReleaseDateChoice))
+        {
+            yield return ideReleaseDateChoice;
+        }
+
+        // Runtime release date choice
+        if (Choice.InitChoice<IScreen>(
+                runtimeReleaseDatePromptScreen,
+                Resources.RuntimeReleaseDate_ChoiceText,
+                testRunConfigStore.RuntimeReleaseDate)
+            .TryGetValue(out var runtimeReleaseDateChoice))
+        {
+            yield return runtimeReleaseDateChoice;
+        }
+
+        // Enable is beta version flag choice with its dependent beta version choice
+        if (Choice.InitChoice<IScreen>(
+                isBetaVersionPromptScreen,
+                Resources.IsBetaVersion_PromptText,
+                testRunConfigStore.IsBetaVersion)
+            .Map(choice => choice with { Children = [.. this.GetBetaVersionChoices()] })
+            .TryGetValue(out var isBetaVersionPromptScreenChoice))
+        {
+            yield return isBetaVersionPromptScreenChoice;
+        }
+    }
+
+    private IEnumerable<Choice<IScreen>> GetBetaVersionChoices()
+    {
+        if (Choice.InitChoice<IScreen>(
+                betaVersionPromptScreen,
+                Resources.BetaVersion_ChoiceText,
+                testRunConfigStore.BetaVersion,
+                () => testRunConfigStore.IsBetaVersion ?? false)
+            .TryGetValue(out var betaVersionPromptScreenChoice))
+        {
+            yield return betaVersionPromptScreenChoice;
+        }
+    }
+
+    private IEnumerable<Choice<IScreen>> GetEmailNotificationChoices(bool isEmailNotificationEnabled)
+    {
+        if (Choice.InitChoice<IScreen>(
+                emailAddressesScreen,
+                Resources.EmailAddresses_ChoiceText,
+                FormatEmailAddresses(testRunConfigStore.EmailAddresses),
+                () => isEmailNotificationEnabled)
+            .TryGetValue(out var emailAddressesChoice))
+        {
+            yield return emailAddressesChoice;
+        }
     }
 }

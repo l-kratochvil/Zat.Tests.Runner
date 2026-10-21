@@ -140,7 +140,7 @@
 {1}</value>
   </data>
   <data name="EmailResult_Subject_Format" xml:space="preserve">
-    <value>Zat.Tests.Runner: {0}/{1} test cases passed</value>
+    <value>Test completed - summary: {0}/{1} test cases passed</value>
   </data>
   <data name="EmailResult_StoppedByUser" xml:space="preserve">
     <value>(stopped by user)</value>
@@ -151,7 +151,100 @@
   <data name="EmailResult_ApplicationTests" xml:space="preserve">
     <value>Application tests</value>
   </data>
-  <data name="EmailResult_FailedTestCases" xml:space="preserve">
-    <value>Failed test cases:</value>
+  <data name="EmailResult_TestsNotRun_SectionHeader" xml:space="preserve">
+    <value>Tests Not Run</value>
+  </data>
+  <data name="EmailResult_ErrorsFailuresWarnings_SectionHeader" xml:space="preserve">
+    <value>Errors, Failures and Warnings</value>
+  </data>
+  <data name="EmailResult_Label_Ignored" xml:space="preserve">
+    <value>Ignored</value>
+  </data>
+  <data name="EmailResult_Label_Explicit" xml:space="preserve">
+    <value>Explicit</value>
+  </data>
+  <data name="EmailResult_Label_Skipped" xml:space="preserve">
+    <value>Skipped</value>
+  </data>
+  <data name="EmailResult_Label_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="EmailResult_Label_Invalid" xml:space="preserve">
+    <value>Invalid</value>
+  </data>
+  <data name="EmailResult_Label_Failed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="EmailResult_Label_Warning" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+  <data name="EmailResult_Summary_OverallResult" xml:space="preserve">
+    <value>Overall result</value>
+  </data>
+  <data name="EmailResult_Summary_TestCount" xml:space="preserve">
+    <value>Test Count</value>
+  </data>
+  <data name="EmailResult_Summary_Passed" xml:space="preserve">
+    <value>Passed</value>
+  </data>
+  <data name="EmailResult_Summary_Failed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="EmailResult_Summary_Warnings" xml:space="preserve">
+    <value>Warnings</value>
+  </data>
+  <data name="EmailResult_Summary_Inconclusive" xml:space="preserve">
+    <value>Inconclusive</value>
+  </data>
+  <data name="EmailResult_Summary_Skipped" xml:space="preserve">
+    <value>Skipped</value>
+  </data>
+  <data name="EmailResult_Summary_FailedTests" xml:space="preserve">
+    <value>Failed Tests</value>
+  </data>
+  <data name="EmailResult_Summary_Failures" xml:space="preserve">
+    <value>Failures</value>
+  </data>
+  <data name="EmailResult_Summary_Errors" xml:space="preserve">
+    <value>Errors</value>
+  </data>
+  <data name="EmailResult_Summary_Invalid" xml:space="preserve">
+    <value>Invalid</value>
+  </data>
+  <data name="EmailResult_Summary_SkippedTests" xml:space="preserve">
+    <value>Skipped Tests</value>
+  </data>
+  <data name="EmailResult_Summary_Ignored" xml:space="preserve">
+    <value>Ignored</value>
+  </data>
+  <data name="EmailResult_Summary_Explicit" xml:space="preserve">
+    <value>Explicit</value>
+  </data>
+  <data name="EmailResult_Summary_Other" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="EmailResult_Summary_Duration" xml:space="preserve">
+    <value>Duration</value>
+  </data>
+  <data name="EmailResult_Status_Passed" xml:space="preserve">
+    <value>Passed</value>
+  </data>
+  <data name="EmailResult_Status_Failed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="EmailResult_Status_Skipped" xml:space="preserve">
+    <value>Skipped</value>
+  </data>
+  <data name="EmailResult_Status_Inconclusive" xml:space="preserve">
+    <value>Inconclusive</value>
+  </data>
+  <data name="EmailResult_Status_Warning" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+  <data name="EmailResult_Status_Unknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="EmailResult_FullResultsInTestLink" xml:space="preserve">
+    <value>The complete results with details are available in TestLink.</value>
   </data>
 </root>

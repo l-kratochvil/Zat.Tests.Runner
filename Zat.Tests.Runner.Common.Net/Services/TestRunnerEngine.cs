@@ -1,6 +1,7 @@
 ﻿namespace Zat.Tests.Runner.Common.Net.Services;
 
 using System.Collections.Generic;
+using System.Diagnostics;
 
 using CSharpFunctionalExtensions;
 
@@ -94,6 +95,7 @@ public class TestRunnerEngine(
             // Both the caller's token and StopTestRun end up cancelling runCts.
             stopRequestedRegistration = runCts.Token.Register(this.OnStopRequested);
 
+            var stopwatch = Stopwatch.StartNew();
             var testRunResults = new List<TestResult>();
 
             try
@@ -130,7 +132,10 @@ public class TestRunnerEngine(
                 // Stopped before the proxy got to any test case.
             }
 
-            var testRunResult = new TestRunResult([.. testRunResults], IsStoppedByUser: runCts.IsCancellationRequested);
+            var testRunResult = new TestRunResult(
+                [.. testRunResults],
+                IsStoppedByUser: runCts.IsCancellationRequested,
+                ElapsedTime: stopwatch.Elapsed);
             foreach (var handler in resultHandlers)
             {
                 handler.HandleTestRunResult(testRunResult);
@@ -182,6 +187,7 @@ public class TestRunnerEngine(
                 TestType.Application));
         }
 
+        // ReSharper disable once InvertIf
         if (runtimeTestEntities.Length > 0)
         {
             ArgumentNullException.ThrowIfNull(config.TestedHwAssemblyTypes);
@@ -225,7 +231,7 @@ public class TestRunnerEngine(
     private static async Task<T> WaitUnlessAbandonedAsync<T>(Task<T> task, CancellationToken stopToken)
     {
         using var abandonCts = new CancellationTokenSource();
-        using var stopRegistration = stopToken.Register(() => abandonCts.CancelAfter(StopTimeout));
+        await using var stopRegistration = stopToken.Register(() => abandonCts.CancelAfter(StopTimeout));
 
         return await task.WaitAsync(abandonCts.Token);
     }

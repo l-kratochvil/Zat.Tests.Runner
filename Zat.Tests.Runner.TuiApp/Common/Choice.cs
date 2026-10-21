@@ -2,14 +2,25 @@
 
 using CSharpFunctionalExtensions;
 
-internal class Choice<TValue>(
-    TValue value,
-    string displayText,
-    string? displayValue = null)
+internal sealed record Choice<TValue>
 {
-    public string Text { get; } = displayText.AsTextValuePair(displayValue);
+    public Choice(
+        TValue value,
+        string displayText,
+        string? displayValue = null)
+    {
+        this.Value = value;
+        this.Text = displayText.AsTextValuePair(displayValue);
+    }
 
-    public TValue Value { get; } = value;
+    public string Text { get; }
+
+    public TValue Value { get; }
+
+    /// <summary>
+    /// Gets the choices that depend on this one; they are shown one level deeper in the choice tree.
+    /// </summary>
+    public IReadOnlyList<Choice<TValue>> Children { get; init; } = [];
 }
 
 internal static class Choice

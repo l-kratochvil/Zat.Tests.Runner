@@ -76,7 +76,9 @@ public class EmailResultHandler(
 
     private static string MakeBody(string subject, TestRunResult testRunResult)
     {
-        var body = new StringBuilder().AppendLine(subject);
+        var body = new StringBuilder()
+            .AppendLine(subject)
+            .AppendLine($"{Resources.EmailResult_Summary_Duration}: {FormatDuration(testRunResult.ElapsedTime)}");
 
         if (testRunResult.SubRunResults.Count == 0)
         {
@@ -86,30 +88,150 @@ public class EmailResultHandler(
         foreach (var subRunResult in testRunResult.SubRunResults)
         {
             body.AppendLine().AppendLine($"== {MakeSubRunTitle(subRunResult)} ==");
-
-            var countsByStatus = subRunResult.TestCaseResults
-                .GroupBy(x => x.Status)
-                .OrderBy(x => x.Key is not TestStatus.Passed)
-                .ThenBy(x => x.Key);
-            foreach (var statusCount in countsByStatus)
-            {
-                body.AppendLine($"{statusCount.Key}: {statusCount.Count()}");
-            }
-
-            if (subRunResult.FailedResults.Length == 0)
-            {
-                continue;
-            }
-
-            body.AppendLine().AppendLine(Resources.EmailResult_FailedTestCases);
-            foreach (var failedResult in subRunResult.FailedResults)
-            {
-                body.AppendLine($"- {failedResult.Id} ({failedResult.EntityName}): {failedResult.Detail?.Message}");
-            }
+            AppendSummary(body, subRunResult);
+            AppendNotRunSection(body, subRunResult);
+            AppendProblemsSection(body, subRunResult);
         }
+
+        body.AppendLine().AppendLine(Resources.EmailResult_FullResultsInTestLink);
 
         return body.ToString();
     }
+
+    private static void AppendSummary(StringBuilder body, TestResult result)
+    {
+        body.AppendLine($"{Resources.EmailResult_Summary_OverallResult}: {MapStatus(result.OverallStatus)}");
+        body.AppendLine(
+            $"{Resources.EmailResult_Summary_TestCount}: {result.TestCaseResults.Length}" +
+            $", {Resources.EmailResult_Summary_Passed}: {result.PassedResults.Length}" +
+            $", {Resources.EmailResult_Summary_Failed}: {result.FailedResults.Length}" +
+            $", {Resources.EmailResult_Summary_Warnings}: {result.WarningResults.Length}" +
+            $", {Resources.EmailResult_Summary_Inconclusive}: {result.InconclusiveResults.Length}" +
+            $", {Resources.EmailResult_Summary_Skipped}: {result.NotRunResults.Length}");
+        body.AppendLine(
+            $"  {Resources.EmailResult_Summary_FailedTests} -" +
+            $" {Resources.EmailResult_Summary_Failures}: {result.FailureResults.Length}" +
+            $", {Resources.EmailResult_Summary_Errors}: {result.ErrorResults.Length}" +
+            $", {Resources.EmailResult_Summary_Invalid}: {result.InvalidResults.Length}");
+        body.AppendLine(
+            $"  {Resources.EmailResult_Summary_SkippedTests} -" +
+            $" {Resources.EmailResult_Summary_Ignored}: {result.IgnoredResults.Length}" +
+            $", {Resources.EmailResult_Summary_Explicit}: {result.ExplicitResults.Length}" +
+            $", {Resources.EmailResult_Summary_Other}: {result.SkippedResults.Length + result.UnknownResults.Length}");
+    }
+
+    private static void AppendNotRunSection(StringBuilder body, TestResult result)
+        => AppendEntrySection(
+            body,
+            Resources.EmailResult_TestsNotRun_SectionHeader,
+            GetReportedResults(result),
+            [
+                (TestStatus.Ignored, Resources.EmailResult_Label_Ignored),
+                (TestStatus.Explicit, Resources.EmailResult_Label_Explicit),
+                (TestStatus.Skipped, Resources.EmailResult_Label_Skipped),
+                (TestStatus.Unknown, Resources.EmailResult_Status_Unknown),
+            ]);
+
+    private static void AppendProblemsSection(StringBuilder body, TestResult result)
+        => AppendEntrySection(
+            body,
+            Resources.EmailResult_ErrorsFailuresWarnings_SectionHeader,
+            GetReportedResults(result),
+            [
+                (TestStatus.Error, Resources.EmailResult_Label_Error),
+                (TestStatus.Invalid, Resources.EmailResult_Label_Invalid),
+                (TestStatus.Failure, Resources.EmailResult_Label_Failed),
+                (TestStatus.Warning, Resources.EmailResult_Label_Warning),
+            ]);
+
+    /// <summary>
+    /// Lists the <paramref name="reportedResults"/> of the given statuses in the order of
+    /// <paramref name="labelsByStatus"/>, each by its test case ID and message.
+    /// </summary>
+    private static void AppendEntrySection(
+        StringBuilder body,
+        string header,
+        TestEntityResult[] reportedResults,
+        (TestStatus Status, string Label)[] labelsByStatus)
+    {
+        var entries = labelsByStatus
+            .SelectMany(x => reportedResults.Where(r => r.Status == x.Status).Select(r => (x.Label, Result: r)))
+            .ToArray();
+        if (entries.Length == 0)
+        {
+            return;
+        }
+
+        body.AppendLine().AppendLine($"{header}:");
+        for (var i = 0; i < entries.Length; i++)
+        {
+            var (label, result) = entries[i];
+            body.AppendLine($"{i + 1}) {label} : {MakeEntityTitle(result)}");
+
+            var message = result.Detail?.Message;
+            if (!string.IsNullOrEmpty(message))
+            {
+                body.AppendLine(Indent(message));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Walks the result tree of <paramref name="result"/>: a node that did not pass is reported once and its children
+    /// are skipped, otherwise the children that did not pass are reported.
+    /// </summary>
+    private static TestEntityResult[] GetReportedResults(TestResult result)
+    {
+        var reportedResults = new List<TestEntityResult>();
+
+        foreach (var testSuite in result.TestSuiteResults)
+        {
+            if (testSuite.Status is not TestStatus.Passed)
+            {
+                reportedResults.Add(testSuite);
+                continue;
+            }
+
+            foreach (var testFixture in testSuite.TestFixtureResults)
+            {
+                if (testFixture.Status is not TestStatus.Passed)
+                {
+                    reportedResults.Add(testFixture);
+                    continue;
+                }
+
+                reportedResults.AddRange(testFixture.TestCaseResults.Where(x => x.Status is not TestStatus.Passed));
+            }
+        }
+
+        return [.. reportedResults];
+    }
+
+    private static string MakeEntityTitle(TestEntityResult result)
+        => result is TestCaseResult testCase ? testCase.Id : result.EntityName;
+
+    private static string Indent(string text)
+        => string.Join(
+            Environment.NewLine,
+            text.Split(["\r\n", "\n"], StringSplitOptions.None).Select(x => $"   {x}"));
+
+    private static string FormatDuration(TimeSpan duration)
+        => $"{(int)duration.TotalHours:00}:{duration:mm\\:ss}";
+
+    private static string MapStatus(TestStatus status)
+        => status switch
+        {
+            TestStatus.Passed => Resources.EmailResult_Status_Passed,
+            TestStatus.Failure or
+                TestStatus.Error or
+                TestStatus.Invalid => Resources.EmailResult_Status_Failed,
+            TestStatus.Skipped or
+                TestStatus.Ignored or
+                TestStatus.Explicit => Resources.EmailResult_Status_Skipped,
+            TestStatus.Inconclusive => Resources.EmailResult_Status_Inconclusive,
+            TestStatus.Warning => Resources.EmailResult_Status_Warning,
+            _ => Resources.EmailResult_Status_Unknown,
+        };
 
     private static string MakeSubRunTitle(TestResult subRunResult)
         => subRunResult.TestType switch

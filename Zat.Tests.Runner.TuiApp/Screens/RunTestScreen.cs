@@ -87,7 +87,8 @@ internal class RunTestScreen(
                         IsDebug: testRunConfigStore.IsDebugModeEnabled ?? false,
                         TestedRuntimeVersion: testRunConfigStore.RuntimeVersion,
                         TestedHwAssemblyTypes: testRunConfigStore.HwAssemblyTypes,
-                        TestResultHandlers: [.. testResultHandlers, this]));
+                        TestResultHandlers: [.. testResultHandlers, this]),
+                    ct);
 
                 var promptResult = await ShowLiveDataAsync(
                     table,
@@ -122,8 +123,11 @@ internal class RunTestScreen(
                             }
 
                             table.Rows.Clear();
-                            table.AddRow(new Markup($"{Resources.ElapsedTime}: {data.Stopwatch.Elapsed:hh\\:mm\\:ss}"));
-                            table.AddRow(new Markup(sb.ToString()));
+                            table.AddRow(new Markup($@"{Resources.ElapsedTime}: {data.Stopwatch.Elapsed:hh\:mm\:ss}"));
+                            if (sb.Length > 0)
+                            {
+                                table.AddRow(new Markup(sb.ToString()));
+                            }
 
                             ctx.Refresh();
 
