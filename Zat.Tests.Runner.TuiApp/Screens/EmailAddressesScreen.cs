@@ -68,8 +68,6 @@ internal class EmailAddressesScreen(
                     this.SettingsScreenLazy),
                 Resources.RemoveEmailAddresses_ChoiceText);
         }
-
-        yield return new Choice<IScreen?>(null, Resources.Back_CommandText);
     }
 
     private class AddEmailAddressScreen(

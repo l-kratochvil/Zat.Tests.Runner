@@ -5,10 +5,11 @@
 - Dokončit vazbu na TestLink
 - Zautomatizování kroků testera - základní
 - Otestovat bridge mezi runnerem a Z2xxTests
-- Na počátku kontrolovat spojení se stanicemi: Viz legacy runner RunTest (TestEnvironmentUtils.CheckTestStationsConnection)
+- Před testem kontrolovat spojení se stanicemi: Viz legacy runner RunTest (TestEnvironmentUtils.CheckTestStationsConnection)
 - TuiApp:
   - Implementovat výpis při startu testu (viz [test-run-start_output](test-run-start_output.png))
-  - Odstranit legacy runner (ve vlastním commitu na main)
+  - Z2xxTests: Odstranit legacy runner (uchovat v historii ve vlastním commitu na main)
+- Nechat opravit testy (spousta jich neprochází)
 - WebApp:
   - Rework BindingSelect
   - Vylepšit pojmenování pro "fluxor stores" a "stores StoreBase": Obojí fungujou jinak, ale zároveň obojí je store
@@ -17,20 +18,19 @@
   - Kompletní code-review + refactor celé projektu WebApp (včetně testů) a docs
   - Lokalizace textů
 - Po dokončení merge develop -> main (sumární commit)
-- Změna adresáře "Automized Tests":
-  - Přesunout do Program Data / Roaming AppData
-  - Přejmenovat na Zat.Tests
-  - Přejmenovat adresář "Test libs" (test-libs? runner-libs?)
 - Vyřešit code todos
 
 ## MidPrio
 
 - Update nuget balíčků solutionu
-- Vylepšení vzhledu
+- Změna adresáře "Automized Tests":
+  - Přesunout do Program Data / Roaming AppData
+  - Přejmenovat na Zat.Tests
+  - Přejmenovat adresář "Test libs" (test-libs? runner-libs?)
 - WebApp:
   - Refactor TestDiscovery feature
   - Rozšíření testů pro komponenty DataContext, BinindgInput, BindingSelect, BindingCheckbox
-- Email notifikace (po dokončení testu)
+  - Vylepšení vzhledu
 - TuiApp:
   - Migrace do Terminal.Gui?
   - Převést na Features (ať je struktura projektu s WebApp konzistentní)

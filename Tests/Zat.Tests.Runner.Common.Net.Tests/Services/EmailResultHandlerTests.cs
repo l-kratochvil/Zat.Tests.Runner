@@ -36,7 +36,7 @@ public class EmailResultHandlerTests
             .Setup(x => x.GetSecrets())
             .Returns(new Secrets(new SmtpAuth("smtp-user", "smtp-password")));
 
-        this.GivenNotification(enabled: true, "first@zat.cz", "second@zat.cz");
+        this.SetupHandlerContext(enabled: true, "first@zat.cz", "second@zat.cz");
 
         this.unit = new EmailResultHandler(
             this.emailSenderMock.Object,
@@ -49,7 +49,7 @@ public class EmailResultHandlerTests
     public void HandleTestRunResult__WhenNotificationIsEnabled__ThenShouldSendOneEmailToConfiguredAddresses()
     {
         // When:
-        this.unit.HandleTestRunResult(TestRun(isStoppedByUser: false, SubRun(TestStatus.Passed)));
+        this.unit.HandleTestRunResult(new TestRunResult([SubRun(TestStatus.Passed)], false));
 
         // Then:
         var (config, message) = this.sentEmails.Single();
@@ -65,10 +65,10 @@ public class EmailResultHandlerTests
     public void HandleTestRunResult__WhenNotificationIsDisabled__ThenShouldSendNothing()
     {
         // Given:
-        this.GivenNotification(enabled: false, "first@zat.cz");
+        this.SetupHandlerContext(enabled: false, "first@zat.cz");
 
         // When:
-        this.unit.HandleTestRunResult(TestRun(isStoppedByUser: false, SubRun(TestStatus.Passed)));
+        this.unit.HandleTestRunResult(new TestRunResult([SubRun(TestStatus.Passed)], false));
 
         // Then:
         Assert.That(this.sentEmails, Is.Empty);
@@ -78,10 +78,10 @@ public class EmailResultHandlerTests
     public void HandleTestRunResult__WhenNoAddressIsConfigured__ThenShouldSendNothing()
     {
         // Given:
-        this.GivenNotification(enabled: true);
+        this.SetupHandlerContext(enabled: true);
 
         // When:
-        this.unit.HandleTestRunResult(TestRun(isStoppedByUser: false, SubRun(TestStatus.Passed)));
+        this.unit.HandleTestRunResult(new TestRunResult([SubRun(TestStatus.Passed)], false));
 
         // Then:
         Assert.That(this.sentEmails, Is.Empty);
@@ -91,10 +91,10 @@ public class EmailResultHandlerTests
     public void HandleTestRunResult__WhenSomeAddressesAreInvalidOrForeign__ThenShouldSendOnlyToValidZatAddresses()
     {
         // Given:
-        this.GivenNotification(enabled: true, "not-an-email", "first@zat.cz", "someone@example.com");
+        this.SetupHandlerContext(enabled: true, "not-an-email", "first@zat.cz", "someone@example.com");
 
         // When:
-        this.unit.HandleTestRunResult(TestRun(isStoppedByUser: false, SubRun(TestStatus.Passed)));
+        this.unit.HandleTestRunResult(new TestRunResult([SubRun(TestStatus.Passed)], false));
 
         // Then:
         Assert.That(this.sentEmails.Single().Message.To, Is.EqualTo(new[] { "first@zat.cz" }));
@@ -104,10 +104,10 @@ public class EmailResultHandlerTests
     public void HandleTestRunResult__WhenNoAddressPassesValidation__ThenShouldSendNothing()
     {
         // Given:
-        this.GivenNotification(enabled: true, "not-an-email", "someone@example.com");
+        this.SetupHandlerContext(enabled: true, "not-an-email", "someone@example.com");
 
         // When:
-        this.unit.HandleTestRunResult(TestRun(isStoppedByUser: false, SubRun(TestStatus.Passed)));
+        this.unit.HandleTestRunResult(new TestRunResult([SubRun(TestStatus.Passed)], false));
 
         // Then:
         Assert.That(this.sentEmails, Is.Empty);
@@ -117,10 +117,12 @@ public class EmailResultHandlerTests
     public void HandleTestRunResult__WhenSubRunsHaveResults__ThenSubjectShouldShowPassedOfAllTestCases()
     {
         // When:
-        this.unit.HandleTestRunResult(TestRun(
-            isStoppedByUser: false,
-            SubRun(TestStatus.Passed, TestStatus.Failure),
-            SubRun(TestStatus.Passed, TestStatus.Passed, TestStatus.Skipped)));
+        this.unit.HandleTestRunResult(new TestRunResult(
+            [
+                SubRun(TestStatus.Passed, TestStatus.Failure),
+                SubRun(TestStatus.Passed, TestStatus.Passed, TestStatus.Skipped),
+            ],
+            false));
 
         // Then:
         var subject = this.sentEmails.Single().Message.Subject;
@@ -135,7 +137,7 @@ public class EmailResultHandlerTests
     public void HandleTestRunResult__WhenTestRunWasStoppedByUser__ThenSubjectShouldSaySo()
     {
         // When:
-        this.unit.HandleTestRunResult(TestRun(isStoppedByUser: true, SubRun(TestStatus.Passed)));
+        this.unit.HandleTestRunResult(new TestRunResult([SubRun(TestStatus.Passed)], true));
 
         // Then:
         Assert.That(this.sentEmails.Single().Message.Subject, Does.Contain(Resources.EmailResult_StoppedByUser));
@@ -145,18 +147,25 @@ public class EmailResultHandlerTests
     public void HandleTestRunResult__WhenTestCaseFailed__ThenBodyShouldListItWithItsMessage()
     {
         // When:
-        this.unit.HandleTestRunResult(TestRun(
-            isStoppedByUser: false,
-            SubRun(
-                new TestCaseResult("TC-1", "Passing", TestStatus.Passed),
-                new TestCaseResult("TC-2", "Failing", TestStatus.Failure, new Detail("Button not found", null)))));
+        const string passingTestCaseId = "TC-1";
+        const string failingTestCaseId = "TC-2";
+
+        this.unit.HandleTestRunResult(new TestRunResult(
+            [
+                SubRun(
+                    new TestCaseResult(
+                        passingTestCaseId, "Passing", TestStatus.Passed),
+                    new TestCaseResult(
+                        failingTestCaseId, "Failing", TestStatus.Failure, new Detail("Button not found", null))),
+            ],
+            false));
 
         // Then:
         var body = this.sentEmails.Single().Message.Body;
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(body, Does.Contain("TC-2").And.Contain("Button not found"));
-            Assert.That(body, Does.Not.Contain("TC-1"));
+            Assert.That(body, Does.Contain(failingTestCaseId).And.Contain("Button not found"));
+            Assert.That(body, Does.Not.Contain(passingTestCaseId));
         }
     }
 
@@ -170,15 +179,12 @@ public class EmailResultHandlerTests
 
         // Then:
         Assert.That(
-            () => this.unit.HandleTestRunResult(TestRun(isStoppedByUser: false, SubRun(TestStatus.Passed))),
+            () => this.unit.HandleTestRunResult(new TestRunResult([SubRun(TestStatus.Passed)], false)),
             Throws.Nothing);
     }
 
-    private static TestRunResult TestRun(bool isStoppedByUser, params TestResult[] subRunResults)
-        => new(subRunResults, isStoppedByUser);
-
     private static TestResult SubRun(params TestStatus[] testCaseStatuses)
-        => SubRun(testCaseStatuses.Select((status, i) => new TestCaseResult($"TC-{i}", $"Case{i}", status)).ToArray());
+        => SubRun([..testCaseStatuses.Select((status, i) => new TestCaseResult($"TC-{i}", $"Case{i}", status))]);
 
     private static TestResult SubRun(params TestCaseResult[] testCaseResults)
         => new(
@@ -191,7 +197,7 @@ public class EmailResultHandlerTests
             ]),
             TestType.Application);
 
-    private void GivenNotification(bool enabled, params string[] addresses)
+    private void SetupHandlerContext(bool enabled, params string[] addresses)
     {
         this.contextMock.SetupGet(x => x.IsEmailNotificationEnabled).Returns(enabled);
         this.contextMock.SetupGet(x => x.EmailAddresses).Returns(addresses);

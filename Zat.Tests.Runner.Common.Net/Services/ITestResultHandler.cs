@@ -11,7 +11,9 @@ public interface ITestResultHandler
     /// Handles the test result of one sub-run, once the sub-run completes.
     /// </summary>
     /// <param name="testResult">The handled <see cref="TestResult"/>.</param>
-    void HandleSubRunResult(TestResult testResult);
+    void HandleSubRunResult(TestResult testResult)
+    {
+    }
 
     /// <summary>
     /// Handles the result of the whole test run, once it ends, stopped or not.

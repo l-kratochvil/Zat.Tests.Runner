@@ -9,7 +9,7 @@ internal class EmailResultHandlerContext(
 {
     /// <inheritdoc/>
     public bool IsEmailNotificationEnabled
-        => testRunConfigStore.IsEmailNotificationEnabled ?? true;
+        => testRunConfigStore.IsEmailNotificationEnabled ?? false;
 
     /// <inheritdoc/>
     public IReadOnlyList<string> EmailAddresses

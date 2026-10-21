@@ -24,16 +24,14 @@ public class EmailResultHandler(
     private const string SmtpServer = "zat01ex.zat.lan:25";
     private const string SenderAddress = "tester-z2xx@zat.cz";
 
+    /// <summary>
+    /// Describes the context for the email result handler, providing email notification settings and recipient addresses.
+    /// </summary>
     public interface IContext
     {
         bool IsEmailNotificationEnabled { get; }
 
         IReadOnlyList<string> EmailAddresses { get; }
-    }
-
-    /// <inheritdoc />
-    public void HandleSubRunResult(TestResult testResult)
-    {
     }
 
     /// <inheritdoc />
@@ -44,7 +42,10 @@ public class EmailResultHandler(
             return;
         }
 
-        var recipients = context.EmailAddresses.Where(this.IsValidRecipient).ToArray();
+        var recipients = context
+            .EmailAddresses
+            .Where(this.IsValidRecipient)
+            .ToArray();
         if (recipients.Length == 0)
         {
             logger.Log(LogLevel.Warning, "No email address passed validation, the test run result email is not sent");
@@ -52,7 +53,8 @@ public class EmailResultHandler(
         }
 
         var subject = MakeSubject(testRunResult);
-        var message = new EmailMessage(SenderAddress, recipients, subject, MakeBody(subject, testRunResult));
+        var message = new EmailMessage(
+            SenderAddress, recipients, subject, MakeBody(subject, testRunResult));
 
         try
         {
@@ -138,6 +140,7 @@ public class EmailResultHandler(
             return false;
         }
 
+        // ReSharper disable once InvertIf
         if (!EmailAddressValidators.IsInZatDomain(address))
         {
             logger.Log(LogLevel.Warning, "Email address '{EmailAddress}' is not in the zat.cz domain, skipped", address);

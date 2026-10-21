@@ -46,7 +46,7 @@ public class TestRunnerEngine(
             {
                 return;
             }
-            
+
             field = value;
 
             logger.Log(
