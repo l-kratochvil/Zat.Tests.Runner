@@ -130,6 +130,12 @@ public class TestRunnerEngine(
                 // Stopped before the proxy got to any test case.
             }
 
+            var testRunResult = new TestRunResult([.. testRunResults], IsStoppedByUser: runCts.IsCancellationRequested);
+            foreach (var handler in resultHandlers)
+            {
+                handler.HandleTestRunResult(testRunResult);
+            }
+
             return Result.Success<TestResult[]>([.. testRunResults]);
         }
         finally
@@ -264,7 +270,7 @@ public class TestRunnerEngine(
         {
             foreach (var handler in resultHandlers)
             {
-                handler.Handle(testRunResult);
+                handler.HandleSubRunResult(testRunResult);
             }
         }
 

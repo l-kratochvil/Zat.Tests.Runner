@@ -139,4 +139,19 @@
     <value>Test run se nespustil: test assembly {0} se změnila a už neobsahuje tyto vybrané testy:
 {1}</value>
   </data>
+  <data name="EmailResult_Subject_Format" xml:space="preserve">
+    <value>Zat.Tests.Runner: prošlo {0}/{1} testovacích případů</value>
+  </data>
+  <data name="EmailResult_StoppedByUser" xml:space="preserve">
+    <value>(zastaveno uživatelem)</value>
+  </data>
+  <data name="EmailResult_NoSubRunResults" xml:space="preserve">
+    <value>Žádný sub-run nedoběhl.</value>
+  </data>
+  <data name="EmailResult_ApplicationTests" xml:space="preserve">
+    <value>Aplikační testy</value>
+  </data>
+  <data name="EmailResult_FailedTestCases" xml:space="preserve">
+    <value>Neúspěšné testovací případy:</value>
+  </data>
 </root>

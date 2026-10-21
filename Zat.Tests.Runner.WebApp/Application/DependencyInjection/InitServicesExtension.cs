@@ -8,7 +8,7 @@ using Fluxor.Persist.Storage;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
-
+using Zat.Tests.Runner.Common.Net.Application.DependencyInjection;
 using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.WebApp.Application.Paths;
 using Zat.Tests.Runner.WebApp.Features.TestResultReporting.Services;

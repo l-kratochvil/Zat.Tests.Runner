@@ -4,6 +4,7 @@
 		<TargetFramework>net10.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<UserSecretsId>Zat.Tests.Runner</UserSecretsId>
 		<!-- The out-of-process NUnit proxy server is launched from this application, so its output
          (Exchange) has to sit next to ours. -->
 		<IncludeNUnitTestRunnerProxyDirOutput>true</IncludeNUnitTestRunnerProxyDirOutput>
@@ -23,6 +24,8 @@
 		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
 		<PackageReference Include="Serilog.Sinks.Map" Version="2.0.0" />
 		<PackageReference Include="StreamJsonRpc" Version="2.25.29" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="8.0.0"/>
 	</ItemGroup>
 
 	<ItemGroup>

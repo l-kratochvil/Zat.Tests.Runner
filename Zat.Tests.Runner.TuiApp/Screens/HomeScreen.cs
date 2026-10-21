@@ -18,6 +18,8 @@ internal sealed class HomeScreen(
     TestCasesSelectionScreen testEntitiesFromTestCasesPromptScreen,
     HwAssemblyTypesSelectionScreen hwAssemblyTypesSelectionScreen,
     EnableTestLinkReportingPromptScreen enableTestLinkReportingPromptScreen,
+    EnableEmailNotificationPromptScreen enableEmailNotificationPromptScreen,
+    EmailAddressesScreen emailAddressesScreen,
     EnableDebugModePromptScreen enableDebugModePromptScreen,
     RuntimeReleaseDatePromptScreen runtimeReleaseDatePromptScreen,
     IdeReleaseDatePromptScreen ideReleaseDatePromptScreen,
@@ -93,6 +95,14 @@ internal sealed class HomeScreen(
                 WriteLine();
                 Write(new Rule());
             },
+        };
+
+    private static string? FormatEmailAddresses(string[] emailAddresses)
+        => emailAddresses.Length switch
+        {
+            0 => null,
+            <= 3 => string.Join(", ", emailAddresses),
+            _ => string.Format(Resources.EmailAddresses_Count_Format, emailAddresses.Length),
         };
 
     private IEnumerable<Choice<IScreen>> GetChoices()
@@ -230,6 +240,28 @@ internal sealed class HomeScreen(
             {
                 yield break;
             }
+        }
+
+        // Enable email notification choice; not required, as it is enabled unless switched off
+        var isEmailNotificationEnabled = testRunConfigStore.IsEmailNotificationEnabled ?? true;
+        if (Choice.InitChoice<IScreen>(
+                enableEmailNotificationPromptScreen,
+                Resources.EnableEmailNotification_PromptText,
+                isEmailNotificationEnabled)
+            .TryGetValue(out var enableEmailNotificationPromptScreenChoice))
+        {
+            yield return enableEmailNotificationPromptScreenChoice;
+        }
+
+        // Email addresses choice
+        if (Choice.InitChoice<IScreen>(
+                emailAddressesScreen,
+                Resources.EmailAddresses_ChoiceText,
+                FormatEmailAddresses(testRunConfigStore.EmailAddresses),
+                () => isEmailNotificationEnabled)
+            .TryGetValue(out var emailAddressesChoice))
+        {
+            yield return emailAddressesChoice;
         }
 
         // Enable debug mode choice

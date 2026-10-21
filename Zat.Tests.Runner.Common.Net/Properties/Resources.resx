@@ -139,4 +139,19 @@
     <value>The test run did not start: the test assembly {0} changed and no longer holds these selected tests:
 {1}</value>
   </data>
+  <data name="EmailResult_Subject_Format" xml:space="preserve">
+    <value>Zat.Tests.Runner: {0}/{1} test cases passed</value>
+  </data>
+  <data name="EmailResult_StoppedByUser" xml:space="preserve">
+    <value>(stopped by user)</value>
+  </data>
+  <data name="EmailResult_NoSubRunResults" xml:space="preserve">
+    <value>No sub-run finished.</value>
+  </data>
+  <data name="EmailResult_ApplicationTests" xml:space="preserve">
+    <value>Application tests</value>
+  </data>
+  <data name="EmailResult_FailedTestCases" xml:space="preserve">
+    <value>Failed test cases:</value>
+  </data>
 </root>

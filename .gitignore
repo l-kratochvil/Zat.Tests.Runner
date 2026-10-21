@@ -5,6 +5,7 @@
 
 # Solution-specific files
 [Ee]xchange/
+.artifacts/
 
 # User-specific files
 *.rsuser

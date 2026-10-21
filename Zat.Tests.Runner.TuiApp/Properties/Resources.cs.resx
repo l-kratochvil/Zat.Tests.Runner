@@ -375,4 +375,34 @@
   <data name="BetaVersion_ChoiceText" xml:space="preserve">
     <value>Beza verze</value>
   </data>
+  <data name="EnableEmailNotification_PromptText" xml:space="preserve">
+    <value>Odeslat výsledek e-mailem</value>
+  </data>
+  <data name="EmailAddresses_ChoiceText" xml:space="preserve">
+    <value>E-mailové adresy</value>
+  </data>
+  <data name="EmailAddresses_Count_Format" xml:space="preserve">
+    <value>počet adres: {0}</value>
+  </data>
+  <data name="AddEmailAddress_ChoiceText" xml:space="preserve">
+    <value>Přidat</value>
+  </data>
+  <data name="RemoveEmailAddresses_ChoiceText" xml:space="preserve">
+    <value>Odebrat</value>
+  </data>
+  <data name="EnterEmailAddress_PromptText" xml:space="preserve">
+    <value>Zadejte e-mailovou adresu: </value>
+  </data>
+  <data name="SelectEmailAddressesToRemove_PromptText" xml:space="preserve">
+    <value>Vyberte e-mailové adresy k odebrání</value>
+  </data>
+  <data name="EmailAddressInvalid_ErrorMessage" xml:space="preserve">
+    <value>Neplatná e-mailová adresa</value>
+  </data>
+  <data name="EmailAddressNotInZatDomain_ErrorMessage" xml:space="preserve">
+    <value>E-mailová adresa musí být v doméně zat.cz</value>
+  </data>
+  <data name="EmailAddressDuplicate_ErrorMessage" xml:space="preserve">
+    <value>E-mailová adresa už je v seznamu</value>
+  </data>
 </root>

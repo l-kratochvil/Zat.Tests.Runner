@@ -52,7 +52,7 @@ internal class RunTestScreen(
         ];
 
     /// <inheritdoc />
-    void ITestResultHandler.Handle(TestResult result)
+    void ITestResultHandler.HandleSubRunResult(TestResult result)
     {
         var oldTestStartTime = this.currentTestStartTime;
         this.currentTestStartTime = DateTime.UtcNow;

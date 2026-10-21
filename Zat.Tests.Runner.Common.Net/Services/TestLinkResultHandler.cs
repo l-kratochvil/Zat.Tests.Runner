@@ -13,7 +13,7 @@ using Zat.Z2xxTests.Common;
 public class TestLinkResultHandler(
     ITestLink testLink,
     TestLinkResultHandler.IContext context,
-    ILogger<LogSources.TestLink> logger)
+    ILogger<LogSources.TestResultHandler> logger)
     : ITestResultHandler
 {
     private const int ApplicationTestsTestPlanId = 9560;
@@ -22,7 +22,7 @@ public class TestLinkResultHandler(
     private static readonly FileExtensionContentTypeProvider FileExtensionContentTypeProvider = new();
 
     /// <inheritdoc />
-    public void Handle(TestResult testResult)
+    public void HandleSubRunResult(TestResult testResult)
     {
         if (!context.IsTestLinkReportingEnabled)
         {

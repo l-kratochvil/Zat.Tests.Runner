@@ -21,6 +21,8 @@ internal static class InitScreensExtensions
                 .AddSingleton<TestCasesSelectionScreen>()
                 .AddSingleton<HwAssemblyTypesSelectionScreen>()
                 .AddSingleton<EnableTestLinkReportingPromptScreen>()
+                .AddSingleton<EnableEmailNotificationPromptScreen>()
+                .AddSingleton<EmailAddressesScreen>()
                 .AddSingleton<IdeReleaseDatePromptScreen>()
                 .AddSingleton<RuntimeReleaseDatePromptScreen>()
                 .AddSingleton<EnableDebugModePromptScreen>()

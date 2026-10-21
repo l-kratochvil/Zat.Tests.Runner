@@ -22,9 +22,17 @@ internal record AppState(
     [property: JsonPropertyName("isDebugModeEnabled")]
     bool? IsDebugModeEnabled,
     [property: JsonPropertyName("isBetaVersion")]
-    bool? IsBetaVersion)
+    bool? IsBetaVersion,
+    [property: JsonPropertyName("isEmailNotificationEnabled")]
+    bool? IsEmailNotificationEnabled)
 {
-    public AppState() : this(null, null, null, null, null, null, null, null, null)
+    public AppState() : this(null, null, null, null, null, null, null, null, null, null)
     {
     }
+
+    /// <summary>
+    /// Gets the addresses the test run result email is sent to; empty also when the state file predates them.
+    /// </summary>
+    [JsonPropertyName("emailAddresses")]
+    public string[] EmailAddresses { get; init; } = [];
 }

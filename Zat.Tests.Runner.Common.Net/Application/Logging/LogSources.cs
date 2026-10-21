@@ -10,7 +10,7 @@ public static class LogSources
     /// </summary>
     public static IReadOnlyList<string> All { get; } =
     [
-        nameof(App), nameof(TestRun), nameof(TestLink)
+        nameof(App), nameof(TestRun), nameof(TestResultHandler)
     ];
 
     /// <summary>
@@ -26,5 +26,5 @@ public static class LogSources
     /// <summary>
     /// Source representing communication with TestLink.
     /// </summary>
-    public record TestLink;
+    public record TestResultHandler;
 }

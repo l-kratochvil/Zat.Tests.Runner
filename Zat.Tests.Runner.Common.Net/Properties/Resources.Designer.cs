@@ -61,6 +61,51 @@ namespace Zat.Tests.Runner.Common.Net.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Application tests.
+        /// </summary>
+        public static string EmailResult_ApplicationTests {
+            get {
+                return ResourceManager.GetString("EmailResult_ApplicationTests", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed test cases:.
+        /// </summary>
+        public static string EmailResult_FailedTestCases {
+            get {
+                return ResourceManager.GetString("EmailResult_FailedTestCases", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No sub-run finished..
+        /// </summary>
+        public static string EmailResult_NoSubRunResults {
+            get {
+                return ResourceManager.GetString("EmailResult_NoSubRunResults", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to (stopped by user).
+        /// </summary>
+        public static string EmailResult_StoppedByUser {
+            get {
+                return ResourceManager.GetString("EmailResult_StoppedByUser", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Zat.Tests.Runner: {0}/{1} test cases passed.
+        /// </summary>
+        public static string EmailResult_Subject_Format {
+            get {
+                return ResourceManager.GetString("EmailResult_Subject_Format", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to PDP client tests.
         /// </summary>
         public static string PdpClientTests {

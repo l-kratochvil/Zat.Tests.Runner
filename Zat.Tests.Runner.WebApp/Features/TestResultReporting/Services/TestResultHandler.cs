@@ -10,7 +10,7 @@ using Zat.Tests.Runner.Common.Net.Services;
 public class TestResultHandler : ITestResultHandler
 {
     /// <inheritdoc />
-    public void Handle(TestResult testResult)
+    public void HandleSubRunResult(TestResult testResult)
     {
         Debug.SafeFail("TODO");
 

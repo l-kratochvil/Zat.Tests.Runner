@@ -83,11 +83,68 @@ public class TestRunnerEngineTests
         var handledResult = results.Value.Single();
         using (Assert.EnterMultipleScope())
         {
-            this.resultHandlerMock.Verify(x => x.Handle(handledResult), Times.Once);
+            this.resultHandlerMock.Verify(x => x.HandleSubRunResult(handledResult), Times.Once);
             Assert.That(
                 handledResult.TestCaseResults.Select(x => (x.EntityName, x.Status)),
                 Is.EqualTo(new[] { (PassingTestCasePath, TestStatus.Passed) }));
         }
+    }
+
+    [Test]
+    public async Task RunTestAsync__WhenTestRunCompletes__ThenShouldHandTestRunResultOnceWithAllSubRunResults()
+    {
+        // When:
+        var results = await this.unit.RunTestAsync(
+            [RuntimeTestCase()],
+            this.Config(HwAssemblyType.HW00, HwAssemblyType.HW01));
+
+        // Then:
+        Assert.That(results.Value, Has.Length.EqualTo(2));
+        this.resultHandlerMock.Verify(
+            x => x.HandleTestRunResult(It.Is<TestRunResult>(r =>
+                r.SubRunResults.SequenceEqual(results.Value) && !r.IsStoppedByUser)),
+            Times.Once);
+        this.resultHandlerMock.Verify(x => x.HandleTestRunResult(It.IsAny<TestRunResult>()), Times.Once);
+    }
+
+    [Test]
+    public async Task StopTestRun__WhenCalledBetweenSubRuns__ThenShouldHandTestRunResultAsStoppedByUser()
+    {
+        // Given:
+        this.resultHandlerMock
+            .Setup(x => x.HandleSubRunResult(It.IsAny<TestResult>()))
+            .Callback(this.unit.StopTestRun);
+
+        // When:
+        var results = await this.unit.RunTestAsync(
+            [RuntimeTestCase()],
+            this.Config(HwAssemblyType.HW00, HwAssemblyType.HW01));
+
+        // Then:
+        this.resultHandlerMock.Verify(
+            x => x.HandleTestRunResult(It.Is<TestRunResult>(r =>
+                r.SubRunResults.SequenceEqual(results.Value) && r.IsStoppedByUser)),
+            Times.Once);
+        this.resultHandlerMock.Verify(x => x.HandleTestRunResult(It.IsAny<TestRunResult>()), Times.Once);
+    }
+
+    [Test]
+    public async Task RunTestAsync__WhenCallerCancelsBeforeAnySubRunFinishes__ThenShouldStillHandTestRunResult()
+    {
+        // Given:
+        using var callerCts = new CancellationTokenSource();
+        this.bridgeConnectorMock
+            .Setup(x => x.Connect(It.IsAny<TestConfig>()))
+            .Callback(callerCts.Cancel)
+            .Returns(() => new Disposer(() => { }));
+
+        // When:
+        await this.unit.RunTestAsync([ApplicationTestCase()], this.Config(), callerCts.Token);
+
+        // Then:
+        this.resultHandlerMock.Verify(
+            x => x.HandleTestRunResult(It.Is<TestRunResult>(r => r.SubRunResults.Count == 0 && r.IsStoppedByUser)),
+            Times.Once);
     }
 
     [Test]
@@ -107,7 +164,7 @@ public class TestRunnerEngineTests
         using (Assert.EnterMultipleScope())
         {
             Assert.That(results.Value, Is.Empty);
-            this.resultHandlerMock.Verify(x => x.Handle(It.IsAny<TestResult>()), Times.Never);
+            this.resultHandlerMock.Verify(x => x.HandleSubRunResult(It.IsAny<TestResult>()), Times.Never);
             Assert.That(
                 this.reportedStates,
                 Is.EqualTo(new[] { TestRunState.Running, TestRunState.Stopping, TestRunState.Stopped }));
@@ -157,7 +214,8 @@ public class TestRunnerEngineTests
                 results.IsFailure ? results.Error : string.Empty,
                 Does.Contain(missingTestCasePath).And.Not.Contain(PassingTestCasePath));
             this.bridgeConnectorMock.Verify(x => x.Connect(It.IsAny<TestConfig>()), Times.Never);
-            this.resultHandlerMock.Verify(x => x.Handle(It.IsAny<TestResult>()), Times.Never);
+            this.resultHandlerMock.Verify(x => x.HandleSubRunResult(It.IsAny<TestResult>()), Times.Never);
+            this.resultHandlerMock.Verify(x => x.HandleTestRunResult(It.IsAny<TestRunResult>()), Times.Never);
             Assert.That(this.reportedStates, Is.EqualTo(new[] { TestRunState.Running, TestRunState.Stopped }));
         }
     }
@@ -194,7 +252,7 @@ public class TestRunnerEngineTests
     {
         // Given:
         this.resultHandlerMock
-            .Setup(x => x.Handle(It.IsAny<TestResult>()))
+            .Setup(x => x.HandleSubRunResult(It.IsAny<TestResult>()))
             .Callback(this.unit.StopTestRun);
 
         // When:
@@ -206,8 +264,8 @@ public class TestRunnerEngineTests
         using (Assert.EnterMultipleScope())
         {
             Assert.That(results.Value.Select(x => x.TestedHwAssemblyType), Is.EqualTo(new[] { HwAssemblyType.HW00 }));
-            this.resultHandlerMock.Verify(x => x.Handle(results.Value[0]), Times.Once);
-            this.resultHandlerMock.Verify(x => x.Handle(It.IsAny<TestResult>()), Times.Once);
+            this.resultHandlerMock.Verify(x => x.HandleSubRunResult(results.Value[0]), Times.Once);
+            this.resultHandlerMock.Verify(x => x.HandleSubRunResult(It.IsAny<TestResult>()), Times.Once);
             Assert.That(
                 this.reportedStates,
                 Is.EqualTo(new[] { TestRunState.Running, TestRunState.Stopping, TestRunState.Stopped }));
@@ -231,7 +289,7 @@ public class TestRunnerEngineTests
         {
             // The proxy was handed the stop, so it did not run the test case at all.
             Assert.That(results.Value, Is.Empty);
-            this.resultHandlerMock.Verify(x => x.Handle(It.IsAny<TestResult>()), Times.Never);
+            this.resultHandlerMock.Verify(x => x.HandleSubRunResult(It.IsAny<TestResult>()), Times.Never);
             Assert.That(this.unit.State, Is.EqualTo(TestRunState.Stopped));
         }
     }
@@ -261,7 +319,7 @@ public class TestRunnerEngineTests
         using (Assert.EnterMultipleScope())
         {
             Assert.That(results.Value, Is.Empty);
-            this.resultHandlerMock.Verify(x => x.Handle(It.IsAny<TestResult>()), Times.Never);
+            this.resultHandlerMock.Verify(x => x.HandleSubRunResult(It.IsAny<TestResult>()), Times.Never);
             Assert.That(unit.State, Is.EqualTo(TestRunState.Stopped));
             connectionMock.Verify(x => x.DisposeAsync(), Times.Once);
         }

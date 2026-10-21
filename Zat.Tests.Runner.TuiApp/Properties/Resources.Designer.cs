@@ -833,5 +833,95 @@ namespace Zat.Tests.Runner.TuiApp.Properties {
                 return ResourceManager.GetString("YesShorten", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Send result by email.
+        /// </summary>
+        public static string EnableEmailNotification_PromptText {
+            get {
+                return ResourceManager.GetString("EnableEmailNotification_PromptText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Email addresses.
+        /// </summary>
+        public static string EmailAddresses_ChoiceText {
+            get {
+                return ResourceManager.GetString("EmailAddresses_ChoiceText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} addresses.
+        /// </summary>
+        public static string EmailAddresses_Count_Format {
+            get {
+                return ResourceManager.GetString("EmailAddresses_Count_Format", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add.
+        /// </summary>
+        public static string AddEmailAddress_ChoiceText {
+            get {
+                return ResourceManager.GetString("AddEmailAddress_ChoiceText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remove.
+        /// </summary>
+        public static string RemoveEmailAddresses_ChoiceText {
+            get {
+                return ResourceManager.GetString("RemoveEmailAddresses_ChoiceText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter email address: .
+        /// </summary>
+        public static string EnterEmailAddress_PromptText {
+            get {
+                return ResourceManager.GetString("EnterEmailAddress_PromptText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select email addresses to remove.
+        /// </summary>
+        public static string SelectEmailAddressesToRemove_PromptText {
+            get {
+                return ResourceManager.GetString("SelectEmailAddressesToRemove_PromptText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Not a valid email address.
+        /// </summary>
+        public static string EmailAddressInvalid_ErrorMessage {
+            get {
+                return ResourceManager.GetString("EmailAddressInvalid_ErrorMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Email address must be in the zat.cz domain.
+        /// </summary>
+        public static string EmailAddressNotInZatDomain_ErrorMessage {
+            get {
+                return ResourceManager.GetString("EmailAddressNotInZatDomain_ErrorMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Email address is already in the list.
+        /// </summary>
+        public static string EmailAddressDuplicate_ErrorMessage {
+            get {
+                return ResourceManager.GetString("EmailAddressDuplicate_ErrorMessage", resourceCulture);
+            }
+        }
     }
 }

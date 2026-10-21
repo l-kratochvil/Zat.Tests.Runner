@@ -1,4 +1,4 @@
-namespace Zat.Tests.Runner.Common.Net.Services;
+namespace Zat.Tests.Runner.Common.Net.Application.DependencyInjection;
 
 using System.Diagnostics;
 
@@ -10,8 +10,9 @@ using Microsoft.Extensions.Options;
 using Zat.Tests.Runner.Common.Net.Application;
 using Zat.Tests.Runner.Common.Net.Application.Logging;
 using Zat.Tests.Runner.Common.Net.Application.Paths;
+using Zat.Tests.Runner.Common.Net.Services;
 
-public static class ServicesExtensions
+public static class InitSharedServicesExtensions
 {
     extension(IServiceCollection services)
     {
@@ -36,6 +37,8 @@ public static class ServicesExtensions
                 .InitAppPathsProvider<TAppPathsProvider, TAppPathsProviderInterface>()
                 .InitLogging()
                 .AddScoped<WeakReferenceMessenger>()
+                .AddSingleton<ISecretsProvider, SecretsProvider>()
+                .AddSingleton<IEmailSender, SmtpEmailSender>()
                 .AddSingleton<GlobalWeakReferenceMessanger>()
                 .AddSingleton<ITestRunnerBridgeConnector, TestRunnerBridgeConnector>()
                 .AddSingleton<INUnitTestRunnerProxyConnector>(

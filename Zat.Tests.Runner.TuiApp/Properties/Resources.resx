@@ -375,4 +375,34 @@
   <data name="BetaVersion_ChoiceText" xml:space="preserve">
     <value>Beta version</value>
   </data>
+  <data name="EnableEmailNotification_PromptText" xml:space="preserve">
+    <value>Send result by email</value>
+  </data>
+  <data name="EmailAddresses_ChoiceText" xml:space="preserve">
+    <value>Email addresses</value>
+  </data>
+  <data name="EmailAddresses_Count_Format" xml:space="preserve">
+    <value>{0} addresses</value>
+  </data>
+  <data name="AddEmailAddress_ChoiceText" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="RemoveEmailAddresses_ChoiceText" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="EnterEmailAddress_PromptText" xml:space="preserve">
+    <value>Enter email address: </value>
+  </data>
+  <data name="SelectEmailAddressesToRemove_PromptText" xml:space="preserve">
+    <value>Select email addresses to remove</value>
+  </data>
+  <data name="EmailAddressInvalid_ErrorMessage" xml:space="preserve">
+    <value>Not a valid email address</value>
+  </data>
+  <data name="EmailAddressNotInZatDomain_ErrorMessage" xml:space="preserve">
+    <value>Email address must be in the zat.cz domain</value>
+  </data>
+  <data name="EmailAddressDuplicate_ErrorMessage" xml:space="preserve">
+    <value>Email address is already in the list</value>
+  </data>
 </root>

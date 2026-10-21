@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
-
+using Zat.Tests.Runner.Common.Net.Application.DependencyInjection;
 using Zat.Tests.Runner.Common.Net.Application.Logging;
 using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.TuiApp.Application.Paths;
@@ -25,7 +25,9 @@ internal static class InitServicesExtensions
                     .AddSingleton<IAppPathsProvider>(
                         static provider => provider.GetRequiredService<AppPathsProvider>())
                     .AddSingleton<TestLinkResultHandler.IContext, TestLinkResultHandlerContext>()
-                    .AddSingleton<ITestResultHandler, TestLinkResultHandler>());
+                    .AddSingleton<ITestResultHandler, TestLinkResultHandler>()
+                    .AddSingleton<EmailResultHandler.IContext, EmailResultHandlerContext>()
+                    .AddSingleton<ITestResultHandler, EmailResultHandler>());
     }
 
     /// <summary>
