@@ -21,6 +21,7 @@ public class NUnitTestRunnerProxyTests
     private const string OneTimeTearDownFailingTestFixturePath = Net481TestSuitePath + ".OneTimeTearDownFailingFixture";
     private const string IgnoredTestFixturePath = Net481TestSuitePath + ".IgnoredFixture";
     private const string ConfigurationFileTestFixturePath = Net481TestSuitePath + ".ConfigurationFileFixture";
+    private const string TearDownAttachmentTestFixturePath = Net481TestSuitePath + ".TearDownAttachmentFixture";
 
     private static readonly string NUnitTestAssembliesDirPath = Path.Combine(
         Assembly.GetExecutingAssembly().GetAssemblyDirectoryPath(),
@@ -97,13 +98,13 @@ public class NUnitTestRunnerProxyTests
         var result = await unit.LoadTestAssemblyAsync(testAssemblyDllPath);
 
         // Then
-        Assert.That(result.Select(x => x.Name), Is.EquivalentTo(new[] { "Net461", "Nested" }));
+        Assert.That(result.Select(x => x.Name), Is.EquivalentTo(["Net461", "Nested"]));
 
         var nestedTestSuite = result.Single(x => x.Name == "Nested");
-        Assert.That(nestedTestSuite.TestFixtures.Select(x => x.Name), Is.EqualTo(new[] { "NestedTestSuite" }));
+        Assert.That(nestedTestSuite.TestFixtures.Select(x => x.Name), Is.EqualTo(["NestedTestSuite"]));
         Assert.That(
             nestedTestSuite.TestFixtures[0].TestCases.Select(x => x.Name),
-            Is.EqualTo(new[] { "NestedTestCase" }));
+            Is.EqualTo(["NestedTestCase"]));
     }
 
     [Test]
@@ -136,17 +137,18 @@ public class NUnitTestRunnerProxyTests
         var result = await this.unit.RunTestAsync(testCases);
 
         // Then:
-        Assert.That(result.TestSuiteResults.Select(x => x.EntityName), Is.EqualTo(new[] { Net481TestSuitePath }));
+        Assert.That(result.TestSuiteResults.Select(x => x.EntityName), Is.EqualTo([Net481TestSuitePath]));
         Assert.That(
             result.TestSuiteResults[0].TestFixtureResults.Select(x => x.EntityName),
-            Is.EquivalentTo(new[]
-            {
+            Is.EquivalentTo(
+            [
                 SampleTestFixturePath,
                 OneTimeSetUpFailingTestFixturePath,
                 OneTimeTearDownFailingTestFixturePath,
                 IgnoredTestFixturePath,
                 ConfigurationFileTestFixturePath,
-            }));
+                TearDownAttachmentTestFixturePath,
+            ]));
         Assert.That(
             GetTestCaseResults(result).Select(x => x.EntityName),
             Is.EquivalentTo(testCases.Select(x => x.ExecutionPath)));

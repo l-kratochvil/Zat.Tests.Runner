@@ -112,7 +112,9 @@ public class NUnitTestRunnerRpcTests
         var result = await unit.RunTestAsync(testCases);
 
         // Then
-        var testCaseResults = GetTestCaseResults(result);
+        var testCaseResults = GetTestCaseResults(result)
+            .Where(x => x.EntityName.Contains(".SampleTestSuite."))
+            .ToArray();
         var withAttachment = testCaseResults.Single(x => x.EntityName.EndsWith(".SampleTestSuite.WithAttachment"));
         var attachment = withAttachment.TestAttachments.Single();
         using (Assert.EnterMultipleScope())
@@ -123,6 +125,31 @@ public class NUnitTestRunnerRpcTests
             Assert.That(
                 testCaseResults.Where(x => x != withAttachment),
                 Has.All.Matches<TestCaseResult>(x => x.TestAttachments.Length == 0));
+        }
+    }
+
+    [TestCase("Plain", "Plain", "PLAIN FAILURE REASON")]
+    [TestCase("NamedMethod", "Named", "NAMED FAILURE REASON")]
+    public async Task RunTestAsync__WhenTearDownAddsAttachment__ThenTestCaseResultShouldCarryIt(
+        string testCaseMethodName, string testName, string failureReason)
+    {
+        // Given
+        var unit = this.connection.Proxy;
+        var testCase = GetTestCases(await LoadTestAssemblyAsync(unit, TestAssemblyNet481DllPath))
+            .Single(x => x.ExecutionPath == $"{TestAssemblyNet481Name}.TearDownAttachmentFixture.{testCaseMethodName}");
+
+        // When
+        var result = await unit.RunTestAsync([testCase]);
+
+        // Then
+        var testCaseResult = GetTestCaseResults(result).Single();
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(testCaseResult.Status, Is.EqualTo(TestStatus.Failure));
+            Assert.That(testCaseResult.Detail?.Message, Does.Contain(failureReason));
+            Assert.That(
+                testCaseResult.TestAttachments.Select(x => (x.Description, Path.GetFileName(x.FilePath))),
+                Is.EqualTo(new[] { ("TEARDOWN ATTACHMENT", $"{testName}.txt") }));
         }
     }
 

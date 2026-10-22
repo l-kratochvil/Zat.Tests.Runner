@@ -181,7 +181,7 @@ public sealed class TestAssemblyRunner : MarshalByRefObject
     private static IEnumerable<TestSuiteResult> CollectTestSuiteResults(
         ITest root, TestFilter testFilter, IReadOnlyDictionary<string, ITestResult> results)
     {
-        foreach (var testSuite in FindTestSuites(root).Where(x => testFilter.Pass(x)))
+        foreach (var testSuite in FindTestSuites(root).Where(testFilter.Pass))
         {
             var (status, detail) = CreateGroupOutcome(FindResult(results, testSuite));
             yield return new TestSuiteResult(
@@ -195,7 +195,7 @@ public sealed class TestAssemblyRunner : MarshalByRefObject
     private static IEnumerable<TestFixtureResult> CollectTestFixtureResults(
         TestSuite testSuite, TestFilter testFilter, IReadOnlyDictionary<string, ITestResult> results)
     {
-        foreach (var testFixture in testSuite.Tests.OfType<TestFixture>().Where(x => testFilter.Pass(x)))
+        foreach (var testFixture in testSuite.Tests.OfType<TestFixture>().Where(testFilter.Pass))
         {
             var (status, detail) = CreateGroupOutcome(FindResult(results, testFixture));
             yield return new TestFixtureResult(
@@ -209,23 +209,43 @@ public sealed class TestAssemblyRunner : MarshalByRefObject
     private static IEnumerable<TestCaseResult> CollectTestCaseResults(
         TestFixture testFixture, TestFilter testFilter, IReadOnlyDictionary<string, ITestResult> results)
     {
-        foreach (var testCase in testFixture.Tests.OfType<Test>().Where(x => testFilter.Pass(x)))
+        foreach (var testCase in testFixture.Tests.OfType<Test>().Where(testFilter.Pass))
         {
-            var id = GetTestCaseId(testCase);
-            yield return results.TryGetValue(testCase.FullName, out var result)
-                ? new TestCaseResult(
-                    id,
-                    EntityName: testCase.FullName,
-                    MapStatus(result.ResultState),
-                    CreateDetail(result),
-                    [.. result.TestAttachments.Select(x => new Common.Model.TestAttachment(x.Description, x.FilePath))])
-                : new TestCaseResult(
-                    id,
-                    EntityName: testCase.FullName,
-                    TestStatus.Unknown,
-                    new Detail(NotRunMessage, StackTrace: null));
+            yield return CreateTestCaseResult(GetTestCaseId(testCase), testCase, FindResult(results, testCase));
         }
     }
+
+    /// <summary>
+    /// Creates the <see cref="TestCaseResult"/> of <paramref name="testCase"/>. A method named by
+    /// <see cref="TestCaseAttribute.TestName"/> is a test case whose single NUnit test, run with its set up and tear down,
+    /// is nested under it, so that nested result carries its outcome; attachments are gathered from every level.
+    /// </summary>
+    private static TestCaseResult CreateTestCaseResult(string id, Test testCase, ITestResult? result)
+    {
+        if (result is null)
+        {
+            return new TestCaseResult(
+                id,
+                EntityName: testCase.FullName,
+                TestStatus.Unknown,
+                new Detail(NotRunMessage, StackTrace: null));
+        }
+
+        var nestedResults = result.Children.ToArray();
+        var outcome = nestedResults.Length == 1 ? nestedResults[0] : result;
+
+        return new TestCaseResult(
+            id,
+            EntityName: testCase.FullName,
+            MapStatus(outcome.ResultState),
+            CreateDetail(outcome),
+            [.. SelfAndDescendants(result)
+                .SelectMany(static x => x.TestAttachments)
+                .Select(static x => new Common.Model.TestAttachment(x.Description, x.FilePath))]);
+    }
+
+    private static IEnumerable<ITestResult> SelfAndDescendants(ITestResult result)
+        => result.Children.SelectMany(SelfAndDescendants).Prepend(result);
 
     /// <summary>
     /// Gets the <see cref="TestCaseEntity.Id"/> of <paramref name="testCase"/>, shared by test discovery and result
@@ -245,8 +265,8 @@ public sealed class TestAssemblyRunner : MarshalByRefObject
     private static IEnumerable<TestSuite> FindTestSuites(ITest root)
     {
         foreach (var testSuite in root.Tests
-            .OfType<TestSuite>()
-            .Where(static x => x is not TestFixture and not ParameterizedFixtureSuite))
+                     .OfType<TestSuite>()
+                     .Where(static x => x is not TestFixture and not ParameterizedFixtureSuite))
         {
             if (testSuite.Tests.OfType<TestFixture>().Any())
             {
