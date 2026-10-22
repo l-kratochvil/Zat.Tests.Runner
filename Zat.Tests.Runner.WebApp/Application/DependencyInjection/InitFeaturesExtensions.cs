@@ -52,7 +52,7 @@ public static class InitFeaturesExtensions
 
         private IServiceCollection InitAppLogging()
             => services
-                .AddSingletonLoggerProvider<AppLoggerProvider>()
+                .AddSingletonAppLoggerProvider<AppLoggerProvider>()
                 .AddScoped<AppLoggerViewModel>();
     }
 }

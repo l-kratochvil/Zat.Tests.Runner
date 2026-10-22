@@ -55,7 +55,8 @@ public class TestRunnerEngineTests
         this.unit = new TestRunnerEngine(
             this.bridgeConnectorMock.Object,
             new NUnitTestRunnerProxyConnector(launchDebugger: false),
-            NullLogger<LogSources.TestRun>.Instance);
+            NullLogger<LogSources.TestRun>.Instance,
+            NullLogger<LogSources.App>.Instance);
         this.unit.StateChanged += this.reportedStates.Add;
     }
 
@@ -68,7 +69,7 @@ public class TestRunnerEngineTests
         // Then:
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(this.reportedStates, Is.EqualTo(new[] { TestRunState.Running, TestRunState.Stopped }));
+            Assert.That(this.reportedStates, Is.EqualTo([TestRunState.Running, TestRunState.Stopped]));
             Assert.That(this.unit.State, Is.EqualTo(TestRunState.Stopped));
         }
     }
@@ -86,7 +87,7 @@ public class TestRunnerEngineTests
             this.resultHandlerMock.Verify(x => x.HandleSubRunResult(handledResult), Times.Once);
             Assert.That(
                 handledResult.TestCaseResults.Select(x => (x.EntityName, x.Status)),
-                Is.EqualTo(new[] { (PassingTestCasePath, TestStatus.Passed) }));
+                Is.EqualTo([(PassingTestCasePath, TestStatus.Passed)]));
         }
     }
 
@@ -167,7 +168,7 @@ public class TestRunnerEngineTests
             this.resultHandlerMock.Verify(x => x.HandleSubRunResult(It.IsAny<TestResult>()), Times.Never);
             Assert.That(
                 this.reportedStates,
-                Is.EqualTo(new[] { TestRunState.Running, TestRunState.Stopping, TestRunState.Stopped }));
+                Is.EqualTo([TestRunState.Running, TestRunState.Stopping, TestRunState.Stopped]));
         }
     }
 
@@ -216,7 +217,7 @@ public class TestRunnerEngineTests
             this.bridgeConnectorMock.Verify(x => x.Connect(It.IsAny<TestConfig>()), Times.Never);
             this.resultHandlerMock.Verify(x => x.HandleSubRunResult(It.IsAny<TestResult>()), Times.Never);
             this.resultHandlerMock.Verify(x => x.HandleTestRunResult(It.IsAny<TestRunResult>()), Times.Never);
-            Assert.That(this.reportedStates, Is.EqualTo(new[] { TestRunState.Running, TestRunState.Stopped }));
+            Assert.That(this.reportedStates, Is.EqualTo([TestRunState.Running, TestRunState.Stopped]));
         }
     }
 
@@ -232,7 +233,8 @@ public class TestRunnerEngineTests
         var unit = new TestRunnerEngine(
             this.bridgeConnectorMock.Object,
             GivenConnector(new Mock<INUnitTestRunnerProxyConnection>(), proxyMock),
-            NullLogger<LogSources.TestRun>.Instance);
+            NullLogger<LogSources.TestRun>.Instance,
+            NullLogger<LogSources.App>.Instance);
         unit.StateChanged += this.reportedStates.Add;
 
         // When:
@@ -242,7 +244,7 @@ public class TestRunnerEngineTests
         Assert.CatchAsync(() => testRun);
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(this.reportedStates, Is.EqualTo(new[] { TestRunState.Running, TestRunState.Stopped }));
+            Assert.That(this.reportedStates, Is.EqualTo([TestRunState.Running, TestRunState.Stopped]));
             Assert.That(unit.State, Is.EqualTo(TestRunState.Stopped));
         }
     }
@@ -263,12 +265,12 @@ public class TestRunnerEngineTests
         // Then:
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(results.Value.Select(x => x.TestedHwAssemblyType), Is.EqualTo(new[] { HwAssemblyType.HW00 }));
+            Assert.That(results.Value.Select(x => x.TestedHwAssemblyType), Is.EqualTo([HwAssemblyType.HW00]));
             this.resultHandlerMock.Verify(x => x.HandleSubRunResult(results.Value[0]), Times.Once);
             this.resultHandlerMock.Verify(x => x.HandleSubRunResult(It.IsAny<TestResult>()), Times.Once);
             Assert.That(
                 this.reportedStates,
-                Is.EqualTo(new[] { TestRunState.Running, TestRunState.Stopping, TestRunState.Stopped }));
+                Is.EqualTo([TestRunState.Running, TestRunState.Stopping, TestRunState.Stopped]));
         }
     }
 
@@ -303,7 +305,8 @@ public class TestRunnerEngineTests
         var unit = new TestRunnerEngine(
             this.bridgeConnectorMock.Object,
             GivenConnector(connectionMock, proxyMock),
-            NullLogger<LogSources.TestRun>.Instance);
+            NullLogger<LogSources.TestRun>.Instance,
+            NullLogger<LogSources.App>.Instance);
 
         proxyMock
             .Setup(x => x.RunTestAsync(It.IsAny<IEnumerable<TestEntity>>(), It.IsAny<CancellationToken>()))

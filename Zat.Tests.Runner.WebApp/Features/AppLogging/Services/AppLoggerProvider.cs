@@ -17,16 +17,14 @@ public sealed class AppLoggerProvider(
     /// <inheritdoc/>
     public ILogger CreateLogger(string categoryName)
         => this.loggers.GetOrAdd(
-            categoryName, _ => new Logger(categoryName, globalMessanger));
+            categoryName, _ => new Logger(globalMessanger));
 
     /// <inheritdoc/>
     public void Dispose()
     {
     }
 
-    private class Logger(
-        string categoryName,
-        GlobalWeakReferenceMessanger globalMessanger)
+    private class Logger(GlobalWeakReferenceMessanger globalMessanger)
         : ILogger
     {
         /// <inheritdoc/>
@@ -50,7 +48,6 @@ public sealed class AppLoggerProvider(
                     new LogEntry(
                         Timestamp: DateTimeOffset.Now,
                         LogLevel: logLevel,
-                        Source: categoryName,
                         Message: formatter(state, exception),
                         Detail: exception?.ToString()))));
     }

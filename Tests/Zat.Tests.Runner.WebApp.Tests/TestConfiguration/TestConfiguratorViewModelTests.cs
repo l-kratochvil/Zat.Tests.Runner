@@ -29,7 +29,7 @@ public class TestConfiguratorViewModelTests
         this.unit = new TestConfigurationViewModel(
             this.store,
             new Mock<IAppSettingsStore>().Object,
-            new Mock<ILogger<LogSources.App>>().Object,
+            new Mock<ILogger>().Object,
             this.store.Dispatcher.Object);
     }
 

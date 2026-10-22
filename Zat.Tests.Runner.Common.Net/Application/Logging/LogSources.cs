@@ -1,30 +1,27 @@
 namespace Zat.Tests.Runner.Common.Net.Application.Logging;
 
 /// <summary>
-/// Known log sources, kept as plain strings so outside entries can be routed without a mapping.
+/// Log sources, used as logger categories.
 /// </summary>
 public static class LogSources
 {
     /// <summary>
-    /// Gets the list of all known sources.
-    /// </summary>
-    public static IReadOnlyList<string> All { get; } =
-    [
-        nameof(App), nameof(TestRun), nameof(TestResultHandler)
-    ];
-
-    /// <summary>
-    /// Source representing the application itself: lifecycle, navigation, and settings.
+    /// The log provided to the user; it reaches only providers registered for the log.
     /// </summary>
     public record App;
 
     /// <summary>
-    /// Source representing a test run and the output of the test runner.
+    /// Default log source for general diagnostics.
+    /// </summary>
+    public record Default;
+
+    /// <summary>
+    /// Diagnostics of a test run..
     /// </summary>
     public record TestRun;
 
     /// <summary>
-    /// Source representing communication with TestLink.
+    /// Diagnostics of test result handling.
     /// </summary>
     public record TestResultHandler;
 }

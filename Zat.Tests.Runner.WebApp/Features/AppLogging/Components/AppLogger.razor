@@ -36,19 +36,6 @@
                         </label>
                     }
                 </span>
-
-                <span class="filter-group">
-                    @foreach (var source in this.ViewModel.AvailableSources)
-                    {
-                        <label class="form-check-label filter-option">
-                            <input type="checkbox"
-                                   class="form-check-input"
-                                   checked="@this.ViewModel.IsSelected(source)"
-                                   @onchange="args => this.ViewModel.SetSelected(source, (bool)args.Value!)" />
-                            @source
-                        </label>
-                    }
-                </span>
             </div>
 
             <button type="button"
@@ -67,7 +54,6 @@
                 <div class="log-entry severity-@entry.LogLevel.ToString().ToLowerInvariant()">
                     <span class="entry-time">@entry.Timestamp.ToString("HH:mm:ss.fff")</span>
                     <span class="entry-severity">@entry.LogLevel</span>
-                    <span class="entry-source">@entry.Source</span>
                     <span class="entry-message">@entry.Message</span>
                 </div>
 

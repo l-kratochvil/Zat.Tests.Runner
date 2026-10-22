@@ -1,145 +1,140 @@
 .app-log-panel {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .app-log-header {
-    display: flex;
-    align-items: center;
-    flex: 0 0 auto;
-    flex-wrap: wrap;
-    gap: 0.35rem 0.75rem;
-    padding: 0.25rem 0.5rem;
-    border-bottom: 1px solid #dee2e6;
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-bottom: 1px solid #dee2e6;
 }
 
 .app-log-panel.is-collapsed .app-log-header {
-    border-bottom: none;
+  border-bottom: none;
 }
 
 .toggle-button {
-    flex: 0 0 auto;
-    line-height: 1;
-    padding: 0.1rem 0.4rem;
+  flex: 0 0 auto;
+  line-height: 1;
+  padding: 0.1rem 0.4rem;
 }
 
 .pane-title {
-    flex: 0 0 auto;
-    align-self: center;
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 600;
-    line-height: 1.2;
+  flex: 0 0 auto;
+  align-self: center;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.2;
 }
 
 .error-count {
-    flex: 0 0 auto;
-    margin-left: auto;
-    font-size: 0.8rem;
-    color: #6c757d;
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: #6c757d;
 }
 
 .error-count.has-errors {
-    color: #b02a37;
-    font-weight: 600;
+  color: #b02a37;
+  font-weight: 600;
 }
 
 .filters {
-    display: flex;
-    flex: 1 1 auto;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.75rem;
-    min-width: 0;
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
 }
 
 .filter-group {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0 0.5rem;
-    border-left: 1px solid #dee2e6;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.5rem;
+  border-left: 1px solid #dee2e6;
 }
 
 .filter-option {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    font-size: 0.8rem;
-    margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  margin: 0;
 }
 
 /* Bootstrap offsets the checkbox with margin-top, which breaks flex centering against the label text. */
 .filter-option .form-check-input {
-    margin-top: 0;
+  margin-top: 0;
 }
 
 .jump-button {
-    flex: 0 0 auto;
-    padding: 0.1rem 0.5rem;
-    font-size: 0.8rem;
+  flex: 0 0 auto;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.8rem;
 }
 
 .log-file-path {
-    flex: 0 1 auto;
-    max-width: 30ch;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    direction: rtl;
-    font-size: 0.75rem;
-    color: #6c757d;
+  flex: 0 1 auto;
+  max-width: 30ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  direction: rtl;
+  font-size: 0.75rem;
+  color: #6c757d;
 }
 
 .app-log-entries {
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow: auto;
-    padding: 0.25rem 0.5rem;
-    font-family: Consolas, 'Courier New', monospace;
-    font-size: 0.8rem;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 0.25rem 0.5rem;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.8rem;
 }
 
 .log-entry {
-    display: flex;
-    gap: 0.5rem;
-    white-space: pre-wrap;
+  display: flex;
+  gap: 0.5rem;
+  white-space: pre-wrap;
 }
 
 .entry-time {
-    flex: 0 0 auto;
-    color: #6c757d;
+  flex: 0 0 auto;
+  color: #6c757d;
 }
 
 .entry-severity {
-    flex: 0 0 5rem;
-}
-
-.entry-source {
-    flex: 0 0 6rem;
-    color: #6c757d;
+  flex: 0 0 5rem;
 }
 
 .entry-message {
-    flex: 1 1 auto;
-    min-width: 0;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .entry-detail {
-    margin: 0 0 0.25rem 1.5rem;
-    color: #495057;
-    white-space: pre-wrap;
+  margin: 0 0 0.25rem 1.5rem;
+  color: #495057;
+  white-space: pre-wrap;
 }
 
 .severity-debug {
-    color: #6c757d;
+  color: #6c757d;
 }
 
 .severity-warning {
-    color: #997404;
+  color: #997404;
 }
 
 .severity-error {
-    color: #b02a37;
+  color: #b02a37;
 }

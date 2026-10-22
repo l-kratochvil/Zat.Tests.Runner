@@ -105,7 +105,7 @@ public class TestTreeStoreTests
         // Then:
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(this.directoryWatcher.WatchedDirectoryPaths, Is.EqualTo(new[] { TestLibsPath }));
+            Assert.That(this.directoryWatcher.WatchedDirectoryPaths, Is.EqualTo([TestLibsPath]));
             Assert.That(this.unit.TestSuites, Is.EqualTo(changedTestSuites));
             Assert.That(
                 this.reportedChanges.Last(),

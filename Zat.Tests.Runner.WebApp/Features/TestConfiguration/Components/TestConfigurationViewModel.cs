@@ -7,7 +7,6 @@ using FluentValidation;
 
 using Fluxor;
 
-using Zat.Tests.Runner.Common.Net.Application.Logging;
 using Zat.Tests.Runner.WebApp.Shared.Stores.AppSettings;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
 using Zat.Tests.Runner.WebApp.Shared.ViewModel;
@@ -23,7 +22,6 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
     // How release dates are written down in TestLink, which takes them as they are typed.
     private const string DateFormat = "d.M.yyyy";
 
-    private readonly IState<TestConfigurationState> state;
     private readonly IAppSettingsStore appSettingsStore;
     private readonly ILogger logger;
     private readonly IDispatcher dispatcher;
@@ -32,15 +30,14 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
     public TestConfigurationViewModel(
         IState<TestConfigurationState> state,
         IAppSettingsStore appSettingsStore,
-        ILogger<LogSources.App> logger,
+        ILogger logger,
         IDispatcher dispatcher)
     {
-        this.state = state;
         this.appSettingsStore = appSettingsStore;
         this.logger = logger;
         this.dispatcher = dispatcher;
 
-        this.stateBinder = new StateBinder<TestConfigurationViewModel, TestConfigurationState>(this, this.state);
+        this.stateBinder = new StateBinder<TestConfigurationViewModel, TestConfigurationState>(this, state);
 
         this.HasErrorsChanged +=
             hasErrors => this.dispatcher.Dispatch(

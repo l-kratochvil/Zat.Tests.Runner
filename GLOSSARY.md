@@ -46,11 +46,11 @@ The hardware station a test run is executed against.
 ### Logging
 
 **Log**:
-The application activity feed the tester reads: what the application is doing, held in memory by `AppLoggerHub` and shown in `AppLogger`. Never the test result.
+What the application tells the tester, fed only by `LogSources.App` - never diagnostics.
 _Avoid_: output, result
 
 **Log entry**:
-One record in the log: timestamp, severity, source, message and optional detail.
+One record in the log: timestamp, severity, message and optional detail.
 _Avoid_: message, line
 
 **Severity**:
@@ -58,11 +58,11 @@ How serious an entry is, see `LogSeverity`. A successful outcome is reported as 
 _Avoid_: level, log level
 
 **Log source**:
-The channel an entry belongs to. A plain string, so that entries arriving from outside can be routed without a mapping; known ones: `LogSources`.
-_Avoid_: category, logger
+The logger category a record is written under, see `LogSources`. `App` feeds the log; every other one is diagnostics.
+_Avoid_: channel
 
 **Diagnostics**:
-Developer-facing records written through `ILogger`. They reach the log file but never the log.
+Developer-facing records of every category other than `LogSources.App`, including a plain `ILogger` (`LogSources.Default`) and framework records. They reach the log file, console and debug output but never the log.
 _Avoid_: log, debug log
 
 **Browser diagnostics**:
@@ -70,7 +70,7 @@ Diagnostics about what happened in the browser, as opposed to on the test machin
 _Avoid_: client log, JS log
 
 **Log file**:
-The daily file on disk. A superset of the log: it also holds diagnostics and framework records, see ADR-0001.
+The daily file on disk holding diagnostics.
 _Avoid_: log, test result
 
 ### Infrastructure

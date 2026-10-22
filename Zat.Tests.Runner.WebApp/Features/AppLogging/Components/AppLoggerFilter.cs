@@ -1,19 +1,13 @@
 namespace Zat.Tests.Runner.WebApp.Features.AppLogging.Components;
 
-using Zat.Tests.Runner.Common.Net.Application.Logging;
 using Zat.Tests.Runner.WebApp.Shared.Model;
 
 /// <summary>
-/// Which severities and log sources are shown in the log panel.
+/// Filters which severities are shown in the log panel.
 /// </summary>
-/// <remarks>
-/// Severities are tracked as shown values because they are known up front. Log sources are tracked
-/// as hidden values so a source outside <see cref="LogSources.All"/> stays visible by default.
-/// </remarks>
 public sealed class AppLoggerFilter
 {
     private readonly HashSet<LogLevel> selectedLogLevels;
-    private readonly HashSet<string> hiddenSources = [with(StringComparer.OrdinalIgnoreCase)];
 
     private AppLoggerFilter(IEnumerable<LogLevel> selectedLogLevels)
     {
@@ -21,7 +15,7 @@ public sealed class AppLoggerFilter
     }
 
     /// <summary>
-    /// Creates the filter used when the panel first opens: every logLevel and log source is shown.
+    /// Creates the filter used when the panel first opens: every logLevel is shown.
     /// </summary>
     /// <returns>The default filter.</returns>
     public static AppLoggerFilter CreateDefault()
@@ -37,16 +31,6 @@ public sealed class AppLoggerFilter
     public bool IsSelected(LogLevel logLevel)
     {
         return this.selectedLogLevels.Contains(logLevel);
-    }
-
-    /// <summary>
-    /// Determines whether log entries of <paramref name="source"/> are shown.
-    /// </summary>
-    /// <param name="source">Log source to test.</param>
-    /// <returns><see langword="true"/> when <paramref name="source"/> is shown.</returns>
-    public bool IsSelected(string source)
-    {
-        return !this.hiddenSources.Contains(source);
     }
 
     /// <summary>
@@ -67,30 +51,13 @@ public sealed class AppLoggerFilter
     }
 
     /// <summary>
-    /// Shows or hides log entries of <paramref name="source"/>.
-    /// </summary>
-    /// <param name="source">Log source to change.</param>
-    /// <param name="selected">Whether <paramref name="source"/> should be shown.</param>
-    public void SetSelected(string source, bool selected)
-    {
-        if (selected)
-        {
-            this.hiddenSources.Remove(source);
-        }
-        else
-        {
-            this.hiddenSources.Add(source);
-        }
-    }
-
-    /// <summary>
     /// Determines whether <paramref name="entry"/> passes the filter.
     /// </summary>
     /// <param name="entry">Log entry to test.</param>
     /// <returns><see langword="true"/> when <paramref name="entry"/> should be shown.</returns>
     public bool Matches(LogEntry entry)
     {
-        return this.IsSelected(entry.LogLevel) && this.IsSelected(entry.Source);
+        return this.IsSelected(entry.LogLevel);
     }
 
     /// <summary>

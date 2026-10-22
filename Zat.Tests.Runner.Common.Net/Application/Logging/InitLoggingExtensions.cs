@@ -10,10 +10,25 @@ public static class InitLoggingExtensions
 {
     extension(IServiceCollection services)
     {
+        /// <summary>
+        /// Separates the log from diagnostics: <see cref="LogSources.App"/> is created from its own
+        /// logger factory holding only providers of the log, so no filter configured for the main
+        /// pipeline can leak it into the log file, console or debug output.
+        /// </summary>
+        /// <returns>The updated service collection.</returns>
         public IServiceCollection InitLogging()
             => services
+                .AddKeyedSingleton<ILoggerFactory>(
+                    IServicesCollectionExtensions.AppLoggingKey,
+                    (provider, key) => new LoggerFactory(
+                        provider.GetKeyedServices<ILoggerProvider>(key),
+                        new LoggerFilterOptions { MinLevel = LogLevel.Trace }))
+                .AddSingleton<ILogger<LogSources.App>>(
+                    provider => new Logger<LogSources.App>(
+                        provider.GetRequiredKeyedService<ILoggerFactory>(
+                            IServicesCollectionExtensions.AppLoggingKey)))
                 .AddSingleton<ILogger>(
-                    provider => provider.GetRequiredService<ILogger<LogSources.App>>());
+                    provider => provider.GetRequiredService<ILogger<LogSources.Default>>());
     }
 
     extension(ILoggingBuilder builder)

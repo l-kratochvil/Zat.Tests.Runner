@@ -19,7 +19,8 @@ using Zat.Z2xxTests.Common.Model;
 public class TestRunnerEngine(
     ITestRunnerBridgeConnector testRunnerBridgeConnector,
     INUnitTestRunnerProxyConnector nunitTestRunnerProxyConnector,
-    ILogger<LogSources.TestRun> logger)
+    ILogger<LogSources.TestRun> logger,
+    ILogger<LogSources.App> appLogger)
     : ITestRunnerEngine
 {
     /// <summary>
@@ -52,6 +53,17 @@ public class TestRunnerEngine(
 
             logger.Log(
                 LogLevel.Information,
+#pragma warning disable CA2254
+                value switch
+                {
+                    TestRunState.Running => "Test run started",
+                    TestRunState.Stopping => "Test run stopping",
+                    TestRunState.Stopped => "Test run stopped",
+                    _ => throw new ArgumentOutOfRangeException(nameof(value)),
+                });
+
+            appLogger.Log(
+                LogLevel.Information,
                 value switch
                 {
                     TestRunState.Running => Resources.TestRun_Started,
@@ -59,6 +71,7 @@ public class TestRunnerEngine(
                     TestRunState.Stopped => Resources.TestRun_Stopped,
                     _ => throw new ArgumentOutOfRangeException(nameof(value)),
                 });
+#pragma warning restore CA2254
 
             this.StateChanged?.Invoke(value);
         }
@@ -76,6 +89,7 @@ public class TestRunnerEngine(
         using var runCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         var stopRequestedRegistration = default(CancellationTokenRegistration);
         var started = false;
+
         try
         {
             lock (this.stateLock)
@@ -272,12 +286,14 @@ public class TestRunnerEngine(
         var testRunResult = new TestResult(proxyTestResult, subRun.TestType, subRun.TestConfig.TestedHwAssemblyType);
 
         // A sub-run cut short by a stop holds test cases that never ran, so it is not reported as their outcome.
-        if (!cancellationToken.IsCancellationRequested)
+        if (cancellationToken.IsCancellationRequested)
         {
-            foreach (var handler in resultHandlers)
-            {
-                handler.HandleSubRunResult(testRunResult);
-            }
+            return testRunResult;
+        }
+
+        foreach (var handler in resultHandlers)
+        {
+            handler.HandleSubRunResult(testRunResult);
         }
 
         return testRunResult;

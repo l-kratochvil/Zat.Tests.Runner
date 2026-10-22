@@ -8,7 +8,6 @@ using Moq;
 
 using NUnit.Framework;
 
-using Zat.Tests.Runner.Common.Net.Application.Logging;
 using Zat.Tests.Runner.WebApp.Features.AppLogging.Components;
 using Zat.Tests.Runner.WebApp.Shared.Model;
 using Zat.Tests.Runner.WebApp.Shared.Stores.AppLogging;
@@ -16,8 +15,6 @@ using Zat.Tests.Runner.WebApp.Shared.Stores.AppLogging;
 [TestFixture]
 public class AppLoggerViewModelTests
 {
-    private const string GivenUnknownSource = "Unknown source";
-
     private Mock<IState<AppLoggingState>> state;
     private AppLoggingState log;
 
@@ -70,21 +67,6 @@ public class AppLoggerViewModelTests
         // Then:
         Assert.That(this.unit.Entries, Is.EqualTo(new[] { expected }));
     }
-
-    [Test]
-    public void Entries__WhenSourceIsDeselected__ThenShouldLeaveItsEntriesOut()
-    {
-        // Given:
-        var expected = CreateEntry(LogLevel.Information, LogSources.All[0]);
-        this.GivenLog(CreateEntry(LogLevel.Information, GivenUnknownSource), expected);
-
-        // When:
-        this.unit.SetSelected(GivenUnknownSource, selected: false);
-
-        // Then:
-        Assert.That(this.unit.Entries, Is.EqualTo(new[] { expected }));
-    }
-
     [Test]
     public void SetSelected__WhenFilterChanges__ThenShouldAnnounceEntries()
     {
@@ -97,24 +79,6 @@ public class AppLoggerViewModelTests
         // Then:
         Assert.That(announced, Does.Contain(nameof(AppLoggerViewModel.Entries)));
     }
-
-    [Test]
-    public void AvailableSources__WhenLogHeardFromUnknownSource__ThenShouldOfferItBesideKnownOnes()
-    {
-        // Given:
-        // A source outside the known ones would otherwise be impossible to hide.
-        string[] expected = [..LogSources.All, GivenUnknownSource];
-        this.GivenLog(
-            CreateEntry(LogLevel.Information, GivenUnknownSource),
-            CreateEntry(LogLevel.Information, GivenUnknownSource.ToUpperInvariant()));
-
-        // When:
-        var sources = this.unit.AvailableSources;
-
-        // Then:
-        Assert.That(sources, Is.EqualTo(expected));
-    }
-
     [Test]
     public void ToggleCollapsed__WhenPanelIsOpen__ThenShouldCollapseItAndAnnounceIt()
     {
@@ -140,7 +104,6 @@ public class AppLoggerViewModelTests
         [
             nameof(AppLoggerViewModel.Entries),
             nameof(AppLoggerViewModel.ErrorCount),
-            nameof(AppLoggerViewModel.AvailableSources),
         ];
         var announced = this.RecordAnnouncedProperties();
 
@@ -165,11 +128,10 @@ public class AppLoggerViewModelTests
         Assert.That(announced, Is.Empty);
     }
 
-    private static LogEntry CreateEntry(LogLevel logLevel, string? source = null)
+    private static LogEntry CreateEntry(LogLevel logLevel)
         => new(
             Timestamp: DateTimeOffset.Now,
             LogLevel: logLevel,
-            Source: source ?? LogSources.All[0],
             Message: logLevel.ToString());
 
     private void GivenLog(params LogEntry[] entries)

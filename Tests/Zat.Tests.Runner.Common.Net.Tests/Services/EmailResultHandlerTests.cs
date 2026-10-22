@@ -57,7 +57,7 @@ public class EmailResultHandlerTests
         {
             Assert.That(config, Is.EqualTo(new SendConfig("zat01ex.zat.lan:25", "smtp-user", "smtp-password")));
             Assert.That(message.From, Is.EqualTo("tester-z2xx@zat.cz"));
-            Assert.That(message.To, Is.EqualTo(new[] { "first@zat.cz", "second@zat.cz" }));
+            Assert.That(message.To, Is.EqualTo(["first@zat.cz", "second@zat.cz"]));
         }
     }
 
@@ -97,7 +97,7 @@ public class EmailResultHandlerTests
         this.unit.HandleTestRunResult(new TestRunResult([SubRun(TestStatus.Passed)], false, TimeSpan.Zero));
 
         // Then:
-        Assert.That(this.sentEmails.Single().Message.To, Is.EqualTo(new[] { "first@zat.cz" }));
+        Assert.That(this.sentEmails.Single().Message.To, Is.EqualTo(["first@zat.cz"]));
     }
 
     [Test]

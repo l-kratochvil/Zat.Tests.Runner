@@ -77,7 +77,7 @@ public class TestConfiguratorTests : Bunit.TestContext
         this.Services.AddSingleton(this.appSettingsStore.Object);
         this.Services.AddSingleton(this.store.Dispatcher.Object);
         this.Services.AddSingleton(new Mock<IActionSubscriber>().Object);
-        this.Services.AddSingleton(new Mock<ILogger<LogSources.App>>().Object);
+        this.Services.AddSingleton(new Mock<ILogger<LogSources.Default>>().Object);
         this.Services.AddScoped<TestConfigurationViewModel>();
     }
 
