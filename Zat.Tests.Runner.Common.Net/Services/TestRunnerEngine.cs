@@ -1,4 +1,5 @@
-﻿namespace Zat.Tests.Runner.Common.Net.Services;
+﻿#pragma warning disable CA2254
+namespace Zat.Tests.Runner.Common.Net.Services;
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -53,7 +54,6 @@ public class TestRunnerEngine(
 
             logger.Log(
                 LogLevel.Information,
-#pragma warning disable CA2254
                 value switch
                 {
                     TestRunState.Running => "Test run started",
@@ -71,7 +71,6 @@ public class TestRunnerEngine(
                     TestRunState.Stopped => Resources.TestRun_Stopped,
                     _ => throw new ArgumentOutOfRangeException(nameof(value)),
                 });
-#pragma warning restore CA2254
 
             this.StateChanged?.Invoke(value);
         }
@@ -126,11 +125,18 @@ public class TestRunnerEngine(
                 var missingExecutionPaths = FindMissingExecutionPaths(subRuns, testTree);
                 if (missingExecutionPaths.Length > 0)
                 {
+                    logger.Log(
+                        LogLevel.Error,
+                        "The test run did not start: the test assembly {TestAssemblyPath} changed and no longer holds these selected tests: {MissingExecutionPaths}",
+                        config.TestAssemblyDllPath,
+                        missingExecutionPaths);
+
                     var error = string.Format(
                         Resources.TestRun_TestEntitiesMissing_Format,
                         config.TestAssemblyDllPath,
                         string.Join(Environment.NewLine, missingExecutionPaths));
-                    logger.Log(LogLevel.Error, "{Error}", error);
+
+                    appLogger.Log(LogLevel.Error, error);
 
                     return Result.Failure<TestResult[]>(error);
                 }

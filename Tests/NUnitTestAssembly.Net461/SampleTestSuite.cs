@@ -16,4 +16,15 @@ public class SampleTestSuite
     {
         Assert.Pass();
     }
+
+    /// <summary>
+    /// A passing test case with an attachment.
+    /// </summary>
+    [Test]
+    public void WithAttachment()
+    {
+        var filePath = Path.Combine(TestContext.CurrentContext.WorkDirectory, "attachment.txt");
+        File.WriteAllText(filePath, "ATTACHMENT");
+        TestContext.AddTestAttachment(filePath, "ATTACHMENT DESCRIPTION");
+    }
 }

@@ -46,7 +46,7 @@ The hardware station a test run is executed against.
 ### Logging
 
 **Log**:
-What the application tells the tester, fed only by `LogSources.App` - never diagnostics.
+What the application tells the tester, fed only by `LogSources.App` - never diagnostics. Its messages are localized.
 _Avoid_: output, result
 
 **Log entry**:
@@ -62,7 +62,7 @@ The logger category a record is written under, see `LogSources`. `App` feeds the
 _Avoid_: channel
 
 **Diagnostics**:
-Developer-facing records of every category other than `LogSources.App`, including a plain `ILogger` (`LogSources.Default`) and framework records. They reach the log file, console and debug output but never the log.
+Developer-facing records of every category other than `LogSources.App`, including a plain `ILogger` (`LogSources.Default`) and framework records. They are always in English and reach the log file, console and debug output.
 _Avoid_: log, debug log
 
 **Browser diagnostics**:

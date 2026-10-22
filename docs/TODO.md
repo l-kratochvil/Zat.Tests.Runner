@@ -53,17 +53,6 @@
 - Po dokončení Testlink vazby přepsat kapitoly, které byky automatizovany v dokument Automatizované testování - kapitola 2.9.3
 - Dále v dokumentu uvést "povinnosti vývojáře testů": Musí nahrát knihovny testu do adresáře, kde je runner vyžaduje (neuvádět konkrétní cestu, jelikož ta se bude časem měnit)
 
-#### 1. Nahrávání přílohy k výsledku testu
-
-- Zavolat metodu tl.uploadExecutionAttachment a předat získávané execution_id společně s parametry přílohy
-  - executionId: ID vykonaného testu
-  - fileName: Název souboru
-  - fileType / mimetype: Typ souboru (MIME type)
-  - content: Obsah souboru zakódovaný do Base64
-  - title / description (volitelně): Název a popis přílohy
-- Příloha se vytáhne z 'c:\Automized tests\runner-exchange\': Do tohoto adresáře test bude sypat veškeré screenshoty
-- V názvu souboru bude ID testcasu (executionId)
-
 #### 2. Pročistit ITestLink a Testlink
 
 - Týká se i Model a poté XmlRpcStructConvertor

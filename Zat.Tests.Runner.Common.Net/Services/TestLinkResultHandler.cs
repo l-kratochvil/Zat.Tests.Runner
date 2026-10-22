@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging;
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Net.Application.Logging;
 using Zat.Tests.Runner.Common.Net.Model;
-using Zat.Z2xxTests.Common;
 
 public class TestLinkResultHandler(
     ITestLink testLink,
@@ -97,38 +96,10 @@ public class TestLinkResultHandler(
                 notes: $"Message: {testCaseResult.Detail?.Message}\nStackTrace: {testCaseResult.Detail?.StackTrace}",
                 buildId: testBuild.Id);
 
-            // Attach failure screenshot only for failed test cases
-            if (!testCaseResult.Failed)
+            foreach (var testAttachment in testCaseResult.TestAttachments)
             {
-                continue;
+                UploadAttachment(reportTestCaseResult.Id, testAttachment);
             }
-
-            var failureScreenshotName = Paths.FileNames.MakeFailureScreenshotName(
-                testCaseId: testCaseExternalId,
-                hwAssemblyType: testResult.TestedHwAssemblyType);
-            var failureScreenshotPath = Path.Combine(Paths.Directories.Current, failureScreenshotName);
-            if (!File.Exists(failureScreenshotPath))
-            {
-                logger.Log(
-                    LogLevel.Error,
-                    "Failure screenshot not found at path: {FailureScreenshotPath}",
-                    failureScreenshotPath);
-                continue;
-            }
-
-            var failureScreenshotFileBytes = File.ReadAllBytes(failureScreenshotPath);
-            var fileType = FileExtensionContentTypeProvider.TryGetContentType(
-                failureScreenshotPath, out var contentType)
-                ? contentType
-                : "application/octet-stream";
-
-            testLink.UploadExecutionAttachment(
-                executionId: reportTestCaseResult.Id,
-                filename: failureScreenshotName,
-                fileType: fileType,
-                content: failureScreenshotFileBytes,
-                title: "Screenshot", // TODO: Better text?
-                description: "Attached screenshot for the test case result"); // TODO: Better text?
         }
 
         static string MakeBuildName(IContext context, TestResult testResult)
@@ -170,6 +141,28 @@ public class TestLinkResultHandler(
             }
 
             return buildName;
+        }
+
+        void UploadAttachment(int executionId, TestAttachment testAttachment)
+        {
+            var filePath = testAttachment.FilePath;
+            if (!File.Exists(filePath))
+            {
+                logger.Log(LogLevel.Error, "Test attachment not found at path: {FilePath}", filePath);
+                return;
+            }
+
+            var fileName = Path.GetFileName(filePath);
+            var fileType = FileExtensionContentTypeProvider.TryGetContentType(filePath, out var contentType)
+                ? contentType
+                : "application/octet-stream";
+
+            testLink.UploadExecutionAttachment(
+                executionId: executionId,
+                filename: fileName,
+                fileType: fileType,
+                content: File.ReadAllBytes(filePath),
+                title: testAttachment.Description ?? fileName);
         }
     }
 

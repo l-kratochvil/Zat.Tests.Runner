@@ -217,7 +217,8 @@ public sealed class TestAssemblyRunner : MarshalByRefObject
                     id,
                     EntityName: testCase.FullName,
                     MapStatus(result.ResultState),
-                    CreateDetail(result))
+                    CreateDetail(result),
+                    [.. result.TestAttachments.Select(x => new Common.Model.TestAttachment(x.Description, x.FilePath))])
                 : new TestCaseResult(
                     id,
                     EntityName: testCase.FullName,

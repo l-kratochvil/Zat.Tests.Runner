@@ -101,6 +101,31 @@ public class NUnitTestRunnerRpcTests
         }
     }
 
+    [TestCaseSource(nameof(TestAssemblyCases))]
+    public async Task RunTestAsync__WhenTestCaseAddsAttachment__ThenOnlyItsResultShouldCarryIt(string testAssemblyDllPath)
+    {
+        // Given
+        var unit = this.connection.Proxy;
+        var testCases = GetTestCases(await LoadTestAssemblyAsync(unit, testAssemblyDllPath));
+
+        // When
+        var result = await unit.RunTestAsync(testCases);
+
+        // Then
+        var testCaseResults = GetTestCaseResults(result);
+        var withAttachment = testCaseResults.Single(x => x.EntityName.EndsWith(".SampleTestSuite.WithAttachment"));
+        var attachment = withAttachment.TestAttachments.Single();
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(attachment.Description, Is.EqualTo("ATTACHMENT DESCRIPTION"));
+            Assert.That(Path.GetFileName(attachment.FilePath), Is.EqualTo("attachment.txt"));
+            Assert.That(File.Exists(attachment.FilePath), Is.True);
+            Assert.That(
+                testCaseResults.Where(x => x != withAttachment),
+                Has.All.Matches<TestCaseResult>(x => x.TestAttachments.Length == 0));
+        }
+    }
+
     [Test]
     public async Task LoadTestAssemblyAsync_WithZatTestsAssembly()
     {

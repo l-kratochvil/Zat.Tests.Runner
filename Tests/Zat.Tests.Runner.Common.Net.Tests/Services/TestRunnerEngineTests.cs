@@ -5,7 +5,9 @@ using System.Reflection;
 using DevKit.Core.Extensions.Types;
 using DevKit.Core.UtilityObjects;
 
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Logging.Testing;
 
 using Moq;
 
@@ -38,6 +40,9 @@ public class TestRunnerEngineTests
 
     private readonly List<TestRunState> reportedStates = [];
 
+    private readonly FakeLogger<LogSources.TestRun> testRunLogger = new();
+    private readonly FakeLogger<LogSources.App> appLogger = new();
+
     private Mock<ITestRunnerBridgeConnector> bridgeConnectorMock = null!;
     private Mock<ITestResultHandler> resultHandlerMock = null!;
     private TestRunnerEngine unit = null!;
@@ -55,9 +60,27 @@ public class TestRunnerEngineTests
         this.unit = new TestRunnerEngine(
             this.bridgeConnectorMock.Object,
             new NUnitTestRunnerProxyConnector(launchDebugger: false),
-            NullLogger<LogSources.TestRun>.Instance,
-            NullLogger<LogSources.App>.Instance);
+            this.testRunLogger,
+            this.appLogger);
         this.unit.StateChanged += this.reportedStates.Add;
+    }
+
+    [Test]
+    public async Task RunTestAsync__WhenTestRunCompletes__ThenShouldLogEachStateChangeToBothLogAndDiagnostics()
+    {
+        // When:
+        await this.unit.RunTestAsync([ApplicationTestCase()], this.Config());
+
+        // Then:
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(
+                this.appLogger.Collector.GetSnapshot().Select(x => x.Level),
+                Is.EqualTo([LogLevel.Information, LogLevel.Information]));
+            Assert.That(
+                this.testRunLogger.Collector.GetSnapshot().Select(x => x.Level),
+                Is.EqualTo([LogLevel.Information, LogLevel.Information]));
+        }
     }
 
     [Test]
