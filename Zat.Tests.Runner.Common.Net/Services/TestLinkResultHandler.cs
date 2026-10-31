@@ -23,84 +23,93 @@ public class TestLinkResultHandler(
     /// <inheritdoc />
     public void HandleSubRunResult(TestResult testResult)
     {
-        if (!context.IsTestLinkReportingEnabled)
+        try
         {
-            return;
-        }
-
-        var testPlanId = testResult.TestType switch
-        {
-            TestType.Runtime => RuntimeTestsTestPlanId,
-            TestType.Application => ApplicationTestsTestPlanId,
-            TestType.Unknown => throw new InvalidOperationException(
-                $"Unable to determine test plan ID: Test type is '{testResult.TestType}'"),
-            _ => throw new NotSupportedException(testResult.TestType.ToString()),
-        };
-
-        var buildName = MakeBuildName(context, testResult);
-
-        if (testLink.GetBuildsForTestPlan(testPlanId).All(x => x.Name != buildName))
-        {
-            var buildNotes = "# Datum vydání";
-
-            if (!string.IsNullOrEmpty(context.IdeReleaseDate))
+            if (!context.IsTestLinkReportingEnabled)
             {
-                buildNotes += $"<p>- IDE: {context.IdeReleaseDate}</p>";
+                return;
             }
 
-            if (!string.IsNullOrEmpty(context.RuntimeReleaseDate))
+            var testPlanId = testResult.TestType switch
             {
-                buildNotes += $"<p>- RT: {context.RuntimeReleaseDate}</p>";
-            }
+                TestType.Runtime => RuntimeTestsTestPlanId,
+                TestType.Application => ApplicationTestsTestPlanId,
+                TestType.Unknown => throw new InvalidOperationException(
+                    $"Unable to determine test plan ID: Test type is '{testResult.TestType}'"),
+                _ => throw new NotSupportedException(testResult.TestType.ToString()),
+            };
 
-            testLink.CreateBuild(testPlanId, buildName, buildNotes);
-        }
+            var buildName = MakeBuildName(context, testResult);
 
-        var testBuild = testLink
-            .GetBuildsForTestPlan(testPlanId)
-            .FirstOrDefault(x => x.Name == buildName)
-            .CheckIsNotNull($"Build '{buildName}' for test plan with ID '{testPlanId}' not found");
-
-        foreach (var testCaseResult in testResult.TestCaseResults)
-        {
-            if (testCaseResult.Status is TestStatus.Unknown)
+            if (testLink.GetBuildsForTestPlan(testPlanId).All(x => x.Name != buildName))
             {
-                // TODO: What to do next when we don't know the result?
-                logger.Log(
-                    LogLevel.Warning,
-                    "Test case with ID '{TestCaseResultId}' has unknown status",
-                    testCaseResult.Id);
-            }
+                var buildNotes = "# Datum vydání";
 
-            var testCaseExternalId = testCaseResult.Id;
-            var testCaseId = testLink.GetTestCaseByExternalId(testCaseExternalId).Id;
-            var reportTestCaseResult = testLink.ReportTestCaseResult(
-                testCaseId: testCaseId,
-                testPlanId: testPlanId,
-                status: testCaseResult.Status switch
+                if (!string.IsNullOrEmpty(context.IdeReleaseDate))
                 {
-                    TestStatus.Passed => "p",
-                    TestStatus.Failure or
-                        TestStatus.Error or
-                        TestStatus.Invalid => "f",
-                    TestStatus.Skipped or
-                        TestStatus.Ignored or
-                        TestStatus.Explicit or
-                        TestStatus.Inconclusive or
-                        TestStatus.Warning or
-                        TestStatus.Unknown => "b",
-                    _ => throw new NotSupportedException(testCaseResult.Status.ToString()),
-                },
-                platformName: string.Empty,
-                overwrite: true,
-                notes: $"Message: {testCaseResult.Detail?.Message}\nStackTrace: {testCaseResult.Detail?.StackTrace}",
-                buildId: testBuild.Id);
+                    buildNotes += $"<p>- IDE: {context.IdeReleaseDate}</p>";
+                }
 
-            foreach (var testAttachment in testCaseResult.TestAttachments)
+                if (!string.IsNullOrEmpty(context.RuntimeReleaseDate))
+                {
+                    buildNotes += $"<p>- RT: {context.RuntimeReleaseDate}</p>";
+                }
+
+                testLink.CreateBuild(testPlanId, buildName, buildNotes);
+            }
+
+            var testBuild = testLink
+                .GetBuildsForTestPlan(testPlanId)
+                .FirstOrDefault(x => x.Name == buildName)
+                .CheckIsNotNull($"Build '{buildName}' for test plan with ID '{testPlanId}' not found");
+
+            foreach (var testCaseResult in testResult.TestCaseResults)
             {
-                UploadAttachment(reportTestCaseResult.Id, testAttachment);
+                if (testCaseResult.Status is TestStatus.Unknown)
+                {
+                    // TODO: What to do next when we don't know the result?
+                    logger.Log(
+                        LogLevel.Warning,
+                        "Test case with ID '{TestCaseResultId}' has unknown status",
+                        testCaseResult.Id);
+                }
+
+                var testCaseExternalId = testCaseResult.Id;
+                var testCaseId = testLink.GetTestCaseByExternalId(testCaseExternalId).Id;
+                var reportTestCaseResult = testLink.ReportTestCaseResult(
+                    testCaseId: testCaseId,
+                    testPlanId: testPlanId,
+                    status: testCaseResult.Status switch
+                    {
+                        TestStatus.Passed => "p",
+                        TestStatus.Failure or
+                            TestStatus.Error or
+                            TestStatus.Invalid => "f",
+                        TestStatus.Skipped or
+                            TestStatus.Ignored or
+                            TestStatus.Explicit or
+                            TestStatus.Inconclusive or
+                            TestStatus.Warning or
+                            TestStatus.Unknown => "b",
+                        _ => throw new NotSupportedException(testCaseResult.Status.ToString()),
+                    },
+                    platformName: string.Empty,
+                    overwrite: true,
+                    notes: $"Message: {testCaseResult.Detail?.Message}\nStackTrace: {testCaseResult.Detail?.StackTrace}",
+                    buildId: testBuild.Id);
+
+                foreach (var testAttachment in testCaseResult.TestAttachments)
+                {
+                    UploadAttachment(reportTestCaseResult.Id, testAttachment);
+                }
             }
         }
+        catch (Exception ex)
+        {
+            // A mail outage must never fail the test run nor keep the other test result handlers from their work.
+            logger.Log(LogLevel.Error, ex, "Sending the test run result to testlink failed");
+        }
+
 
         static string MakeBuildName(IContext context, TestResult testResult)
         {

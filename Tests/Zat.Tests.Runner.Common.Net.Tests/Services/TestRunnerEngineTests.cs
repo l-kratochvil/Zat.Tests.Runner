@@ -21,9 +21,9 @@ using Zat.Tests.Runner.Common.Services;
 using Zat.Z2xxTests.Common.Model;
 
 /// <summary>
-/// The engine runs a real test assembly through a real proxy; only the bridge to the tested runtime is
-/// mocked, as it needs the runtime itself. A proxy that fails or refuses to stop can't be had for real, so
-/// such a proxy is mocked too.
+/// The engine runs a real test assembly through a real proxy. The bridge to the test assembly is mocked
+/// except in the test of the bridge itself, as its pipe name is machine-wide. A proxy that fails or refuses
+/// to stop can't be had for real, so such a proxy is mocked too.
 /// </summary>
 [TestFixture]
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
@@ -31,6 +31,10 @@ public class TestRunnerEngineTests
 {
     private const string TestAssemblyName = "NUnitTestAssembly.Net481";
     private const string PassingTestCasePath = TestAssemblyName + ".SampleTestSuite.Pass";
+    private const string BridgeTestCasePath = TestAssemblyName + ".TestRunnerBridgeFixture.ReadsTestConfigFromTestRunner";
+
+    // Mirrors TestRunnerBridgeFixture.ExpectedTestedRuntimeVersion of the test assembly.
+    private const string BridgeTestedRuntimeVersion = "1.2.3";
 
     private static readonly string TestAssemblyDllPath = Path.Combine(
         Assembly.GetExecutingAssembly().GetAssemblyDirectoryPath(),
@@ -242,6 +246,30 @@ public class TestRunnerEngineTests
             this.resultHandlerMock.Verify(x => x.HandleTestRunResult(It.IsAny<TestRunResult>()), Times.Never);
             Assert.That(this.reportedStates, Is.EqualTo([TestRunState.Running, TestRunState.Stopped]));
         }
+    }
+
+    [Test]
+    public async Task RunTestAsync__WhenTestCaseReadsTestConfigOverBridge__ThenShouldServeItFromConfig()
+    {
+        // Given:
+        var unit = new TestRunnerEngine(
+            new TestRunnerBridgeConnector(),
+            new NUnitTestRunnerProxyConnector(launchDebugger: false),
+            NullLogger<LogSources.TestRun>.Instance,
+            NullLogger<LogSources.App>.Instance);
+        var bridgeTestCase = new TestEntity(
+            TestType.Application,
+            name: "ReadsTestConfigFromTestRunner",
+            executionPath: BridgeTestCasePath);
+
+        // When:
+        var results = await unit.RunTestAsync(
+            [bridgeTestCase],
+            this.Config() with { TestedRuntimeVersion = BridgeTestedRuntimeVersion });
+
+        // Then:
+        var testCaseResult = results.Value.Single().TestCaseResults.Single();
+        Assert.That(testCaseResult.Status, Is.EqualTo(TestStatus.Passed), testCaseResult.Detail?.Message);
     }
 
     [Test]

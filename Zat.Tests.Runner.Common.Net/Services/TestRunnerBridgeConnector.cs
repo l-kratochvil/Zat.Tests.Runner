@@ -32,15 +32,42 @@ public class TestRunnerBridgeConnector : ITestRunnerBridgeConnector
             new TestRunnerBridge(testConfig),
             new JsonRpcTargetOptions { DisposeOnDisconnect = true });
 
-        rpc.StartListening();
+        var stopWaiting = new CancellationTokenSource();
+        var listening = ListenOnceConnectedAsync(pipe, rpc, stopWaiting.Token);
 
         return new Disposer(() =>
         {
+            // Settle the wait first, so rpc can't start listening on a pipe that is being disposed.
+            stopWaiting.Cancel();
+            listening.GetAwaiter().GetResult();
+            stopWaiting.Dispose();
+
             // Dispose rpc first so it goes through its clean LocallyDisposed shutdown path,
             // which then disposes the pipe itself; disposing the pipe first would surface as
             // a StreamError instead of a graceful disconnect.
             rpc.Dispose();
             pipe.Dispose();
         });
+    }
+
+    /// <remarks>
+    /// Reading the pipe before a client connects fails, which would make rpc drop the pipe and leave the
+    /// client to time out.
+    /// </remarks>
+    private static async Task ListenOnceConnectedAsync(
+        NamedPipeServerStream pipe,
+        JsonRpc rpc,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            await pipe.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        rpc.StartListening();
     }
 }

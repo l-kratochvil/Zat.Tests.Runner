@@ -37,41 +37,41 @@ public class EmailResultHandler(
     /// <inheritdoc />
     public void HandleTestRunResult(TestRunResult testRunResult)
     {
-        if (!context.IsEmailNotificationEnabled || context.EmailAddresses.Count == 0)
-        {
-            return;
-        }
-
-        var recipients = context
-            .EmailAddresses
-            .Where(this.IsValidRecipient)
-            .ToArray();
-        if (recipients.Length == 0)
-        {
-            logger.Log(LogLevel.Warning, "No email address passed validation, the test run result email is not sent");
-            return;
-        }
-
-        var subject = MakeSubject(testRunResult);
-        var message = new EmailMessage(
-            SenderAddress, recipients, subject, MakeBody(subject, testRunResult));
-
         try
         {
+            if (!context.IsEmailNotificationEnabled || context.EmailAddresses.Count == 0)
+            {
+                return;
+            }
+
+            var recipients = context
+                .EmailAddresses
+                .Where(this.IsValidRecipient)
+                .ToArray();
+            if (recipients.Length == 0)
+            {
+                logger.Log(LogLevel.Warning, "No email address passed validation, the test run result email is not sent");
+                return;
+            }
+
+            var subject = MakeSubject(testRunResult);
+            var message = new EmailMessage(
+                SenderAddress, recipients, subject, MakeBody(subject, testRunResult));
+
             var smtpAuth = secretsProvider.GetSecrets().SmtpAuth;
             emailSender.Send(new SendConfig(SmtpServer, smtpAuth.UserName, smtpAuth.Password), message);
+
+
+            logger.Log(
+                LogLevel.Information,
+                "Test run result email sent to {EmailAddresses}",
+                string.Join(", ", recipients));
         }
         catch (Exception ex)
         {
             // A mail outage must never fail the test run nor keep the other test result handlers from their work.
             logger.Log(LogLevel.Error, ex, "Sending the test run result email failed");
-            return;
         }
-
-        logger.Log(
-            LogLevel.Information,
-            "Test run result email sent to {EmailAddresses}",
-            string.Join(", ", recipients));
     }
 
     private static string MakeBody(string subject, TestRunResult testRunResult)

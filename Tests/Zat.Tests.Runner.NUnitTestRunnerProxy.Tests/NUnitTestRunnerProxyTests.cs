@@ -22,6 +22,7 @@ public class NUnitTestRunnerProxyTests
     private const string IgnoredTestFixturePath = Net481TestSuitePath + ".IgnoredFixture";
     private const string ConfigurationFileTestFixturePath = Net481TestSuitePath + ".ConfigurationFileFixture";
     private const string TearDownAttachmentTestFixturePath = Net481TestSuitePath + ".TearDownAttachmentFixture";
+    private const string TestRunnerBridgeTestFixturePath = Net481TestSuitePath + ".TestRunnerBridgeFixture";
 
     private static readonly string NUnitTestAssembliesDirPath = Path.Combine(
         Assembly.GetExecutingAssembly().GetAssemblyDirectoryPath(),
@@ -148,6 +149,7 @@ public class NUnitTestRunnerProxyTests
                 IgnoredTestFixturePath,
                 ConfigurationFileTestFixturePath,
                 TearDownAttachmentTestFixturePath,
+                TestRunnerBridgeTestFixturePath,
             ]));
         Assert.That(
             GetTestCaseResults(result).Select(x => x.EntityName),

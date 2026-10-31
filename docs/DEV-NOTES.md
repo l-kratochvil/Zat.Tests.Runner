@@ -57,10 +57,6 @@
 
 ### HomeScreen
 
-- Možnosti:
-  - Runtime - verze: volitelné půjde zadat datum
-  - IDE - verze: volitelné bude zadat datum
-  - Dotaz: Odeslat výsledek do TestLinku?
 - Rozšířit choices:
   - Před možností spuštění testu se vypíše možnost pro zobrazení preconditions (z TL) navolenych sad:
   - Formátování textu: Od H2 a další nadpisy se bude další text tabbovat (odsazovat)

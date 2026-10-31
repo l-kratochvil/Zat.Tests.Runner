@@ -2,10 +2,18 @@
 
 	<PropertyGroup>
 		<TargetFramework>net481</TargetFramework>
+		<!-- StreamJsonRpc needs binding redirects, which the proxy applies from the configuration file. -->
+		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+		<GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="NUnit" Version="3.14.0" />
+		<PackageReference Include="StreamJsonRpc" Version="2.25.29" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\Zat.Z2xxTests.Common\Zat.Z2xxTests.Common.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
