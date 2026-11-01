@@ -6,5 +6,5 @@ using Zat.Z2xxTests.Common.Model;
 
 public interface ITestRunnerBridgeConnector
 {
-    public Disposer Connect(TestConfig testConfig);
+    public IAsyncDisposable Connect(TestConfig testConfig);
 }

@@ -13,7 +13,7 @@ using Zat.Z2xxTests.Common.Services;
 public class TestRunnerBridgeConnector : ITestRunnerBridgeConnector
 {
     /// <inheritdoc/>
-    public Disposer Connect(TestConfig testConfig)
+    public IAsyncDisposable Connect(TestConfig testConfig)
     {
         // Constructing the stream reserves the pipe name, so a client starting right after this
         // call returns already finds the pipe, even before the connection is accepted below.
@@ -35,18 +35,18 @@ public class TestRunnerBridgeConnector : ITestRunnerBridgeConnector
         var stopWaiting = new CancellationTokenSource();
         var listening = ListenOnceConnectedAsync(pipe, rpc, stopWaiting.Token);
 
-        return new Disposer(() =>
+        return new AsyncDisposer(async () =>
         {
             // Settle the wait first, so rpc can't start listening on a pipe that is being disposed.
-            stopWaiting.Cancel();
-            listening.GetAwaiter().GetResult();
+            await stopWaiting.CancelAsync();
+            await listening.ConfigureAwait(false);
             stopWaiting.Dispose();
 
             // Dispose rpc first so it goes through its clean LocallyDisposed shutdown path,
             // which then disposes the pipe itself; disposing the pipe first would surface as
             // a StreamError instead of a graceful disconnect.
             rpc.Dispose();
-            pipe.Dispose();
+            await pipe.DisposeAsync();
         });
     }
 

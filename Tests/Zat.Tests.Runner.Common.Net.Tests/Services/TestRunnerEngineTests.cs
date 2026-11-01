@@ -57,7 +57,7 @@ public class TestRunnerEngineTests
         this.bridgeConnectorMock = new Mock<ITestRunnerBridgeConnector>();
         this.bridgeConnectorMock
             .Setup(x => x.Connect(It.IsAny<TestConfig>()))
-            .Returns(() => new Disposer(() => { }));
+            .Returns(() => new AsyncDisposer(() => Task.CompletedTask));
 
         this.resultHandlerMock = new Mock<ITestResultHandler>();
 

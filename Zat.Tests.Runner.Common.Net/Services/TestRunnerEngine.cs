@@ -275,7 +275,7 @@ public class TestRunnerEngine(
         ITestResultHandler[] resultHandlers,
         CancellationToken cancellationToken)
     {
-        using var connection = testRunnerBridgeConnector.Connect(subRun.TestConfig);
+        await using var connection = testRunnerBridgeConnector.Connect(subRun.TestConfig);
 
         ProxyTestResult proxyTestResult;
         try
