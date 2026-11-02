@@ -32,15 +32,15 @@ public class TestRunnerBridgeConnector : ITestRunnerBridgeConnector
             new TestRunnerBridge(testConfig),
             new JsonRpcTargetOptions { DisposeOnDisconnect = true });
 
-        var stopWaiting = new CancellationTokenSource();
-        var listening = ListenOnceConnectedAsync(pipe, rpc, stopWaiting.Token);
+        var connectionWaitingCts = new CancellationTokenSource();
+        var listeningTask = ListenOnceConnectedAsync(pipe, rpc, connectionWaitingCts.Token);
 
         return new AsyncDisposer(async () =>
         {
             // Settle the wait first, so rpc can't start listening on a pipe that is being disposed.
-            await stopWaiting.CancelAsync();
-            await listening.ConfigureAwait(false);
-            stopWaiting.Dispose();
+            await connectionWaitingCts.CancelAsync();
+            await listeningTask.ConfigureAwait(false);
+            connectionWaitingCts.Dispose();
 
             // Dispose rpc first so it goes through its clean LocallyDisposed shutdown path,
             // which then disposes the pipe itself; disposing the pipe first would surface as
@@ -57,11 +57,13 @@ public class TestRunnerBridgeConnector : ITestRunnerBridgeConnector
     private static async Task ListenOnceConnectedAsync(
         NamedPipeServerStream pipe,
         JsonRpc rpc,
-        CancellationToken cancellationToken)
+        CancellationToken ct)
     {
         try
         {
-            await pipe.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
+            await pipe
+                .WaitForConnectionAsync(ct)
+                .ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {

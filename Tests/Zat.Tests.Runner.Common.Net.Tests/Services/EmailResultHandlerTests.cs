@@ -126,7 +126,6 @@ public class EmailResultHandlerTests
             TimeSpan.Zero));
 
         // Then:
-        // The e-mail is a summary only; the result of each test case is kept in TestLink.
         var (_, message) = this.sentEmails.Single();
         using (Assert.EnterMultipleScope())
         {
