@@ -3,6 +3,7 @@ namespace Zat.Tests.Runner.WebApp.Tests.Application.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 using NUnit.Framework;
@@ -12,6 +13,7 @@ using Zat.Tests.Runner.WebApp.Application.DependencyInjection;
 using Zat.Tests.Runner.WebApp.Application.Paths;
 using Zat.Tests.Runner.WebApp.Features.AppSettings.Services;
 using Zat.Tests.Runner.WebApp.Shared.JsInterop;
+using Zat.Tests.Runner.WebApp.Tests.Application.Logging;
 
 [TestFixture]
 public class InitServicesExtensionTests
@@ -87,7 +89,7 @@ public class InitServicesExtensionTests
 
         var services = new ServiceCollection();
         services.AddSingleton(configuration);
-        services.AddLogging(builder => builder.InitLogging());
+        services.InitLoggingAsApp(builder => builder.AddConfiguration(configuration).InitLogging());
         services.Configure<FileLoggerOptions>(configuration);
         services.AddSingleton(paths);
         services.AddSingleton<ISharedAppPathsProvider>(paths);

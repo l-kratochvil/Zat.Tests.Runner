@@ -8,23 +8,20 @@ using Microsoft.AspNetCore.Components.Rendering;
 using NUnit.Framework;
 
 using Zat.Tests.Runner.WebApp.Components.Primitives;
-using Zat.Tests.Runner.WebApp.Shared.Validation;
 
 /// <summary>
-/// What a row says about one property, and where it may be said at all.
+/// How a row lays out the label and the input of one property, and where it may do so at all.
 /// </summary>
+/// <remarks>
+/// What is wrong with the value is shown by the <c>Validated</c> wrapper of the input, not by the row.
+/// </remarks>
 [TestFixture]
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
 public class PropertyGridRowTests : Bunit.TestContext
 {
     private const string RowSelector = "label.property-grid-row";
-    private const string MessageSelector = ".property-grid-row-message";
-    private const string ErrorSelector = ".property-grid-row-message.is-error";
-    private const string WarningSelector = ".property-grid-row-message.is-warning";
 
     private const string GivenLabel = "IDE version";
-    private const string GivenFieldName = "IdeVersion";
-    private const string GivenMessage = "Not a version.";
 
     [TearDown]
     public void TearDown()
@@ -38,7 +35,7 @@ public class PropertyGridRowTests : Bunit.TestContext
         // identifier for them to agree on.
 
         // When:
-        var component = this.RenderRowInGrid(Validity.Valid);
+        var component = this.RenderRowInGrid();
 
         // Then:
         using (Assert.EnterMultipleScope())
@@ -60,58 +57,13 @@ public class PropertyGridRowTests : Bunit.TestContext
                 parameters => parameters.Add(row => row.Label, GivenLabel)),
             Throws.InstanceOf<InvalidOperationException>());
 
-    [Test]
-    public void Render__WhenValidityHoldsError__ThenShouldShowItAsError()
-    {
-        // Given:
-        var validity = new Validity([new Validity.Issue(GivenFieldName, GivenMessage)]);
-
-        // When:
-        var component = this.RenderRowInGrid(validity);
-
-        // Then:
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.That(component.Find(ErrorSelector).TextContent.Trim(), Is.EqualTo(GivenMessage));
-            Assert.That(component.FindAll(WarningSelector), Is.Empty);
-        }
-    }
-
-    [Test]
-    public void Render__WhenValidityHoldsWarning__ThenShouldShowItDifferently()
-    {
-        // Given:
-        var validity = new Validity(
-            [new Validity.Issue(GivenFieldName, GivenMessage, Validity.Severity.Warning)]);
-
-        // When:
-        var component = this.RenderRowInGrid(validity);
-
-        // Then:
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.That(component.Find(WarningSelector).TextContent.Trim(), Is.EqualTo(GivenMessage));
-            Assert.That(component.FindAll(ErrorSelector), Is.Empty);
-        }
-    }
-
-    [Test]
-    public void Render__WhenNothingIsWrong__ThenShouldShowNoMessage()
-    {
-        // When:
-        var component = this.RenderRowInGrid(Validity.Valid);
-
-        // Then:
-        Assert.That(component.FindAll(MessageSelector), Is.Empty);
-    }
-
     private static void BuildInput(RenderTreeBuilder builder)
     {
         builder.OpenElement(0, "input");
         builder.CloseElement();
     }
 
-    private IRenderedComponent<PropertyGrid> RenderRowInGrid(Validity validity)
+    private IRenderedComponent<PropertyGrid> RenderRowInGrid()
     {
         RenderFragment input = BuildInput;
 

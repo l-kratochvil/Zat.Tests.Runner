@@ -36,7 +36,7 @@ public class BindingInputTests : Bunit.TestContext
 
     private const string GivenLetters = "chosen";
     private const string GivenNonsense = "1234";
-    private const string RefusalMessage = "Letters only.";
+    private const string ValidationMessage = "Letters only.";
 
     private readonly EditedViewModel viewModel = new();
 
@@ -194,17 +194,17 @@ public class BindingInputTests : Bunit.TestContext
             Throws.InstanceOf<InvalidOperationException>());
 
     [Test]
-    public void Edit__WhenViewModelTurnsEditDown__ThenShouldGoBackToShowingWhatIsHeld()
+    public void Edit__WhenEditIsWrong__ThenShouldHandItToViewModelAndShowWhatIsWrong()
     {
         // Given:
-        // A view model that refuses an edit leaves its value where it was, so what sends the input
-        // back to showing it is the view model saying the property moved all the same.
-        RefusingViewModel refusing = new() { Name = GivenLetters };
+        // The view model holds a wrong value all the same, so the input keeps showing what was
+        // typed and says what is wrong with it.
+        ValidatingViewModel validating = new() { Name = GivenLetters };
 
         var component =
-            this.RenderComponent<BindingInput<RefusingViewModel, string>>(
+            this.RenderComponent<BindingInput<ValidatingViewModel, string>>(
                 parameters => parameters
-                    .AddCascadingValue(refusing)
+                    .AddCascadingValue(validating)
                     .Add(input => input.Binding, model => model.Name));
 
         // When:
@@ -213,9 +213,9 @@ public class BindingInputTests : Bunit.TestContext
         // Then:
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(refusing.Name, Is.EqualTo(GivenLetters));
-            Assert.That(component.Find(InputSelector).GetAttribute("value"), Is.EqualTo(GivenLetters));
-            Assert.That(component.Find(MessageSelector).TextContent.Trim(), Is.EqualTo(RefusalMessage));
+            Assert.That(validating.Name, Is.EqualTo(GivenNonsense));
+            Assert.That(component.Find(InputSelector).GetAttribute("value"), Is.EqualTo(GivenNonsense));
+            Assert.That(component.Find(MessageSelector).TextContent.Trim(), Is.EqualTo(ValidationMessage));
         }
     }
 
@@ -232,19 +232,19 @@ public class BindingInputTests : Bunit.TestContext
             });
 
     /// <summary>
-    /// A real view model, which turns down an edit it finds something wrong with.
+    /// A real view model, which says what is wrong with an edit.
     /// </summary>
-    private sealed class RefusingViewModel : ViewModelBase
+    private sealed class ValidatingViewModel : ViewModelBase
     {
         private string name = string.Empty;
 
-        public RefusingViewModel()
+        public ValidatingViewModel()
             => this.InitValidator(
                 this,
                 validator => validator
                     .RuleFor(model => model.Name)
                     .Matches("^[a-z]+$")
-                    .WithMessage(RefusalMessage));
+                    .WithMessage(ValidationMessage));
 
         public string Name
         {

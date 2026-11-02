@@ -20,6 +20,7 @@ using Zat.Tests.Runner.WebApp.Features.TestConfiguration.Components;
 using Zat.Tests.Runner.WebApp.Shared.Stores.AppSettings;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
+using Zat.Tests.Runner.WebApp.Tests.Application.Logging;
 using Zat.Tests.Runner.WebApp.Tests.TestDiscovery;
 
 using TestConfigurationComponent = Features.TestConfiguration.Components.TestConfiguration;
@@ -77,7 +78,7 @@ public class TestConfiguratorTests : Bunit.TestContext
         this.Services.AddSingleton(this.appSettingsStore.Object);
         this.Services.AddSingleton(this.store.Dispatcher.Object);
         this.Services.AddSingleton(new Mock<IActionSubscriber>().Object);
-        this.Services.AddSingleton(new Mock<ILogger<LogSources.Default>>().Object);
+        this.Services.InitLoggingAsApp();
         this.Services.AddScoped<TestConfigurationViewModel>();
     }
 
@@ -224,7 +225,7 @@ public class TestConfiguratorTests : Bunit.TestContext
         component.Find(IdeVersionSelector).Change("nonsense");
 
         // Then:
-        Assert.That(component.FindAll(".property-grid-row-message.is-error"), Is.Not.Empty);
+        Assert.That(component.FindAll(".validity-message.is-error"), Is.Not.Empty);
     }
 
     [Test]

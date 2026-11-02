@@ -114,7 +114,7 @@ public class EmailResultHandlerTests
     }
 
     [Test]
-    public void HandleTestRunResult__WhenSubRunsHaveResults__ThenSubjectShouldShowPassedOfAllTestCases()
+    public void HandleTestRunResult__WhenSubRunsHaveResults__ThenShouldSumThemUpInSubjectAndBody()
     {
         // When:
         this.unit.HandleTestRunResult(new TestRunResult(
@@ -126,11 +126,14 @@ public class EmailResultHandlerTests
             TimeSpan.Zero));
 
         // Then:
-        var subject = this.sentEmails.Single().Message.Subject;
+        // The e-mail is a summary only; the result of each test case is kept in TestLink.
+        var (_, message) = this.sentEmails.Single();
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(subject, Does.Contain("3/5"));
-            Assert.That(subject, Does.Not.Contain(Resources.EmailResult_StoppedByUser));
+            Assert.That(message.Subject, Does.Contain("3/5"));
+            Assert.That(message.Subject, Does.Not.Contain(Resources.EmailResult_StoppedByUser));
+            Assert.That(message.Body, Does.Contain(SummaryCounts(testCount: 2, passed: 1, failed: 1)));
+            Assert.That(message.Body, Does.Contain(SummaryCounts(testCount: 3, passed: 2, failed: 0)));
         }
     }
 
@@ -142,36 +145,6 @@ public class EmailResultHandlerTests
 
         // Then:
         Assert.That(this.sentEmails.Single().Message.Subject, Does.Contain(Resources.EmailResult_StoppedByUser));
-    }
-
-    [Test]
-    public void HandleTestRunResult__WhenTestCaseFailed__ThenBodyShouldListItByIdWithItsMessage()
-    {
-        // When:
-        const string passingTestCaseId = "TC-1";
-        const string failingTestCaseId = "TC-2";
-        const string failingEntityName = "Suite.Fixture.Failing";
-
-        this.unit.HandleTestRunResult(new TestRunResult(
-            [
-                SubRun(
-                    new TestCaseResult(
-                        passingTestCaseId, "Suite.Fixture.Passing", TestStatus.Passed),
-                    new TestCaseResult(
-                        failingTestCaseId, failingEntityName, TestStatus.Failure, new Detail("Button not found", "at X"))),
-            ],
-            false,
-            TimeSpan.Zero));
-
-        // Then:
-        var body = this.sentEmails.Single().Message.Body;
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.That(body, Does.Contain($"{Resources.EmailResult_Label_Failed} : {failingTestCaseId}"));
-            Assert.That(body, Does.Contain("Button not found"));
-            Assert.That(body, Does.Not.Contain(failingEntityName).And.Not.Contain("at X"));
-            Assert.That(body, Does.Not.Contain(passingTestCaseId));
-        }
     }
 
     [Test]
@@ -187,6 +160,11 @@ public class EmailResultHandlerTests
             () => this.unit.HandleTestRunResult(new TestRunResult([SubRun(TestStatus.Passed)], false, TimeSpan.Zero)),
             Throws.Nothing);
     }
+
+    private static string SummaryCounts(int testCount, int passed, int failed)
+        => $"{Resources.EmailResult_Summary_TestCount}: {testCount}" +
+           $", {Resources.EmailResult_Summary_Passed}: {passed}" +
+           $", {Resources.EmailResult_Summary_Failed}: {failed}";
 
     private static TestResult SubRun(params TestStatus[] testCaseStatuses)
         => SubRun([..testCaseStatuses.Select((status, i) => new TestCaseResult($"TC-{i}", $"Case{i}", status))]);

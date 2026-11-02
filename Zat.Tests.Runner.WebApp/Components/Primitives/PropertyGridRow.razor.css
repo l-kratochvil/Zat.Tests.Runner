@@ -13,15 +13,3 @@
     gap: 0.25rem;
     min-width: 0;
 }
-
-.property-grid-row-message {
-    font-size: 0.85em;
-}
-
-.property-grid-row-message.is-error {
-    color: #b02a37;
-}
-
-.property-grid-row-message.is-warning {
-    color: #8a6d3b;
-}

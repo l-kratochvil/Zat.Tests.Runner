@@ -1,5 +1,8 @@
 ﻿namespace Zat.Tests.Runner.Common.Net.Tests.Application.Paths;
 
+using Microsoft.Extensions.Options;
+
+using Zat.Tests.Runner.Common.Net.Application;
 using Zat.Tests.Runner.Common.Net.Application.Paths;
 
 /// <summary>
@@ -12,8 +15,19 @@ internal sealed class TestAppPathsProvider(string localAppDataPath)
         SharedAppFilePaths,
         SharedAppFileExtensions,
         SharedAppFileNames,
-        SharedAppDirectoryNames>(localAppDataPath)
+        SharedAppDirectoryNames>(localAppDataPath),
+    ITestAppPathsProvider
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TestAppPathsProvider"/> class the way the
+    /// container of an application does.
+    /// </summary>
+    /// <param name="sharedAppOptions">The shared application options.</param>
+    public TestAppPathsProvider(IOptions<ISharedAppOptions> sharedAppOptions)
+        : this(sharedAppOptions.Value.LocalAppDataPath)
+    {
+    }
+
     protected override SharedAppDirectoryPaths CreateDirectories(SharedAppDirectoryPaths shared)
         => shared;
 

@@ -164,7 +164,7 @@ public class TestRunnerEngineTests
         this.bridgeConnectorMock
             .Setup(x => x.Connect(It.IsAny<TestConfig>()))
             .Callback(callerCts.Cancel)
-            .Returns(() => new Disposer(() => { }));
+            .Returns(() => new AsyncDisposer(() => Task.CompletedTask));
 
         // When:
         await this.unit.RunTestAsync([ApplicationTestCase()], this.Config(), callerCts.Token);
@@ -183,7 +183,7 @@ public class TestRunnerEngineTests
         this.bridgeConnectorMock
             .Setup(x => x.Connect(It.IsAny<TestConfig>()))
             .Callback(callerCts.Cancel)
-            .Returns(() => new Disposer(() => { }));
+            .Returns(() => new AsyncDisposer(() => Task.CompletedTask));
 
         // When:
         var results = await this.unit.RunTestAsync([ApplicationTestCase()], this.Config(), callerCts.Token);
@@ -215,7 +215,7 @@ public class TestRunnerEngineTests
                     secondStart = this.unit.RunTestAsync([ApplicationTestCase()], this.Config());
                 }
             })
-            .Returns(() => new Disposer(() => { }));
+            .Returns(() => new AsyncDisposer(() => Task.CompletedTask));
 
         // When:
         await this.unit.RunTestAsync([ApplicationTestCase()], this.Config());
@@ -332,7 +332,7 @@ public class TestRunnerEngineTests
         this.bridgeConnectorMock
             .Setup(x => x.Connect(It.IsAny<TestConfig>()))
             .Callback(this.unit.StopTestRun)
-            .Returns(() => new Disposer(() => { }));
+            .Returns(() => new AsyncDisposer(() => Task.CompletedTask));
 
         // When:
         var results = await this.unit.RunTestAsync([ApplicationTestCase()], this.Config());

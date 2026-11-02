@@ -7,13 +7,11 @@ using NUnit.Framework;
 using Zat.Tests.Runner.WebApp.Shared.ViewModel;
 
 /// <summary>
-/// What a view model does with an edit: what it takes, what it turns down, and what it says either
-/// way.
+/// What a view model does with an edit: what it holds and what it says about it.
 /// </summary>
 /// <remarks>
-/// A view model that turns an edit down leaves the value as it was, so the only thing that can send
-/// a control back to showing what is held is what the view model says about it. That is what most of
-/// this asks about.
+/// A view model holds every edit, wrong or not, and says what is wrong with it; whether a wrong value
+/// is handed on is for whoever reads the view model to decide.
 /// </remarks>
 [TestFixture]
 public class ViewModelBaseTests
@@ -39,7 +37,7 @@ public class ViewModelBaseTests
     }
 
     [Test]
-    public void SetProperty__WhenEditIsWrong__ThenShouldGoOnHoldingWhatItHad()
+    public void SetProperty__WhenEditIsWrong__ThenShouldHoldItAllSame()
     {
         // Given:
         EditedModel unit = new() { Name = GivenLetters };
@@ -48,7 +46,7 @@ public class ViewModelBaseTests
         unit.Name = GivenNonsense;
 
         // Then:
-        Assert.That(unit.Name, Is.EqualTo(GivenLetters));
+        Assert.That(unit.Name, Is.EqualTo(GivenNonsense));
     }
 
     [Test]
@@ -61,8 +59,6 @@ public class ViewModelBaseTests
         unit.Name = GivenNonsense;
 
         // Then:
-        // What is wrong is said about the edit that was turned down, because that is the thing the
-        // tester has to be told about.
         using (Assert.EnterMultipleScope())
         {
             Assert.That(unit.HasErrors, Is.True);
@@ -71,7 +67,7 @@ public class ViewModelBaseTests
     }
 
     [Test]
-    public void SetProperty__WhenEditIsWrong__ThenShouldSayPropertyMovedAllSame()
+    public void SetProperty__WhenEditIsWrong__ThenShouldAnnouncePropertyChanged()
     {
         // Given:
         EditedModel unit = new() { Name = GivenLetters };
@@ -83,9 +79,7 @@ public class ViewModelBaseTests
         unit.Name = GivenNonsense;
 
         // Then:
-        // The value ends up where it started, so without this a control showing the turned-down
-        // edit would never be told to go back to showing what is held.
-        Assert.That(announced, Has.Exactly(2).EqualTo(nameof(EditedModel.Name)));
+        Assert.That(announced, Has.Exactly(1).EqualTo(nameof(EditedModel.Name)));
     }
 
     [Test]
@@ -93,7 +87,7 @@ public class ViewModelBaseTests
     {
         // Given:
         // A property that starts out wrong is the ordinary case — a configuration nobody has filled
-        // in yet — so being turned down once must not be what keeps it wrong.
+        // in yet — so a wrong edit must not be what keeps it wrong.
         EditedModel unit = new();
 
         // When:
@@ -109,11 +103,11 @@ public class ViewModelBaseTests
     }
 
     [Test]
-    public void SetProperty__WhenEditIsWrong__ThenShouldTakeItBackOutOfWhereverItIsKept()
+    public void SetProperty__WhenEditIsWrong__ThenShouldHandItOnAllSame()
     {
         // Given:
-        // Where the value is kept is the caller's to say, and a view model that hands it on must not
-        // leave a turned-down edit behind there.
+        // Where the value is kept is the caller's to say, and what is wrong with it is told
+        // alongside rather than by keeping it out of there.
         var kept = string.Empty;
         DispatchingModel unit = new(value => kept = value) { Name = GivenLetters };
 
@@ -121,7 +115,7 @@ public class ViewModelBaseTests
         unit.Name = GivenNonsense;
 
         // Then:
-        Assert.That(kept, Is.EqualTo(GivenLetters));
+        Assert.That(kept, Is.EqualTo(GivenNonsense));
     }
 
     [Test]
@@ -168,7 +162,7 @@ public class ViewModelBaseTests
     }
 
     [Test]
-    public void HasErrors__WhenEditIsTurnedDown__ThenShouldSaySoOnlyOnce()
+    public void HasErrors__WhenEditIsWrong__ThenShouldSaySoOnlyOnce()
     {
         // Given:
         EditedModel unit = new() { Name = GivenLetters };

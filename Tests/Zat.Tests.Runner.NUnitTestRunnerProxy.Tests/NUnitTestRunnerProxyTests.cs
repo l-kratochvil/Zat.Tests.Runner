@@ -76,11 +76,12 @@ public class NUnitTestRunnerProxyTests
         Assert.That(testSuite.TestFixtures, Has.One.Matches<TestFixtureEntity>(x => x.Name == "SampleTestSuite"));
 
         var testFixture = testSuite.TestFixtures.Single(x => x.Name == "SampleTestSuite");
-        Assert.That(testFixture.TestCases, Has.Length.EqualTo(4));
+        Assert.That(testFixture.TestCases, Has.Length.EqualTo(5));
         Assert.That(testFixture.TestCases, Has.One.Matches<TestCaseEntity>(x => x.Name == "Pass"));
         Assert.That(testFixture.TestCases, Has.One.Matches<TestCaseEntity>(x => x.Name == "Fail"));
         Assert.That(testFixture.TestCases, Has.One.Matches<TestCaseEntity>(x => x.Name == "Error"));
         Assert.That(testFixture.TestCases, Has.One.Matches<TestCaseEntity>(x => x.Name == "Ignored"));
+        Assert.That(testFixture.TestCases, Has.One.Matches<TestCaseEntity>(x => x.Name == "WithAttachment"));
     }
 
     [Test]

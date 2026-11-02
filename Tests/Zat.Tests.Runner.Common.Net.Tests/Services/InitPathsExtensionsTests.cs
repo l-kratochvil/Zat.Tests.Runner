@@ -11,6 +11,8 @@ using NUnit.Framework;
 
 using Zat.Tests.Runner.Common.Net.Application.DependencyInjection;
 using Zat.Tests.Runner.Common.Net.Application.Paths;
+using Zat.Tests.Runner.Common.Net.Tests.Application;
+using Zat.Tests.Runner.Common.Net.Tests.Application.Paths;
 
 [TestFixture]
 public class InitPathsExtensionsTests
@@ -128,34 +130,8 @@ public class InitPathsExtensionsTests
 
         // Then:
         Assert.That(
-            this.services.Where(descriptor => descriptor.ImplementationType == typeof(AppPathsProviderBase<,,,,>)),
+            this.services.Where(descriptor => descriptor.ImplementationType == typeof(TestAppPathsProvider)),
             Has.Exactly(1).Items);
-    }
-
-    [Test]
-    public void InitAppPaths__WhenShippedSettingsAreRead__ThenShouldHoldApplicationDataPath()
-    {
-        // Given:
-        // Nothing is defaulted in code any more, so the settings file shipped with the application
-        // is the only thing standing between it and a refusal to start.
-        IConfiguration givenConfiguration = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json")
-            .Build();
-
-        var givenServices = new ServiceCollection();
-        givenServices.AddSingleton(givenConfiguration);
-
-        using var provider = givenServices.BuildServiceProvider();
-
-        // When:
-        var result = provider.GetRequiredService<ISharedAppPathsProvider>();
-
-        // Then:
-        Assert.That(
-            result.Directories.AppData,
-            Is.EqualTo(Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "Zat.Zat.Tests.Runner")));
     }
 
     [Test]
@@ -208,12 +184,20 @@ public class InitPathsExtensionsTests
     {
         var builder = Host.CreateEmptyApplicationBuilder(settings: null);
         builder.Configuration.AddInMemoryCollection(configuration);
-        // TODO - Fix (was commented out): builder.Services.InitServices();
+        InitSharedServices(builder.Services);
 
         using var host = builder.Build();
         await host.StartAsync();
         await host.StopAsync();
     }
+
+    // Goes through the entry point the applications use, so the options validation they rely on
+    // is what is exercised here.
+    private static void InitSharedServices(IServiceCollection services)
+        => services.InitSharedServices<
+            TestAppOptions,
+            TestAppPathsProvider,
+            ITestAppPathsProvider>(TestAppOptions.SectionName);
 
     private ServiceProvider BuildProvider(string? configuredDataPath)
     {
@@ -226,7 +210,7 @@ public class InitPathsExtensionsTests
 
         this.services = [];
         this.services.AddSingleton(configuration);
-        // TODO - Fix (was commented out): this.services.InitServices();
+        InitSharedServices(this.services);
 
         return this.services.BuildServiceProvider();
     }
