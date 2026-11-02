@@ -154,9 +154,9 @@ internal class RunTestScreen(
 
                 MarkupLine($"[aqua]{Resources.PressEnterToContinue_Message.EscapeMarkup()}[/]");
 
-                await ConsoleUtils.WaitForKeyPressAsync(ConsoleKey.Enter, ct);
-
-                return CompletedShowPrompt.Default;
+                return await ConsoleUtils.WaitForKeyPressAsync(ConsoleKey.Enter, ct)
+                    ? CompletedShowPrompt.Default
+                    : new InterruptedShowPrompt();
             },
         };
 
