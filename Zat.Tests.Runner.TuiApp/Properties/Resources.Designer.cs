@@ -304,6 +304,15 @@ namespace Zat.Tests.Runner.TuiApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Press Enter to continue ....
+        /// </summary>
+        public static string PressEnterToContinue_Message {
+            get {
+                return ResourceManager.GetString("PressEnterToContinue_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Press [blue]&lt;space&gt;[/] to select an item, [green]&lt;enter&gt;[/] to accept.
         /// </summary>
         public static string PressSpaceToSelectItem {

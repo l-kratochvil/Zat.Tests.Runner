@@ -135,6 +135,9 @@
   <data name="PressAnyKeyToContinue_Message" xml:space="preserve">
     <value>Press any key to continue ...</value>
   </data>
+  <data name="PressEnterToContinue_Message" xml:space="preserve">
+    <value>Press Enter to continue ...</value>
+  </data>
   <data name="RuntimeVersion_ChoiceText" xml:space="preserve">
     <value>Runtime version</value>
   </data>

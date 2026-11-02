@@ -25,9 +25,9 @@ using Zat.Tests.Runner.WebApp.Tests.TestDiscovery;
 [TestFixture]
 public class TestExecutionViewModelTests
 {
-    private const string StartLabel = "Start";
-    private const string StopLabel = "Stop";
-    private const string StoppingLabel = "Stopping…";
+    private const string StartLabel = TestExecutionViewModel.StartLabel;
+    private const string StopLabel = TestExecutionViewModel.StopLabel;
+    private const string StoppingLabel = TestExecutionViewModel.StoppingLabel;
 
     private const string GivenTestCasePath = "Suite.Fixture.Test";
 
@@ -131,7 +131,7 @@ public class TestExecutionViewModelTests
         // Then:
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(reasons, Is.EqualTo(new[] { "No tests selected" }));
+            Assert.That(reasons, Is.EqualTo(["No tests selected"]));
             Assert.That(this.unit.CurrentCommand.CanExecute(null), Is.False);
         }
     }
@@ -151,7 +151,7 @@ public class TestExecutionViewModelTests
         // Then:
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(reasons, Is.EqualTo(new[] { "Configuration has errors" }));
+            Assert.That(reasons, Is.EqualTo(["Configuration has errors"]));
             Assert.That(this.unit.CurrentCommand.CanExecute(null), Is.False);
         }
     }
@@ -167,6 +167,24 @@ public class TestExecutionViewModelTests
 
         // Then:
         Assert.That(reasons, Is.Empty);
+    }
+
+    [Test]
+    public void ExecutionBlockingReasons__WhenStoresChangeWithoutEvents__ThenShouldReadTheirCurrentValues()
+    {
+        // Given:
+        this.testSelection.Value = new TestDiscoveryState([GivenTestCasePath]);
+        this.configuration.Value = new TestConfigurationState { HasErrors = false };
+
+        // When:
+        var reasons = this.unit.ExecutionBlockingReasons;
+
+        // Then:
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(reasons, Is.Empty);
+            Assert.That(this.unit.CurrentCommand.CanExecute(null), Is.True);
+        }
     }
 
     [Test]

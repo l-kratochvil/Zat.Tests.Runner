@@ -152,9 +152,9 @@ internal class RunTestScreen(
 
                 this.state.Stopwatch.Stop();
 
-                MarkupLine($"[aqua]{Resources.PressAnyKeyToContinue_Message.EscapeMarkup()}[/]");
+                MarkupLine($"[aqua]{Resources.PressEnterToContinue_Message.EscapeMarkup()}[/]");
 
-                await AnsiConsole.Console.Input.ReadKeyAsync(true, ct);
+                await ConsoleUtils.WaitForKeyPressAsync(ConsoleKey.Enter, ct);
 
                 return CompletedShowPrompt.Default;
             },

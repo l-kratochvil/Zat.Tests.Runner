@@ -135,6 +135,9 @@
   <data name="PressAnyKeyToContinue_Message" xml:space="preserve">
     <value>Pro pokračování stiskněte libovolnou klávesu ...</value>
   </data>
+  <data name="PressEnterToContinue_Message" xml:space="preserve">
+    <value>Pro pokračování stiskněte Enter ...</value>
+  </data>
   <data name="RuntimeVersion_ChoiceText" xml:space="preserve">
     <value>Verze runtime</value>
   </data>

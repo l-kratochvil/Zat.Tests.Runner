@@ -255,7 +255,7 @@ public class TestExplorerViewModelTests
         // Then:
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(this.unit.Roots.Select(root => root.ExecutionPath), Is.EqualTo(new[] { givenNewSuitePath }));
+            Assert.That(this.unit.Roots.Select(root => root.ExecutionPath), Is.EqualTo([givenNewSuitePath]));
             Assert.That(announcedProperties, Does.Contain(nameof(TestExplorerViewModel.Roots)));
         }
     }
@@ -282,16 +282,16 @@ public class TestExplorerViewModelTests
     {
         const string prefix = nameof(TestTreeNodeData.CheckState);
 
-        yield return new TestCaseData(new object[] { Array.Empty<string>() })
+        yield return new TestCaseData([Array.Empty<string>()])
             .SetName(prefix + "__WhenNoTestCaseIsSelected__ThenShouldBe_Unchecked")
             .Returns(TestTreeNodeData.State.Unchecked);
 
-        yield return new TestCaseData(new object[] { new[] { GivenFirstCasePath } })
+        yield return new TestCaseData([new[] { GivenFirstCasePath }])
             .SetName(prefix + "__WhenSomeTestCasesAreSelected__ThenShouldBe_Mixed")
             .Returns(TestTreeNodeData.State.Mixed);
 
         yield return new TestCaseData(
-                new object[] { new[] { GivenFirstCasePath, GivenSecondCasePath } })
+                [new[] { GivenFirstCasePath, GivenSecondCasePath }])
             .SetName(prefix + "__WhenEveryTestCaseIsSelected__ThenShouldBe_Checked")
             .Returns(TestTreeNodeData.State.Checked);
     }

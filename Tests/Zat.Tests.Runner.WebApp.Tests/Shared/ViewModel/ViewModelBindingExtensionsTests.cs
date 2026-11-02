@@ -48,7 +48,7 @@ public class ViewModelBindingExtensionsTests
         this.ChangeStateTo(this.state with { Name = GivenName });
 
         // Then:
-        Assert.That(this.announced, Is.EqualTo(new[] { nameof(BoundViewModel.Name) }));
+        Assert.That(this.announced, Is.EqualTo([nameof(BoundViewModel.Name)]));
     }
 
     [Test]
@@ -106,7 +106,7 @@ public class ViewModelBindingExtensionsTests
         this.unit.Name = GivenName;
 
         // Then:
-        Assert.That(this.written, Is.EqualTo(new[] { GivenName }));
+        Assert.That(this.written, Is.EqualTo([GivenName]));
     }
 
     [Test]

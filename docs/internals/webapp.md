@@ -13,6 +13,7 @@ The mechanisms of `Zat.Tests.Runner.WebApp` that are not obvious from the code.
 - [Circuit start](#circuit-start)
 - [The browser bridge](#the-browser-bridge)
 - [Resizable panes](#resizable-panes)
+- [View model validation](#view-model-validation)
 
 ## TypeScript/JavaScript orchestration
 
@@ -97,3 +98,9 @@ it absorb.
 That arrangement is also how the script knows which way to move: the pane it sizes is the
 neighbour that does not grow, and the side it sits on says whether its size follows the pointer or
 runs against it. The layout already states this, so the component is not told it a second time.
+
+## View model validation
+
+View models validate all fields immediately and before announcing a property change, so errors
+match the values held even before a field is edited. Conditional rules live solely in the validator;
+changing one field automatically rechecks the others.

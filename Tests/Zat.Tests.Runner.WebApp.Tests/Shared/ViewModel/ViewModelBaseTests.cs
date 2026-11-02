@@ -22,11 +22,10 @@ public class ViewModelBaseTests
     [Test]
     public void SetProperty__WhenNothingIsWrongWithEdit__ThenShouldHoldIt()
     {
-        // Given:
-        EditedModel unit = new();
+        // Given
+        var unit = new EditedModel { Name = GivenLetters };
 
-        // When:
-        unit.Name = GivenLetters;
+        // When: None
 
         // Then:
         using (Assert.EnterMultipleScope())
@@ -40,7 +39,7 @@ public class ViewModelBaseTests
     public void SetProperty__WhenEditIsWrong__ThenShouldHoldItAllSame()
     {
         // Given:
-        EditedModel unit = new() { Name = GivenLetters };
+        var unit = new EditedModel { Name = GivenLetters };
 
         // When:
         unit.Name = GivenNonsense;
@@ -53,7 +52,7 @@ public class ViewModelBaseTests
     public void SetProperty__WhenEditIsWrong__ThenShouldSayWhatIsWrongWithIt()
     {
         // Given:
-        EditedModel unit = new() { Name = GivenLetters };
+        var unit = new EditedModel { Name = GivenLetters };
 
         // When:
         unit.Name = GivenNonsense;
@@ -70,9 +69,9 @@ public class ViewModelBaseTests
     public void SetProperty__WhenEditIsWrong__ThenShouldAnnouncePropertyChanged()
     {
         // Given:
-        EditedModel unit = new() { Name = GivenLetters };
+        var unit = new EditedModel { Name = GivenLetters };
 
-        List<string?> announced = [];
+        var announced = new List<string?>();
         unit.PropertyChanged += (_, args) => announced.Add(args.PropertyName);
 
         // When:
@@ -88,10 +87,9 @@ public class ViewModelBaseTests
         // Given:
         // A property that starts out wrong is the ordinary case — a configuration nobody has filled
         // in yet — so a wrong edit must not be what keeps it wrong.
-        EditedModel unit = new();
+        var unit = new EditedModel { Name = GivenNonsense };
 
         // When:
-        unit.Name = GivenNonsense;
         unit.Name = GivenLetters;
 
         // Then:
@@ -109,7 +107,7 @@ public class ViewModelBaseTests
         // Where the value is kept is the caller's to say, and what is wrong with it is told
         // alongside rather than by keeping it out of there.
         var kept = string.Empty;
-        DispatchingModel unit = new(value => kept = value) { Name = GivenLetters };
+        var unit = new DispatchingModel(value => kept = value) { Name = GivenLetters };
 
         // When:
         unit.Name = GivenNonsense;
@@ -121,10 +119,12 @@ public class ViewModelBaseTests
     [Test]
     public void InitValidator__WhenHeldValueIsWrong__ThenShouldSayWhatIsWrongWithItRightAway()
     {
-        // When:
+        // Given:
         // A configuration nobody has filled in yet is wrong before anything is edited, and the
         // tester has to see it so as not to run with it.
-        EditedModel unit = new(GivenNonsense);
+        var unit = new EditedModel(GivenNonsense);
+
+        // When: None
 
         // Then:
         using (Assert.EnterMultipleScope())
@@ -138,7 +138,7 @@ public class ViewModelBaseTests
     public void InitValidator__WhenHeldValueIsRight__ThenShouldSayNothingIsWrong()
     {
         // When:
-        EditedModel unit = new(GivenLetters);
+        var unit = new EditedModel(GivenLetters);
 
         // Then:
         using (Assert.EnterMultipleScope())
@@ -158,31 +158,31 @@ public class ViewModelBaseTests
         _ = new EditedModel(GivenNonsense, hasErrorsChanged: announced.Add);
 
         // Then:
-        Assert.That(announced, Is.EqualTo(new[] { true }));
+        Assert.That(announced, Is.EqualTo([true]));
     }
 
     [Test]
     public void HasErrors__WhenEditIsWrong__ThenShouldSaySoOnlyOnce()
     {
         // Given:
-        EditedModel unit = new() { Name = GivenLetters };
+        var unit = new EditedModel { Name = GivenLetters };
 
         List<bool> announced = [];
-        unit.HasErrorsChanged += has => announced.Add(has);
+        unit.HasErrorsChanged += announced.Add;
 
         // When:
         unit.Name = GivenNonsense;
 
         // Then:
         // Said when it changes rather than at every look, because whoever hears it hands it on.
-        Assert.That(announced, Is.EqualTo(new[] { true }));
+        Assert.That(announced, Is.EqualTo([true]));
     }
 
     [Test]
     public void ChainValidation__WhenConditionIsTurnedOff__ThenShouldStopMindingChainedValue()
     {
         // Given:
-        ChainedModel unit = new() { IsAsked = true, Name = GivenNonsense };
+        var unit = new ChainedModel { IsAsked = true, Name = GivenNonsense };
 
         // When:
         unit.IsAsked = false;
@@ -196,30 +196,60 @@ public class ViewModelBaseTests
     }
 
     [Test]
+    public void ChainValidation__WhenConditionIsTurnedOff__ThenShouldAnnounceAfterRecheckingChainedValue()
+    {
+        // Given:
+        var unit = new ChainedModel { IsAsked = true, Name = GivenNonsense };
+        bool? announcedValidity = null;
+        unit.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(ChainedModel.IsAsked))
+            {
+                announcedValidity = unit.GetValidity(nameof(ChainedModel.Name))?.HasErrors;
+            }
+        };
+
+        // When:
+        unit.IsAsked = false;
+
+        // Then:
+        Assert.That(announcedValidity, Is.False);
+    }
+
+    [Test]
     public void ChainValidation__WhenConditionIsTurnedOn__ThenShouldMindChainedValueAgain()
     {
         // Given:
-        ChainedModel unit = new() { Name = GivenNonsense };
+        var unit = new ChainedModel { Name = GivenNonsense, IsAsked = true };
 
-        // When:
-        unit.IsAsked = true;
+        // When: None
 
         // Then:
         Assert.That(unit.HasErrors, Is.True);
     }
 
-    [Test]
-    public void ChainValidation__WhenChainedValueWasNeverLookedAt__ThenShouldStillSayNothingAboutIt()
+    [TestCase(true, false)]
+    [TestCase(false, true)]
+    public void ConditionalValidation__WhenConditionChangesForUneditedValue__ThenShouldUpdateItsValidity(
+        bool givenIsAsked,
+        bool expectedHasErrors)
     {
         // Given:
-        // A value nobody has been to yet is not a mistake anyone made, whatever it is chained to.
-        ChainedModel unit = new();
+        var unit = new ChainedModel(isAsked: givenIsAsked);
+        Assert.That(unit.GetValidity(nameof(ChainedModel.Name))?.HasErrors, Is.EqualTo(givenIsAsked));
+        List<bool> announced = [];
+        unit.HasErrorsChanged += announced.Add;
 
         // When:
-        unit.IsAsked = true;
+        unit.IsAsked = !givenIsAsked;
 
         // Then:
-        Assert.That(unit.GetValidity(nameof(ChainedModel.Name)), Is.Null);
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(unit.GetValidity(nameof(ChainedModel.Name))?.HasErrors, Is.EqualTo(expectedHasErrors));
+            Assert.That(unit.HasErrors, Is.EqualTo(expectedHasErrors));
+            Assert.That(announced, Is.EqualTo([expectedHasErrors]));
+        }
     }
 
     /// <summary>
@@ -258,31 +288,30 @@ public class ViewModelBaseTests
     /// </summary>
     private sealed class ChainedModel : ViewModelBase
     {
-        private bool isAsked;
-        private string name = string.Empty;
+        public ChainedModel(bool isAsked = false)
+        {
+            this.IsAsked = isAsked;
 
-        public ChainedModel()
-            => this.InitValidator(
+            this.InitValidator(
                 this,
                 validator => validator
                     .RuleFor(static model => model.Name)
                     .Matches("^[a-z]+$")
                     .WithMessage("Letters only.")
-                    .When(static model => model.IsAsked),
-                chains => chains
-                    .Chain(rootProperty: static model => model.IsAsked, static model => model.Name));
+                    .When(static model => model.IsAsked));
+        }
 
         public bool IsAsked
         {
-            get => this.isAsked;
-            set => this.SetProperty(ref this.isAsked, value);
+            get;
+            set => this.SetProperty(ref field, value);
         }
 
         public string Name
         {
-            get => this.name;
-            set => this.SetProperty(ref this.name, value);
-        }
+            get;
+            set => this.SetProperty(ref field, value);
+        } = string.Empty;
     }
 
     /// <summary>
@@ -291,8 +320,6 @@ public class ViewModelBaseTests
     private sealed class DispatchingModel : ViewModelBase
     {
         private readonly Action<string> dispatch;
-
-        private string name = string.Empty;
 
         public DispatchingModel(Action<string> dispatch)
         {
@@ -308,15 +335,15 @@ public class ViewModelBaseTests
 
         public string Name
         {
-            get => this.name;
+            get;
             set => this.SetProperty(
-                this.name,
+                field,
                 value,
                 accepted =>
                 {
-                    this.name = accepted;
+                    field = accepted;
                     this.dispatch(accepted);
                 });
-        }
+        } = string.Empty;
     }
 }

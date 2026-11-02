@@ -65,8 +65,9 @@ public class AppLoggerViewModelTests
         this.unit.SetSelected(LogLevel.Information, selected: false);
 
         // Then:
-        Assert.That(this.unit.Entries, Is.EqualTo(new[] { expected }));
+        Assert.That(this.unit.Entries, Is.EqualTo([expected]));
     }
+
     [Test]
     public void SetSelected__WhenFilterChanges__ThenShouldAnnounceEntries()
     {
@@ -79,6 +80,7 @@ public class AppLoggerViewModelTests
         // Then:
         Assert.That(announced, Does.Contain(nameof(AppLoggerViewModel.Entries)));
     }
+
     [Test]
     public void ToggleCollapsed__WhenPanelIsOpen__ThenShouldCollapseItAndAnnounceIt()
     {

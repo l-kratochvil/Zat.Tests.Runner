@@ -34,9 +34,9 @@ public class TestExecutionTests : Bunit.TestContext
 {
     private const string ButtonSelector = "button";
 
-    private const string StartLabel = "Start";
-    private const string StopLabel = "Stop";
-    private const string StoppingLabel = "Stopping…";
+    private const string StartLabel = TestExecutionViewModel.StartLabel;
+    private const string StopLabel = TestExecutionViewModel.StopLabel;
+    private const string StoppingLabel = TestExecutionViewModel.StoppingLabel;
 
     private const string GivenTestCasePath = "Suite.Fixture.Test";
 

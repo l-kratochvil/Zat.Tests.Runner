@@ -258,6 +258,7 @@ public class TestConfiguratorViewModelTests
     public void ValidityFor__WhenTestLinkIsTurnedOff__ThenShouldNoLongerMindWhatIsNotAskedFor()
     {
         // Given:
+        this.store.ChangeTo(new TestConfigurationState() with { RuntimeVersion = "6" });
         this.unit.IsTestLinkReportEnabled = true;
         this.unit.IdeVersion = new Version(1, 2, 3, 4);
         this.unit.IdeReleaseDate = "yesterday";
@@ -298,6 +299,11 @@ public class TestConfiguratorViewModelTests
     public void ValidityFor__WhenBetaIsTurnedOff__ThenShouldNoLongerMindBetaNumber()
     {
         // Given:
+        this.store.ChangeTo(new TestConfigurationState() with
+        {
+            RuntimeVersion = "6",
+            IdeVersion = new Version(6, 1),
+        });
         this.unit.IsTestLinkReportEnabled = true;
         this.unit.IsBetaVersion = true;
         this.unit.BetaVersion = "beta";
@@ -306,7 +312,11 @@ public class TestConfiguratorViewModelTests
         this.unit.IsBetaVersion = false;
 
         // Then:
-        Assert.That(this.unit.HasErrors, Is.False);
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(this.unit.GetValidity(nameof(TestConfigurationViewModel.BetaVersion))?.HasErrors, Is.False);
+            Assert.That(this.unit.HasErrors, Is.False);
+        }
     }
 
     [Test]

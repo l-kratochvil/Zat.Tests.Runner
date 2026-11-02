@@ -105,7 +105,7 @@ public class BindingSelectTests : Bunit.TestContext
         // Then:
         Assert.That(
             component.FindAll(OptionSelector).Select(option => option.TextContent.Trim()),
-            Is.EqualTo(new[] { GivenPlaceholder, nameof(Shade.Red), nameof(Shade.Green) }));
+            Is.EqualTo([GivenPlaceholder, nameof(Shade.Red), nameof(Shade.Green)]));
     }
 
     [Test]
@@ -119,7 +119,7 @@ public class BindingSelectTests : Bunit.TestContext
         // Then:
         Assert.That(
             component.FindAll(OptionSelector).Select(option => option.TextContent.Trim()),
-            Is.EqualTo(new[] { GivenPlaceholder, "shade of Red", "shade of Green" }));
+            Is.EqualTo([GivenPlaceholder, "shade of Red", "shade of Green"]));
     }
 
     [Test]

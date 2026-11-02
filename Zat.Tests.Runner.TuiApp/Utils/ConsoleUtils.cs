@@ -102,4 +102,40 @@ internal static class ConsoleUtils
         WriteLine(Resources.PressAnyKeyToContinue_Message);
         AnsiConsole.Console.Input.ReadKey(true);
     }
+
+    /// <summary>
+    /// Waits until the user presses Enter; keys pressed before the call and any other keys are ignored.
+    /// </summary>
+    /// <param name="key">Key to wait for.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>False if the wait was interrupted by <paramref name="ct"/>, true otherwise.</returns>
+    public static async Task<bool> WaitForKeyPressAsync(
+        ConsoleKey key,
+        CancellationToken ct)
+    {
+        var input = AnsiConsole.Console.Input;
+
+        // Clear any previously pressed keys.
+        while (input.IsKeyAvailable())
+        {
+            _ = await input.ReadKeyAsync(true, ct);
+        }
+
+        try
+        {
+            while (await input.ReadKeyAsync(true, ct) is { } pressedKey)
+            {
+                if (pressedKey.Key == key)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        catch (OperationCanceledException)
+        {
+            return false;
+        }
+    }
 }

@@ -1,6 +1,5 @@
 namespace Zat.Tests.Runner.WebApp.Features.TestExecution.Components;
 
-using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 using DevKit.Mvvm.ViewModel.Commands;
@@ -21,6 +20,10 @@ using Zat.Tests.Runner.WebApp.Shared.ViewModel;
 /// </summary>
 public sealed partial class TestExecutionViewModel : ViewModelBase, IDisposable
 {
+    internal const string StartLabel = "Start";
+    internal const string StopLabel = "Stop";
+    internal const string StoppingLabel = "Stopping …";
+
     private readonly ITestRunnerEngine testRunnerEngine;
     private readonly IEnumerable<ITestResultHandler> testResultHandlers;
     private readonly IState<TestConfigurationState> configurationState;
@@ -43,22 +46,16 @@ public sealed partial class TestExecutionViewModel : ViewModelBase, IDisposable
         this.testTreeStore = testTreeStore;
         this.appPathsProvider = appPathsProvider;
 
-        // The test run belongs to the environment rather than to this client, so another client may
-        // start or stop it at any time.
         this.testRunnerEngine.StateChanged += this.OnTestRunnerEngineStateChanged;
         this.testSelectionState.StateChanged += this.OnTestSelectionChanged;
         this.configurationState.StateChanged += this.OnConfigurationChanged;
-
-        this.UpdateTestsSelected();
-        this.UpdateConfigurationHasErrors();
-        this.UpdateTestRunState(this.testRunnerEngine.State);
     }
 
     /// <summary>
     /// Gets the state of the test run, whoever started it.
     /// </summary>
-    [ObservableProperty]
-    public partial TestRunState TestRunState { get; private set; }
+    public TestRunState TestRunState
+        => this.testRunnerEngine.State;
 
     /// <summary>
     /// Gets a value indicating whether the test configuration cannot be run with.
@@ -67,20 +64,20 @@ public sealed partial class TestExecutionViewModel : ViewModelBase, IDisposable
     /// Read from the state rather than validated here: the configurator owns the rules and puts its
     /// answer into the state.
     /// </remarks>
-    [ObservableProperty]
-    public partial bool ConfigurationHasErrors { get; private set; }
+    public bool ConfigurationHasErrors
+        => this.configurationState.Value.HasErrors;
 
     /// <summary>
     /// Gets a value indicating whether any test case is selected to run.
     /// </summary>
-    [ObservableProperty]
-    public partial bool TestsSelected { get; private set; }
+    public bool TestsSelected
+        => this.SelectedTestCases().Count > 0;
 
     /// <summary>
     /// Gets what can be done with the test run in its current state.
     /// </summary>
     public ExtendedCommand CurrentCommand
-        => this.TestRunState switch
+        => this.testRunnerEngine.State switch
         {
             TestRunState.Running => this.StopTestCommand,
             TestRunState.Stopping => this.StoppingTestCommand,
@@ -91,31 +88,37 @@ public sealed partial class TestExecutionViewModel : ViewModelBase, IDisposable
     /// Gets why a test run cannot start; empty when nothing stands in its way.
     /// </summary>
     public IReadOnlyList<string> ExecutionBlockingReasons
-        => [..this.GetExecutionBlockingReasons()];
+        => [.. this.GetExecutionBlockingReasons()];
+
+    private RelayCommand StopTestRelayCommand
+        => field ??= new RelayCommand(
+            execute: this.testRunnerEngine.StopTestRun,
+            canExecute: () => this.testRunnerEngine.State is TestRunState.Running);
 
     private ExtendedCommand StopTestCommand
         => field ??= new ExtendedCommand(
-            command: new RelayCommand(
-                execute: this.testRunnerEngine.StopTestRun,
-                canExecute: () => this.TestRunState is TestRunState.Running),
-            displayText: "Stop");
+            command: this.StopTestRelayCommand,
+            displayText: StopLabel);
 
     private ExtendedCommand StoppingTestCommand
         => field ??= new ExtendedCommand(
             command: new RelayCommand(
                 execute: static () => { },
                 canExecute: static () => false),
-            displayText: "Stopping …");
+            displayText: StoppingLabel);
+
+    private AsyncRelayCommand StartTestRelayCommand
+        => field ??= new AsyncRelayCommand(
+            execute: this.StartTestRunAsync,
+            canExecute: () =>
+                this.testRunnerEngine.State is TestRunState.Stopped
+                && this.TestsSelected
+                && !this.ConfigurationHasErrors);
 
     private ExtendedCommand StartTestCommand
         => field ??= new ExtendedCommand(
-            command: new AsyncRelayCommand(
-                execute: this.StartTestRunAsync,
-                canExecute: () =>
-                    this.TestRunState is TestRunState.Stopped
-                    && this.TestsSelected
-                    && !this.ConfigurationHasErrors),
-            displayText: "Start");
+            command: this.StartTestRelayCommand,
+            displayText: StartLabel);
 
     /// <inheritdoc/>
     public void Dispose()
@@ -144,25 +147,29 @@ public sealed partial class TestExecutionViewModel : ViewModelBase, IDisposable
     }
 
     private void OnTestRunnerEngineStateChanged(TestRunState state)
-        => this.UpdateTestRunState(this.testRunnerEngine.State);
+    {
+        this.OnPropertyChanged(nameof(this.TestRunState));
+        this.OnPropertyChanged(nameof(this.CurrentCommand));
+        this.StartTestRelayCommand.NotifyCanExecuteChanged();
+        this.StopTestRelayCommand.NotifyCanExecuteChanged();
+    }
 
     private void OnTestSelectionChanged(object? sender, EventArgs e)
-        => this.UpdateTestsSelected();
+    {
+        this.OnPropertyChanged(nameof(this.TestsSelected));
+        this.OnPropertyChanged(nameof(this.ExecutionBlockingReasons));
+        this.StartTestRelayCommand.NotifyCanExecuteChanged();
+    }
 
     private void OnConfigurationChanged(object? sender, EventArgs e)
-        => this.UpdateConfigurationHasErrors();
-
-    private void UpdateTestRunState(TestRunState state)
-        => this.TestRunState = state;
-
-    private void UpdateTestsSelected()
-        => this.TestsSelected = this.SelectedTestCases().Count > 0;
+    {
+        this.OnPropertyChanged(nameof(this.ConfigurationHasErrors));
+        this.OnPropertyChanged(nameof(this.ExecutionBlockingReasons));
+        this.StartTestRelayCommand.NotifyCanExecuteChanged();
+    }
 
     private IReadOnlyList<TestCaseEntity> SelectedTestCases()
         => this.testSelectionState.Value.SelectedTestCases(this.testTreeStore.TestSuites);
-
-    private void UpdateConfigurationHasErrors()
-        => this.ConfigurationHasErrors = this.configurationState.Value.HasErrors;
 
     private IEnumerable<string> GetExecutionBlockingReasons()
     {

@@ -233,20 +233,7 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
                     .Must(static x => string.IsNullOrEmpty(x) || int.TryParse(x, out _))
                     .When(static x => x.IsTestLinkReportEnabled && x.IsBetaVersion)
                     .WithMessage("Write the beta number as a whole number, for example 3.");
-            },
-            chains => chains
-                .Chain(
-                    rootProperty: static x => x.IsTestLinkReportEnabled,
-                    static x => x.IdeVersion,
-                    static x => x.IdeReleaseDate,
-                    static x => x.RuntimeReleaseDate,
-                    static x => x.BetaVersion)
-                .Chain(
-                    rootProperty: static x => x.IsBetaVersion,
-                    static x => x.BetaVersion)
-                .Chain(
-                    rootProperty: static x => x.IsRuntimeTest,
-                    static x => x.TestedHwAssembly));
+            });
 
     private IReadOnlyList<string> InitRuntimeVersions()
     {

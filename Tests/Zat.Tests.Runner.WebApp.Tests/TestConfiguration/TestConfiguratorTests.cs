@@ -240,7 +240,7 @@ public class TestConfiguratorTests : Bunit.TestContext
         // Then:
         Assert.That(
             component.FindAll($"{RuntimeVersionSelector} option").Select(option => option.TextContent.Trim()),
-            Is.EqualTo(new[] { "—", "9" }));
+            Is.EqualTo(["—", "9"]));
     }
 
     [Test]

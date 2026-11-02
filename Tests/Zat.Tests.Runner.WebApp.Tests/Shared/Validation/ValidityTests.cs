@@ -47,7 +47,7 @@ public class ValidityTests
         var narrowed = unit.For(GivenField);
 
         // Then:
-        Assert.That(narrowed.Issues, Is.EqualTo(new[] { givenProblem }));
+        Assert.That(narrowed.Issues, Is.EqualTo([givenProblem]));
     }
 
     [Test]
