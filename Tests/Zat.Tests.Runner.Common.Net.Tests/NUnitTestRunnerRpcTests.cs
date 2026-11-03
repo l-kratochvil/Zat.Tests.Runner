@@ -7,6 +7,8 @@ using DevKit.Core.Extensions.Types;
 
 using NUnit.Framework;
 
+using NUnitTestAssembly.Common;
+
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.Common.Net.Tests.Application.Paths;
@@ -16,9 +18,16 @@ using Zat.Tests.Runner.Common.Services;
 public class NUnitTestRunnerRpcTests
 {
     private const bool LaunchDebugger = false; // Enable debugger launch only if necessary to not spawn "attach to process" prompts
-    private const string TestAssemblyNet461Name = "NUnitTestAssembly.Net461";
-    private const string TestAssemblyNet481Name = "NUnitTestAssembly.Net481";
-    private const string Net481FailingTestCasePath = TestAssemblyNet481Name + ".SampleTestSuite.Fail";
+    private const string TestAssemblyNet461Name = NUnitTestAssembly.Net461.TestAssembly.Name;
+    private const string TestAssemblyNet481Name = NUnitTestAssembly.Net481.TestAssembly.Name;
+    private const string Net481TestCaseFixturePath =
+        TestAssemblyNet481Name + "." + nameof(NUnitTestAssembly.Net481.TestCaseFixture);
+
+    private const string Net481FailingTestCasePath =
+        Net481TestCaseFixturePath + "." + nameof(NUnitTestAssembly.Net481.TestCaseFixture.FailingTest);
+
+    private const string TearDownAttachmentFixturePath =
+        TestAssemblyNet481Name + "." + nameof(NUnitTestAssembly.Net481.TearDownAttachmentFixture);
 
     private static readonly string NUnitTestAssembliesDirPath = Path.Combine(
         Assembly.GetExecutingAssembly().GetAssemblyDirectoryPath(),
@@ -97,7 +106,9 @@ public class NUnitTestRunnerRpcTests
         using (Assert.EnterMultipleScope())
         {
             Assert.That(testCaseResult.Status, Is.EqualTo(TestStatus.Failure));
-            Assert.That(testCaseResult.Detail?.Message, Does.Contain("FAILURE REASON"));
+            Assert.That(
+                testCaseResult.Detail?.Message,
+                Does.Contain(TestCaseFixtureBase.FailureReason));
         }
     }
 
@@ -113,14 +124,19 @@ public class NUnitTestRunnerRpcTests
 
         // Then
         var testCaseResults = GetTestCaseResults(result)
-            .Where(x => x.EntityName.Contains(".SampleTestSuite."))
+            .Where(x => x.EntityName.Contains($".{nameof(NUnitTestAssembly.Net481.TestCaseFixture)}."))
             .ToArray();
-        var withAttachment = testCaseResults.Single(x => x.EntityName.EndsWith(".SampleTestSuite.WithAttachment"));
+        var withAttachment = testCaseResults.Single(
+            x => x.EntityName.EndsWith($".{nameof(NUnitTestAssembly.Net481.TestCaseFixture.AttachingTest)}"));
         var attachment = withAttachment.TestAttachments.Single();
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(attachment.Description, Is.EqualTo("ATTACHMENT DESCRIPTION"));
-            Assert.That(Path.GetFileName(attachment.FilePath), Is.EqualTo("attachment.txt"));
+            Assert.That(
+                attachment.Description,
+                Is.EqualTo(TestCaseFixtureBase.AttachmentDescription));
+            Assert.That(
+                Path.GetFileName(attachment.FilePath),
+                Is.EqualTo(TestCaseFixtureBase.AttachmentFileName));
             Assert.That(File.Exists(attachment.FilePath), Is.True);
             Assert.That(
                 testCaseResults.Where(x => x != withAttachment),
@@ -128,15 +144,21 @@ public class NUnitTestRunnerRpcTests
         }
     }
 
-    [TestCase("Plain", "Plain", "PLAIN FAILURE REASON")]
-    [TestCase("NamedMethod", "Named", "NAMED FAILURE REASON")]
+    [TestCase(
+        nameof(NUnitTestAssembly.Net481.TearDownAttachmentFixture.UnnamedTest),
+        nameof(NUnitTestAssembly.Net481.TearDownAttachmentFixture.UnnamedTest),
+        NUnitTestAssembly.Net481.TearDownAttachmentFixture.UnnamedTestFailureReason)]
+    [TestCase(
+        nameof(NUnitTestAssembly.Net481.TearDownAttachmentFixture.NamedTest),
+        NUnitTestAssembly.Net481.TearDownAttachmentFixture.NamedTestName,
+        NUnitTestAssembly.Net481.TearDownAttachmentFixture.NamedTestFailureReason)]
     public async Task RunTestAsync__WhenTearDownAddsAttachment__ThenTestCaseResultShouldCarryIt(
         string testCaseMethodName, string testName, string failureReason)
     {
         // Given
         var unit = this.connection.Proxy;
         var testCase = GetTestCases(await LoadTestAssemblyAsync(unit, TestAssemblyNet481DllPath))
-            .Single(x => x.ExecutionPath == $"{TestAssemblyNet481Name}.TearDownAttachmentFixture.{testCaseMethodName}");
+            .Single(x => x.ExecutionPath == $"{TearDownAttachmentFixturePath}.{testCaseMethodName}");
 
         // When
         var result = await unit.RunTestAsync([testCase]);
@@ -149,7 +171,11 @@ public class NUnitTestRunnerRpcTests
             Assert.That(testCaseResult.Detail?.Message, Does.Contain(failureReason));
             Assert.That(
                 testCaseResult.TestAttachments.Select(x => (x.Description, Path.GetFileName(x.FilePath))),
-                Is.EqualTo(new[] { ("TEARDOWN ATTACHMENT", $"{testName}.txt") }));
+                Is.EqualTo(
+                    new[]
+                    {
+                        (NUnitTestAssembly.Net481.TearDownAttachmentFixture.AttachmentDescription, $"{testName}.txt"),
+                    }));
         }
     }
 

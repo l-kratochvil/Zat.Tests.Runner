@@ -29,12 +29,13 @@ using Zat.Z2xxTests.Common.Model;
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
 public class TestRunnerEngineTests
 {
-    private const string TestAssemblyName = "NUnitTestAssembly.Net481";
-    private const string PassingTestCasePath = TestAssemblyName + ".SampleTestSuite.Pass";
-    private const string BridgeTestCasePath = TestAssemblyName + ".TestRunnerBridgeFixture.ReadsTestConfigFromTestRunner";
+    private const string TestAssemblyName = NUnitTestAssembly.Net481.TestAssembly.Name;
+    private const string TestCaseFixturePath = TestAssemblyName + "." + nameof(NUnitTestAssembly.Net481.TestCaseFixture);
+    private const string PassingTestCasePath =
+        TestCaseFixturePath + "." + nameof(NUnitTestAssembly.Net481.TestCaseFixture.PassingTest);
 
-    // Mirrors TestRunnerBridgeFixture.ExpectedTestedRuntimeVersion of the test assembly.
-    private const string BridgeTestedRuntimeVersion = "1.2.3";
+    private const string BridgeTestCasePath =
+        TestCaseFixturePath + "." + nameof(NUnitTestAssembly.Net481.TestCaseFixture.UseTestRunnerBridgeTest);
 
     private static readonly string TestAssemblyDllPath = Path.Combine(
         Assembly.GetExecutingAssembly().GetAssemblyDirectoryPath(),
@@ -73,7 +74,7 @@ public class TestRunnerEngineTests
     public async Task RunTestAsync__WhenTestRunCompletes__ThenShouldLogEachStateChangeToBothLogAndDiagnostics()
     {
         // When:
-        await this.unit.RunTestAsync([ApplicationTestCase()], this.Config());
+        await this.unit.RunTestAsync([CreateApplicationTestEntity()], this.CreateConfig());
 
         // Then:
         using (Assert.EnterMultipleScope())
@@ -91,7 +92,7 @@ public class TestRunnerEngineTests
     public async Task RunTestAsync__WhenTestRunCompletes__ThenShouldReportRunningAndThenStopped()
     {
         // When:
-        await this.unit.RunTestAsync([ApplicationTestCase()], this.Config());
+        await this.unit.RunTestAsync([CreateApplicationTestEntity()], this.CreateConfig());
 
         // Then:
         using (Assert.EnterMultipleScope())
@@ -105,7 +106,7 @@ public class TestRunnerEngineTests
     public async Task RunTestAsync__WhenTestRunCompletes__ThenShouldHandItsResult()
     {
         // When:
-        var results = await this.unit.RunTestAsync([ApplicationTestCase()], this.Config());
+        var results = await this.unit.RunTestAsync([CreateApplicationTestEntity()], this.CreateConfig());
 
         // Then:
         var handledResult = results.Value.Single();
@@ -123,8 +124,8 @@ public class TestRunnerEngineTests
     {
         // When:
         var results = await this.unit.RunTestAsync(
-            [RuntimeTestCase()],
-            this.Config(HwAssemblyType.HW00, HwAssemblyType.HW01));
+            [CreateRuntimeTestEntity()],
+            this.CreateConfig(HwAssemblyType.HW00, HwAssemblyType.HW01));
 
         // Then:
         Assert.That(results.Value, Has.Length.EqualTo(2));
@@ -145,8 +146,8 @@ public class TestRunnerEngineTests
 
         // When:
         var results = await this.unit.RunTestAsync(
-            [RuntimeTestCase()],
-            this.Config(HwAssemblyType.HW00, HwAssemblyType.HW01));
+            [CreateRuntimeTestEntity()],
+            this.CreateConfig(HwAssemblyType.HW00, HwAssemblyType.HW01));
 
         // Then:
         this.resultHandlerMock.Verify(
@@ -167,7 +168,7 @@ public class TestRunnerEngineTests
             .Returns(() => new AsyncDisposer(() => Task.CompletedTask));
 
         // When:
-        await this.unit.RunTestAsync([ApplicationTestCase()], this.Config(), callerCts.Token);
+        await this.unit.RunTestAsync([CreateApplicationTestEntity()], this.CreateConfig(), callerCts.Token);
 
         // Then:
         this.resultHandlerMock.Verify(
@@ -186,7 +187,7 @@ public class TestRunnerEngineTests
             .Returns(() => new AsyncDisposer(() => Task.CompletedTask));
 
         // When:
-        var results = await this.unit.RunTestAsync([ApplicationTestCase()], this.Config(), callerCts.Token);
+        var results = await this.unit.RunTestAsync([CreateApplicationTestEntity()], this.CreateConfig(), callerCts.Token);
 
         // Then:
         using (Assert.EnterMultipleScope())
@@ -212,13 +213,13 @@ public class TestRunnerEngineTests
                 {
                     // Marked first, so a start that is not refused can't recurse back in here.
                     secondStart = Task.CompletedTask;
-                    secondStart = this.unit.RunTestAsync([ApplicationTestCase()], this.Config());
+                    secondStart = this.unit.RunTestAsync([CreateApplicationTestEntity()], this.CreateConfig());
                 }
             })
             .Returns(() => new AsyncDisposer(() => Task.CompletedTask));
 
         // When:
-        await this.unit.RunTestAsync([ApplicationTestCase()], this.Config());
+        await this.unit.RunTestAsync([CreateApplicationTestEntity()], this.CreateConfig());
 
         // Then:
         Assert.ThrowsAsync<InvalidOperationException>(() => secondStart!);
@@ -228,11 +229,11 @@ public class TestRunnerEngineTests
     public async Task RunTestAsync__WhenTestAssemblyLacksSelectedTestEntity__ThenShouldFailWithoutRunningAnything()
     {
         // Given:
-        const string missingTestCasePath = TestAssemblyName + ".SampleTestSuite.Missing";
+        const string missingTestCasePath = TestCaseFixturePath + ".Missing";
         var missingTestCase = new TestEntity(TestType.Application, name: "Missing", executionPath: missingTestCasePath);
 
         // When:
-        var results = await this.unit.RunTestAsync([ApplicationTestCase(), missingTestCase], this.Config());
+        var results = await this.unit.RunTestAsync([CreateApplicationTestEntity(), missingTestCase], this.CreateConfig());
 
         // Then:
         using (Assert.EnterMultipleScope())
@@ -259,13 +260,16 @@ public class TestRunnerEngineTests
             NullLogger<LogSources.App>.Instance);
         var bridgeTestCase = new TestEntity(
             TestType.Application,
-            name: "ReadsTestConfigFromTestRunner",
+            name: nameof(NUnitTestAssembly.Net481.TestCaseFixture.UseTestRunnerBridgeTest),
             executionPath: BridgeTestCasePath);
 
         // When:
         var results = await unit.RunTestAsync(
             [bridgeTestCase],
-            this.Config() with { TestedRuntimeVersion = BridgeTestedRuntimeVersion });
+            this.CreateConfig() with
+            {
+                TestedRuntimeVersion = NUnitTestAssembly.Net481.TestCaseFixture.ExpectedTestedRuntimeVersion,
+            });
 
         // Then:
         var testCaseResult = results.Value.Single().TestCaseResults.Single();
@@ -283,13 +287,13 @@ public class TestRunnerEngineTests
 
         var unit = new TestRunnerEngine(
             this.bridgeConnectorMock.Object,
-            GivenConnector(new Mock<INUnitTestRunnerProxyConnection>(), proxyMock),
+            CreateTestRunnerProxyConnector(new Mock<INUnitTestRunnerProxyConnection>(), proxyMock),
             NullLogger<LogSources.TestRun>.Instance,
             NullLogger<LogSources.App>.Instance);
         unit.StateChanged += this.reportedStates.Add;
 
         // When:
-        var testRun = unit.RunTestAsync([ApplicationTestCase()], this.Config());
+        var testRun = unit.RunTestAsync([CreateApplicationTestEntity()], this.CreateConfig());
 
         // Then:
         Assert.CatchAsync(() => testRun);
@@ -310,8 +314,8 @@ public class TestRunnerEngineTests
 
         // When:
         var results = await this.unit.RunTestAsync(
-            [RuntimeTestCase()],
-            this.Config(HwAssemblyType.HW00, HwAssemblyType.HW01));
+            [CreateRuntimeTestEntity()],
+            this.CreateConfig(HwAssemblyType.HW00, HwAssemblyType.HW01));
 
         // Then:
         using (Assert.EnterMultipleScope())
@@ -335,7 +339,7 @@ public class TestRunnerEngineTests
             .Returns(() => new AsyncDisposer(() => Task.CompletedTask));
 
         // When:
-        var results = await this.unit.RunTestAsync([ApplicationTestCase()], this.Config());
+        var results = await this.unit.RunTestAsync([CreateApplicationTestEntity()], this.CreateConfig());
 
         // Then:
         using (Assert.EnterMultipleScope())
@@ -355,7 +359,7 @@ public class TestRunnerEngineTests
         var proxyMock = new Mock<INUnitTestRunnerProxy>();
         var unit = new TestRunnerEngine(
             this.bridgeConnectorMock.Object,
-            GivenConnector(connectionMock, proxyMock),
+            CreateTestRunnerProxyConnector(connectionMock, proxyMock),
             NullLogger<LogSources.TestRun>.Instance,
             NullLogger<LogSources.App>.Instance);
 
@@ -366,7 +370,7 @@ public class TestRunnerEngineTests
 
         // When:
         var results = await unit
-            .RunTestAsync([ApplicationTestCase()], this.Config())
+            .RunTestAsync([CreateApplicationTestEntity()], this.CreateConfig())
             .WaitAsync(TestRunnerEngine.StopTimeout * 3);
 
         // Then:
@@ -379,7 +383,7 @@ public class TestRunnerEngineTests
         }
     }
 
-    private static INUnitTestRunnerProxyConnector GivenConnector(
+    private static INUnitTestRunnerProxyConnector CreateTestRunnerProxyConnector(
         Mock<INUnitTestRunnerProxyConnection> connectionMock,
         Mock<INUnitTestRunnerProxy> proxyMock)
     {
@@ -389,10 +393,10 @@ public class TestRunnerEngineTests
             new(
                 [
                     new(
-                        [ApplicationTestCase(id: "Pass")],
+                        [CreateApplicationTestCase(id: nameof(NUnitTestAssembly.Net481.TestCaseFixture.PassingTest))],
                         TestType.Application,
-                        name: "SampleTestSuite",
-                        executionPath: TestAssemblyName + ".SampleTestSuite"),
+                        name: nameof(NUnitTestAssembly.Net481.TestCaseFixture),
+                        executionPath: TestCaseFixturePath),
                 ],
                 TestType.Application,
                 name: TestAssemblyName,
@@ -414,17 +418,26 @@ public class TestRunnerEngineTests
         return connectorMock.Object;
     }
 
-    private static TestEntity ApplicationTestCase()
-        => new(TestType.Application, name: "Pass", executionPath: PassingTestCasePath);
+    private static TestEntity CreateApplicationTestEntity()
+        => new(
+            TestType.Application,
+            name: nameof(NUnitTestAssembly.Net481.TestCaseFixture.PassingTest),
+            executionPath: PassingTestCasePath);
 
-    private static TestCaseEntity ApplicationTestCase(string id)
-        => new(TestType.Application, id: id, name: "Pass", executionPath: PassingTestCasePath);
+    private static TestEntity CreateRuntimeTestEntity()
+        => new(
+            TestType.Runtime,
+            name: nameof(NUnitTestAssembly.Net481.TestCaseFixture.PassingTest),
+            executionPath: PassingTestCasePath);
 
-    // The proxy runs by execution path alone, so a test case of the test assembly can stand in for a runtime one.
-    private static TestEntity RuntimeTestCase()
-        => new(TestType.Runtime, name: "Pass", executionPath: PassingTestCasePath);
+    private static TestCaseEntity CreateApplicationTestCase(string id)
+        => new(
+            TestType.Application,
+            id: id,
+            name: nameof(NUnitTestAssembly.Net481.TestCaseFixture.PassingTest),
+            executionPath: PassingTestCasePath);
 
-    private ITestRunnerEngine.Config Config(params HwAssemblyType[] testedHwAssemblyTypes)
+    private ITestRunnerEngine.Config CreateConfig(params HwAssemblyType[] testedHwAssemblyTypes)
         => new(
             TestAssemblyDllPath: TestAssemblyDllPath,
             IsDebug: false,

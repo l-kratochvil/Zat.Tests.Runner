@@ -3,33 +3,36 @@ namespace NUnitTestAssembly.Net481;
 using NUnit.Framework;
 
 /// <summary>
-/// A test fixture whose <see cref="OneTimeTearDownAttribute"/> fails, used as build-time test data for the proxy tests.
+/// A fixture whose one-time teardown fails after its test cases run.
 /// </summary>
 [TestFixture]
 public class OneTimeTearDownFailingFixture
 {
+    public const string ErrorReason = "ONE TIME TEARDOWN REASON";
+
     /// <summary>
     /// A failing one-time tear-down.
     /// </summary>
     [OneTimeTearDown]
     public void OneTimeTearDown()
     {
-        throw new Exception("ONE TIME TEARDOWN REASON");
+        throw new Exception(ErrorReason);
     }
 
+
     /// <summary>
-    /// A passing test case.
+    /// A test case that should pass.
     /// </summary>
     [Test]
-    public void OneTimeTearDownFailing_First()
+    public void FirstTest()
     {
     }
 
     /// <summary>
-    /// A passing test case.
+    /// A test case that should pass.
     /// </summary>
     [Test]
-    public void OneTimeTearDownFailing_Second()
+    public void SecondTest()
     {
     }
 }

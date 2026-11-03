@@ -3,25 +3,27 @@ namespace NUnitTestAssembly.Net481;
 using NUnit.Framework;
 
 /// <summary>
-/// An ignored test fixture, used as build-time test data for the proxy tests.
+/// A fixture ignored as a whole.
 /// </summary>
 [TestFixture]
-[Ignore("FIXTURE IGNORE REASON")]
+[Ignore(IgnoreReason)]
 public class IgnoredFixture
 {
+    public const string IgnoreReason = "FIXTURE IGNORE REASON";
+
     /// <summary>
-    /// A test case that would pass.
+    /// A test case that should be ignored.
     /// </summary>
     [Test]
-    public void IgnoredFixture_First()
+    public void FirstTest()
     {
     }
 
     /// <summary>
-    /// A test case that would pass.
+    /// A test case that should be ignored.
     /// </summary>
     [Test]
-    public void IgnoredFixture_Second()
+    public void SecondTest()
     {
     }
 }

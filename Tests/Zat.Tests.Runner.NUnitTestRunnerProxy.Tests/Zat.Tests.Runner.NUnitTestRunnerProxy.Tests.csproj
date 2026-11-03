@@ -16,18 +16,18 @@
 		<ProjectReference Include="..\..\Zat.Tests.Runner.NUnitTestRunnerProxy\Zat.Tests.Runner.NUnitTestRunnerProxy.csproj" />
 	</ItemGroup>
 
-	<!--
-    Reference the NUnit test-assembly fixtures only to enforce build ordering:
-    they must be built (and staged to Exchange) before this project's output is
-    assembled. Their assemblies are test data, not compile-time dependencies.
-  -->
+	<!-- Reference the test assemblies to share fixture names and test-case paths with their discovery tests. -->
 	<ItemGroup>
+		<ProjectReference Include="..\NUnitTestAssembly.Common\NUnitTestAssembly.Common.csproj">
+			<ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+			<Private>false</Private>
+		</ProjectReference>
 		<ProjectReference Include="..\NUnitTestAssembly.Net481\NUnitTestAssembly.Net481.csproj">
-			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+			<ReferenceOutputAssembly>true</ReferenceOutputAssembly>
 			<Private>false</Private>
 		</ProjectReference>
 		<ProjectReference Include="..\NUnitTestAssembly.Net461\NUnitTestAssembly.Net461.csproj">
-			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+			<ReferenceOutputAssembly>true</ReferenceOutputAssembly>
 			<Private>false</Private>
 		</ProjectReference>
 	</ItemGroup>

@@ -8,8 +8,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="NUnit" Version="3.14.0" />
+		<PackageReference Include="NUnit" Version="3.14.0" PrivateAssets="all" />
 		<PackageReference Include="StreamJsonRpc" Version="2.25.29" />
+		<ProjectReference Include="..\NUnitTestAssembly.Common\NUnitTestAssembly.Common.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

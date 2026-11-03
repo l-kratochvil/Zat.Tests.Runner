@@ -6,23 +6,25 @@ using DevKit.Core.Extensions.Types;
 
 using NUnit.Framework;
 
+using NUnitTestAssembly.Common;
+
 using Zat.Tests.Runner.Common.Model;
 
 // TODO: Test GetIsAssemblyLoadedAsync, GetIsTestRunningAsync, etc.
 // TODO: Change to Net10 and communicate with proxy via StreamJsonRpc (as the production proxy client does) instead of directly calling the proxy implementation.
 public class NUnitTestRunnerProxyTests
 {
-    private const string TestAssemblyNet461Name = "NUnitTestAssembly.Net461";
-    private const string TestAssemblyNet481Name = "NUnitTestAssembly.Net481";
+    private const string TestAssemblyNet461Name = NUnitTestAssembly.Net461.TestAssembly.Name;
+    private const string TestAssemblyNet481Name = NUnitTestAssembly.Net481.TestAssembly.Name;
 
     private const string Net481TestSuitePath = TestAssemblyNet481Name;
-    private const string SampleTestFixturePath = Net481TestSuitePath + ".SampleTestSuite";
-    private const string OneTimeSetUpFailingTestFixturePath = Net481TestSuitePath + ".OneTimeSetUpFailingFixture";
-    private const string OneTimeTearDownFailingTestFixturePath = Net481TestSuitePath + ".OneTimeTearDownFailingFixture";
-    private const string IgnoredTestFixturePath = Net481TestSuitePath + ".IgnoredFixture";
-    private const string ConfigurationFileTestFixturePath = Net481TestSuitePath + ".ConfigurationFileFixture";
-    private const string TearDownAttachmentTestFixturePath = Net481TestSuitePath + ".TearDownAttachmentFixture";
-    private const string TestRunnerBridgeTestFixturePath = Net481TestSuitePath + ".TestRunnerBridgeFixture";
+    private const string NestedTestSuitePath = Net481TestSuitePath + ".Nested";
+    private const string TestCaseFixturePath = Net481TestSuitePath + "." + nameof(NUnitTestAssembly.Net481.TestCaseFixture);
+    private const string OneTimeSetUpFailingTestFixturePath = Net481TestSuitePath + "." + nameof(NUnitTestAssembly.Net481.OneTimeSetUpFailingFixture);
+    private const string OneTimeTearDownFailingTestFixturePath = Net481TestSuitePath + "." + nameof(NUnitTestAssembly.Net481.OneTimeTearDownFailingFixture);
+    private const string IgnoredTestFixturePath = Net481TestSuitePath + "." + nameof(NUnitTestAssembly.Net481.IgnoredFixture);
+    private const string TearDownAttachmentTestFixturePath = Net481TestSuitePath + "." + nameof(NUnitTestAssembly.Net481.TearDownAttachmentFixture);
+    private const string NestedTestFixturePath = NestedTestSuitePath + "." + nameof(NUnitTestAssembly.Net481.Nested.NestedFixture);
 
     private static readonly string NUnitTestAssembliesDirPath = Path.Combine(
         Assembly.GetExecutingAssembly().GetAssemblyDirectoryPath(),
@@ -68,20 +70,42 @@ public class NUnitTestRunnerProxyTests
         var result = await unit.LoadTestAssemblyAsync(testAssemblyDllPath);
 
         // Then
-        Assert.That(result, Is.Not.Empty);
-        Assert.That(result, Has.Length.EqualTo(1));
-        Assert.That(result, Has.One.Matches<TestSuiteEntity>(x => x.Name == "Net481"));
+        Assert.That(
+            result.Select(x => x.Name),
+            Is.EquivalentTo([nameof(NUnitTestAssembly.Net481), nameof(NUnitTestAssembly.Net481.Nested)]));
 
-        var testSuite = result[0];
-        Assert.That(testSuite.TestFixtures, Has.One.Matches<TestFixtureEntity>(x => x.Name == "SampleTestSuite"));
+        var testSuite = result.Single(x => x.Name == nameof(NUnitTestAssembly.Net481));
+        Assert.That(testSuite.TestFixtures.Select(x => x.Name), Is.EquivalentTo(
+        [
+            nameof(NUnitTestAssembly.Net481.TestCaseFixture),
+            nameof(NUnitTestAssembly.Net481.OneTimeSetUpFailingFixture),
+            nameof(NUnitTestAssembly.Net481.OneTimeTearDownFailingFixture),
+            nameof(NUnitTestAssembly.Net481.IgnoredFixture),
+            nameof(NUnitTestAssembly.Net481.TearDownAttachmentFixture),
+        ]));
 
-        var testFixture = testSuite.TestFixtures.Single(x => x.Name == "SampleTestSuite");
-        Assert.That(testFixture.TestCases, Has.Length.EqualTo(5));
-        Assert.That(testFixture.TestCases, Has.One.Matches<TestCaseEntity>(x => x.Name == "Pass"));
-        Assert.That(testFixture.TestCases, Has.One.Matches<TestCaseEntity>(x => x.Name == "Fail"));
-        Assert.That(testFixture.TestCases, Has.One.Matches<TestCaseEntity>(x => x.Name == "Error"));
-        Assert.That(testFixture.TestCases, Has.One.Matches<TestCaseEntity>(x => x.Name == "Ignored"));
-        Assert.That(testFixture.TestCases, Has.One.Matches<TestCaseEntity>(x => x.Name == "WithAttachment"));
+        var testFixture = testSuite.TestFixtures.Single(x => x.Name == nameof(NUnitTestAssembly.Net481.TestCaseFixture));
+        Assert.That(
+            testFixture.TestCases.Select(x => x.Name),
+            Is.EquivalentTo(
+            [
+                nameof(NUnitTestAssembly.Net481.TestCaseFixture.PassingTest),
+                nameof(NUnitTestAssembly.Net481.TestCaseFixture.FailingTest),
+                nameof(NUnitTestAssembly.Net481.TestCaseFixture.ThrowingTest),
+                nameof(NUnitTestAssembly.Net481.TestCaseFixture.IgnoredTest),
+                nameof(NUnitTestAssembly.Net481.TestCaseFixture.AttachingTest),
+                nameof(NUnitTestAssembly.Net481.TestCaseFixture.UseConfigurationFileTest),
+                nameof(NUnitTestAssembly.Net481.TestCaseFixture.UseTestRunnerBridgeTest),
+            ]));
+
+        var nestedTestSuite = result.Single(x => x.Name == nameof(NUnitTestAssembly.Net481.Nested));
+        var nestedTestFixture = nestedTestSuite.TestFixtures.Single();
+        Assert.That(
+            nestedTestFixture.Name,
+            Is.EqualTo(nameof(NUnitTestAssembly.Net481.Nested.NestedFixture)));
+        Assert.That(
+            nestedTestFixture.TestCases.Select(x => x.Name),
+            Is.EqualTo([nameof(NUnitTestAssembly.Net481.Nested.NestedFixture.NestedTest)]));
     }
 
     [Test]
@@ -100,13 +124,20 @@ public class NUnitTestRunnerProxyTests
         var result = await unit.LoadTestAssemblyAsync(testAssemblyDllPath);
 
         // Then
-        Assert.That(result.Select(x => x.Name), Is.EquivalentTo(["Net461", "Nested"]));
-
-        var nestedTestSuite = result.Single(x => x.Name == "Nested");
-        Assert.That(nestedTestSuite.TestFixtures.Select(x => x.Name), Is.EqualTo(["NestedTestSuite"]));
+        Assert.That(result.Select(x => x.Name), Is.EqualTo([nameof(NUnitTestAssembly.Net461)]));
         Assert.That(
-            nestedTestSuite.TestFixtures[0].TestCases.Select(x => x.Name),
-            Is.EqualTo(["NestedTestCase"]));
+            result[0].TestFixtures.Select(x => x.Name),
+            Is.EqualTo([nameof(NUnitTestAssembly.Net461.TestCaseFixture)]));
+        Assert.That(
+            result[0].TestFixtures[0].TestCases.Select(x => x.Name),
+            Is.EquivalentTo(
+            [
+                nameof(NUnitTestAssembly.Net461.TestCaseFixture.PassingTest),
+                nameof(NUnitTestAssembly.Net461.TestCaseFixture.FailingTest),
+                nameof(NUnitTestAssembly.Net461.TestCaseFixture.ThrowingTest),
+                nameof(NUnitTestAssembly.Net461.TestCaseFixture.IgnoredTest),
+                nameof(NUnitTestAssembly.Net461.TestCaseFixture.AttachingTest),
+            ]));
     }
 
     [Test]
@@ -139,19 +170,22 @@ public class NUnitTestRunnerProxyTests
         var result = await this.unit.RunTestAsync(testCases);
 
         // Then:
-        Assert.That(result.TestSuiteResults.Select(x => x.EntityName), Is.EqualTo([Net481TestSuitePath]));
         Assert.That(
-            result.TestSuiteResults[0].TestFixtureResults.Select(x => x.EntityName),
+            result.TestSuiteResults.Select(x => x.EntityName),
+            Is.EquivalentTo([Net481TestSuitePath, NestedTestSuitePath]));
+        Assert.That(
+            result.TestSuiteResults.Single(x => x.EntityName == Net481TestSuitePath).TestFixtureResults.Select(x => x.EntityName),
             Is.EquivalentTo(
             [
-                SampleTestFixturePath,
+                TestCaseFixturePath,
                 OneTimeSetUpFailingTestFixturePath,
                 OneTimeTearDownFailingTestFixturePath,
                 IgnoredTestFixturePath,
-                ConfigurationFileTestFixturePath,
                 TearDownAttachmentTestFixturePath,
-                TestRunnerBridgeTestFixturePath,
             ]));
+        Assert.That(
+            result.TestSuiteResults.Single(x => x.EntityName == NestedTestSuitePath).TestFixtureResults.Select(x => x.EntityName),
+            Is.EqualTo([NestedTestFixturePath]));
         Assert.That(
             GetTestCaseResults(result).Select(x => x.EntityName),
             Is.EquivalentTo(testCases.Select(x => x.ExecutionPath)));
@@ -172,16 +206,16 @@ public class NUnitTestRunnerProxyTests
             Is.EquivalentTo(testCases.Select(x => (x.ExecutionPath, x.Id))));
     }
 
-    [TestCase("Pass", TestStatus.Passed, null)]
-    [TestCase("Fail", TestStatus.Failure, "FAILURE REASON")]
-    [TestCase("Error", TestStatus.Error, "ERROR REASON")]
-    [TestCase("Ignored", TestStatus.Ignored, "IGNORE REASON")]
+    [TestCase(nameof(NUnitTestAssembly.Net481.TestCaseFixture.PassingTest), TestStatus.Passed, null)]
+    [TestCase(nameof(NUnitTestAssembly.Net481.TestCaseFixture.FailingTest), TestStatus.Failure, NUnitTestAssembly.Net481.TestCaseFixture.FailureReason)]
+    [TestCase(nameof(NUnitTestAssembly.Net481.TestCaseFixture.ThrowingTest), TestStatus.Error, NUnitTestAssembly.Net481.TestCaseFixture.ErrorReason)]
+    [TestCase(nameof(NUnitTestAssembly.Net481.TestCaseFixture.IgnoredTest), TestStatus.Ignored, NUnitTestAssembly.Net481.TestCaseFixture.IgnoreReason)]
     public async Task RunTestAsync__WhenRunWithSingleTestCase__ThenShouldReturnItsStatusAndDetail_AndPassedParents(
         string givenTestCaseName, TestStatus expectedStatus, string? expectedMessage)
     {
         // Given:
         var testCase = GetTestCases(await this.LoadNet481TestAssemblyAsync())
-            .Single(x => x.ExecutionPath == $"{SampleTestFixturePath}.{givenTestCaseName}");
+            .Single(x => x.ExecutionPath == $"{TestCaseFixturePath}.{givenTestCaseName}");
 
         // When:
         var result = await this.unit.RunTestAsync([testCase]);
@@ -192,7 +226,7 @@ public class NUnitTestRunnerProxyTests
         Assert.That(testSuiteResult.Detail, Is.Null);
 
         var testFixtureResult = testSuiteResult.TestFixtureResults.Single();
-        Assert.That(testFixtureResult.EntityName, Is.EqualTo(SampleTestFixturePath));
+        Assert.That(testFixtureResult.EntityName, Is.EqualTo(TestCaseFixturePath));
         Assert.That(testFixtureResult.Status, Is.EqualTo(TestStatus.Passed));
         Assert.That(testFixtureResult.Detail, Is.Null);
 
@@ -224,12 +258,12 @@ public class NUnitTestRunnerProxyTests
 
         var testFixtureResult = testSuiteResult.TestFixtureResults.Single();
         Assert.That(testFixtureResult.Status, Is.EqualTo(TestStatus.Error));
-        Assert.That(testFixtureResult.Detail?.Message, Does.Contain("ONE TIME SETUP REASON"));
+        Assert.That(testFixtureResult.Detail?.Message, Does.Contain(NUnitTestAssembly.Net481.OneTimeSetUpFailingFixture.ErrorReason));
         Assert.That(testFixtureResult.Detail?.StackTrace, Is.Not.Empty);
 
         Assert.That(testFixtureResult.TestCaseResults, Has.Length.EqualTo(2));
         Assert.That(testFixtureResult.TestCaseResults, Has.All.Matches<TestCaseResult>(
-            x => x.Status == TestStatus.Error && x.Detail!.Message.Contains("ONE TIME SETUP REASON")));
+            x => x.Status == TestStatus.Error && x.Detail!.Message.Contains(NUnitTestAssembly.Net481.OneTimeSetUpFailingFixture.ErrorReason)));
     }
 
     [Test]
@@ -247,7 +281,7 @@ public class NUnitTestRunnerProxyTests
 
         var testFixtureResult = testSuiteResult.TestFixtureResults.Single();
         Assert.That(testFixtureResult.Status, Is.EqualTo(TestStatus.Error));
-        Assert.That(testFixtureResult.Detail?.Message, Does.Contain("ONE TIME TEARDOWN REASON"));
+        Assert.That(testFixtureResult.Detail?.Message, Does.Contain(NUnitTestAssembly.Net481.OneTimeTearDownFailingFixture.ErrorReason));
 
         Assert.That(testFixtureResult.TestCaseResults, Has.Length.EqualTo(2));
         Assert.That(testFixtureResult.TestCaseResults, Has.All.Matches<TestCaseResult>(
@@ -266,11 +300,11 @@ public class NUnitTestRunnerProxyTests
         // Then:
         var testFixtureResult = result.TestSuiteResults.Single().TestFixtureResults.Single();
         Assert.That(testFixtureResult.Status, Is.EqualTo(TestStatus.Ignored));
-        Assert.That(testFixtureResult.Detail?.Message, Does.Contain("FIXTURE IGNORE REASON"));
+        Assert.That(testFixtureResult.Detail?.Message, Does.Contain(NUnitTestAssembly.Net481.IgnoredFixture.IgnoreReason));
 
         Assert.That(testFixtureResult.TestCaseResults, Has.Length.EqualTo(2));
         Assert.That(testFixtureResult.TestCaseResults, Has.All.Matches<TestCaseResult>(
-            x => x.Status == TestStatus.Ignored && x.Detail!.Message.Contains("FIXTURE IGNORE REASON")));
+            x => x.Status == TestStatus.Ignored && x.Detail!.Message.Contains(NUnitTestAssembly.Net481.IgnoredFixture.IgnoreReason)));
     }
 
     [Test]
@@ -280,7 +314,7 @@ public class NUnitTestRunnerProxyTests
         var testSuites = await this.LoadNet481TestAssemblyAsync();
 
         // When:
-        var result = await this.unit.RunTestAsync([testSuites.Single()]);
+        var result = await this.unit.RunTestAsync(testSuites);
 
         // Then:
         Assert.That(
@@ -295,14 +329,14 @@ public class NUnitTestRunnerProxyTests
         // Given:
         var testFixture = (await this.LoadNet481TestAssemblyAsync())
             .SelectMany(x => x.TestFixtures)
-            .Single(x => x.ExecutionPath == SampleTestFixturePath);
+            .Single(x => x.ExecutionPath == TestCaseFixturePath);
 
         // When:
         var result = await this.unit.RunTestAsync([testFixture]);
 
         // Then:
         var testFixtureResult = result.TestSuiteResults.Single().TestFixtureResults.Single();
-        Assert.That(testFixtureResult.EntityName, Is.EqualTo(SampleTestFixturePath));
+        Assert.That(testFixtureResult.EntityName, Is.EqualTo(TestCaseFixturePath));
         Assert.That(
             testFixtureResult.TestCaseResults.Select(x => x.EntityName),
             Is.EquivalentTo(testFixture.TestCases.Select(x => x.ExecutionPath)));
@@ -312,7 +346,8 @@ public class NUnitTestRunnerProxyTests
     public async Task RunTestAsync__WhenTestAssemblyHasConfigurationFile__ThenShouldApplyItToTestCases()
     {
         // Given:
-        var testCases = GetTestCases(await this.LoadNet481TestAssemblyAsync(), ConfigurationFileTestFixturePath);
+        var testCases = GetTestCases(await this.LoadNet481TestAssemblyAsync(), TestCaseFixturePath)
+            .Where(x => x.Name == nameof(NUnitTestAssembly.Net481.TestCaseFixture.UseConfigurationFileTest));
 
         // When:
         var result = await this.unit.RunTestAsync(testCases);

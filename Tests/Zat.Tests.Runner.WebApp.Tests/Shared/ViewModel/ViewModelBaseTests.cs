@@ -23,7 +23,7 @@ public class ViewModelBaseTests
     public void SetProperty__WhenNothingIsWrongWithEdit__ThenShouldHoldIt()
     {
         // Given
-        var unit = new EditedModel { Name = GivenLetters };
+        var unit = new EditedViewModel { Name = GivenLetters };
 
         // When: None
 
@@ -39,7 +39,7 @@ public class ViewModelBaseTests
     public void SetProperty__WhenEditIsWrong__ThenShouldHoldItAllSame()
     {
         // Given:
-        var unit = new EditedModel { Name = GivenLetters };
+        var unit = new EditedViewModel { Name = GivenLetters };
 
         // When:
         unit.Name = GivenNonsense;
@@ -52,7 +52,7 @@ public class ViewModelBaseTests
     public void SetProperty__WhenEditIsWrong__ThenShouldSayWhatIsWrongWithIt()
     {
         // Given:
-        var unit = new EditedModel { Name = GivenLetters };
+        var unit = new EditedViewModel { Name = GivenLetters };
 
         // When:
         unit.Name = GivenNonsense;
@@ -61,7 +61,7 @@ public class ViewModelBaseTests
         using (Assert.EnterMultipleScope())
         {
             Assert.That(unit.HasErrors, Is.True);
-            Assert.That(unit.GetValidity(nameof(EditedModel.Name))?.Issues, Has.Exactly(1).Items);
+            Assert.That(unit.GetValidity(nameof(EditedViewModel.Name))?.Issues, Has.Exactly(1).Items);
         }
     }
 
@@ -69,7 +69,7 @@ public class ViewModelBaseTests
     public void SetProperty__WhenEditIsWrong__ThenShouldAnnouncePropertyChanged()
     {
         // Given:
-        var unit = new EditedModel { Name = GivenLetters };
+        var unit = new EditedViewModel { Name = GivenLetters };
 
         var announced = new List<string?>();
         unit.PropertyChanged += (_, args) => announced.Add(args.PropertyName);
@@ -78,7 +78,7 @@ public class ViewModelBaseTests
         unit.Name = GivenNonsense;
 
         // Then:
-        Assert.That(announced, Has.Exactly(1).EqualTo(nameof(EditedModel.Name)));
+        Assert.That(announced, Has.Exactly(1).EqualTo(nameof(EditedViewModel.Name)));
     }
 
     [Test]
@@ -87,7 +87,7 @@ public class ViewModelBaseTests
         // Given:
         // A property that starts out wrong is the ordinary case — a configuration nobody has filled
         // in yet — so a wrong edit must not be what keeps it wrong.
-        var unit = new EditedModel { Name = GivenNonsense };
+        var unit = new EditedViewModel { Name = GivenNonsense };
 
         // When:
         unit.Name = GivenLetters;
@@ -107,7 +107,7 @@ public class ViewModelBaseTests
         // Where the value is kept is the caller's to say, and what is wrong with it is told
         // alongside rather than by keeping it out of there.
         var kept = string.Empty;
-        var unit = new DispatchingModel(value => kept = value) { Name = GivenLetters };
+        var unit = new DispatchingViewModel(value => kept = value) { Name = GivenLetters };
 
         // When:
         unit.Name = GivenNonsense;
@@ -122,7 +122,7 @@ public class ViewModelBaseTests
         // Given:
         // A configuration nobody has filled in yet is wrong before anything is edited, and the
         // tester has to see it so as not to run with it.
-        var unit = new EditedModel(GivenNonsense);
+        var unit = new EditedViewModel(GivenNonsense);
 
         // When: None
 
@@ -130,7 +130,7 @@ public class ViewModelBaseTests
         using (Assert.EnterMultipleScope())
         {
             Assert.That(unit.HasErrors, Is.True);
-            Assert.That(unit.GetValidity(nameof(EditedModel.Name))?.Issues, Has.Exactly(1).Items);
+            Assert.That(unit.GetValidity(nameof(EditedViewModel.Name))?.Issues, Has.Exactly(1).Items);
         }
     }
 
@@ -138,13 +138,13 @@ public class ViewModelBaseTests
     public void InitValidator__WhenHeldValueIsRight__ThenShouldSayNothingIsWrong()
     {
         // When:
-        var unit = new EditedModel(GivenLetters);
+        var unit = new EditedViewModel(GivenLetters);
 
         // Then:
         using (Assert.EnterMultipleScope())
         {
             Assert.That(unit.HasErrors, Is.False);
-            Assert.That(unit.GetValidity(nameof(EditedModel.Name))?.Issues, Is.Empty);
+            Assert.That(unit.GetValidity(nameof(EditedViewModel.Name))?.Issues, Is.Empty);
         }
     }
 
@@ -152,10 +152,10 @@ public class ViewModelBaseTests
     public void InitValidator__WhenHeldValueIsWrong__ThenShouldTellWhoeverHandsItOn()
     {
         // Given:
-        List<bool> announced = [];
+        var announced = new List<bool>();
 
         // When:
-        _ = new EditedModel(GivenNonsense, hasErrorsChanged: announced.Add);
+        _ = new EditedViewModel(GivenNonsense, hasErrorsChanged: announced.Add);
 
         // Then:
         Assert.That(announced, Is.EqualTo([true]));
@@ -165,7 +165,7 @@ public class ViewModelBaseTests
     public void HasErrors__WhenEditIsWrong__ThenShouldSaySoOnlyOnce()
     {
         // Given:
-        var unit = new EditedModel { Name = GivenLetters };
+        var unit = new EditedViewModel { Name = GivenLetters };
 
         List<bool> announced = [];
         unit.HasErrorsChanged += announced.Add;
@@ -179,48 +179,48 @@ public class ViewModelBaseTests
     }
 
     [Test]
-    public void ChainValidation__WhenConditionIsTurnedOff__ThenShouldStopMindingChainedValue()
+    public void ConditionalValidation__WhenConditionIsTurnedOff__ThenShouldStopValidatingName()
     {
         // Given:
-        var unit = new ChainedModel { IsAsked = true, Name = GivenNonsense };
+        var unit = new ConditionalValidationViewModel { IsNameValidated = true, Name = GivenNonsense };
 
         // When:
-        unit.IsAsked = false;
+        unit.IsNameValidated = false;
 
         // Then:
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(unit.GetValidity(nameof(ChainedModel.Name))?.HasErrors, Is.False);
+            Assert.That(unit.GetValidity(nameof(ConditionalValidationViewModel.Name))?.HasErrors, Is.False);
             Assert.That(unit.HasErrors, Is.False);
         }
     }
 
     [Test]
-    public void ChainValidation__WhenConditionIsTurnedOff__ThenShouldAnnounceAfterRecheckingChainedValue()
+    public void ConditionalValidation__WhenConditionIsTurnedOff__ThenShouldAnnounceAfterRevalidatingName()
     {
         // Given:
-        var unit = new ChainedModel { IsAsked = true, Name = GivenNonsense };
+        var unit = new ConditionalValidationViewModel { IsNameValidated = true, Name = GivenNonsense };
         bool? announcedValidity = null;
         unit.PropertyChanged += (_, args) =>
         {
-            if (args.PropertyName == nameof(ChainedModel.IsAsked))
+            if (args.PropertyName == nameof(ConditionalValidationViewModel.IsNameValidated))
             {
-                announcedValidity = unit.GetValidity(nameof(ChainedModel.Name))?.HasErrors;
+                announcedValidity = unit.GetValidity(nameof(ConditionalValidationViewModel.Name))?.HasErrors;
             }
         };
 
         // When:
-        unit.IsAsked = false;
+        unit.IsNameValidated = false;
 
         // Then:
         Assert.That(announcedValidity, Is.False);
     }
 
     [Test]
-    public void ChainValidation__WhenConditionIsTurnedOn__ThenShouldMindChainedValueAgain()
+    public void ConditionalValidation__WhenConditionIsTurnedOn__ThenShouldValidateName()
     {
         // Given:
-        var unit = new ChainedModel { Name = GivenNonsense, IsAsked = true };
+        var unit = new ConditionalValidationViewModel { Name = GivenNonsense, IsNameValidated = true };
 
         // When: None
 
@@ -230,36 +230,42 @@ public class ViewModelBaseTests
 
     [TestCase(true, false)]
     [TestCase(false, true)]
-    public void ConditionalValidation__WhenConditionChangesForUneditedValue__ThenShouldUpdateItsValidity(
-        bool givenIsAsked,
+    public void ConditionalValidation__WhenConditionChangesForUneditedName__ThenShouldUpdateItsValidity(
+        bool givenIsNameValidated,
         bool expectedHasErrors)
     {
         // Given:
-        var unit = new ChainedModel(isAsked: givenIsAsked);
-        Assert.That(unit.GetValidity(nameof(ChainedModel.Name))?.HasErrors, Is.EqualTo(givenIsAsked));
-        List<bool> announced = [];
+        var unit = new ConditionalValidationViewModel(isNameValidated: givenIsNameValidated);
+        Assert.That(unit.GetValidity(nameof(ConditionalValidationViewModel.Name))?.HasErrors, Is.EqualTo(givenIsNameValidated));
+        var announced = new List<bool>();
         unit.HasErrorsChanged += announced.Add;
 
         // When:
-        unit.IsAsked = !givenIsAsked;
+        unit.IsNameValidated = !givenIsNameValidated;
 
         // Then:
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(unit.GetValidity(nameof(ChainedModel.Name))?.HasErrors, Is.EqualTo(expectedHasErrors));
+            Assert.That(unit.GetValidity(nameof(ConditionalValidationViewModel.Name))?.HasErrors, Is.EqualTo(expectedHasErrors));
             Assert.That(unit.HasErrors, Is.EqualTo(expectedHasErrors));
             Assert.That(announced, Is.EqualTo([expectedHasErrors]));
         }
     }
 
+    private static IRuleBuilderOptions<TViewModel, string> MustBeLetters<TViewModel>(
+        IRuleBuilder<TViewModel, string> rule) =>
+        rule
+            .Matches("^[a-z]+$")
+            .WithMessage("Letters only.");
+
     /// <summary>
     /// A view model holding one value of its own.
     /// </summary>
-    private sealed class EditedModel : ViewModelBase
+    private sealed class EditedViewModel : ViewModelBase
     {
         private string name;
 
-        public EditedModel(string name = "", Action<bool>? hasErrorsChanged = null)
+        public EditedViewModel(string name = "", Action<bool>? hasErrorsChanged = null)
         {
             this.name = name;
 
@@ -270,10 +276,7 @@ public class ViewModelBaseTests
 
             this.InitValidator(
                 this,
-                validator => validator
-                    .RuleFor(model => model.Name)
-                    .Matches("^[a-z]+$")
-                    .WithMessage("Letters only."));
+                validator => MustBeLetters(validator.RuleFor(static model => model.Name)));
         }
 
         public string Name
@@ -284,24 +287,21 @@ public class ViewModelBaseTests
     }
 
     /// <summary>
-    /// A view model asking for a value only while it is told to.
+    /// A view model validating <see cref="Name"/> only while <see cref="IsNameValidated"/> is set.
     /// </summary>
-    private sealed class ChainedModel : ViewModelBase
+    private sealed class ConditionalValidationViewModel : ViewModelBase
     {
-        public ChainedModel(bool isAsked = false)
+        public ConditionalValidationViewModel(bool isNameValidated = false)
         {
-            this.IsAsked = isAsked;
+            this.IsNameValidated = isNameValidated;
 
             this.InitValidator(
                 this,
-                validator => validator
-                    .RuleFor(static model => model.Name)
-                    .Matches("^[a-z]+$")
-                    .WithMessage("Letters only.")
-                    .When(static model => model.IsAsked));
+                validator => MustBeLetters(validator.RuleFor(static model => model.Name))
+                    .When(static model => model.IsNameValidated));
         }
 
-        public bool IsAsked
+        public bool IsNameValidated
         {
             get;
             set => this.SetProperty(ref field, value);
@@ -317,20 +317,17 @@ public class ViewModelBaseTests
     /// <summary>
     /// A view model that hands every value it takes on to somebody else.
     /// </summary>
-    private sealed class DispatchingModel : ViewModelBase
+    private sealed class DispatchingViewModel : ViewModelBase
     {
         private readonly Action<string> dispatch;
 
-        public DispatchingModel(Action<string> dispatch)
+        public DispatchingViewModel(Action<string> dispatch)
         {
             this.dispatch = dispatch;
 
             this.InitValidator(
                 this,
-                validator => validator
-                    .RuleFor(model => model.Name)
-                    .Matches("^[a-z]+$")
-                    .WithMessage("Letters only."));
+                validator => MustBeLetters(validator.RuleFor(static model => model.Name)));
         }
 
         public string Name

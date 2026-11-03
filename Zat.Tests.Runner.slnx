@@ -18,6 +18,7 @@
     <File Path="docs/TODO.md" />
   </Folder>
   <Folder Name="/Tests/">
+    <Project Path="Tests/NUnitTestAssembly.Common/NUnitTestAssembly.Common.csproj" />
     <Project Path="Tests/NUnitTestAssembly.Net461/NUnitTestAssembly.Net461.csproj" />
     <Project Path="Tests/NUnitTestAssembly.Net481/NUnitTestAssembly.Net481.csproj" />
     <Project Path="Tests/Zat.Tests.Runner.TuiApp.Tests/Zat.Tests.Runner.TuiApp.Tests.csproj" />

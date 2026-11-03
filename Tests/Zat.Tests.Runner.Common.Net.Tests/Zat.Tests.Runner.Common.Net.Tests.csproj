@@ -14,12 +14,16 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\NUnitTestAssembly.Common\NUnitTestAssembly.Common.csproj">
+			<ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+			<Private>false</Private>
+		</ProjectReference>
 		<ProjectReference Include="..\NUnitTestAssembly.Net481\NUnitTestAssembly.Net481.csproj">
-			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+			<ReferenceOutputAssembly>true</ReferenceOutputAssembly>
 			<Private>false</Private>
 		</ProjectReference>
 		<ProjectReference Include="..\NUnitTestAssembly.Net461\NUnitTestAssembly.Net461.csproj">
-			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+			<ReferenceOutputAssembly>true</ReferenceOutputAssembly>
 			<Private>false</Private>
 		</ProjectReference>
 	</ItemGroup>
