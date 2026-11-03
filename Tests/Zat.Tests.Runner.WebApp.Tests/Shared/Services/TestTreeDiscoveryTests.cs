@@ -37,7 +37,7 @@ public class TestTreeDiscoveryTests
         // Given:
         // Discovery failing must not take the application down with it: the user would lose the
         // log that says why, which is the only thing that makes the failure actionable.
-        this.GivenDiscoveryFails(new InvalidOperationException("no runner"));
+        this.SetUpDiscoveryFailure(new InvalidOperationException("no runner"));
 
         // When, Then:
         Assert.DoesNotThrowAsync(() => this.unit.StartAsync(CancellationToken.None));
@@ -48,7 +48,7 @@ public class TestTreeDiscoveryTests
     {
         // Given:
         var givenException = new InvalidOperationException("no runner");
-        this.GivenDiscoveryFails(givenException);
+        this.SetUpDiscoveryFailure(givenException);
 
         // When:
         await this.unit.StartAsync(CancellationToken.None);
@@ -64,7 +64,7 @@ public class TestTreeDiscoveryTests
             Times.Once);
     }
 
-    private void GivenDiscoveryFails(Exception exception)
+    private void SetUpDiscoveryFailure(Exception exception)
         => this.testTreeStoreMock
             .Setup(store => store.DiscoverAsync(It.IsAny<CancellationToken>()))
             .ThrowsAsync(exception);

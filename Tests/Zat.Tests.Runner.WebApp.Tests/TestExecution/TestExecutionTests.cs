@@ -77,7 +77,7 @@ public class TestExecutionTests : Bunit.TestContext
     public void Render__WhenNothingHasBeenClicked__ThenShouldOfferToStartRun()
     {
         // Given:
-        this.GivenARunnableConfiguration();
+        this.SetUpRunnableConfiguration();
 
         // When:
         var component =
@@ -91,7 +91,7 @@ public class TestExecutionTests : Bunit.TestContext
     public void OnTestRunStateChanged__WhenAnotherClientStartsTestRun__ThenShouldOfferToStopIt()
     {
         // Given:
-        this.GivenARunnableConfiguration();
+        this.SetUpRunnableConfiguration();
 
         var component =
             this.RenderComponent<TestExecutionComponent>();
@@ -115,7 +115,7 @@ public class TestExecutionTests : Bunit.TestContext
     public void OnConfigurationChanged__WhenConfigurationTurnsRunnable__ThenShouldLetRunStart()
     {
         // Given:
-        this.GivenSelectedTestCase();
+        this.SetUpSelectedTestCase();
         this.configuration = new TestConfigurationState { HasErrors = true };
 
         var component =
@@ -133,7 +133,7 @@ public class TestExecutionTests : Bunit.TestContext
     public void Render__WhenTestRunIsStopping__ThenShouldNotLetAnythingBeClicked()
     {
         // Given:
-        this.GivenARunnableConfiguration();
+        this.SetUpRunnableConfiguration();
         this.testRunState = TestRunState.Stopping;
 
         // When:
@@ -179,12 +179,12 @@ public class TestExecutionTests : Bunit.TestContext
     private static string? Reason(IRenderedComponent<TestExecutionComponent> component)
         => component.Find(ButtonSelector).GetAttribute("title");
 
-    private void GivenARunnableConfiguration()
+    private void SetUpRunnableConfiguration()
     {
         this.configuration = ConfigurationSaidToBeRunnable();
-        this.GivenSelectedTestCase();
+        this.SetUpSelectedTestCase();
     }
 
-    private void GivenSelectedTestCase()
+    private void SetUpSelectedTestCase()
         => this.testSelection = new TestDiscoveryState([GivenTestCasePath]);
 }

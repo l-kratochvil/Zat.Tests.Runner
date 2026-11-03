@@ -94,7 +94,7 @@ public class TestExecutionViewModelTests
         bool expectedCanExecute)
     {
         // Given:
-        this.GivenARunnableConfiguration();
+        this.SetUpRunnableConfiguration();
         this.testRunState = givenState;
 
         // When:
@@ -143,7 +143,7 @@ public class TestExecutionViewModelTests
         // What is wrong with it is not said here: the configurator is beside the button and says it
         // field by field.
         this.configuration.Value = new TestConfigurationState { HasErrors = true };
-        this.GivenSelectedTestCase();
+        this.SetUpSelectedTestCase();
 
         // When:
         var reasons = this.unit.ExecutionBlockingReasons;
@@ -160,7 +160,7 @@ public class TestExecutionViewModelTests
     public void ExecutionBlockingReasons__WhenSelectionAndConfigurationAreBothThere__ThenShouldBeEmpty()
     {
         // Given:
-        this.GivenARunnableConfiguration();
+        this.SetUpRunnableConfiguration();
 
         // When:
         var reasons = this.unit.ExecutionBlockingReasons;
@@ -228,7 +228,7 @@ public class TestExecutionViewModelTests
         // Given:
         // A selection remembered before the test assemblies changed may name a test that is gone,
         // and a run of nothing is not a run.
-        this.GivenARunnableConfiguration();
+        this.SetUpRunnableConfiguration();
 
         // When:
         this.testSelection.ChangeTo(new TestDiscoveryState(["Suite.Fixture.RemovedTest"]));
@@ -278,12 +278,12 @@ public class TestExecutionViewModelTests
         return announced;
     }
 
-    private void GivenARunnableConfiguration()
+    private void SetUpRunnableConfiguration()
     {
         this.configuration.Value = new TestConfigurationState { HasErrors = false };
-        this.GivenSelectedTestCase();
+        this.SetUpSelectedTestCase();
     }
 
-    private void GivenSelectedTestCase()
+    private void SetUpSelectedTestCase()
         => this.testSelection.Value = new TestDiscoveryState([GivenTestCasePath]);
 }

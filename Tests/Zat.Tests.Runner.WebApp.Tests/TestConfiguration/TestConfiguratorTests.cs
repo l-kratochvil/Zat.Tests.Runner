@@ -1,5 +1,7 @@
 namespace Zat.Tests.Runner.WebApp.Tests.TestConfiguration;
 
+using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 
 using Bunit;
@@ -49,6 +51,11 @@ public class TestConfiguratorTests : Bunit.TestContext
 
     private const string GivenTestCasePath = "Suite.Fixture.Test";
 
+    private const string GivenInstallFolderPath = @"C:\Ide";
+    private const string MovedInstallFolderPath = @"C:\Ide2";
+
+    private readonly MockFileSystem fileSystem = new();
+
     private TestDiscoveryState testSelection = new();
     private IReadOnlyList<TestSuiteEntity> loadedTestSuites = [];
 
@@ -70,12 +77,15 @@ public class TestConfiguratorTests : Bunit.TestContext
         this.appSettingsStore = new Mock<IAppSettingsStore>();
         this.appSettingsStore
             .SetupGet(store => store.Current)
-            .Returns(new AppSettingsState(@"C:\Ide"));
+            .Returns(new AppSettingsState(GivenInstallFolderPath));
+
+        this.GivenInstalledRuntimeVersions(GivenInstallFolderPath, "7", "6");
 
         this.Services.AddSingleton<IState<TestConfigurationState>>(this.store);
         this.Services.AddSingleton(this.testSelectionState.Object);
         this.Services.AddSingleton(testTreeStore.Object);
         this.Services.AddSingleton(this.appSettingsStore.Object);
+        this.Services.AddSingleton<IFileSystem>(this.fileSystem);
         this.Services.AddSingleton(this.store.Dispatcher.Object);
         this.Services.AddSingleton(new Mock<IActionSubscriber>().Object);
         this.Services.InitLoggingAsApp();
@@ -103,7 +113,7 @@ public class TestConfiguratorTests : Bunit.TestContext
         // Given:
         // Only a runtime test runs against hardware, so for anything else the field is not shown at
         // all rather than shown and ignored.
-        this.GivenSelectedTestCase(TestType.Application);
+        this.SetUpSelectedTestCase(TestType.Application);
 
         // When:
         var component = this.RenderConfigurator();
@@ -116,7 +126,7 @@ public class TestConfiguratorTests : Bunit.TestContext
     public void Render__WhenRuntimeTestIsSelected__ThenShouldAskForTestStation()
     {
         // Given:
-        this.GivenSelectedTestCase(TestType.Runtime);
+        this.SetUpSelectedTestCase(TestType.Runtime);
 
         // When:
         var component = this.RenderConfigurator();
@@ -235,7 +245,8 @@ public class TestConfiguratorTests : Bunit.TestContext
         var component = this.RenderConfigurator();
 
         // When:
-        this.RaiseAppSettingsChanged(component);
+        this.GivenInstalledRuntimeVersions(MovedInstallFolderPath, "9");
+        this.RaiseAppSettingsChanged(component, MovedInstallFolderPath);
 
         // Then:
         Assert.That(
@@ -255,7 +266,8 @@ public class TestConfiguratorTests : Bunit.TestContext
         var component = this.RenderConfigurator();
 
         // When:
-        this.RaiseAppSettingsChanged(component);
+        this.GivenInstalledRuntimeVersions(MovedInstallFolderPath, "9");
+        this.RaiseAppSettingsChanged(component, MovedInstallFolderPath);
 
         // Then:
         this.store.Dispatcher.Verify(
@@ -273,7 +285,8 @@ public class TestConfiguratorTests : Bunit.TestContext
         var component = this.RenderConfigurator();
 
         // When:
-        this.RaiseAppSettingsChanged(component);
+        this.GivenInstalledRuntimeVersions(MovedInstallFolderPath, "6");
+        this.RaiseAppSettingsChanged(component, MovedInstallFolderPath);
 
         // Then:
         this.store.Dispatcher.Verify(
@@ -323,7 +336,7 @@ public class TestConfiguratorTests : Bunit.TestContext
         this.store.Dispatcher.Invocations.Clear();
 
         // When:
-        this.GivenSelectedTestCase(TestType.Runtime);
+        this.SetUpSelectedTestCase(TestType.Runtime);
         this.RaiseTestSelectionChanged(component);
 
         // Then:
@@ -335,11 +348,23 @@ public class TestConfiguratorTests : Bunit.TestContext
 
     // The settings are one instance shared by everyone connected, so they announce a change on the
     // thread of whoever made it rather than on this circuit's.
-    private void RaiseAppSettingsChanged(IRenderedComponent<TestConfigurationComponent> component)
+    private void RaiseAppSettingsChanged(
+        IRenderedComponent<TestConfigurationComponent> component,
+        string newInstallFolderPath)
     {
-        this.appSettingsStore.Raise(store => store.Changed += null);
+        var settings = new AppSettingsState(newInstallFolderPath);
+        this.appSettingsStore.SetupGet(store => store.Current).Returns(settings);
+        this.appSettingsStore.Raise(store => store.Changed += null, settings);
 
         component.WaitForState(() => true);
+    }
+
+    private void GivenInstalledRuntimeVersions(string installFolderPath, params string[] versions)
+    {
+        foreach (var version in versions)
+        {
+            this.fileSystem.AddDirectory(this.fileSystem.Path.Combine(installFolderPath, version));
+        }
     }
 
     private void RaiseTestSelectionChanged(IRenderedComponent<TestConfigurationComponent> component)
@@ -349,7 +374,7 @@ public class TestConfiguratorTests : Bunit.TestContext
         component.WaitForState(() => true);
     }
 
-    private void GivenSelectedTestCase(TestType testType)
+    private void SetUpSelectedTestCase(TestType testType)
     {
         this.loadedTestSuites = [TestSuites.WithOneTestCase(testType, GivenTestCasePath)];
         this.testSelection = new TestDiscoveryState([GivenTestCasePath]);

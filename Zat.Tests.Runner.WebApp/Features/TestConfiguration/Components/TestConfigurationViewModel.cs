@@ -1,14 +1,18 @@
 namespace Zat.Tests.Runner.WebApp.Features.TestConfiguration.Components;
 
 using System.Globalization;
+using System.IO.Abstractions;
 using System.Text.RegularExpressions;
 
 using FluentValidation;
 
 using Fluxor;
 
+using Zat.Tests.Runner.Common.Model;
+using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.WebApp.Shared.Stores.AppSettings;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
+using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
 using Zat.Tests.Runner.WebApp.Shared.ViewModel;
 
 using Zat.Z2xxTests.Common.Model;
@@ -23,6 +27,9 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
     private const string DateFormat = "d.M.yyyy";
 
     private readonly IAppSettingsStore appSettingsStore;
+    private readonly IFileSystem fileSystem;
+    private readonly IState<TestDiscoveryState> testSelectionState;
+    private readonly ITestTreeStore testTreeStore;
     private readonly ILogger logger;
     private readonly IDispatcher dispatcher;
     private readonly StateBinder<TestConfigurationViewModel, TestConfigurationState> stateBinder;
@@ -30,28 +37,47 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
     public TestConfigurationViewModel(
         IState<TestConfigurationState> state,
         IAppSettingsStore appSettingsStore,
+        IFileSystem fileSystem,
+        IState<TestDiscoveryState> testSelectionState,
+        ITestTreeStore testTreeStore,
         ILogger logger,
         IDispatcher dispatcher)
     {
         this.appSettingsStore = appSettingsStore;
+        this.fileSystem = fileSystem;
+        this.testSelectionState = testSelectionState;
+        this.testTreeStore = testTreeStore;
         this.logger = logger;
         this.dispatcher = dispatcher;
 
         this.stateBinder = new StateBinder<TestConfigurationViewModel, TestConfigurationState>(this, state);
+
+        this.RuntimeVersions = this.ReadRuntimeVersions(this.appSettingsStore.Current.IdeInstallFolderPath);
 
         this.HasErrorsChanged +=
             hasErrors => this.dispatcher.Dispatch(
                 new StatusChangedAction(
                     NewHasErrors: new ValueChange<bool>(hasErrors)));
 
+        this.appSettingsStore.Changed += this.OnAppSettingsChanged;
+        this.testSelectionState.StateChanged += this.OnTestSelectionChanged;
+
         this.InitValidator();
     }
 
-    // TODO: Determine based on selected test entities
-    public bool IsRuntimeTest { get; private set; }
+    /// <summary>
+    /// Gets a value indicating whether a runtime test is selected, which is what runs against a
+    /// test station and so needs one chosen.
+    /// </summary>
+    public bool IsRuntimeTest
+        => this.testSelectionState.Value
+            .GetSelectedTestCasesFromTestSuites(this.testTreeStore.TestSuites)
+            .Any(static testCase => testCase.TestType == TestType.Runtime);
 
-    public IReadOnlyList<string> RuntimeVersions
-        => field ??= this.InitRuntimeVersions();
+    /// <summary>
+    /// Gets the runtime versions installed in the IDE install folder, newest first.
+    /// </summary>
+    public IReadOnlyList<string> RuntimeVersions { get; private set; }
 
     public string? RuntimeVersion
     {
@@ -172,10 +198,32 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
 
     /// <inheritdoc/>
     public void Dispose()
-        => this.stateBinder.Dispose();
+    {
+        this.appSettingsStore.Changed -= this.OnAppSettingsChanged;
+        this.testSelectionState.StateChanged -= this.OnTestSelectionChanged;
+        this.stateBinder.Dispose();
+    }
 
     [GeneratedRegex(@"^\d+")]
     private static partial Regex LeadingNumber();
+
+    /// <summary>
+    /// Puts the folder names found in the install folder in the order they are offered in: newest
+    /// first, leaving out anything that is not a version.
+    /// </summary>
+    private static IReadOnlyList<string> OrderRuntimeVersions(IEnumerable<string> folderNames)
+        =>
+        [
+            ..folderNames
+                .Where(static name => !string.IsNullOrEmpty(name) && LeadingNumber().IsMatch(name))
+                .OrderBy(static name => int.TryParse(name, out var parsed) ? parsed : char.MaxValue)
+                .ThenBy(static name =>
+                    int.TryParse(LeadingNumber().Match(name).Value, out var parsed)
+                        ? parsed
+                        : char.MaxValue)
+                .ThenBy(static name => name, StringComparer.Ordinal)
+                .Reverse()
+        ];
 
     private static bool IsDateOrEmpty(string? text)
         => string.IsNullOrEmpty(text)
@@ -235,18 +283,16 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
                     .WithMessage("Write the beta number as a whole number, for example 3.");
             });
 
-    private IReadOnlyList<string> InitRuntimeVersions()
+    private IReadOnlyList<string> ReadRuntimeVersions(string installFolderPath)
     {
-        var installFolderPath = this.appSettingsStore.Current.IdeInstallFolderPath;
-
         IReadOnlyList<string> folderNames;
         try
         {
             folderNames =
             [
-                ..Directory
+                ..this.fileSystem.Directory
                     .GetDirectories(installFolderPath)
-                    .Select(Path.GetFileName)
+                    .Select(this.fileSystem.Path.GetFileName)
                     .OfType<string>()
             ];
         }
@@ -262,17 +308,24 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
             return [];
         }
 
-        return
-        [
-            ..folderNames
-                .Where(static name => !string.IsNullOrEmpty(name) && LeadingNumber().IsMatch(name))
-                .OrderBy(static name => int.TryParse(name, out var parsed) ? parsed : char.MaxValue)
-                .ThenBy(static name =>
-                    int.TryParse(LeadingNumber().Match(name).Value, out var parsed)
-                        ? parsed
-                        : char.MaxValue)
-                .ThenBy(static name => name, StringComparer.Ordinal)
-                .Reverse()
-        ];
+        return OrderRuntimeVersions(folderNames);
     }
+
+    // The settings are shared by every circuit, so this runs on the thread of whoever changed them.
+    private void OnAppSettingsChanged(AppSettingsState settings)
+    {
+        this.RuntimeVersions = this.ReadRuntimeVersions(settings.IdeInstallFolderPath);
+        this.OnPropertyChanged(nameof(this.RuntimeVersions));
+
+        // A version left behind by the old install folder would let a test run start against an
+        // installation that is not on the machine, while the combo box shows nothing chosen.
+        if (this.RuntimeVersion is not null
+            && !this.RuntimeVersions.Contains(this.RuntimeVersion, StringComparer.Ordinal))
+        {
+            this.RuntimeVersion = null;
+        }
+    }
+
+    private void OnTestSelectionChanged(object? sender, EventArgs e)
+        => this.OnPropertyChanged(nameof(this.IsRuntimeTest));
 }

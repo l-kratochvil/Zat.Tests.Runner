@@ -67,7 +67,7 @@ public class TestTreeStoreTests
     public async Task DiscoverAsync__WhenTestAssemblyIsRead__ThenShouldHoldItsTestSuites()
     {
         // Given:
-        var testSuites = this.GivenTestAssemblyHolds("A");
+        var testSuites = this.SetUpTestAssemblyHolding("A");
 
         // When:
         await this.unit.DiscoverAsync();
@@ -81,7 +81,7 @@ public class TestTreeStoreTests
     {
         // Given:
         // Nothing may keep the proxy server running once discovery is done.
-        this.GivenTestAssemblyHolds("A");
+        this.SetUpTestAssemblyHolding("A");
 
         // When:
         await this.unit.DiscoverAsync();
@@ -94,9 +94,9 @@ public class TestTreeStoreTests
     public async Task OnTestAssemblyChanged__WhenQuietPeriodPasses__ThenShouldDiscoverTestTreeAgain()
     {
         // Given:
-        this.GivenTestAssemblyHolds("A");
+        this.SetUpTestAssemblyHolding("A");
         await this.unit.DiscoverAsync();
-        var changedTestSuites = this.GivenTestAssemblyHolds("A", "B");
+        var changedTestSuites = this.SetUpTestAssemblyHolding("A", "B");
 
         // When:
         this.directoryWatcher.Change();
@@ -117,7 +117,7 @@ public class TestTreeStoreTests
     public async Task OnTestAssemblyChanged__WhenItChangesAgainWithinQuietPeriod__ThenShouldWaitForQuietPeriodToPassAgain()
     {
         // Given:
-        this.GivenTestAssemblyHolds("A");
+        this.SetUpTestAssemblyHolding("A");
         await this.unit.DiscoverAsync();
 
         // When:
@@ -140,9 +140,9 @@ public class TestTreeStoreTests
     public async Task OnTestAssemblyChanged__WhenTestAssemblyHoldsSameTestEntities__ThenShouldSayExecutionPathsDidNotChange()
     {
         // Given:
-        this.GivenTestAssemblyHolds("A");
+        this.SetUpTestAssemblyHolding("A");
         await this.unit.DiscoverAsync();
-        var sameTestSuites = this.GivenTestAssemblyHolds("A");
+        var sameTestSuites = this.SetUpTestAssemblyHolding("A");
 
         // When:
         this.directoryWatcher.Change();
@@ -158,7 +158,7 @@ public class TestTreeStoreTests
     public async Task OnTestAssemblyChanged__WhenTestAssemblyCannotBeRead__ThenShouldHoldNoTestSuites()
     {
         // Given:
-        this.GivenTestAssemblyHolds("A");
+        this.SetUpTestAssemblyHolding("A");
         await this.unit.DiscoverAsync();
         this.proxyMock
             .Setup(x => x.LoadTestAssemblyAsync(TestAssemblyDllPath, It.IsAny<CancellationToken>()))
@@ -177,12 +177,19 @@ public class TestTreeStoreTests
         }
     }
 
-    private static TestSuiteEntity[] TestTree(params string[] testCaseNames)
-        =>
-        [
-            new(
+    private TestSuiteEntity[] SetUpTestAssemblyHolding(params string[] testCaseNames)
+    {
+        TestSuiteEntity[] testSuites = [CreateTestSuiteEntity(testCaseNames)];
+        this.proxyMock
+            .Setup(x => x.LoadTestAssemblyAsync(TestAssemblyDllPath, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(testSuites);
+
+        return testSuites;
+
+        static TestSuiteEntity CreateTestSuiteEntity(params string[] testCaseNames)
+            => new(
                 [
-                    new(
+                    new TestFixtureEntity(
                         [.. testCaseNames.Select(name => new TestCaseEntity(
                             TestType.Application,
                             id: name,
@@ -194,17 +201,7 @@ public class TestTreeStoreTests
                 ],
                 TestType.Application,
                 name: "Suite",
-                executionPath: "Suite"),
-        ];
-
-    private TestSuiteEntity[] GivenTestAssemblyHolds(params string[] testCaseNames)
-    {
-        var testSuites = TestTree(testCaseNames);
-        this.proxyMock
-            .Setup(x => x.LoadTestAssemblyAsync(TestAssemblyDllPath, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(testSuites);
-
-        return testSuites;
+                executionPath: "Suite");
     }
 
     private sealed class FakeDirectoryWatcher : IDirectoryWatcher

@@ -19,7 +19,7 @@ public static class TestDiscoveryStateExtensions
     /// <param name="state">The test selection.</param>
     /// <param name="testSuites">Test suites the selected test cases are looked up in.</param>
     /// <returns>The selected test cases, in the order of <paramref name="testSuites"/>.</returns>
-    public static IReadOnlyList<TestCaseEntity> SelectedTestCases(
+    public static IReadOnlyList<TestCaseEntity> GetSelectedTestCasesFromTestSuites(
         this TestDiscoveryState state,
         IEnumerable<TestSuiteEntity> testSuites)
     {

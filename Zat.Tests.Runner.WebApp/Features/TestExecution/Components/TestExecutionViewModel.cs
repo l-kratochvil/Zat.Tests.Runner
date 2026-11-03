@@ -169,7 +169,7 @@ public sealed partial class TestExecutionViewModel : ViewModelBase, IDisposable
     }
 
     private IReadOnlyList<TestCaseEntity> SelectedTestCases()
-        => this.testSelectionState.Value.SelectedTestCases(this.testTreeStore.TestSuites);
+        => this.testSelectionState.Value.GetSelectedTestCasesFromTestSuites(this.testTreeStore.TestSuites);
 
     private IEnumerable<string> GetExecutionBlockingReasons()
     {

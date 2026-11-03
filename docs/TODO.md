@@ -3,21 +3,23 @@
 ## HiPrio
 
 - Dokončit vazbu na TestLink
-- Zautomatizování kroků testera - základní
-- Otestovat bridge mezi runnerem a Z2xxTests
+- Zautomatizování kroků testera - základní (VIZ DETAILY!)
 - Před testem kontrolovat spojení se stanicemi: Viz legacy runner RunTest (TestEnvironmentUtils.CheckTestStationsConnection)
 - TuiApp:
   - Implementovat výpis při startu testu (viz [test-run-start_output](test-run-start_output.png))
   - Z2xxTests: Odstranit legacy runner (uchovat v historii ve vlastním commitu na main)
-- Nechat opravit testy (spousta jich neprochází)
+  - Pro práci s filesystém používat službu IFileSystem (viz WebApp TestConfigurationViewModel)
+  - Sdílet logiku pro získávání verzí nainstalovaných runtime s WebApp TestConfigurationViewModel
 - WebApp:
   - Rework BindingSelect
   - Vylepšit pojmenování pro "fluxor stores" a "stores StoreBase": Obojí fungujou jinak, ale zároveň obojí je store
-  - TestConfiguration: Musí umožnovat vybrat vícero (comobobox) HwAssemblyType (TestedHwAssemblyType umožňuje pouze jeden. Musí se hlídat navolené možnosti stejně jako u TuiApp (nesmí být navoleno zároven BB1M a BB37M)
+  - TestConfiguration: Musí umožnovat vybrat vícero (comobobox) HwAssemblyType 
+  (TestedHwAssemblyType umožňuje pouze jeden. Musí se hlídat navolené možnosti stejně jako u TuiApp (nesmí být navoleno zároven BB1M a BB37M)
   - Vyřešit Deploy
   - Kompletní code-review + refactor celé projektu WebApp (včetně testů) a docs
   - Lokalizace textů
 - Po dokončení merge develop -> main (sumární commit)
+- Zrušit fluxor a zaměnit za WeakReferenceMessanger??
 - Vyřešit code todos
 
 ## MidPrio

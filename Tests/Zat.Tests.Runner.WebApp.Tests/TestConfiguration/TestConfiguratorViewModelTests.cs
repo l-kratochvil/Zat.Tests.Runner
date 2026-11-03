@@ -1,5 +1,9 @@
 namespace Zat.Tests.Runner.WebApp.Tests.TestConfiguration;
 
+using System.IO.Abstractions.TestingHelpers;
+
+using Fluxor;
+
 using Microsoft.Extensions.Logging;
 
 using Moq;
@@ -7,9 +11,11 @@ using Moq;
 using NUnit.Framework;
 
 using Zat.Tests.Runner.Common.Net.Application.Logging;
+using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.WebApp.Features.TestConfiguration.Components;
 using Zat.Tests.Runner.WebApp.Shared.Stores.AppSettings;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
+using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
 using Zat.Tests.Runner.WebApp.Shared.Validation;
 using Zat.Z2xxTests.Common.Model;
 
@@ -26,9 +32,21 @@ public class TestConfiguratorViewModelTests
         // is being typed, so a stand-in would leave the interesting part untested.
         this.store = new TestConfigurationStoreFake();
 
+        var appSettingsStore = new Mock<IAppSettingsStore>();
+        appSettingsStore.SetupGet(store => store.Current).Returns(new AppSettingsState(@"C:\Ide"));
+
+        var testSelectionState = new Mock<IState<TestDiscoveryState>>();
+        testSelectionState.SetupGet(state => state.Value).Returns(new TestDiscoveryState());
+
+        var testTreeStore = new Mock<ITestTreeStore>();
+        testTreeStore.SetupGet(store => store.TestSuites).Returns([]);
+
         this.unit = new TestConfigurationViewModel(
             this.store,
-            new Mock<IAppSettingsStore>().Object,
+            appSettingsStore.Object,
+            new MockFileSystem(),
+            testSelectionState.Object,
+            testTreeStore.Object,
             new Mock<ILogger>().Object,
             this.store.Dispatcher.Object);
     }

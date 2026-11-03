@@ -25,7 +25,7 @@ public class TestDiscoveryStateExtensionsTests
         var givenState = new TestDiscoveryState(givenPaths);
 
         // When:
-        var testCases = givenState.SelectedTestCases([CreateTestSuite()]);
+        var testCases = givenState.GetSelectedTestCasesFromTestSuites([CreateTestSuite()]);
 
         // Then:
         Assert.That(testCases.Select(testCase => testCase.ExecutionPath), Is.EqualTo(expectedPaths));

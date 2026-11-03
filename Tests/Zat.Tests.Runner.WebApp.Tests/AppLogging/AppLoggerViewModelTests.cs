@@ -41,7 +41,7 @@ public class AppLoggerViewModelTests
         // Given:
         // The count stands in for the log while the panel is collapsed, so hiding errors from the
         // list must not hide them from the count.
-        this.GivenLog(
+        this.SetUpLog(
             CreateEntry(LogLevel.Error),
             CreateEntry(LogLevel.Warning),
             CreateEntry(LogLevel.Error));
@@ -59,7 +59,7 @@ public class AppLoggerViewModelTests
     {
         // Given:
         var expected = CreateEntry(LogLevel.Warning);
-        this.GivenLog(CreateEntry(LogLevel.Information), expected);
+        this.SetUpLog(CreateEntry(LogLevel.Information), expected);
 
         // When:
         this.unit.SetSelected(LogLevel.Information, selected: false);
@@ -136,12 +136,12 @@ public class AppLoggerViewModelTests
             LogLevel: logLevel,
             Message: logLevel.ToString());
 
-    private void GivenLog(params LogEntry[] entries)
+    private void SetUpLog(params LogEntry[] entries)
         => this.log = new AppLoggingState { Entries = entries };
 
     private void ChangeLog(params LogEntry[] entries)
     {
-        this.GivenLog(entries);
+        this.SetUpLog(entries);
         this.state.Raise(state => state.StateChanged += null, EventArgs.Empty);
     }
 

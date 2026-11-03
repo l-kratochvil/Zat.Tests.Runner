@@ -1,6 +1,7 @@
 namespace Zat.Tests.Runner.Common.Net.Application.DependencyInjection;
 
 using System.Diagnostics;
+using System.IO.Abstractions;
 
 using CommunityToolkit.Mvvm.Messaging;
 
@@ -47,6 +48,7 @@ public static class InitSharedServicesExtensions
                 .AddSingleton(_ => ITestLink.Config.Default)
                 .AddSingleton<ITestRunnerEngine, TestRunnerEngine>()
                 .AddSingleton(TimeProvider.System)
+                .AddSingleton<IFileSystem, FileSystem>()
                 .AddSingleton<IDirectoryWatcher, FileSystemDirectoryWatcher>()
                 .AddSingleton<ITestTreeStore, TestTreeStore>();
 
