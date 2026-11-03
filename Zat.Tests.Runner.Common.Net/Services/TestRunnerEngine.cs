@@ -21,7 +21,8 @@ public class TestRunnerEngine(
     ITestRunnerBridgeConnector testRunnerBridgeConnector,
     INUnitTestRunnerProxyConnector nunitTestRunnerProxyConnector,
     ILogger<LogSources.TestRun> logger,
-    ILogger<LogSources.App> appLogger)
+    ILogger<LogSources.App> appLogger,
+    TimeProvider timeProvider)
     : ITestRunnerEngine
 {
     /// <summary>
@@ -278,6 +279,7 @@ public class TestRunnerEngine(
         await using var connection = testRunnerBridgeConnector.Connect(subRun.TestConfig);
 
         ProxyTestResult proxyTestResult;
+        var startTime = timeProvider.GetUtcNow();
         try
         {
             proxyTestResult = await WaitUnlessAbandonedAsync(
@@ -289,7 +291,13 @@ public class TestRunnerEngine(
             return null;
         }
 
-        var testRunResult = new TestResult(proxyTestResult, subRun.TestType, subRun.TestConfig.TestedHwAssemblyType);
+        var endTime = timeProvider.GetUtcNow();
+        var testRunResult = new TestResult(
+            proxyTestResult,
+            subRun.TestType,
+            startTime,
+            endTime,
+            subRun.TestConfig.TestedHwAssemblyType);
 
         // A sub-run cut short by a stop holds test cases that never ran, so it is not reported as their outcome.
         if (cancellationToken.IsCancellationRequested)

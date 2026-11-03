@@ -1,3 +1,15 @@
+.sub-run-report + .sub-run-report {
+  border-top: 1px solid #dee2e6;
+  margin-top: 1rem;
+  padding-top: 0.25rem;
+}
+
+.sub-run-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-top: 1rem;
+}
+
 .result-section-title {
   font-size: 0.875rem;
   font-weight: 600;

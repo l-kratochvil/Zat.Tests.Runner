@@ -122,7 +122,9 @@ public class TestLinkResultHandlerTests
                     "Suite",
                     TestStatus.Passed),
             ]),
-            TestType.Application);
+            TestType.Application,
+            DateTimeOffset.UtcNow,
+            DateTimeOffset.UtcNow);
 
     private string CreateFile(string fileName)
     {

@@ -1,47 +1,97 @@
 @* Feature: TestResultReporting — "the user can view the result of a test run". *@
 
+@inherits Zat.Tests.Runner.WebApp.Components.MvvmComponentBase<TestResultViewModel>
+
 <section class="test-result-panel">
     <h2 class="pane-title">Test Result</h2>
 
-    <p class="placeholder-note">
-        Placeholder — the result of the last test run will be shown here
-        (the sections below sketch what it is made of).
-    </p>
+    @if (this.ViewModel.SubRunReports.Count == 0)
+    {
+        <p class="placeholder-note">
+            The result of the last test run will be shown here.
+        </p>
+    }
+    else
+    {
+        @foreach (var report in this.ViewModel.SubRunReports)
+        {
+            <article class="sub-run-report">
+                <h3 class="sub-run-title">@report.Title</h3>
 
-    <h3 class="result-section-title">Tests Not Run</h3>
-    <ol class="result-entries">
-        <li>
-            <span class="entry-label label-skipped">Ignored</span>
-            <span class="entry-name">Z2xxTests.Pertinax6Tests.ProjectManagerTestsuite_BasicFunctions.Z200-901</span>
-            <pre class="entry-detail">REASON</pre>
-        </li>
-    </ol>
+                @if (report.NotRunEntries.Count > 0)
+                {
+                    <h4 class="result-section-title">Tests Not Run</h4>
+                    <ol class="result-entries">
+                        @foreach (var entry in report.NotRunEntries)
+                        {
+                            <li>
+                                <span class="entry-label @entry.LabelClass">@entry.Label</span>
+                                <span class="entry-name">@entry.Name</span>
+                                @if (!string.IsNullOrEmpty(entry.Detail))
+                                {
+                                    <pre class="entry-detail">@entry.Detail</pre>
+                                }
+                            </li>
+                        }
+                    </ol>
+                }
 
-    <h3 class="result-section-title">Errors, Failures and Warnings</h3>
-    <ol class="result-entries">
-        <li>
-            <span class="entry-label label-problem">Error</span>
-            <span class="entry-name">Z2xxTests.Pertinax6Tests.ProjectManagerTestsuite_BasicFunctions.Z200-902</span>
-            <pre class="entry-detail">System.Exception : TEST
-   at Z2xxTests.Pertinax6Tests.ProjectManagerTestsuite_BasicFunctions.TEMP03() in C:\Users\l-kratochvil\source\repos\Zat.Tests\Z2xxTests\Pertinax6Tests\ProjectManagerTests\ProjectManagerTestsuite_BasicFunctions.cs:line 85</pre>
-        </li>
-    </ol>
+                @if (report.ProblemEntries.Count > 0)
+                {
+                    <h4 class="result-section-title">Errors, Failures and Warnings</h4>
+                    <ol class="result-entries">
+                        @foreach (var entry in report.ProblemEntries)
+                        {
+                            <li>
+                                <span class="entry-label @entry.LabelClass">@entry.Label</span>
+                                <span class="entry-name">@entry.Name</span>
+                                @if (!string.IsNullOrEmpty(entry.Detail))
+                                {
+                                    <pre class="entry-detail">@entry.Detail</pre>
+                                }
+                            </li>
+                        }
+                    </ol>
+                }
 
-    <h3 class="result-section-title">Test Run Summary</h3>
-    <dl class="result-summary">
-        <dt>Overall result</dt>
-        <dd>—</dd>
-        <dt>Test count</dt>
-        <dd>— (passed —, failed —, warnings —, inconclusive —, skipped —)</dd>
-        <dt>Failed tests</dt>
-        <dd>failures —, errors —, invalid —</dd>
-        <dt>Skipped tests</dt>
-        <dd>ignored —, explicit —, other —</dd>
-        <dt>Start time</dt>
-        <dd>—</dd>
-        <dt>End time</dt>
-        <dd>—</dd>
-        <dt>Duration</dt>
-        <dd>—</dd>
-    </dl>
+                <h4 class="result-section-title">Test Run Summary</h4>
+                <dl class="result-summary">
+                    <dt>Overall result</dt>
+                    <dd>@report.OverallStatus</dd>
+                    <dt>Test count</dt>
+                    <dd>
+                        @report.Result.TestCaseResults.Length
+                        (passed @report.Result.PassedResults.Length,
+                        failed @report.Result.FailedResults.Length,
+                        warnings @report.Result.WarningResults.Length,
+                        inconclusive @report.Result.InconclusiveResults.Length,
+                        skipped @report.Result.NotRunResults.Length)
+                    </dd>
+                    <dt>Failed tests</dt>
+                    <dd>
+                        failures @report.Result.FailureResults.Length,
+                        errors @report.Result.ErrorResults.Length,
+                        invalid @report.Result.InvalidResults.Length
+                    </dd>
+                    <dt>Skipped tests</dt>
+                    <dd>
+                        ignored @report.Result.IgnoredResults.Length,
+                        explicit @report.Result.ExplicitResults.Length,
+                        other @report.Result.OtherNotRunResults.Length
+                    </dd>
+                    <dt>Start time</dt>
+                    <dd>@report.Result.StartTime.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss'Z'")</dd>
+                    <dt>End time</dt>
+                    <dd>@report.Result.EndTime.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss'Z'")</dd>
+                    <dt>Duration</dt>
+                    <dd>@report.Result.Duration.TotalSeconds.ToString("F3", System.Globalization.CultureInfo.InvariantCulture) s</dd>
+                </dl>
+            </article>
+        }
+    }
 </section>
+
+@code {
+    [Inject]
+    protected override TestResultViewModel ViewModel { get; set; } = null!;
+}

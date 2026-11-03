@@ -11,10 +11,11 @@
   - Pro práci s filesystém používat službu IFileSystem (viz WebApp TestConfigurationViewModel)
   - Sdílet logiku pro získávání verzí nainstalovaných runtime s WebApp TestConfigurationViewModel
 - WebApp:
+  - Implementovat issue #14: jsou již vytvořené tickety, stačí použít /implement-spec
   - Rework BindingSelect
   - Vylepšit pojmenování pro "fluxor stores" a "stores StoreBase": Obojí fungujou jinak, ale zároveň obojí je store
-  - TestConfiguration: Musí umožnovat vybrat vícero (comobobox) HwAssemblyType 
-  (TestedHwAssemblyType umožňuje pouze jeden. Musí se hlídat navolené možnosti stejně jako u TuiApp (nesmí být navoleno zároven BB1M a BB37M)
+  - TestConfiguration: Musí umožnovat vybrat vícero (comobobox) HwAssemblyType
+    (TestedHwAssemblyType umožňuje pouze jeden. Musí se hlídat navolené možnosti stejně jako u TuiApp (nesmí být navoleno zároven BB1M a BB37M)
   - Vyřešit Deploy
   - Kompletní code-review + refactor celé projektu WebApp (včetně testů) a docs
   - Lokalizace textů

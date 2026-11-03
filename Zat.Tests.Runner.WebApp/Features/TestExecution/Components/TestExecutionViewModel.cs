@@ -18,8 +18,9 @@ using Zat.Tests.Runner.WebApp.Shared.ViewModel;
 /// The test run as the tester controls it: what can be done with it now, and what keeps a new one
 /// from starting.
 /// </summary>
-public sealed partial class TestExecutionViewModel : ViewModelBase, IDisposable
+public sealed class TestExecutionViewModel : ViewModelBase, IDisposable
 {
+    // TODO: Localize texts
     internal const string StartLabel = "Start";
     internal const string StopLabel = "Stop";
     internal const string StoppingLabel = "Stopping …";
@@ -132,22 +133,15 @@ public sealed partial class TestExecutionViewModel : ViewModelBase, IDisposable
     }
 
     private async Task StartTestRunAsync()
-    {
-
-        await this.testRunnerEngine.RunTestAsync(
+        => await this.testRunnerEngine.RunTestAsync(
             testRunEntities: this.SelectedTestCases(),
             config: new ITestRunnerEngine.Config(
                 IsDebug: this.configurationState.Value.IsDebugModeEnabled,
                 TestedRuntimeVersion: this.configurationState.Value.RuntimeVersion,
-                TestedHwAssemblyTypes: [this.configurationState.Value.TestedHwAssembly ?? Z2xxTests.Common.Model.HwAssemblyType.Unknown], 
+                TestedHwAssemblyTypes: [this.configurationState.Value.TestedHwAssembly ?? Z2xxTests.Common.Model.HwAssemblyType.Unknown],
                 TestResultHandlers: this.testResultHandlers,
                 TestAssemblyDllPath: this.appPathsProvider.Files.MainAssemblyDll),
             cancellationToken: CancellationToken.None);
-
-        // TODO: Report result:
-        // - The report feature should handle testlink reporting and showing it in the UI
-        // - Maybe it uses fluxor Effect?
-    }
 
     private void OnTestRunnerEngineStateChanged(TestRunState state)
     {

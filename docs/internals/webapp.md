@@ -55,8 +55,9 @@ disposes it, following the pattern in the
 
 Some of a circuit's work has to start before any component asks for it. For example, the log is
 written outside of any circuit and has to reach the store of every circuit. `CircuitInitializer`
-starts such work as the circuit opens. Prerendering runs in a scope of its own, which it does not
-reach.
+starts such work as the circuit opens, including forwarding completed sub-run results from the
+global messenger to each circuit's unpersisted result store. Prerendering runs in a scope of its
+own, which it does not reach.
 
 ## The browser bridge
 

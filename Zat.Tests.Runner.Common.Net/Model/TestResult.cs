@@ -4,14 +4,18 @@ using Zat.Tests.Runner.Common.Model;
 using Zat.Z2xxTests.Common.Model;
 
 /// <summary>
-/// The test result of one test run. Per-status collections are computed over the test cases of all test fixtures.
+/// The test result of one sub-run, including its recorded timing and the shared selection of reportable entities.
 /// </summary>
 /// <param name="ProxyTestResult">The test result obtained from the proxy.</param>
 /// <param name="TestType">The type of the executed tests.</param>
+/// <param name="StartTime">When the sub-run started.</param>
+/// <param name="EndTime">When the sub-run ended.</param>
 /// <param name="TestedHwAssemblyType">The tested HW assembly type, required for runtime tests.</param>
 public record TestResult(
     ProxyTestResult ProxyTestResult,
     TestType TestType,
+    DateTimeOffset StartTime,
+    DateTimeOffset EndTime,
     HwAssemblyType? TestedHwAssemblyType = null)
     : ProxyTestResult(ProxyTestResult)
 {
@@ -45,6 +49,12 @@ public record TestResult(
     /// </summary>
     public TestStatus OverallStatus
         => this.overallStatus ??= this.GetOverallStatus();
+
+    /// <summary>
+    /// Gets the duration of the sub-run.
+    /// </summary>
+    public TimeSpan Duration
+        => this.EndTime - this.StartTime;
 
     /// <summary>
     /// Gets the test fixture results of all test suites.
@@ -123,7 +133,7 @@ public record TestResult(
     /// or <see cref="TestStatus.Invalid"/>.
     /// </summary>
     public TestCaseResult[] FailedResults
-        => field ??= [..this.TestCaseResults.Where(x => x.Failed)];
+        => field ??= [.. this.TestCaseResults.Where(x => x.Failed)];
 
     /// <summary>
     /// Gets the test case results that were not run: with a status of <see cref="TestStatus.Skipped"/>,
@@ -136,8 +146,66 @@ public record TestResult(
             TestStatus.Explicit,
             TestStatus.Unknown);
 
+    /// <summary>
+    /// Gets the non-passed results to report for entities in the test tree, ordered by status.
+    /// A non-passed suite or fixture is reported once instead of its children.
+    /// </summary>
+    public TestEntityResult[] ReportedNotRunResults
+        => field ??= this.GetReportedResults(
+            TestStatus.Ignored,
+            TestStatus.Explicit,
+            TestStatus.Skipped,
+            TestStatus.Unknown);
+
+    /// <summary>
+    /// Gets the problem results to report for entities in the test tree, ordered by status.
+    /// A non-passed suite or fixture is reported once instead of its children.
+    /// </summary>
+    public TestEntityResult[] ReportedProblemResults
+        => field ??= this.GetReportedResults(
+            TestStatus.Error,
+            TestStatus.Invalid,
+            TestStatus.Failure,
+            TestStatus.Warning);
+
+    /// <summary>
+    /// Gets test case results skipped or unknown for a reason other than ignored or explicit.
+    /// </summary>
+    public TestCaseResult[] OtherNotRunResults
+        => field ??= this.GetTestCaseResults(TestStatus.Skipped, TestStatus.Unknown);
+
     private TestCaseResult[] GetTestCaseResults(params TestStatus[] statuses)
         => [.. this.TestCaseResults.Where(x => statuses.Contains(x.Status))];
+
+    private TestEntityResult[] GetReportedResults(params TestStatus[] statuses)
+    {
+        var results = new List<TestEntityResult>();
+
+        foreach (var testSuite in this.TestSuiteResults)
+        {
+            if (testSuite.Status is not TestStatus.Passed)
+            {
+                results.Add(testSuite);
+                continue;
+            }
+
+            foreach (var testFixture in testSuite.TestFixtureResults)
+            {
+                if (testFixture.Status is not TestStatus.Passed)
+                {
+                    results.Add(testFixture);
+                    continue;
+                }
+
+                results.AddRange(testFixture.TestCaseResults.Where(x => x.Status is not TestStatus.Passed));
+            }
+        }
+
+        return
+        [
+            .. statuses.SelectMany(status => results.Where(result => result.Status == status)),
+        ];
+    }
 
     private TestStatus GetOverallStatus()
     {

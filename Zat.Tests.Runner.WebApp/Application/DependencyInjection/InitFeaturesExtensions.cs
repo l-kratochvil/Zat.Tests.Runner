@@ -9,6 +9,8 @@ using Zat.Tests.Runner.WebApp.Features.TestConfiguration.Components;
 using Zat.Tests.Runner.WebApp.Features.TestDiscovery.Components;
 using Zat.Tests.Runner.WebApp.Features.TestDiscovery.Services;
 using Zat.Tests.Runner.WebApp.Features.TestExecution.Components;
+using Zat.Tests.Runner.WebApp.Features.TestExecution.Services;
+using Zat.Tests.Runner.WebApp.Features.TestResultReporting.Components;
 using Zat.Tests.Runner.WebApp.Shared.Stores.AppSettings;
 
 /// <summary>
@@ -24,6 +26,7 @@ public static class InitFeaturesExtensions
                 .InitTestDiscovery()
                 .InitTestConfiguration()
                 .InitTestExecution()
+                .InitTestResultReporting()
                 .InitAppLogging();
 
         private IServiceCollection InitTestDiscovery()
@@ -48,7 +51,12 @@ public static class InitFeaturesExtensions
 
         private IServiceCollection InitTestExecution()
             => services
-                .AddScoped<TestExecutionViewModel>();
+                .AddScoped<TestExecutionViewModel>()
+                .AddScoped<TestRunnerEngineStateHandler>();
+
+        private IServiceCollection InitTestResultReporting()
+            => services
+                .AddScoped<TestResultViewModel>();
 
         private IServiceCollection InitAppLogging()
             => services

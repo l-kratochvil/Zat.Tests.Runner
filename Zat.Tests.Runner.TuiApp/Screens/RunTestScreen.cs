@@ -28,9 +28,8 @@ internal class RunTestScreen(
     : ScreenBase(homeScreen, exitScreen, settingsScreen),
       ITestResultHandler
 {
-    private readonly List<TestResultHandled> handledTestResults = [];
+    private readonly List<TestResult> handledTestResults = [];
     private State state = new();
-    private DateTime currentTestStartTime = DateTime.UtcNow;
 
     /// <inheritdoc/>
     protected override Configuration Config { get; init; } = new()
@@ -54,14 +53,7 @@ internal class RunTestScreen(
     /// <inheritdoc />
     void ITestResultHandler.HandleSubRunResult(TestResult result)
     {
-        var oldTestStartTime = this.currentTestStartTime;
-        this.currentTestStartTime = DateTime.UtcNow;
-        this.handledTestResults.Add(
-            new TestResultHandled(
-                result,
-                oldTestStartTime,
-                DateTime.UtcNow,
-                this.state.Stopwatch.Elapsed));
+        this.handledTestResults.Add(result);
         this.state.Stopwatch.Restart();
     }
 
@@ -75,9 +67,8 @@ internal class RunTestScreen(
                 var table = new Table()
                     .HideHeaders()
                     .AddColumn(string.Empty);
-
                 this.state = new State();
-                this.currentTestStartTime = DateTime.UtcNow;
+                this.state = new State();
                 this.state.Stopwatch.Restart();
 
                 // ReSharper disable once MethodSupportsCancellation
@@ -100,26 +91,22 @@ internal class RunTestScreen(
                             var sb = new StringBuilder();
                             for (var i = 0; i < this.handledTestResults.Count; i++)
                             {
-                                var handledTestResult = this.handledTestResults[i];
+                                var testResult = this.handledTestResults[i];
 
                                 sb.AppendLine(string.Empty);
+                                var header = TextUtils.SafeFormat(
+                                    Resources.TestResultHeader_Format,
+                                    i + 1,
+                                    testResult.StartTime.UtcDateTime);
+                                var testType = testResult.TestedHwAssemblyType is { } testedHwAssemblyType
+                                    ? $"{testResult.TestType} · {testedHwAssemblyType}"
+                                    : testResult.TestType.ToString();
                                 sb.AppendLine(
-                                    $"[bold underline aqua]{TextUtils
-                                        .SafeFormat(
-                                            Resources.TestResultHeader_Format,
-                                            i + 1,
-                                            handledTestResult.StartTime)
-                                        .EscapeMarkup()}[/]");
+                                    $"[bold underline aqua]{$"{header} · {testType}".EscapeMarkup()}[/]");
 
-                                var testResult = handledTestResult.Result;
                                 RenderNotRunSection(sb, testResult);
                                 RenderProblemsSection(sb, testResult);
-                                RenderSummarySection(
-                                    sb,
-                                    testResult,
-                                    handledTestResult.StartTime,
-                                    handledTestResult.EndTime,
-                                    handledTestResult.Duration);
+                                RenderSummarySection(sb, testResult);
                             }
 
                             table.Rows.Clear();
@@ -190,15 +177,14 @@ internal class RunTestScreen(
 
     private static void RenderNotRunSection(StringBuilder sb, TestResult result)
     {
-        var reportedResults = GetReportedResults(result);
         var entries = new List<ReportEntry>();
-        entries.AddRange(reportedResults.Where(x => x.Status is TestStatus.Ignored).Select(
+        entries.AddRange(result.ReportedNotRunResults.Where(x => x.Status is TestStatus.Ignored).Select(
             x => new ReportEntry("yellow", Resources.TestRunReport_Label_Ignored, x)));
-        entries.AddRange(reportedResults.Where(x => x.Status is TestStatus.Explicit).Select(
+        entries.AddRange(result.ReportedNotRunResults.Where(x => x.Status is TestStatus.Explicit).Select(
             x => new ReportEntry("yellow", Resources.TestRunReport_Label_Explicit, x)));
-        entries.AddRange(reportedResults.Where(x => x.Status is TestStatus.Skipped).Select(
+        entries.AddRange(result.ReportedNotRunResults.Where(x => x.Status is TestStatus.Skipped).Select(
             x => new ReportEntry("yellow", Resources.TestRunReport_Label_Skipped, x)));
-        entries.AddRange(reportedResults.Where(x => x.Status is TestStatus.Unknown).Select(
+        entries.AddRange(result.ReportedNotRunResults.Where(x => x.Status is TestStatus.Unknown).Select(
             x => new ReportEntry("yellow", Resources.TestRunReport_Status_Unknown, x)));
 
         RenderEntrySection(sb, Resources.TestRunReport_TestsNotRun_SectionHeader, entries, includeStackTrace: false);
@@ -206,49 +192,17 @@ internal class RunTestScreen(
 
     private static void RenderProblemsSection(StringBuilder sb, TestResult result)
     {
-        var reportedResults = GetReportedResults(result);
         var entries = new List<ReportEntry>();
-        entries.AddRange(reportedResults.Where(x => x.Status is TestStatus.Error).Select(
+        entries.AddRange(result.ReportedProblemResults.Where(x => x.Status is TestStatus.Error).Select(
             x => new ReportEntry("red", Resources.TestRunReport_Label_Error, x)));
-        entries.AddRange(reportedResults.Where(x => x.Status is TestStatus.Invalid).Select(
+        entries.AddRange(result.ReportedProblemResults.Where(x => x.Status is TestStatus.Invalid).Select(
             x => new ReportEntry("red", Resources.TestRunReport_Label_Invalid, x)));
-        entries.AddRange(reportedResults.Where(x => x.Status is TestStatus.Failure).Select(
+        entries.AddRange(result.ReportedProblemResults.Where(x => x.Status is TestStatus.Failure).Select(
             x => new ReportEntry("red", Resources.TestRunReport_Label_Failed, x)));
-        entries.AddRange(reportedResults.Where(x => x.Status is TestStatus.Warning).Select(
+        entries.AddRange(result.ReportedProblemResults.Where(x => x.Status is TestStatus.Warning).Select(
             x => new ReportEntry("yellow", Resources.TestRunReport_Label_Warning, x)));
 
         RenderEntrySection(sb, Resources.TestRunReport_ErrorsFailuresWarnings_SectionHeader, entries, includeStackTrace: true);
-    }
-
-    /// <summary>
-    /// Walks the result tree of <paramref name="result"/>: a node that did not pass is reported once and its children
-    /// are skipped, otherwise the children that did not pass are reported.
-    /// </summary>
-    private static TestEntityResult[] GetReportedResults(TestResult result)
-    {
-        var reportedResults = new List<TestEntityResult>();
-
-        foreach (var testSuite in result.TestSuiteResults)
-        {
-            if (testSuite.Status is not TestStatus.Passed)
-            {
-                reportedResults.Add(testSuite);
-                continue;
-            }
-
-            foreach (var testFixture in testSuite.TestFixtureResults)
-            {
-                if (testFixture.Status is not TestStatus.Passed)
-                {
-                    reportedResults.Add(testFixture);
-                    continue;
-                }
-
-                reportedResults.AddRange(testFixture.TestCaseResults.Where(x => x.Status is not TestStatus.Passed));
-            }
-        }
-
-        return [.. reportedResults];
     }
 
     private static void RenderEntrySection(
@@ -293,10 +247,7 @@ internal class RunTestScreen(
 
     private static void RenderSummarySection(
         StringBuilder sb,
-        TestResult result,
-        DateTime startTimeUtc,
-        DateTime endTimeUtc,
-        TimeSpan duration)
+        TestResult result)
     {
         sb.AppendLine($"[aqua]{Resources.TestRunReport_Summary_SectionHeader.EscapeMarkup()}[/]");
 
@@ -322,23 +273,23 @@ internal class RunTestScreen(
             $" {MakeLabel(Resources.TestRunReport_Summary_Ignored)} {result.IgnoredResults.Length}" +
             $", {MakeLabel(Resources.TestRunReport_Summary_Explicit)} {result.ExplicitResults.Length}" +
             $", {MakeLabel(Resources.TestRunReport_Summary_Other)} " +
-            $"{result.SkippedResults.Length + result.UnknownResults.Length}");
+            $"{result.OtherNotRunResults.Length}");
 
         sb.AppendLine(
-            $"  {MakeLabel(Resources.TestRunReport_Summary_StartTime)} {FormatTimestamp(startTimeUtc)}");
+            $"  {MakeLabel(Resources.TestRunReport_Summary_StartTime)} {FormatTimestamp(result.StartTime)}");
         sb.AppendLine(
-            $"  {MakeLabel(Resources.TestRunReport_Summary_EndTime)} {FormatTimestamp(endTimeUtc)}");
+            $"  {MakeLabel(Resources.TestRunReport_Summary_EndTime)} {FormatTimestamp(result.EndTime)}");
         sb.AppendLine(
             $"  {MakeLabel(Resources.TestRunReport_Summary_Duration)} " +
-            $"{duration.TotalSeconds.ToString("F3", CultureInfo.InvariantCulture)} " +
+            $"{result.Duration.TotalSeconds.ToString("F3", CultureInfo.InvariantCulture)} " +
             $"{Resources.TestRunReport_Summary_Seconds.EscapeMarkup()}");
     }
 
     private static string MakeLabel(string text)
         => $"[green]{text.EscapeMarkup()}:[/]";
 
-    private static string FormatTimestamp(DateTime utc)
-        => utc.ToString("yyyy-MM-dd HH:mm:ss'Z'", CultureInfo.InvariantCulture);
+    private static string FormatTimestamp(DateTimeOffset utc)
+        => utc.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss'Z'", CultureInfo.InvariantCulture);
 
     private static string MapStatus(TestStatus status)
         => status switch
@@ -365,9 +316,4 @@ internal class RunTestScreen(
         public Stopwatch Stopwatch { get; } = new();
     }
 
-    private record TestResultHandled(
-        TestResult Result,
-        DateTime StartTime,
-        DateTime EndTime,
-        TimeSpan Duration);
 }

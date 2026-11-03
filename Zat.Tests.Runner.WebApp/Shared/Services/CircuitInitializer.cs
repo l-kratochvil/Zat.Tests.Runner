@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Components.Server.Circuits;
 using Zat.Tests.Runner.Common.Net.Application.DependencyInjection;
 using Zat.Tests.Runner.Common.Net.Services;
 using Zat.Tests.Runner.WebApp.Shared.Stores.AppLogging;
+using Zat.Tests.Runner.WebApp.Shared.Stores.TestResultReporting;
 
 /// <summary>
 /// Prepares a circuit as soon as it opens, before any of its components render: initialises its
@@ -28,13 +29,14 @@ internal sealed class CircuitInitializer(
     IDispatcher dispatcher)
     : CircuitHandler,
       IRecipient<DataChangedAction>,
+      IRecipient<SubRunResultReceivedAction>,
       IDisposable
 {
     /// <inheritdoc/>
     public override Task OnCircuitOpenedAsync(Circuit circuit, CancellationToken cancellationToken)
     {
         provider.InitInitializableServices(services, ServiceLifetime.Scoped);
-        globalMessanger.Register(this);
+        globalMessanger.RegisterAll(this);
 
         return Task.CompletedTask;
     }
@@ -44,6 +46,12 @@ internal sealed class CircuitInitializer(
         => dispatcher.Dispatch(message);
 
     /// <inheritdoc/>
+    public void Receive(SubRunResultReceivedAction message)
+        => dispatcher.Dispatch(message);
+
+    /// <inheritdoc/>
     public void Dispose()
-        => globalMessanger.UnregisterAll(this);
+    {
+        globalMessanger.UnregisterAll(this);
+    }
 }

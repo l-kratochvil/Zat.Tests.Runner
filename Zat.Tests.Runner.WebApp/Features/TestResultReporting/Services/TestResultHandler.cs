@@ -1,19 +1,12 @@
 namespace Zat.Tests.Runner.WebApp.Features.TestResultReporting.Services;
 
-using System.Diagnostics;
-
-using DevKit.Core.Extensions.Types;
-
 using Zat.Tests.Runner.Common.Net.Model;
 using Zat.Tests.Runner.Common.Net.Services;
+using Zat.Tests.Runner.WebApp.Shared.Stores.TestResultReporting;
 
-public class TestResultHandler : ITestResultHandler
+public class TestResultHandler(GlobalWeakReferenceMessanger globalMessanger) : ITestResultHandler
 {
     /// <inheritdoc />
     public void HandleSubRunResult(TestResult testResult)
-    {
-        Debug.SafeFail("TODO");
-
-        // TODO: Update TestResultReporting store to display the new test result
-    }
+        => globalMessanger.Send(new SubRunResultReceivedAction(testResult));
 }

@@ -66,7 +66,8 @@ public class TestRunnerEngineTests
             this.bridgeConnectorMock.Object,
             new NUnitTestRunnerProxyConnector(launchDebugger: false),
             this.testRunLogger,
-            this.appLogger);
+            this.appLogger,
+            TimeProvider.System);
         this.unit.StateChanged += this.reportedStates.Add;
     }
 
@@ -257,7 +258,8 @@ public class TestRunnerEngineTests
             new TestRunnerBridgeConnector(),
             new NUnitTestRunnerProxyConnector(launchDebugger: false),
             NullLogger<LogSources.TestRun>.Instance,
-            NullLogger<LogSources.App>.Instance);
+            NullLogger<LogSources.App>.Instance,
+            TimeProvider.System);
         var bridgeTestCase = new TestEntity(
             TestType.Application,
             name: nameof(NUnitTestAssembly.Net481.TestCaseFixture.UseTestRunnerBridgeTest),
@@ -289,7 +291,8 @@ public class TestRunnerEngineTests
             this.bridgeConnectorMock.Object,
             CreateTestRunnerProxyConnector(new Mock<INUnitTestRunnerProxyConnection>(), proxyMock),
             NullLogger<LogSources.TestRun>.Instance,
-            NullLogger<LogSources.App>.Instance);
+            NullLogger<LogSources.App>.Instance,
+            TimeProvider.System);
         unit.StateChanged += this.reportedStates.Add;
 
         // When:
@@ -361,7 +364,8 @@ public class TestRunnerEngineTests
             this.bridgeConnectorMock.Object,
             CreateTestRunnerProxyConnector(connectionMock, proxyMock),
             NullLogger<LogSources.TestRun>.Instance,
-            NullLogger<LogSources.App>.Instance);
+            NullLogger<LogSources.App>.Instance,
+            TimeProvider.System);
 
         proxyMock
             .Setup(x => x.RunTestAsync(It.IsAny<IEnumerable<TestEntity>>(), It.IsAny<CancellationToken>()))

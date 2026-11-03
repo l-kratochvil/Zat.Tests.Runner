@@ -166,7 +166,7 @@ public class EmailResultHandlerTests
            $", {Resources.EmailResult_Summary_Failed}: {failed}";
 
     private static TestResult SubRun(params TestStatus[] testCaseStatuses)
-        => SubRun([..testCaseStatuses.Select((status, i) => new TestCaseResult($"TC-{i}", $"Case{i}", status))]);
+        => SubRun([.. testCaseStatuses.Select((status, i) => new TestCaseResult($"TC-{i}", $"Case{i}", status))]);
 
     private static TestResult SubRun(params TestCaseResult[] testCaseResults)
         => new(
@@ -177,7 +177,9 @@ public class EmailResultHandlerTests
                     "Suite",
                     TestStatus.Passed),
             ]),
-            TestType.Application);
+            TestType.Application,
+            DateTimeOffset.UtcNow,
+            DateTimeOffset.UtcNow);
 
     private void SetupHandlerContext(bool enabled, params string[] addresses)
     {

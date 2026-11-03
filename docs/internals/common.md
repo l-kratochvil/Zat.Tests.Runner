@@ -48,6 +48,9 @@ Only one test run may be in progress on the environment, because the test statio
 can't be shared. `ITestRunnerEngine` is therefore a singleton that refuses a second start, and the
 state of its test run is shared by every client: any of them sees it and may stop it.
 
+The engine records the start and end of each sub-run in its `TestResult`, which also owns the shared
+selection of entities reported by the front-ends.
+
 ## The test tree follows the test assembly
 
 The test assembly may be deployed again while the application runs, so `ITestTreeStore` discovers
