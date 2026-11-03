@@ -22,11 +22,11 @@ using Zat.Tests.Runner.WebApp.Tests.TestDiscovery;
 using TestExecutionComponent = Zat.Tests.Runner.WebApp.Features.TestExecution.Components.TestExecution;
 
 /// <summary>
-/// That the button shows what its view model offers and is redrawn when that changes.
+/// That the button displays what its view model decides and is redrawn when that changes.
 /// </summary>
 /// <remarks>
-/// What is offered and what stops a test run from starting is decided by the view model and
-/// exercised in <see cref="TestExecutionViewModelTests"/>.
+/// What the button displays and what stops a test run from starting is decided by the view model
+/// and exercised in <see cref="TestExecutionViewModelTests"/>.
 /// </remarks>
 [TestFixture]
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
@@ -74,7 +74,7 @@ public class TestExecutionTests : Bunit.TestContext
         => this.Dispose();
 
     [Test]
-    public void Render__WhenNothingHasBeenClicked__ThenShouldOfferToStartRun()
+    public void Render__WhenNothingHasBeenClicked__ThenShouldShowStartButton()
     {
         // Given:
         this.SetUpRunnableConfiguration();
@@ -88,7 +88,7 @@ public class TestExecutionTests : Bunit.TestContext
     }
 
     [Test]
-    public void OnTestRunStateChanged__WhenAnotherClientStartsTestRun__ThenShouldOfferToStopIt()
+    public void OnTestRunStateChanged__WhenAnotherClientStartsTestRun__ThenShouldShowEnabledStopButton()
     {
         // Given:
         this.SetUpRunnableConfiguration();
@@ -112,7 +112,7 @@ public class TestExecutionTests : Bunit.TestContext
     }
 
     [Test]
-    public void OnConfigurationChanged__WhenConfigurationTurnsRunnable__ThenShouldLetRunStart()
+    public void OnConfigurationChanged__WhenConfigurationTurnsRunnable__ThenShouldEnableStartButton()
     {
         // Given:
         this.SetUpSelectedTestCase();
@@ -130,7 +130,7 @@ public class TestExecutionTests : Bunit.TestContext
     }
 
     [Test]
-    public void Render__WhenTestRunIsStopping__ThenShouldNotLetAnythingBeClicked()
+    public void Render__WhenTestRunIsStopping__ThenShouldShowDisabledStoppingButton()
     {
         // Given:
         this.SetUpRunnableConfiguration();
@@ -149,7 +149,7 @@ public class TestExecutionTests : Bunit.TestContext
     }
 
     [Test]
-    public void Render__WhenNoTestIsSelected__ThenShouldNotLetRunStart()
+    public void Render__WhenNoTestIsSelected__ThenShouldDisableStartButtonAndShowReason()
     {
         // Given:
         this.configuration = ConfigurationSaidToBeRunnable();

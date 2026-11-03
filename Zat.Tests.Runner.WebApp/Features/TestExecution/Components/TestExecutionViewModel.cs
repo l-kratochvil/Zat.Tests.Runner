@@ -24,6 +24,9 @@ public sealed partial class TestExecutionViewModel : ViewModelBase, IDisposable
     internal const string StopLabel = "Stop";
     internal const string StoppingLabel = "Stopping …";
 
+    internal const string NoTestsSelectedReason = "No tests selected";
+    internal const string ConfigurationHasErrorsReason = "Configuration has errors";
+
     private readonly ITestRunnerEngine testRunnerEngine;
     private readonly IEnumerable<ITestResultHandler> testResultHandlers;
     private readonly IState<TestConfigurationState> configurationState;
@@ -175,12 +178,12 @@ public sealed partial class TestExecutionViewModel : ViewModelBase, IDisposable
     {
         if (!this.TestsSelected)
         {
-            yield return "No tests selected";
+            yield return NoTestsSelectedReason;
         }
 
         if (this.ConfigurationHasErrors)
         {
-            yield return "Configuration has errors";
+            yield return ConfigurationHasErrorsReason;
         }
     }
 }
