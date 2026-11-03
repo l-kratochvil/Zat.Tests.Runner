@@ -12,6 +12,7 @@
   - Sdílet logiku pro získávání verzí nainstalovaných runtime s WebApp TestConfigurationViewModel
 - WebApp:
   - Implementovat issue #14: jsou již vytvořené tickety, stačí použít /implement-spec
+  - TestConfiguration feature: 'Beta version' by mělo být viditelné pouze při povoleném reportování do TestLinku (je ale viditelné vždy)
   - Rework BindingSelect
   - Vylepšit pojmenování pro "fluxor stores" a "stores StoreBase": Obojí fungujou jinak, ale zároveň obojí je store
   - TestConfiguration: Musí umožnovat vybrat vícero (comobobox) HwAssemblyType

@@ -43,48 +43,27 @@ public class TestRunnerEngineTests
         TestAssemblyName,
         $"{TestAssemblyName}.dll");
 
-    private readonly List<TestRunState> reportedStates = [];
-
-    private readonly FakeLogger<LogSources.TestRun> testRunLogger = new();
-    private readonly FakeLogger<LogSources.App> appLogger = new();
-
-    private Mock<ITestRunnerBridgeConnector> bridgeConnectorMock = null!;
-    private Mock<ITestResultHandler> resultHandlerMock = null!;
-    private TestRunnerEngine unit = null!;
-
-    [SetUp]
-    public void SetUp()
-    {
-        this.bridgeConnectorMock = new Mock<ITestRunnerBridgeConnector>();
-        this.bridgeConnectorMock
-            .Setup(x => x.Connect(It.IsAny<TestConfig>()))
-            .Returns(() => new AsyncDisposer(() => Task.CompletedTask));
-
-        this.resultHandlerMock = new Mock<ITestResultHandler>();
-
-        this.unit = new TestRunnerEngine(
-            this.bridgeConnectorMock.Object,
-            new NUnitTestRunnerProxyConnector(launchDebugger: false),
-            this.testRunLogger,
-            this.appLogger,
-            TimeProvider.System);
-        this.unit.StateChanged += this.reportedStates.Add;
-    }
-
     [Test]
     public async Task RunTestAsync__WhenTestRunCompletes__ThenShouldLogEachStateChangeToBothLogAndDiagnostics()
     {
+        // Given:
+        var testRunLogger = new FakeLogger<LogSources.TestRun>();
+        var appLogger = new FakeLogger<LogSources.App>();
+        var unit = CreateUnit(
+            logger: testRunLogger,
+            appLogger: appLogger);
+
         // When:
-        await this.unit.RunTestAsync([CreateApplicationTestEntity()], this.CreateConfig());
+        await unit.RunTestAsync([CreateApplicationTestEntity()], CreateConfig());
 
         // Then:
         using (Assert.EnterMultipleScope())
         {
             Assert.That(
-                this.appLogger.Collector.GetSnapshot().Select(x => x.Level),
+                appLogger.Collector.GetSnapshot().Select(x => x.Level),
                 Is.EqualTo([LogLevel.Information, LogLevel.Information]));
             Assert.That(
-                this.testRunLogger.Collector.GetSnapshot().Select(x => x.Level),
+                testRunLogger.Collector.GetSnapshot().Select(x => x.Level),
                 Is.EqualTo([LogLevel.Information, LogLevel.Information]));
         }
     }
@@ -92,28 +71,37 @@ public class TestRunnerEngineTests
     [Test]
     public async Task RunTestAsync__WhenTestRunCompletes__ThenShouldReportRunningAndThenStopped()
     {
+        // Given:
+        var reportedStates = new List<TestRunState>();
+        var unit = CreateUnit();
+        unit.StateChanged += reportedStates.Add;
+
         // When:
-        await this.unit.RunTestAsync([CreateApplicationTestEntity()], this.CreateConfig());
+        await unit.RunTestAsync([CreateApplicationTestEntity()], CreateConfig());
 
         // Then:
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(this.reportedStates, Is.EqualTo([TestRunState.Running, TestRunState.Stopped]));
-            Assert.That(this.unit.State, Is.EqualTo(TestRunState.Stopped));
+            Assert.That(reportedStates, Is.EqualTo([TestRunState.Running, TestRunState.Stopped]));
+            Assert.That(unit.State, Is.EqualTo(TestRunState.Stopped));
         }
     }
 
     [Test]
     public async Task RunTestAsync__WhenTestRunCompletes__ThenShouldHandItsResult()
     {
+        // Given:
+        var resultHandlerMock = new Mock<ITestResultHandler>();
+        var unit = CreateUnit();
+
         // When:
-        var results = await this.unit.RunTestAsync([CreateApplicationTestEntity()], this.CreateConfig());
+        var results = await unit.RunTestAsync([CreateApplicationTestEntity()], CreateConfig(resultHandlerMock.Object));
 
         // Then:
         var handledResult = results.Value.Single();
         using (Assert.EnterMultipleScope())
         {
-            this.resultHandlerMock.Verify(x => x.HandleSubRunResult(handledResult), Times.Once);
+            resultHandlerMock.Verify(x => x.HandleSubRunResult(handledResult), Times.Once);
             Assert.That(
                 handledResult.TestCaseResults.Select(x => (x.EntityName, x.Status)),
                 Is.EqualTo([(PassingTestCasePath, TestStatus.Passed)]));
@@ -123,39 +111,45 @@ public class TestRunnerEngineTests
     [Test]
     public async Task RunTestAsync__WhenTestRunCompletes__ThenShouldHandTestRunResultOnceWithAllSubRunResults()
     {
+        // Given:
+        var resultHandlerMock = new Mock<ITestResultHandler>();
+        var unit = CreateUnit();
+
         // When:
-        var results = await this.unit.RunTestAsync(
+        var results = await unit.RunTestAsync(
             [CreateRuntimeTestEntity()],
-            this.CreateConfig(HwAssemblyType.HW00, HwAssemblyType.HW01));
+            CreateConfig(resultHandlerMock.Object, HwAssemblyType.HW00, HwAssemblyType.HW01));
 
         // Then:
         Assert.That(results.Value, Has.Length.EqualTo(2));
-        this.resultHandlerMock.Verify(
+        resultHandlerMock.Verify(
             x => x.HandleTestRunResult(It.Is<TestRunResult>(r =>
                 r.SubRunResults.SequenceEqual(results.Value) && !r.IsStoppedByUser)),
             Times.Once);
-        this.resultHandlerMock.Verify(x => x.HandleTestRunResult(It.IsAny<TestRunResult>()), Times.Once);
+        resultHandlerMock.Verify(x => x.HandleTestRunResult(It.IsAny<TestRunResult>()), Times.Once);
     }
 
     [Test]
     public async Task StopTestRun__WhenCalledBetweenSubRuns__ThenShouldHandTestRunResultAsStoppedByUser()
     {
         // Given:
-        this.resultHandlerMock
+        var resultHandlerMock = new Mock<ITestResultHandler>();
+        var unit = CreateUnit();
+        resultHandlerMock
             .Setup(x => x.HandleSubRunResult(It.IsAny<TestResult>()))
-            .Callback(this.unit.StopTestRun);
+            .Callback(unit.StopTestRun);
 
         // When:
-        var results = await this.unit.RunTestAsync(
+        var results = await unit.RunTestAsync(
             [CreateRuntimeTestEntity()],
-            this.CreateConfig(HwAssemblyType.HW00, HwAssemblyType.HW01));
+            CreateConfig(resultHandlerMock.Object, HwAssemblyType.HW00, HwAssemblyType.HW01));
 
         // Then:
-        this.resultHandlerMock.Verify(
+        resultHandlerMock.Verify(
             x => x.HandleTestRunResult(It.Is<TestRunResult>(r =>
                 r.SubRunResults.SequenceEqual(results.Value) && r.IsStoppedByUser)),
             Times.Once);
-        this.resultHandlerMock.Verify(x => x.HandleTestRunResult(It.IsAny<TestRunResult>()), Times.Once);
+        resultHandlerMock.Verify(x => x.HandleTestRunResult(It.IsAny<TestRunResult>()), Times.Once);
     }
 
     [Test]
@@ -163,16 +157,19 @@ public class TestRunnerEngineTests
     {
         // Given:
         using var callerCts = new CancellationTokenSource();
-        this.bridgeConnectorMock
+        var bridgeConnectorMock = CreateBridgeConnectorMock();
+        var resultHandlerMock = new Mock<ITestResultHandler>();
+        var unit = CreateUnit(bridgeConnectorMock.Object);
+        bridgeConnectorMock
             .Setup(x => x.Connect(It.IsAny<TestConfig>()))
             .Callback(callerCts.Cancel)
             .Returns(() => new AsyncDisposer(() => Task.CompletedTask));
 
         // When:
-        await this.unit.RunTestAsync([CreateApplicationTestEntity()], this.CreateConfig(), callerCts.Token);
+        await unit.RunTestAsync([CreateApplicationTestEntity()], CreateConfig(resultHandlerMock.Object), callerCts.Token);
 
         // Then:
-        this.resultHandlerMock.Verify(
+        resultHandlerMock.Verify(
             x => x.HandleTestRunResult(It.Is<TestRunResult>(r => r.SubRunResults.Count == 0 && r.IsStoppedByUser)),
             Times.Once);
     }
@@ -182,21 +179,26 @@ public class TestRunnerEngineTests
     {
         // Given:
         using var callerCts = new CancellationTokenSource();
-        this.bridgeConnectorMock
+        var bridgeConnectorMock = CreateBridgeConnectorMock();
+        var resultHandlerMock = new Mock<ITestResultHandler>();
+        var reportedStates = new List<TestRunState>();
+        var unit = CreateUnit(bridgeConnectorMock.Object);
+        unit.StateChanged += reportedStates.Add;
+        bridgeConnectorMock
             .Setup(x => x.Connect(It.IsAny<TestConfig>()))
             .Callback(callerCts.Cancel)
             .Returns(() => new AsyncDisposer(() => Task.CompletedTask));
 
         // When:
-        var results = await this.unit.RunTestAsync([CreateApplicationTestEntity()], this.CreateConfig(), callerCts.Token);
+        var results = await unit.RunTestAsync([CreateApplicationTestEntity()], CreateConfig(resultHandlerMock.Object), callerCts.Token);
 
         // Then:
         using (Assert.EnterMultipleScope())
         {
             Assert.That(results.Value, Is.Empty);
-            this.resultHandlerMock.Verify(x => x.HandleSubRunResult(It.IsAny<TestResult>()), Times.Never);
+            resultHandlerMock.Verify(x => x.HandleSubRunResult(It.IsAny<TestResult>()), Times.Never);
             Assert.That(
-                this.reportedStates,
+                reportedStates,
                 Is.EqualTo([TestRunState.Running, TestRunState.Stopping, TestRunState.Stopped]));
         }
     }
@@ -206,7 +208,9 @@ public class TestRunnerEngineTests
     {
         // Given:
         Task? secondStart = null;
-        this.bridgeConnectorMock
+        var bridgeConnectorMock = CreateBridgeConnectorMock();
+        var unit = CreateUnit(bridgeConnectorMock.Object);
+        bridgeConnectorMock
             .Setup(x => x.Connect(It.IsAny<TestConfig>()))
             .Callback(() =>
             {
@@ -214,13 +218,13 @@ public class TestRunnerEngineTests
                 {
                     // Marked first, so a start that is not refused can't recurse back in here.
                     secondStart = Task.CompletedTask;
-                    secondStart = this.unit.RunTestAsync([CreateApplicationTestEntity()], this.CreateConfig());
+                    secondStart = unit.RunTestAsync([CreateApplicationTestEntity()], CreateConfig());
                 }
             })
             .Returns(() => new AsyncDisposer(() => Task.CompletedTask));
 
         // When:
-        await this.unit.RunTestAsync([CreateApplicationTestEntity()], this.CreateConfig());
+        await unit.RunTestAsync([CreateApplicationTestEntity()], CreateConfig());
 
         // Then:
         Assert.ThrowsAsync<InvalidOperationException>(() => secondStart!);
@@ -232,9 +236,16 @@ public class TestRunnerEngineTests
         // Given:
         const string missingTestCasePath = TestCaseFixturePath + ".Missing";
         var missingTestCase = new TestEntity(TestType.Application, name: "Missing", executionPath: missingTestCasePath);
+        var bridgeConnectorMock = CreateBridgeConnectorMock();
+        var resultHandlerMock = new Mock<ITestResultHandler>();
+        var reportedStates = new List<TestRunState>();
+        var unit = CreateUnit(bridgeConnectorMock.Object);
+        unit.StateChanged += reportedStates.Add;
 
         // When:
-        var results = await this.unit.RunTestAsync([CreateApplicationTestEntity(), missingTestCase], this.CreateConfig());
+        var results = await unit.RunTestAsync(
+            [CreateApplicationTestEntity(), missingTestCase],
+            CreateConfig(resultHandlerMock.Object));
 
         // Then:
         using (Assert.EnterMultipleScope())
@@ -243,10 +254,10 @@ public class TestRunnerEngineTests
             Assert.That(
                 results.IsFailure ? results.Error : string.Empty,
                 Does.Contain(missingTestCasePath).And.Not.Contain(PassingTestCasePath));
-            this.bridgeConnectorMock.Verify(x => x.Connect(It.IsAny<TestConfig>()), Times.Never);
-            this.resultHandlerMock.Verify(x => x.HandleSubRunResult(It.IsAny<TestResult>()), Times.Never);
-            this.resultHandlerMock.Verify(x => x.HandleTestRunResult(It.IsAny<TestRunResult>()), Times.Never);
-            Assert.That(this.reportedStates, Is.EqualTo([TestRunState.Running, TestRunState.Stopped]));
+            bridgeConnectorMock.Verify(x => x.Connect(It.IsAny<TestConfig>()), Times.Never);
+            resultHandlerMock.Verify(x => x.HandleSubRunResult(It.IsAny<TestResult>()), Times.Never);
+            resultHandlerMock.Verify(x => x.HandleTestRunResult(It.IsAny<TestRunResult>()), Times.Never);
+            Assert.That(reportedStates, Is.EqualTo([TestRunState.Running, TestRunState.Stopped]));
         }
     }
 
@@ -254,12 +265,7 @@ public class TestRunnerEngineTests
     public async Task RunTestAsync__WhenTestCaseReadsTestConfigOverBridge__ThenShouldServeItFromConfig()
     {
         // Given:
-        var unit = new TestRunnerEngine(
-            new TestRunnerBridgeConnector(),
-            new NUnitTestRunnerProxyConnector(launchDebugger: false),
-            NullLogger<LogSources.TestRun>.Instance,
-            NullLogger<LogSources.App>.Instance,
-            TimeProvider.System);
+        var unit = CreateUnit(testRunnerBridgeConnector: new TestRunnerBridgeConnector());
         var bridgeTestCase = new TestEntity(
             TestType.Application,
             name: nameof(NUnitTestAssembly.Net481.TestCaseFixture.UseTestRunnerBridgeTest),
@@ -268,7 +274,7 @@ public class TestRunnerEngineTests
         // When:
         var results = await unit.RunTestAsync(
             [bridgeTestCase],
-            this.CreateConfig() with
+            CreateConfig() with
             {
                 TestedRuntimeVersion = NUnitTestAssembly.Net481.TestCaseFixture.ExpectedTestedRuntimeVersion,
             });
@@ -287,22 +293,21 @@ public class TestRunnerEngineTests
             .Setup(x => x.RunTestAsync(It.IsAny<IEnumerable<TestEntity>>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("RUN FAILURE"));
 
-        var unit = new TestRunnerEngine(
-            this.bridgeConnectorMock.Object,
-            CreateTestRunnerProxyConnector(new Mock<INUnitTestRunnerProxyConnection>(), proxyMock),
-            NullLogger<LogSources.TestRun>.Instance,
-            NullLogger<LogSources.App>.Instance,
-            TimeProvider.System);
-        unit.StateChanged += this.reportedStates.Add;
+        var reportedStates = new List<TestRunState>();
+        var unit = CreateUnit(
+            nunitTestRunnerProxyConnector: CreateTestRunnerProxyConnector(
+                new Mock<INUnitTestRunnerProxyConnection>(),
+                proxyMock));
+        unit.StateChanged += reportedStates.Add;
 
         // When:
-        var testRun = unit.RunTestAsync([CreateApplicationTestEntity()], this.CreateConfig());
+        var testRun = unit.RunTestAsync([CreateApplicationTestEntity()], CreateConfig());
 
         // Then:
         Assert.CatchAsync(() => testRun);
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(this.reportedStates, Is.EqualTo([TestRunState.Running, TestRunState.Stopped]));
+            Assert.That(reportedStates, Is.EqualTo([TestRunState.Running, TestRunState.Stopped]));
             Assert.That(unit.State, Is.EqualTo(TestRunState.Stopped));
         }
     }
@@ -311,23 +316,27 @@ public class TestRunnerEngineTests
     public async Task StopTestRun__WhenCalledBetweenSubRuns__ThenShouldSkipTheRemainingOnes()
     {
         // Given:
-        this.resultHandlerMock
+        var resultHandlerMock = new Mock<ITestResultHandler>();
+        var reportedStates = new List<TestRunState>();
+        var unit = CreateUnit();
+        unit.StateChanged += reportedStates.Add;
+        resultHandlerMock
             .Setup(x => x.HandleSubRunResult(It.IsAny<TestResult>()))
-            .Callback(this.unit.StopTestRun);
+            .Callback(unit.StopTestRun);
 
         // When:
-        var results = await this.unit.RunTestAsync(
+        var results = await unit.RunTestAsync(
             [CreateRuntimeTestEntity()],
-            this.CreateConfig(HwAssemblyType.HW00, HwAssemblyType.HW01));
+            CreateConfig(resultHandlerMock.Object, HwAssemblyType.HW00, HwAssemblyType.HW01));
 
         // Then:
         using (Assert.EnterMultipleScope())
         {
             Assert.That(results.Value.Select(x => x.TestedHwAssemblyType), Is.EqualTo([HwAssemblyType.HW00]));
-            this.resultHandlerMock.Verify(x => x.HandleSubRunResult(results.Value[0]), Times.Once);
-            this.resultHandlerMock.Verify(x => x.HandleSubRunResult(It.IsAny<TestResult>()), Times.Once);
+            resultHandlerMock.Verify(x => x.HandleSubRunResult(results.Value[0]), Times.Once);
+            resultHandlerMock.Verify(x => x.HandleSubRunResult(It.IsAny<TestResult>()), Times.Once);
             Assert.That(
-                this.reportedStates,
+                reportedStates,
                 Is.EqualTo([TestRunState.Running, TestRunState.Stopping, TestRunState.Stopped]));
         }
     }
@@ -336,21 +345,24 @@ public class TestRunnerEngineTests
     public async Task StopTestRun__WhenCalledDuringSubRun__ThenShouldAbortItWithoutHandlingItsResult()
     {
         // Given:
-        this.bridgeConnectorMock
+        var bridgeConnectorMock = CreateBridgeConnectorMock();
+        var resultHandlerMock = new Mock<ITestResultHandler>();
+        var unit = CreateUnit(bridgeConnectorMock.Object);
+        bridgeConnectorMock
             .Setup(x => x.Connect(It.IsAny<TestConfig>()))
-            .Callback(this.unit.StopTestRun)
+            .Callback(unit.StopTestRun)
             .Returns(() => new AsyncDisposer(() => Task.CompletedTask));
 
         // When:
-        var results = await this.unit.RunTestAsync([CreateApplicationTestEntity()], this.CreateConfig());
+        var results = await unit.RunTestAsync([CreateApplicationTestEntity()], CreateConfig(resultHandlerMock.Object));
 
         // Then:
         using (Assert.EnterMultipleScope())
         {
             // The proxy was handed the stop, so it did not run the test case at all.
             Assert.That(results.Value, Is.Empty);
-            this.resultHandlerMock.Verify(x => x.HandleSubRunResult(It.IsAny<TestResult>()), Times.Never);
-            Assert.That(this.unit.State, Is.EqualTo(TestRunState.Stopped));
+            resultHandlerMock.Verify(x => x.HandleSubRunResult(It.IsAny<TestResult>()), Times.Never);
+            Assert.That(unit.State, Is.EqualTo(TestRunState.Stopped));
         }
     }
 
@@ -358,14 +370,11 @@ public class TestRunnerEngineTests
     public async Task StopTestRun__WhenProxyDoesNotGiveInDuringSubRun__ThenShouldEndTestRunAndItsConnection()
     {
         // Given:
-        var connectionMock = new Mock<INUnitTestRunnerProxyConnection>();
+        var proxyConnectionMock = new Mock<INUnitTestRunnerProxyConnection>();
         var proxyMock = new Mock<INUnitTestRunnerProxy>();
-        var unit = new TestRunnerEngine(
-            this.bridgeConnectorMock.Object,
-            CreateTestRunnerProxyConnector(connectionMock, proxyMock),
-            NullLogger<LogSources.TestRun>.Instance,
-            NullLogger<LogSources.App>.Instance,
-            TimeProvider.System);
+        var resultHandlerMock = new Mock<ITestResultHandler>();
+        var unit = CreateUnit(
+            nunitTestRunnerProxyConnector: CreateTestRunnerProxyConnector(proxyConnectionMock, proxyMock));
 
         proxyMock
             .Setup(x => x.RunTestAsync(It.IsAny<IEnumerable<TestEntity>>(), It.IsAny<CancellationToken>()))
@@ -374,18 +383,41 @@ public class TestRunnerEngineTests
 
         // When:
         var results = await unit
-            .RunTestAsync([CreateApplicationTestEntity()], this.CreateConfig())
+            .RunTestAsync([CreateApplicationTestEntity()], CreateConfig(resultHandlerMock.Object))
             .WaitAsync(TestRunnerEngine.StopTimeout * 3);
 
         // Then:
         using (Assert.EnterMultipleScope())
         {
             Assert.That(results.Value, Is.Empty);
-            this.resultHandlerMock.Verify(x => x.HandleSubRunResult(It.IsAny<TestResult>()), Times.Never);
+            resultHandlerMock.Verify(x => x.HandleSubRunResult(It.IsAny<TestResult>()), Times.Never);
             Assert.That(unit.State, Is.EqualTo(TestRunState.Stopped));
-            connectionMock.Verify(x => x.DisposeAsync(), Times.Once);
+            proxyConnectionMock.Verify(x => x.DisposeAsync(), Times.Once);
         }
     }
+
+    private static Mock<ITestRunnerBridgeConnector> CreateBridgeConnectorMock()
+    {
+        var bridgeConnectorMock = new Mock<ITestRunnerBridgeConnector>();
+        bridgeConnectorMock
+            .Setup(x => x.Connect(It.IsAny<TestConfig>()))
+            .Returns(() => new AsyncDisposer(() => Task.CompletedTask));
+
+        return bridgeConnectorMock;
+    }
+
+    private static TestRunnerEngine CreateUnit(
+        ITestRunnerBridgeConnector? testRunnerBridgeConnector = null,
+        INUnitTestRunnerProxyConnector? nunitTestRunnerProxyConnector = null,
+        ILogger<LogSources.TestRun>? logger = null,
+        ILogger<LogSources.App>? appLogger = null,
+        TimeProvider? timeProvider = null)
+        => new(
+            testRunnerBridgeConnector ?? CreateBridgeConnectorMock().Object,
+            nunitTestRunnerProxyConnector ?? new NUnitTestRunnerProxyConnector(launchDebugger: false),
+            logger ?? NullLogger<LogSources.TestRun>.Instance,
+            appLogger ?? NullLogger<LogSources.App>.Instance,
+            timeProvider ?? TimeProvider.System);
 
     private static INUnitTestRunnerProxyConnector CreateTestRunnerProxyConnector(
         Mock<INUnitTestRunnerProxyConnection> connectionMock,
@@ -441,11 +473,13 @@ public class TestRunnerEngineTests
             name: nameof(NUnitTestAssembly.Net481.TestCaseFixture.PassingTest),
             executionPath: PassingTestCasePath);
 
-    private ITestRunnerEngine.Config CreateConfig(params HwAssemblyType[] testedHwAssemblyTypes)
+    private static ITestRunnerEngine.Config CreateConfig(
+        ITestResultHandler? resultHandler = null,
+        params HwAssemblyType[] testedHwAssemblyTypes)
         => new(
             TestAssemblyDllPath: TestAssemblyDllPath,
             IsDebug: false,
             TestedRuntimeVersion: null,
             TestedHwAssemblyTypes: testedHwAssemblyTypes,
-            TestResultHandlers: [this.resultHandlerMock.Object]);
+            TestResultHandlers: [resultHandler ?? Mock.Of<ITestResultHandler>()]);
 }
