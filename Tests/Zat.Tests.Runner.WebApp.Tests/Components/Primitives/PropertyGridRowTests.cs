@@ -54,7 +54,7 @@ public class PropertyGridRowTests : Bunit.TestContext
         // A label belongs to its first control only, so a click on the name would press that control.
 
         // When:
-        var component = this.RenderRowInGrid(isGroup: true);
+        var component = this.RenderRowInGrid(useLabel: true);
 
         // Then:
         using (Assert.EnterMultipleScope())
@@ -82,7 +82,7 @@ public class PropertyGridRowTests : Bunit.TestContext
         builder.CloseElement();
     }
 
-    private IRenderedComponent<PropertyGrid> RenderRowInGrid(bool isGroup = false)
+    private IRenderedComponent<PropertyGrid> RenderRowInGrid(bool useLabel = false)
     {
         RenderFragment input = BuildInput;
 
@@ -90,7 +90,7 @@ public class PropertyGridRowTests : Bunit.TestContext
             parameters => parameters.AddChildContent<PropertyGridRow>(
                 row => row
                     .Add(component => component.Label, GivenLabel)
-                    .Add(component => component.IsGroup, isGroup)
+                    .Add(component => component.UseLabel, useLabel)
                     .Add(component => component.ChildContent, input)));
     }
 }

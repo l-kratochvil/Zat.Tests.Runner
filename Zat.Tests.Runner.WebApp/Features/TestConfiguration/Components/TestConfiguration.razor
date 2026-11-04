@@ -90,10 +90,10 @@
 
                 @if (this.ViewModel.IsEmailNotificationEnabled)
                 {
-                    <PropertyGridRow Label="Email addresses">
+                    <PropertyGridRow Label="Email addresses" UseLabel="false">
                         <EmailAddressListEditor
                             TDataContext="TestConfigurationViewModel"
-                            Binding="@(vm => vm.EmailAddresses)"
+                            EmailAddressesBinding="@(vm => vm.EmailAddresses)"
                             OnAdd="this.ViewModel.AddEmailAddress"
                             OnRemove="this.ViewModel.RemoveEmailAddress" />
                     </PropertyGridRow>

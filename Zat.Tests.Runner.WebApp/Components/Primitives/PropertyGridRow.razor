@@ -6,32 +6,13 @@
    A group of controls is never wrapped: a label belongs to its first control only, so a click on
    the name would press whichever button happens to come first. *@
 
-@if (this.LabelFor is null && !this.IsGroup)
+@if (this.UseLabel)
 {
-    <label class="property-grid-row">
-        <span class="property-grid-row-label">@this.Label</span>
-
-        <span class="property-grid-row-value">
-            @this.ChildContent
-        </span>
-    </label>
+    <label class="property-grid-row">@this.Cells</label>
 }
 else
 {
-    <span class="property-grid-row">
-        @if (this.LabelFor is null)
-        {
-            <span class="property-grid-row-label">@this.Label</span>
-        }
-        else
-        {
-            <label class="property-grid-row-label" for="@this.LabelFor">@this.Label</label>
-        }
-
-        <span class="property-grid-row-value">
-            @this.ChildContent
-        </span>
-    </span>
+    <span class="property-grid-row">@this.Cells</span>
 }
 
 @code {
@@ -43,16 +24,10 @@ else
     public string Label { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets the identifier of an input labelled separately from the row.
-    /// </summary>
-    [Parameter]
-    public string? LabelFor { get; set; }
-
-    /// <summary>
     /// Gets or sets a value indicating whether the input is a group of controls rather than one control.
     /// </summary>
     [Parameter]
-    public bool IsGroup { get; set; }
+    public bool UseLabel { get; set; } = true;
 
     /// <summary>
     /// Gets or sets the input shown for the property.
@@ -66,6 +41,15 @@ else
     /// </summary>
     [CascadingParameter]
     private PropertyGrid? Grid { get; set; }
+
+    private RenderFragment Cells =>
+        @<text>
+            <span class="property-grid-row-label">@this.Label</span>
+
+            <span class="property-grid-row-value">
+                @this.ChildContent
+            </span>
+        </text>;
 
     /// <inheritdoc/>
     protected override void OnParametersSet()

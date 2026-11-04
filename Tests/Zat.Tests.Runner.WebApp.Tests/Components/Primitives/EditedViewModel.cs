@@ -20,12 +20,6 @@ internal sealed class EditedViewModel
 {
     private readonly Dictionary<string, Validity> validities = [];
 
-    private string? text;
-    private int number;
-    private bool isEnabled;
-    private Shade? shade;
-    private Shade requiredShade;
-
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -50,32 +44,32 @@ internal sealed class EditedViewModel
 
     public string? Text
     {
-        get => this.text;
-        set => this.Write(ref this.text, value);
+        get;
+        set => this.Write(ref field, value);
     }
 
     public int Number
     {
-        get => this.number;
-        set => this.Write(ref this.number, value);
+        get;
+        set => this.Write(ref field, value);
     }
 
     public bool IsEnabled
     {
-        get => this.isEnabled;
-        set => this.Write(ref this.isEnabled, value);
+        get;
+        set => this.Write(ref field, value);
     }
 
     public Shade? Shading
     {
-        get => this.shade;
-        set => this.Write(ref this.shade, value);
+        get;
+        set => this.Write(ref field, value);
     }
 
     public Shade RequiredShading
     {
-        get => this.requiredShade;
-        set => this.Write(ref this.requiredShade, value);
+        get;
+        set => this.Write(ref field, value);
     }
 
     /// <summary>

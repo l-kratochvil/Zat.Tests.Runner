@@ -63,7 +63,7 @@ public class TestConfigurationTests
         AddInstalledRuntimeVersions(fileSystem, GivenInstallFolderPath, "7", "6");
 
         // When:
-        using var context = CreateUnit(out var unit, fileSystem: fileSystem);
+        using var disposer = CreateUnit(out var unit, fileSystem: fileSystem);
 
         // Then:
         // The versions plus the empty choice standing for none of them.
@@ -80,7 +80,7 @@ public class TestConfigurationTests
         var testTreeStore = TreeWithOneTestCase(TestType.Application);
 
         // When:
-        using var context = CreateUnit(
+        using var disposer = CreateUnit(
             out var unit,
             testSelectionState: testSelectionState,
             testTreeStore: testTreeStore);
@@ -97,7 +97,7 @@ public class TestConfigurationTests
         var testTreeStore = TreeWithOneTestCase(TestType.Runtime);
 
         // When:
-        using var context = CreateUnit(
+        using var disposer = CreateUnit(
             out var unit,
             testSelectionState: testSelectionState,
             testTreeStore: testTreeStore);
@@ -114,7 +114,7 @@ public class TestConfigurationTests
         var testSelectionState = new Mock<IState<TestDiscoveryState>>();
         testSelectionState.SetupGet(state => state.Value).Returns(() => testSelection);
 
-        using var context = CreateUnit(
+        using var disposer = CreateUnit(
             out var unit,
             testSelectionState: testSelectionState.Object,
             testTreeStore: TreeWithOneTestCase(TestType.Runtime));
@@ -131,7 +131,7 @@ public class TestConfigurationTests
     public void Render__WhenResultDoesNotGoToTestLink__ThenShouldHideIdeVersion()
     {
         // Given & When:
-        using var context = CreateUnit(out var unit);
+        using var disposer = CreateUnit(out var unit);
 
         // Then:
         Assert.That(unit.FindAll(IdeVersionSelector), Is.Empty);
@@ -141,7 +141,7 @@ public class TestConfigurationTests
     public void Render__WhenResultDoesNotGoToTestLink__ThenShouldShowOnlyDebugMode()
     {
         // Given & When:
-        using var context = CreateUnit(out var unit);
+        using var disposer = CreateUnit(out var unit);
 
         // Then:
         using (Assert.EnterMultipleScope())
@@ -158,7 +158,7 @@ public class TestConfigurationTests
     public void OnTestLinkEnabled__WhenResultIsToGoToTestLink__ThenShouldShowReleaseDatesAndBetaCheckbox()
     {
         // Given:
-        using var context = CreateUnit(out var unit);
+        using var disposer = CreateUnit(out var unit);
 
         // When:
         unit.Find(TestLinkSelector).Change(true);
@@ -177,7 +177,7 @@ public class TestConfigurationTests
     public void OnBetaEnabled__WhenTestedBuildIsBeta__ThenShouldShowBetaNumber()
     {
         // Given:
-        using var context = CreateUnit(out var unit);
+        using var disposer = CreateUnit(out var unit);
         unit.Find(TestLinkSelector).Change(true);
 
         // When:
@@ -193,7 +193,7 @@ public class TestConfigurationTests
         // Given:
         // The version is what the result is filed under, so it is shown exactly when there is
         // somewhere to file it.
-        using var context = CreateUnit(out var unit);
+        using var disposer = CreateUnit(out var unit);
 
         // When:
         unit.Find(TestLinkSelector).Change(true);
@@ -206,7 +206,7 @@ public class TestConfigurationTests
     public void OnTestLinkDisabled__WhenResultIsNotToGoToTestLinkAfterAll__ThenShouldHideIdeVersion()
     {
         // Given:
-        using var context = CreateUnit(out var unit);
+        using var disposer = CreateUnit(out var unit);
         unit.Find(TestLinkSelector).Change(true);
 
         // When:
@@ -230,7 +230,7 @@ public class TestConfigurationTests
     public void OnIdeVersionTyped__WhenWhatWasTypedIsNotVersion__ThenShouldDisplayError()
     {
         // Given:
-        using var context = CreateUnit(out var unit);
+        using var disposer = CreateUnit(out var unit);
         unit.Find(TestLinkSelector).Change(true);
 
         // When:
@@ -253,7 +253,7 @@ public class TestConfigurationTests
             .SetupGet(store => store.Current)
             .Returns(new AppSettingsState(GivenInstallFolderPath));
 
-        using var context = CreateUnit(
+        using var disposer = CreateUnit(
             out var unit,
             appSettingsStore: appSettingsStore.Object,
             fileSystem: fileSystem);
