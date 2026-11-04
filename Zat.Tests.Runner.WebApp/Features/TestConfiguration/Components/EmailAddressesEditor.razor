@@ -6,32 +6,39 @@
 
 @typeparam TDataContext where TDataContext : class, INotifyPropertyChanged, INotifyDataInfo
 
-@inherits Zat.Tests.Runner.WebApp.Components.MvvmComponentBase<EmailAddressListEditorViewModel>
+@inherits Zat.Tests.Runner.WebApp.Components.MvvmComponentBase<EmailAddressesEditorViewModel>
 
-<BindingItemList TDataContext="TDataContext"
-                 Binding="this.EmailAddressesBinding"
-                 OnRemove="this.OnRemove"
-                 OnAdd="this.ViewModel.BeginAdd"
-                 IsAdding="this.ViewModel.IsEditing">
-    <DataContext Data="this.ViewModel">
+<DataContext Data="this.ViewModel">
+    <BindingItemList TDataContext="TDataContext"
+                     Binding="this.EmailAddressesBinding"
+                     OnRemove="this.OnRemove"
+                     OnAdd="this.ViewModel.BeginAdd"
+                     IsAddEnabled="!this.ViewModel.IsEditing"
+                     IsRemoveEnabled="!this.ViewModel.IsEditing"/>
+
+    @if (this.ViewModel.IsEditing)
+    {
         <span class="d-flex align-items-start gap-1">
             <span class="flex-grow-1">
                 <BindingInput Class="input-email-address"
-                              Binding="@(vm => vm.EmailAddress)"
-                              BindingEvent="BindingEvent.OnInput"
-                              aria-label="New email address"
-                              Placeholder="name@zat.cz" />
+                                Binding="@(vm => vm.EmailAddress)"
+                                BindingEvent="BindingEvent.OnInput"
+                                aria-label="New email address"
+                                Placeholder="name@zat.cz" />
             </span>
+
             <button type="button"
                     class="btn btn-outline-primary btn-sm"
                     disabled="@(!this.ViewModel.CanConfirm)"
                     @onclick="this.ConfirmAsync">OK</button>
+
             <button type="button"
                     class="btn btn-outline-secondary btn-sm"
                     @onclick="this.ViewModel.Cancel">Cancel</button>
         </span>
-    </DataContext>
-</BindingItemList>
+
+    }
+</DataContext>
 
 @code {
     private Func<TDataContext, IReadOnlyList<string>> readEmailAddresses = null!;
@@ -51,12 +58,14 @@
     [CascadingParameter]
     public required TDataContext ParentDataContext { get; set; }
 
-    protected override EmailAddressListEditorViewModel ViewModel { get; set; } = null!;
+    protected override EmailAddressesEditorViewModel ViewModel { get; set; } = null!;
 
     protected override void OnInitialized()
     {
         this.readEmailAddresses = this.EmailAddressesBinding.Compile();
-        this.ViewModel = new EmailAddressListEditorViewModel(() => this.readEmailAddresses(this.ParentDataContext));
+        this.ViewModel = new EmailAddressesEditorViewModel(
+            () => this.readEmailAddresses(this.ParentDataContext));
+            
         base.OnInitialized();
     }
 

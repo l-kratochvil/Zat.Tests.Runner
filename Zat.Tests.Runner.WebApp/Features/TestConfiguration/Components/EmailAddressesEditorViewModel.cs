@@ -14,12 +14,12 @@ using Zat.Tests.Runner.WebApp.Shared.ViewModel;
 /// <remarks>
 /// Owned by one editor, so the address being typed is never shared with, nor overwritten by, another.
 /// </remarks>
-public sealed class EmailAddressListEditorViewModel : ViewModelBase
+public sealed class EmailAddressesEditorViewModel : ViewModelBase
 {
     private readonly Func<IReadOnlyList<string>> readAddresses;
 
     /// <param name="readAddresses">Reads the recipients currently listed.</param>
-    public EmailAddressListEditorViewModel(Func<IReadOnlyList<string>> readAddresses)
+    public EmailAddressesEditorViewModel(Func<IReadOnlyList<string>> readAddresses)
     {
         this.readAddresses = readAddresses;
 

@@ -18,13 +18,9 @@
                 <button type="button"
                         class="btn btn-outline-secondary btn-sm"
                         aria-label="@($"Remove {item}")"
+                        disabled="@(!this.IsRemoveEnabled)"
                         @onclick="() => this.OnRemove.InvokeAsync(item)">Remove</button>
             </span>
-        }
-
-        @if (this.IsAdding)
-        {
-            @this.ChildContent
         }
 
         @if (this.OnAdd.HasDelegate)
@@ -32,7 +28,7 @@
             <span>
                 <button type="button"
                         class="btn btn-outline-secondary btn-sm"
-                        disabled="@this.IsAdding"
+                        disabled="@(!this.IsAddEnabled)"
                         @onclick="() => this.OnAdd.InvokeAsync()">Add</button>
             </span>
         }
@@ -57,16 +53,16 @@
     public EventCallback OnAdd { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether an item is being added, which disables Add and shows <see cref="ChildContent"/>.
+    /// Gets or sets a
     /// </summary>
     [Parameter]
-    public bool IsAdding { get; set; }
-
+    public bool IsAddEnabled { get; set; } = true;
+    
     /// <summary>
-    /// Gets or sets the form an item is added through.
+    /// Gets or sets a
     /// </summary>
     [Parameter]
-    public RenderFragment? ChildContent { get; set; }
+    public bool IsRemoveEnabled { get; set; } = true;
 
     private IReadOnlyList<string> Items
         => this.readItems?.Invoke(this.ViewModel) ?? [];
