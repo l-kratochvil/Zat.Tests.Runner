@@ -31,68 +31,74 @@
                 </PropertyGridRow>
             }
 
-            <PropertyGridRow Label="Report to TestLink">
-                <BindingCheckbox 
-                    Class="input-report-to-testlink"
-                    Binding="@(vm => vm.IsTestLinkReportEnabled)" />
-            </PropertyGridRow>
-
-            @if (this.ViewModel.IsTestLinkReportEnabled)
-            {               
-                <PropertyGridRow Label="IDE version">
-                    <BindingInput 
-                        Class="input-ide-version"
-                        Binding="@(vm => vm.IdeVersion)"
-                        Placeholder="X.Y.Z" />               
-                </PropertyGridRow>
-
-                <PropertyGridRow Label="IDE release date">
-                    <BindingInput
-                        Class="input-ide-release-date"
-                        Binding="@(vm => vm.IdeReleaseDate)"
-                        Placeholder="DD.MM.YYYY" />
-                </PropertyGridRow>
-
-                <PropertyGridRow Label="Runtime release date">
-                    <BindingInput
-                        Class="input-runtime-release-date"
-                        Binding="@(vm => vm.RuntimeReleaseDate)"
-                        Placeholder="DD.MM.YYYY" />
-                </PropertyGridRow>
-
-                <PropertyGridRow Label="Beta version">
+            <Group>
+                <PropertyGridRow Label="Report to TestLink">
                     <BindingCheckbox
-                        Class="input-is-beta-version"
-                        Binding="@(vm => vm.IsBetaVersion)" />
+                        Class="input-report-to-testlink"
+                        Binding="@(vm => vm.IsTestLinkReportEnabled)" />
                 </PropertyGridRow>
 
-                @if (this.ViewModel.IsBetaVersion)
+                @if (this.ViewModel.IsTestLinkReportEnabled)
                 {
-                    <PropertyGridRow Label="Beta number">
+                    <PropertyGridRow Label="IDE version">
                         <BindingInput
-                            Class="input-beta-version"
-                            Binding="@(vm => vm.BetaVersion)"
-                            Placeholder="N" />
+                            Class="input-ide-version"
+                            Binding="@(vm => vm.IdeVersion)"
+                            Placeholder="X.Y.Z" />
+                    </PropertyGridRow>
+
+                    <PropertyGridRow Label="IDE release date">
+                        <BindingInput
+                            Class="input-ide-release-date"
+                            Binding="@(vm => vm.IdeReleaseDate)"
+                            Placeholder="DD.MM.YYYY" />
+                    </PropertyGridRow>
+
+                    <PropertyGridRow Label="Runtime release date">
+                        <BindingInput
+                            Class="input-runtime-release-date"
+                            Binding="@(vm => vm.RuntimeReleaseDate)"
+                            Placeholder="DD.MM.YYYY" />
+                    </PropertyGridRow>
+
+                    <Group>
+                        <PropertyGridRow Label="Beta version">
+                            <BindingCheckbox
+                                Class="input-is-beta-version"
+                                Binding="@(vm => vm.IsBetaVersion)" />
+                        </PropertyGridRow>
+
+                        @if (this.ViewModel.IsBetaVersion)
+                        {
+                            <PropertyGridRow Label="Beta number">
+                                <BindingInput
+                                    Class="input-beta-version"
+                                    Binding="@(vm => vm.BetaVersion)"
+                                    Placeholder="N" />
+                            </PropertyGridRow>
+                        }
+                    </Group>
+                }
+            </Group>
+
+            <Group>
+                <PropertyGridRow Label="Report by email">
+                    <BindingCheckbox
+                        Class="input-report-by-email"
+                        Binding="@(vm => vm.IsEmailNotificationEnabled)" />
+                </PropertyGridRow>
+
+                @if (this.ViewModel.IsEmailNotificationEnabled)
+                {
+                    <PropertyGridRow Label="Email addresses">
+                        <EmailAddressListEditor
+                            TDataContext="TestConfigurationViewModel"
+                            Binding="@(vm => vm.EmailAddresses)"
+                            OnAdd="this.ViewModel.AddEmailAddress"
+                            OnRemove="this.ViewModel.RemoveEmailAddress" />
                     </PropertyGridRow>
                 }
-            }
-
-            <PropertyGridRow Label="Report by email">
-                <BindingCheckbox
-                    Class="input-report-by-email"
-                    Binding="@(vm => vm.IsEmailNotificationEnabled)" />
-            </PropertyGridRow>
-
-            @if (this.ViewModel.IsEmailNotificationEnabled)
-            {
-                <PropertyGridRow Label="Email addresses" IsGroup="true">
-                    <EmailAddressListEditor
-                        TDataContext="TestConfigurationViewModel"
-                        EmailAddressesBinding="@(vm => vm.EmailAddresses)"
-                        OnAdd="this.ViewModel.AddEmailAddress"
-                        OnRemove="this.ViewModel.RemoveEmailAddress" />
-                </PropertyGridRow>
-            }
+            </Group>
 
             <PropertyGridRow Label="Debug mode">
                 <BindingCheckbox

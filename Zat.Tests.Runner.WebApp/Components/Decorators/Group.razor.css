@@ -1,0 +1,17 @@
+.group {
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 0.375rem;
+    padding: 0.5rem 0.75rem;
+}
+
+/* Inside a property grid the group spans all its columns and reuses them, so the labels inside
+   stay in one column with the labels outside. */
+.property-grid > .group,
+.property-grid .group > .group {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    column-gap: inherit;
+    row-gap: 0.5rem;
+    align-items: baseline;
+}

@@ -1,0 +1,24 @@
+@* A frame around content that belongs together, e.g. a switch and the settings it reveals.
+
+   The group only draws the frame; how the framed content is laid out is left to the content, and
+   inside a property grid the group takes over the grid columns so its rows stay aligned with the
+   rows around it. *@
+
+<div class="@($"group {this.Class}")">
+    @this.ChildContent
+</div>
+
+@code {
+    /// <summary>
+    /// Gets or sets the content framed by the group.
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>
+    /// Gets or sets additional CSS classes of the group element.
+    /// </summary>
+    [Parameter]
+    public string? Class { get; set; }
+}
