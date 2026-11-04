@@ -10,11 +10,11 @@ using Fluxor;
 
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Net.Services;
+using Zat.Tests.Runner.Common.Net.Validation;
 using Zat.Tests.Runner.WebApp.Shared.Stores.AppSettings;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
 using Zat.Tests.Runner.WebApp.Shared.ViewModel;
-
 using Zat.Z2xxTests.Common.Model;
 
 /// <summary>
@@ -79,28 +79,52 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
     /// </summary>
     public IReadOnlyList<string> RuntimeVersions { get; private set; }
 
-    public string? RuntimeVersion
-    {
-        get => this.RuntimeVersionState.Value;
-        set => this.RuntimeVersionState.Value = value;
-    }
+    /// <summary>
+    /// Gets the email notification recipients.
+    /// </summary>
+    public IReadOnlyList<string> EmailAddresses
+        => this.EmailAddressesState.Value;
 
-    public Version? IdeVersion
-    {
-        get => this.IdeVersionState.Value;
-        set => this.IdeVersionState.Value = value;
-    }
-
-    public HwAssemblyType? TestedHwAssembly
-    {
-        get => this.TestedHwAssemblyState.Value;
-        set => this.TestedHwAssemblyState.Value = value;
-    }
-
+    /// <summary>
+    /// Gets or sets a value indicating whether the TestLink report is enabled.
+    /// </summary>
     public bool IsTestLinkReportEnabled
     {
         get => this.IsTestLinkReportEnabledState.Value;
         set => this.IsTestLinkReportEnabledState.Value = value;
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the test result is emailed.
+    /// </summary>
+    public bool IsEmailNotificationEnabled
+    {
+        get => this.IsEmailNotificationEnabledState.Value;
+        set => this.IsEmailNotificationEnabledState.Value = value;
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the debug mode is enabled.
+    /// </summary>
+    public bool IsDebugModeEnabled
+    {
+        get => this.IsDebugModeEnabledState.Value;
+        set => this.IsDebugModeEnabledState.Value = value;
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the versions are beta.
+    /// </summary>
+    public bool IsBetaVersion
+    {
+        get => this.IsBetaVersionState.Value;
+        set => this.IsBetaVersionState.Value = value;
+    }
+
+    public string? RuntimeVersion
+    {
+        get => this.RuntimeVersionState.Value;
+        set => this.RuntimeVersionState.Value = value;
     }
 
     public string? IdeReleaseDate
@@ -115,86 +139,120 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
         set => this.RuntimeReleaseDateState.Value = value;
     }
 
-    public bool IsBetaVersion
-    {
-        get => this.IsBetaVersionState.Value;
-        set => this.IsBetaVersionState.Value = value;
-    }
-
     public string? BetaVersion
     {
         get => this.BetaVersionState.Value;
         set => this.BetaVersionState.Value = value;
     }
 
-    public bool IsDebugModeEnabled
+    public Version? IdeVersion
     {
-        get => this.IsDebugModeEnabledState.Value;
-        set => this.IsDebugModeEnabledState.Value = value;
+        get => this.IdeVersionState.Value;
+        set => this.IdeVersionState.Value = value;
+    }
+
+    public HwAssemblyType? TestedHwAssembly
+    {
+        get => this.TestedHwAssemblyState.Value;
+        set => this.TestedHwAssemblyState.Value = value;
     }
 
     private StateBinding<string?> RuntimeVersionState
         => field ??= this.stateBinder.Bind(
-                selectValue: static s => s.RuntimeVersion,
-                property: static vm => vm.RuntimeVersion,
-                writeValue: value => this.dispatcher.Dispatch(
-                    new DataChangedAction(NewRuntimeVersion: new ValueChange<string?>(value))));
+            selectValue: static s => s.RuntimeVersion,
+            property: static vm => vm.RuntimeVersion,
+            writeValue: value => this.dispatcher.Dispatch(
+                new DataChangedAction(NewRuntimeVersion: new ValueChange<string?>(value))));
 
     private StateBinding<Version?> IdeVersionState
         => field ??= this.stateBinder.Bind(
-                selectValue: static s => s.IdeVersion,
-                property: static vm => vm.IdeVersion,
-                writeValue: value => this.dispatcher.Dispatch(
-                    new DataChangedAction(NewIdeVersion: new ValueChange<Version?>(value))));
+            selectValue: static s => s.IdeVersion,
+            property: static vm => vm.IdeVersion,
+            writeValue: value => this.dispatcher.Dispatch(
+                new DataChangedAction(NewIdeVersion: new ValueChange<Version?>(value))));
 
     private StateBinding<HwAssemblyType?> TestedHwAssemblyState
         => field ??= this.stateBinder.Bind(
-                selectValue: static s => s.TestedHwAssembly,
-                property: static vm => vm.TestedHwAssembly,
-                writeValue: value => this.dispatcher.Dispatch(
-                    new DataChangedAction(NewTestedHwAssembly: new ValueChange<HwAssemblyType?>(value))));
+            selectValue: static s => s.TestedHwAssembly,
+            property: static vm => vm.TestedHwAssembly,
+            writeValue: value => this.dispatcher.Dispatch(
+                new DataChangedAction(NewTestedHwAssembly: new ValueChange<HwAssemblyType?>(value))));
 
     private StateBinding<bool> IsTestLinkReportEnabledState
         => field ??= this.stateBinder.Bind(
-                selectValue: static s => s.IsTestLinkReportEnabled,
-                property: static vm => vm.IsTestLinkReportEnabled,
-                writeValue: value => this.dispatcher.Dispatch(
-                    new DataChangedAction(NewIsTestLinkReportEnabled: new ValueChange<bool>(value))));
+            selectValue: static s => s.IsTestLinkReportEnabled,
+            property: static vm => vm.IsTestLinkReportEnabled,
+            writeValue: value => this.dispatcher.Dispatch(
+                new DataChangedAction(NewIsTestLinkReportEnabled: new ValueChange<bool>(value))));
+
+    private StateBinding<bool> IsEmailNotificationEnabledState
+        => field ??= this.stateBinder.Bind(
+            selectValue: static s => s.IsEmailNotificationEnabled,
+            property: static vm => vm.IsEmailNotificationEnabled,
+            writeValue: value => this.dispatcher.Dispatch(
+                new DataChangedAction(NewIsEmailNotificationEnabled: new ValueChange<bool>(value))));
+
+    private StateBinding<IReadOnlyList<string>> EmailAddressesState
+        => field ??= this.stateBinder.Bind(
+            selectValue: static s => s.EmailAddresses,
+            property: static vm => vm.EmailAddresses,
+            writeValue: value => this.dispatcher.Dispatch(
+                new DataChangedAction(NewEmailAddresses: new ValueChange<string[]>([.. value]))));
 
     private StateBinding<string?> IdeReleaseDateState
         => field ??= this.stateBinder.Bind(
-                selectValue: static s => s.IdeReleaseDate,
-                property: static vm => vm.IdeReleaseDate,
-                writeValue: value => this.dispatcher.Dispatch(
-                    new DataChangedAction(NewIdeReleaseDate: new ValueChange<string?>(value))));
+            selectValue: static s => s.IdeReleaseDate,
+            property: static vm => vm.IdeReleaseDate,
+            writeValue: value => this.dispatcher.Dispatch(
+                new DataChangedAction(NewIdeReleaseDate: new ValueChange<string?>(value))));
 
     private StateBinding<string?> RuntimeReleaseDateState
         => field ??= this.stateBinder.Bind(
-                selectValue: static s => s.RuntimeReleaseDate,
-                property: static vm => vm.RuntimeReleaseDate,
-                writeValue: value => this.dispatcher.Dispatch(
-                    new DataChangedAction(NewRuntimeReleaseDate: new ValueChange<string?>(value))));
+            selectValue: static s => s.RuntimeReleaseDate,
+            property: static vm => vm.RuntimeReleaseDate,
+            writeValue: value => this.dispatcher.Dispatch(
+                new DataChangedAction(NewRuntimeReleaseDate: new ValueChange<string?>(value))));
 
     private StateBinding<bool> IsBetaVersionState
         => field ??= this.stateBinder.Bind(
-                selectValue: static s => s.IsBetaVersion,
-                property: static vm => vm.IsBetaVersion,
-                writeValue: value => this.dispatcher.Dispatch(
-                    new DataChangedAction(NewIsBetaVersion: new ValueChange<bool>(value))));
+            selectValue: static s => s.IsBetaVersion,
+            property: static vm => vm.IsBetaVersion,
+            writeValue: value => this.dispatcher.Dispatch(
+                new DataChangedAction(NewIsBetaVersion: new ValueChange<bool>(value))));
 
     private StateBinding<string?> BetaVersionState
         => field ??= this.stateBinder.Bind(
-                selectValue: static s => s.BetaVersion,
-                property: static vm => vm.BetaVersion,
-                writeValue: value => this.dispatcher.Dispatch(
-                    new DataChangedAction(NewBetaVersion: new ValueChange<string?>(value))));
+            selectValue: static s => s.BetaVersion,
+            property: static vm => vm.BetaVersion,
+            writeValue: value => this.dispatcher.Dispatch(
+                new DataChangedAction(NewBetaVersion: new ValueChange<string?>(value))));
 
     private StateBinding<bool> IsDebugModeEnabledState
         => field ??= this.stateBinder.Bind(
-                selectValue: static s => s.IsDebugModeEnabled,
-                property: static vm => vm.IsDebugModeEnabled,
-                writeValue: value => this.dispatcher.Dispatch(
-                    new DataChangedAction(NewIsDebugModeEnabled: new ValueChange<bool>(value))));
+            selectValue: static s => s.IsDebugModeEnabled,
+            property: static vm => vm.IsDebugModeEnabled,
+            writeValue: value => this.dispatcher.Dispatch(
+                new DataChangedAction(NewIsDebugModeEnabled: new ValueChange<bool>(value))));
+
+    /// <summary>
+    /// Appends one recipient; what is wrong with it is reported by the validation of <see cref="EmailAddresses"/>.
+    /// </summary>
+    /// <param name="address">The address to append.</param>
+    public void AddEmailAddress(string address)
+        => this.EmailAddressesState.Value = [.. this.EmailAddresses, address];
+
+    /// <summary>
+    /// Removes one recipient.
+    /// </summary>
+    /// <param name="address">The address to remove.</param>
+    public void RemoveEmailAddress(string address)
+    {
+        var addresses = this.EmailAddresses.ToList();
+        if (addresses.Remove(address))
+        {
+            this.EmailAddressesState.Value = addresses;
+        }
+    }
 
     /// <inheritdoc/>
     public void Dispose()
@@ -214,7 +272,7 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
     private static IReadOnlyList<string> OrderRuntimeVersions(IEnumerable<string> folderNames)
         =>
         [
-            ..folderNames
+            .. folderNames
                 .Where(static name => !string.IsNullOrEmpty(name) && LeadingNumber().IsMatch(name))
                 .OrderBy(static name => int.TryParse(name, out var parsed) ? parsed : char.MaxValue)
                 .ThenBy(static name =>
@@ -227,12 +285,12 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
 
     private static bool IsDateOrEmpty(string? text)
         => string.IsNullOrEmpty(text)
-            || DateTime.TryParseExact(
-                text,
-                DateFormat,
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.None,
-                out _);
+           || DateTime.TryParseExact(
+               text,
+               DateFormat,
+               CultureInfo.InvariantCulture,
+               DateTimeStyles.None,
+               out _);
 
     // Semantic versioning with the patch left out, which is how the IDE versions are written down.
     [GeneratedRegex(@"^\d+\.\d+(\.\d+)?$")]
@@ -281,6 +339,20 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
                     .Must(static x => string.IsNullOrEmpty(x) || int.TryParse(x, out _))
                     .When(static x => x.IsTestLinkReportEnabled && x.IsBetaVersion)
                     .WithMessage("Write the beta number as a whole number, for example 3.");
+
+                validator
+                    .RuleFor(static x => x.EmailAddresses)
+                    .Custom(static (addresses, context) =>
+                    {
+                        foreach (var address in addresses)
+                        {
+                            if (EmailAddressValidators.Validate(address).TryGetError(out var error))
+                            {
+                                context.AddFailure($"{address}: {error}");
+                            }
+                        }
+                    })
+                    .When(static x => x.IsEmailNotificationEnabled);
             });
 
     private IReadOnlyList<string> ReadRuntimeVersions(string installFolderPath)
@@ -290,7 +362,7 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
         {
             folderNames =
             [
-                ..this.fileSystem.Directory
+                .. this.fileSystem.Directory
                     .GetDirectories(installFolderPath)
                     .Select(this.fileSystem.Path.GetFileName)
                     .OfType<string>()

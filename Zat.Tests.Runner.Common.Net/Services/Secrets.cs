@@ -4,8 +4,10 @@ namespace Zat.Tests.Runner.Common.Net.Services;
 /// Represents the user secrets.
 /// </summary>
 /// <param name="SmtpAuth">The SMTP authentication credentials.</param>
+/// <param name="TestLinkApi">The TestLink API secrets.</param>
 public record Secrets(
-    SmtpAuth SmtpAuth);
+    SmtpAuth SmtpAuth,
+    TestLinkApi TestLinkApi);
 
 /// <summary>
 /// Represents SMTP authentication credentials.
@@ -15,3 +17,10 @@ public record Secrets(
 public record SmtpAuth(
     string UserName,
     string Password);
+
+/// <summary>
+/// Represents TestLink configuration.
+/// </summary>
+/// <param name="ApiKey">The TestLink API key.</param>
+public record TestLinkApi(
+    string ApiKey);

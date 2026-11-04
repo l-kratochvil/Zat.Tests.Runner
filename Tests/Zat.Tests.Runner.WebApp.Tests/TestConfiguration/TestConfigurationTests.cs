@@ -43,6 +43,7 @@ public class TestConfigurationTests
     private const string RuntimeReleaseDateSelector = ".input-runtime-release-date";
     private const string BetaSelector = ".input-is-beta-version";
     private const string BetaNumberSelector = ".input-beta-version";
+    private const string EmailSelector = ".input-report-by-email";
     private const string DebugModeSelector = ".input-debug-mode";
     private const string ErrorMessageSelector = ".validity-message.is-error";
 
@@ -213,6 +214,16 @@ public class TestConfigurationTests
 
         // Then:
         Assert.That(unit.FindAll(IdeVersionSelector), Is.Empty);
+    }
+
+    [Test]
+    public void OnEmailNotificationEnabled__WhenResultIsToGoByEmail__ThenShouldRender()
+    {
+        // Given:
+        using var dependencies = CreateUnit(out var unit);
+
+        // When & Then:
+        Assert.DoesNotThrow(() => unit.Find(EmailSelector).Change(true));
     }
 
     [Test]

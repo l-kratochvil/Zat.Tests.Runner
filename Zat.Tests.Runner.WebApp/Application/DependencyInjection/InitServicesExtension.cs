@@ -48,6 +48,8 @@ public static class InitServicesExtension
                 .AddScoped<ITestResultHandler, TestResultHandler>()
                 .AddScoped<ITestResultHandler, TestLinkResultHandler>()
                 .AddScoped<TestLinkResultHandler.IContext, TestLinkResultHandlerContext>()
+                .AddScoped<ITestResultHandler, EmailResultHandler>()
+                .AddScoped<EmailResultHandler.IContext, EmailResultHandlerContext>()
                 .AddScoped<WeakReferenceMessenger>()
                 .AddSingleton<BrowserLogger>();
 

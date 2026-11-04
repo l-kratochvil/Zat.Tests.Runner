@@ -34,7 +34,9 @@ public class EmailResultHandlerTests
         var secretsProviderMock = new Mock<ISecretsProvider>();
         secretsProviderMock
             .Setup(x => x.GetSecrets())
-            .Returns(new Secrets(new SmtpAuth("smtp-user", "smtp-password")));
+            .Returns(new Secrets(
+                new SmtpAuth("smtp-user", "smtp-password"),
+                new TestLinkApi(string.Empty)));
 
         this.SetupHandlerContext(enabled: true, "first@zat.cz", "second@zat.cz");
 

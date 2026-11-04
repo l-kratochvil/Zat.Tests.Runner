@@ -2,15 +2,37 @@
 
    The name and the input are wrapped in one label element so that the label belongs to the input
    without anybody writing an identifier for the two to agree on; the wrapper is laid out as if it
-   were not there, which is what keeps every label in one column and every input in the other. *@
+   were not there, which is what keeps every label in one column and every input in the other.
+   A group of controls is never wrapped: a label belongs to its first control only, so a click on
+   the name would press whichever button happens to come first. *@
 
-<label class="property-grid-row">
-    <span class="property-grid-row-label">@this.Label</span>
+@if (this.LabelFor is null && !this.IsGroup)
+{
+    <label class="property-grid-row">
+        <span class="property-grid-row-label">@this.Label</span>
 
-    <span class="property-grid-row-value">
-        @this.ChildContent
+        <span class="property-grid-row-value">
+            @this.ChildContent
+        </span>
+    </label>
+}
+else
+{
+    <span class="property-grid-row">
+        @if (this.LabelFor is null)
+        {
+            <span class="property-grid-row-label">@this.Label</span>
+        }
+        else
+        {
+            <label class="property-grid-row-label" for="@this.LabelFor">@this.Label</label>
+        }
+
+        <span class="property-grid-row-value">
+            @this.ChildContent
+        </span>
     </span>
-</label>
+}
 
 @code {
     /// <summary>
@@ -19,6 +41,18 @@
     [Parameter]
     [EditorRequired]
     public string Label { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the identifier of an input labelled separately from the row.
+    /// </summary>
+    [Parameter]
+    public string? LabelFor { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the input is a group of controls rather than one control.
+    /// </summary>
+    [Parameter]
+    public bool IsGroup { get; set; }
 
     /// <summary>
     /// Gets or sets the input shown for the property.

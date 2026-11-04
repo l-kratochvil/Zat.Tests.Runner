@@ -69,6 +69,17 @@ public class MvvmComponentBaseTests : Bunit.TestContext
         Assert.That(component.RenderCount, Is.EqualTo(1));
     }
 
+    [Test]
+    public void DisposeAsync__WhenComponentWasNeverInitialized__ThenShouldNotThrow()
+    {
+        // Given:
+        // A component whose parameters failed to be set is disposed without ever being initialized.
+        var component = new UnlimitedComponent();
+
+        // When & Then:
+        Assert.DoesNotThrowAsync(async () => await component.DisposeAsync());
+    }
+
     private IRenderedComponent<TComponent> Render<TComponent>()
         where TComponent : MvvmComponentBase<EditedViewModel>
         => this.RenderComponent<TComponent>(parameters => parameters.AddCascadingValue(this.viewModel));

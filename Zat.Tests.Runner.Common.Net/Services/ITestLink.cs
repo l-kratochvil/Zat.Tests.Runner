@@ -48,13 +48,11 @@ public interface ITestLink
     TestPlatform[] GetTestPlanPlatforms(int testPlanId);
 
     public record Config(
-        string ApiKey,
         string XmlRpcServerUrl,
         bool LoggingEnabled)
     {
         public static Config Default
             => new(
-                ApiKey: "dc7a17e14a9f1879d38583a38c3a81e8",
                 XmlRpcServerUrl: "https://vyvoj.zat.lan/tester/testlink/lib/api/xmlrpc/v1/xmlrpc.php",
                 LoggingEnabled: false);
     }

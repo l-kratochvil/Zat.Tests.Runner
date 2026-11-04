@@ -235,12 +235,12 @@ internal class RunTestScreen(
 
             if (!string.IsNullOrEmpty(detail?.Message))
             {
-                sb.AppendLine(detail.Message.EscapeMarkup());
+                sb.AppendLine(detail.Message.ToConsoleSafeText().EscapeMarkup());
             }
 
             if (includeStackTrace && !string.IsNullOrEmpty(detail?.StackTrace))
             {
-                sb.AppendLine(detail.StackTrace.EscapeMarkup());
+                sb.AppendLine(detail.StackTrace.ToConsoleSafeText().EscapeMarkup());
             }
         }
     }

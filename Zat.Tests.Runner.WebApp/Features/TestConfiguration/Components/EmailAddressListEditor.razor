@@ -1,0 +1,70 @@
+@* Edits an email recipient list: removes recipients and adds new ones through a confirmed form. *@
+
+@using System.ComponentModel
+@using System.Linq.Expressions
+@using Zat.Tests.Runner.WebApp.Shared.ViewModel
+
+@typeparam TDataContext where TDataContext : class, INotifyPropertyChanged, INotifyDataInfo
+
+@inherits Zat.Tests.Runner.WebApp.Components.MvvmComponentBase<EmailAddressListEditorViewModel>
+
+<BindingItemList TDataContext="TDataContext"
+                 Binding="this.EmailAddressesBinding"
+                 OnRemove="this.OnRemove"
+                 OnAdd="this.ViewModel.BeginAdd"
+                 IsAdding="this.ViewModel.IsEditing">
+    <DataContext Data="this.ViewModel">
+        <span class="d-flex align-items-start gap-1">
+            <span class="flex-grow-1">
+                <BindingInput Class="input-email-address"
+                              Binding="@(vm => vm.EmailAddress)"
+                              BindingEvent="BindingEvent.OnInput"
+                              aria-label="New email address"
+                              Placeholder="name@zat.cz" />
+            </span>
+            <button type="button"
+                    class="btn btn-outline-primary btn-sm"
+                    disabled="@(!this.ViewModel.CanConfirm)"
+                    @onclick="this.ConfirmAsync">OK</button>
+            <button type="button"
+                    class="btn btn-outline-secondary btn-sm"
+                    @onclick="this.ViewModel.Cancel">Cancel</button>
+        </span>
+    </DataContext>
+</BindingItemList>
+
+@code {
+    private Func<TDataContext, IReadOnlyList<string>> readEmailAddresses = null!;
+
+    [Parameter, EditorRequired]
+    public required Expression<Func<TDataContext, IReadOnlyList<string>>> EmailAddressesBinding { get; set; }
+
+    /// <summary>
+    /// Gets or sets what receives a confirmed address.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public EventCallback<string> OnAdd { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<string> OnRemove { get; set; }
+
+    [CascadingParameter]
+    public required TDataContext ParentDataContext { get; set; }
+
+    protected override EmailAddressListEditorViewModel ViewModel { get; set; } = null!;
+
+    protected override void OnInitialized()
+    {
+        this.readEmailAddresses = this.EmailAddressesBinding.Compile();
+        this.ViewModel = new EmailAddressListEditorViewModel(() => this.readEmailAddresses(this.ParentDataContext));
+        base.OnInitialized();
+    }
+
+    private async Task ConfirmAsync()
+    {
+        if (this.ViewModel.Confirm().TryGetValue(out var address))
+        {
+            await this.OnAdd.InvokeAsync(address);
+        }
+    }
+}

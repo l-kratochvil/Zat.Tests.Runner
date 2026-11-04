@@ -62,14 +62,14 @@ internal class SettingsScreen(
                             if (string.IsNullOrWhiteSpace(path))
                             {
                                 return Resources.PathCanNotBeEmpty_ErrorMessage
-                                    .Pipe(TextFormattors.AsErrorText)
+                                    .AsErrorText()
                                     .Pipe(ValidationResult.Error);
                             }
 
                             if (!Directory.Exists(path))
                             {
                                 return Resources.PathDoesNotExist_ErrorMessage
-                                    .Pipe(TextFormattors.AsErrorText)
+                                    .AsErrorText()
                                     .Pipe(ValidationResult.Error);
                             }
 

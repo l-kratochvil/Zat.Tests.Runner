@@ -53,6 +53,16 @@ public record TestConfigurationState(
     }
 
     /// <summary>
+    /// Gets a value indicating whether the test result is emailed to the listed addresses.
+    /// </summary>
+    public bool IsEmailNotificationEnabled { get; init; }
+
+    /// <summary>
+    /// Gets the addresses the test result is emailed to.
+    /// </summary>
+    public string[] EmailAddresses { get; init; } = [];
+
+    /// <summary>
     /// Gets a value indicating whether the configuration has errors.
     /// </summary>
     [JsonIgnore]

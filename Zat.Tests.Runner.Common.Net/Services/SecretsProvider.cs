@@ -20,6 +20,9 @@ public class SecretsProvider : ISecretsProvider
         const string smtpAuthUserNameKey = $"{smtpAuthBaseKey}:UserName";
         const string smtpAuthPasswordKey = $"{smtpAuthBaseKey}:Password";
 
+        const string testLinkApiBaseKey = "TestLinkApi";
+        const string testLinkApiApiKeyKey = $"{testLinkApiBaseKey}:ApiKey";
+
         var config = new ConfigurationBuilder()
             .AddUserSecrets(Assembly.GetExecutingAssembly(), optional: true)
             .Build();
@@ -27,6 +30,8 @@ public class SecretsProvider : ISecretsProvider
         return new Secrets(
             new SmtpAuth(
                 config[smtpAuthUserNameKey] ?? string.Empty,
-                config[smtpAuthPasswordKey] ?? string.Empty));
+                config[smtpAuthPasswordKey] ?? string.Empty),
+            new TestLinkApi(
+                config[testLinkApiApiKeyKey] ?? string.Empty));
     }
 }

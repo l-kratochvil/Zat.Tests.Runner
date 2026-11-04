@@ -14,4 +14,6 @@ public record DataChangedAction(
     ValueChange<string?>? NewRuntimeVersion = null,
     ValueChange<string?>? NewRuntimeReleaseDate = null,
     ValueChange<string?>? NewIdeReleaseDate = null,
-    ValueChange<string?>? NewBetaVersion = null);
+    ValueChange<string?>? NewBetaVersion = null,
+    ValueChange<bool>? NewIsEmailNotificationEnabled = null,
+    ValueChange<string[]>? NewEmailAddresses = null);

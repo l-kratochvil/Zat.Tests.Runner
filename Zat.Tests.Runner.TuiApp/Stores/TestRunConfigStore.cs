@@ -40,9 +40,6 @@ internal class TestRunConfigStore
             current => current with { IsTestLinkReportingEnabled = value });
     }
 
-    /// <summary>
-    /// Gets or sets whether the test run result is emailed; <see langword="null"/> means enabled.
-    /// </summary>
     public bool? IsEmailNotificationEnabled
     {
         get => this.appStateStore.Current.IsEmailNotificationEnabled;
@@ -52,7 +49,7 @@ internal class TestRunConfigStore
 
     public string[] EmailAddresses
     {
-        get => this.appStateStore.Current.EmailAddresses ?? [];
+        get => this.appStateStore.Current.EmailAddresses;
         set => this.appStateStore.Update(
             current => current with { EmailAddresses = value });
     }

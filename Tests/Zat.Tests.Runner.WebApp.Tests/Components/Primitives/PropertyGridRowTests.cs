@@ -48,6 +48,25 @@ public class PropertyGridRowTests : Bunit.TestContext
     }
 
     [Test]
+    public void Render__WhenRowHoldsGroupOfControls__ThenShouldNotWrapThemInLabelElement()
+    {
+        // Given:
+        // A label belongs to its first control only, so a click on the name would press that control.
+
+        // When:
+        var component = this.RenderRowInGrid(isGroup: true);
+
+        // Then:
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(component.FindAll("label"), Is.Empty);
+            Assert.That(
+                component.Find(".property-grid-row .property-grid-row-label").TextContent.Trim(),
+                Is.EqualTo(GivenLabel));
+        }
+    }
+
+    [Test]
     public void Render__WhenRowIsOutsideGrid__ThenShouldThrowRatherThanRender()
 
         // A row outside a grid has no columns to fall into, which would otherwise show up as a
@@ -63,7 +82,7 @@ public class PropertyGridRowTests : Bunit.TestContext
         builder.CloseElement();
     }
 
-    private IRenderedComponent<PropertyGrid> RenderRowInGrid()
+    private IRenderedComponent<PropertyGrid> RenderRowInGrid(bool isGroup = false)
     {
         RenderFragment input = BuildInput;
 
@@ -71,6 +90,7 @@ public class PropertyGridRowTests : Bunit.TestContext
             parameters => parameters.AddChildContent<PropertyGridRow>(
                 row => row
                     .Add(component => component.Label, GivenLabel)
+                    .Add(component => component.IsGroup, isGroup)
                     .Add(component => component.ChildContent, input)));
     }
 }

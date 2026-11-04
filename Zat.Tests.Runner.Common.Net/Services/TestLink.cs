@@ -17,12 +17,11 @@ public class TestLink : ITestLink
     /// <summary>
     /// Initializes a new instance of the <see cref="TestLink"/> class.
     /// </summary>
-    /// <param name="apiKey">TestLink API key as provided by testlink.</param>
-    /// <param name="xmlRpcServerUrl">URL of testlink XML RPC server. Something like: http://localhost/testlink/lib/api/xmlrpc.php</param>
-    /// <param name="loggingEnabled">Enable capture of lastRequest and lastResponse for debugging.</param>
-    public TestLink(ITestLink.Config config)
+    public TestLink(
+        ITestLink.Config config,
+        ISecretsProvider secretsProvider)
     {
-        var apiKey = config.ApiKey;
+        var apiKey = secretsProvider.GetSecrets().TestLinkApi.ApiKey;
         var xmlRpcServerUrl = config.XmlRpcServerUrl;
         var loggingEnabled = config.LoggingEnabled;
 

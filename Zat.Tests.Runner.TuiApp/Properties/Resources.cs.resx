@@ -376,7 +376,7 @@
     <value>Musí být celé číslo</value>
   </data>
   <data name="BetaVersion_ChoiceText" xml:space="preserve">
-    <value>Beza verze</value>
+    <value>Beta verze</value>
   </data>
   <data name="EnableEmailNotification_PromptText" xml:space="preserve">
     <value>Odeslat výsledek e-mailem</value>

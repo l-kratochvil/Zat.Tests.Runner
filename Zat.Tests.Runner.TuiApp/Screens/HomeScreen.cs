@@ -194,8 +194,8 @@ internal sealed class HomeScreen(
             yield break;
         }
 
-        // Enable email notification choice with its dependent choices; not required, as it is enabled unless switched off
-        var isEmailNotificationEnabled = testRunConfigStore.IsEmailNotificationEnabled ?? true;
+        // Enable email notification choice with its dependent choices
+        var isEmailNotificationEnabled = testRunConfigStore.IsEmailNotificationEnabled ?? false;
         if (Choice.InitChoice<IScreen>(
                 enableEmailNotificationPromptScreen,
                 Resources.EnableEmailNotification_PromptText,

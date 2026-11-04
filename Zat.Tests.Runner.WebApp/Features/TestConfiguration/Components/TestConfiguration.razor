@@ -77,6 +77,23 @@
                 }
             }
 
+            <PropertyGridRow Label="Report by email">
+                <BindingCheckbox
+                    Class="input-report-by-email"
+                    Binding="@(vm => vm.IsEmailNotificationEnabled)" />
+            </PropertyGridRow>
+
+            @if (this.ViewModel.IsEmailNotificationEnabled)
+            {
+                <PropertyGridRow Label="Email addresses" IsGroup="true">
+                    <EmailAddressListEditor
+                        TDataContext="TestConfigurationViewModel"
+                        EmailAddressesBinding="@(vm => vm.EmailAddresses)"
+                        OnAdd="this.ViewModel.AddEmailAddress"
+                        OnRemove="this.ViewModel.RemoveEmailAddress" />
+                </PropertyGridRow>
+            }
+
             <PropertyGridRow Label="Debug mode">
                 <BindingCheckbox
                     Class="input-debug-mode"

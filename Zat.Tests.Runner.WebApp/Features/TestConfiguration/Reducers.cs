@@ -32,6 +32,12 @@ public static class Reducers
                 action.NewIsTestLinkReportEnabled,
                 (state, value) => state with { IsTestLinkReportEnabled = value })
             .UpdateIfChanged(
+                action.NewIsEmailNotificationEnabled,
+                (state, value) => state with { IsEmailNotificationEnabled = value })
+            .UpdateIfChanged(
+                action.NewEmailAddresses,
+                (state, value) => state with { EmailAddresses = value })
+            .UpdateIfChanged(
                 action.NewTestedHwAssembly,
                 (state, value) => state with { TestedHwAssembly = value })
             .UpdateIfChanged(
