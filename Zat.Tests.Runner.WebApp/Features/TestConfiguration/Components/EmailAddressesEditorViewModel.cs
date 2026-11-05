@@ -2,6 +2,8 @@
 
 using CSharpFunctionalExtensions;
 
+using DevKit.Core.Extensions.Functional;
+
 using FluentValidation;
 
 using Zat.Tests.Runner.Common.Net.Validation;
@@ -151,6 +153,11 @@ public sealed class EmailAddressesEditorViewModel : ViewModelBase
         this.pendingAdd = null;
     }
 
-    private Result ValidateNew(string address)
-        => EmailAddressValidators.ValidateNew(address.Trim(), this.EmailAddresses);
+    private Result<string> ValidateNew(string address)
+        => address
+            .Trim()
+            .Pipe(EmailAddressValidators.Validate)
+            .Ensure(
+                address => !this.EmailAddresses.Contains(address, StringComparer.OrdinalIgnoreCase),
+                "This email address has already been added.");
 }

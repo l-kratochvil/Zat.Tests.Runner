@@ -36,7 +36,6 @@
                     class="btn btn-outline-secondary btn-sm"
                     @onclick="this.ViewModel.Cancel">Cancel</button>
         </span>
-
     }
 </DataContext>
 
@@ -61,13 +60,13 @@
     /// the recipients; the editor makes its own when none is given.
     /// </summary>
     [Parameter]
-    public EmailAddressesEditorViewModel? EditorViewModel { get; set; }
+    public EmailAddressesEditorViewModel? ExternalViewModel { get; set; }
 
     protected override EmailAddressesEditorViewModel ViewModel { get; set; } = null!;
 
     protected override void OnInitialized()
     {
-        this.ViewModel = this.EditorViewModel ?? new EmailAddressesEditorViewModel();
+        this.ViewModel = this.ExternalViewModel ?? new EmailAddressesEditorViewModel();
 
         base.OnInitialized();
     }

@@ -1,6 +1,7 @@
 namespace Zat.Tests.Runner.WebApp.Tests.Components.Primitives;
 
 using AngleSharp.Dom;
+
 using Bunit;
 
 using Fluxor;
@@ -46,7 +47,8 @@ public class BindingCheckboxTests : Bunit.TestContext
 
         // Then:
         Assert.That(
-            component.Find(CheckboxSelector).HasAttribute(AttributeNames.Checked), Is.EqualTo(givenTick));
+            component.Find(CheckboxSelector).HasAttribute(AttributeNames.Checked),
+            Is.EqualTo(givenTick));
     }
 
     [Test]
