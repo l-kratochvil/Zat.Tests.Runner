@@ -337,6 +337,69 @@ public class TestConfigurationViewModelTests
         Assert.That(HasErrors(unit, nameof(TestConfigurationViewModel.BetaVersion)), Is.False);
     }
 
+    [TestCase(true, ExpectedResult = true)]
+    [TestCase(false, ExpectedResult = false)]
+    public bool EmailAddresses__WhenAddressIsInvalid__ThenShouldIndicateErrorsOnlyWhenEmailed(
+        bool givenIsEmailNotificationEnabled)
+    {
+        // Given & When:
+        var store = StoreHolding(new TestConfigurationState
+        {
+            RuntimeVersion = "6",
+            IsEmailNotificationEnabled = givenIsEmailNotificationEnabled,
+            EmailAddresses = ["someone@example.com"],
+        });
+        using var unit = CreateUnit(store: store);
+
+        // Then:
+        Assert.That(store.Value.HasErrors, Is.EqualTo(unit.HasErrors));
+        return unit.HasErrors;
+    }
+
+    [Test]
+    public void EmailAddresses__WhenStoreStateChangesToInvalidAddress__ThenShouldIndicateErrors()
+    {
+        // Given:
+        var store = StoreHolding(new TestConfigurationState
+        {
+            RuntimeVersion = "6",
+            IsEmailNotificationEnabled = true,
+        });
+        using var unit = CreateUnit(store: store);
+
+        // When:
+        store.ChangeTo(store.Value with { EmailAddresses = ["someone@example.com"] });
+
+        // Then:
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(unit.HasErrors, Is.True);
+            Assert.That(
+                unit.EmailAddressesEditor.GetValidity(nameof(EmailAddressesEditorViewModel.EmailAddresses))?.HasErrors,
+                Is.True);
+        }
+    }
+
+    [Test]
+    public void EmailAddressesEditor__WhenAddressBeingTypedIsInvalid__ThenShouldNotIndicateErrors()
+    {
+        // Given:
+        // An address not confirmed yet is not part of the configuration, so it must not stop a run.
+        using var unit = CreateUnit(
+            store: StoreHolding(new TestConfigurationState
+            {
+                RuntimeVersion = "6",
+                IsEmailNotificationEnabled = true,
+            }));
+        _ = unit.EmailAddressesEditor.BeginAdd();
+
+        // When:
+        unit.EmailAddressesEditor.EmailAddress = "someone@example.com";
+
+        // Then:
+        Assert.That(unit.HasErrors, Is.False);
+    }
+
     [TestCase(TestType.Runtime, ExpectedResult = true)]
     [TestCase(TestType.Application, ExpectedResult = false)]
     public bool IsRuntimeTest__WhenTestIsSelected__ThenShouldTellWhetherItIsRuntimeTest(TestType givenTestType)

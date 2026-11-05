@@ -1,5 +1,6 @@
 namespace Zat.Tests.Runner.WebApp.Features.TestConfiguration.Components;
 
+using System.ComponentModel;
 using System.Globalization;
 using System.IO.Abstractions;
 using System.Text.RegularExpressions;
@@ -10,7 +11,6 @@ using Fluxor;
 
 using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Net.Services;
-using Zat.Tests.Runner.Common.Net.Validation;
 using Zat.Tests.Runner.WebApp.Shared.Stores.AppSettings;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
 using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
@@ -62,8 +62,16 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
         this.appSettingsStore.Changed += this.OnAppSettingsChanged;
         this.testSelectionState.StateChanged += this.OnTestSelectionChanged;
 
+        this.EmailAddressesEditor.EmailAddresses = this.EmailAddresses;
+        this.EmailAddressesEditor.PropertyChanged += this.OnEmailAddressesEditorPropertyChanged;
+
         this.InitValidator();
     }
+
+    /// <summary>
+    /// Gets the editor of the email notification recipients, which tells what is wrong with them.
+    /// </summary>
+    public EmailAddressesEditorViewModel EmailAddressesEditor { get; } = new();
 
     /// <summary>
     /// Gets a value indicating whether a runtime test is selected, which is what runs against a
@@ -242,7 +250,23 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
     {
         this.appSettingsStore.Changed -= this.OnAppSettingsChanged;
         this.testSelectionState.StateChanged -= this.OnTestSelectionChanged;
+        this.EmailAddressesEditor.PropertyChanged -= this.OnEmailAddressesEditorPropertyChanged;
         this.stateBinder.Dispose();
+    }
+
+    /// <inheritdoc/>
+    /// <remarks>
+    /// Hands the recipients to the editor before validating, so that what is wrong with them is known
+    /// by the time the change is announced.
+    /// </remarks>
+    protected override void OnPropertyChanged(PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(this.EmailAddresses))
+        {
+            this.EmailAddressesEditor.EmailAddresses = this.EmailAddresses;
+        }
+
+        base.OnPropertyChanged(e);
     }
 
     [GeneratedRegex(@"^\d+")]
@@ -324,17 +348,10 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
                     .WithMessage("Write the beta number as a whole number, for example 3.");
 
                 validator
-                    .RuleFor(static x => x.EmailAddresses)
-                    .Custom(static (addresses, context) =>
-                    {
-                        foreach (var address in addresses)
-                        {
-                            if (EmailAddressValidators.Validate(address).TryGetError(out var error))
-                            {
-                                context.AddFailure($"{address}: {error}");
-                            }
-                        }
-                    })
+                    .RuleFor(static x => x.EmailAddressesEditor)
+                    .Must(static editor =>
+                        editor.GetValidity(nameof(EmailAddressesEditorViewModel.EmailAddresses))?.HasErrors is not true)
+                    .WithMessage("Fix the email addresses.")
                     .When(static x => x.IsEmailNotificationEnabled);
             });
 
@@ -383,4 +400,12 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
 
     private void OnTestSelectionChanged(object? sender, EventArgs e)
         => this.OnPropertyChanged(nameof(this.IsRuntimeTest));
+
+    private void OnEmailAddressesEditorPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(EmailAddressesEditorViewModel.EmailAddresses))
+        {
+            this.OnPropertyChanged(nameof(this.EmailAddressesEditor));
+        }
+    }
 }

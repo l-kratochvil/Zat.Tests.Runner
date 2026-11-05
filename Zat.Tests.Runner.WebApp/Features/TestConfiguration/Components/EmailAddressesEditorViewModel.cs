@@ -8,36 +8,64 @@ using Zat.Tests.Runner.Common.Net.Validation;
 using Zat.Tests.Runner.WebApp.Shared.ViewModel;
 
 /// <summary>
-/// One recipient being added to an email recipient list: whether it is being added at all, the address
-/// typed so far, and what is wrong with it.
+/// An email recipient list with what is wrong with it, and the one recipient being added to it: whether
+/// it is being added at all, the address typed so far, and what is wrong with it.
 /// </summary>
 /// <remarks>
 /// Owned by one editor, so the address being typed is never shared with, nor overwritten by, another.
 /// </remarks>
 public sealed class EmailAddressesEditorViewModel : ViewModelBase
 {
-    private readonly Func<IReadOnlyList<string>> readAddresses;
-
     private TaskCompletionSource<Maybe<string>>? pendingAdd;
 
-    /// <param name="readAddresses">Reads the recipients currently listed.</param>
-    public EmailAddressesEditorViewModel(Func<IReadOnlyList<string>> readAddresses)
+    public EmailAddressesEditorViewModel()
     {
-        this.readAddresses = readAddresses;
+        this.EmailAddresses = [];
 
         this.InitValidator(
             this,
-            validator => validator
-                .RuleFor(static x => x.EmailAddress)
-                .Custom((address, context) =>
-                {
-                    // An empty address has nothing wrong with it to tell yet; it only cannot be confirmed.
-                    if (!string.IsNullOrWhiteSpace(address) && this.ValidateNew(address).TryGetError(out var error))
+            validator =>
+            {
+                validator
+                    .RuleFor(static x => x.EmailAddresses)
+                    .Custom(static (addresses, context) =>
                     {
-                        context.AddFailure(error);
-                    }
-                })
-                .When(static x => x.IsEditing));
+                        foreach (var address in addresses)
+                        {
+                            if (EmailAddressValidators.Validate(address).TryGetError(out var error))
+                            {
+                                context.AddFailure($"{address}: {error}");
+                            }
+                        }
+                    });
+
+                validator
+                    .RuleFor(static x => x.EmailAddress)
+                    .Custom((address, context) =>
+                    {
+                        // An empty address has nothing wrong with it to tell yet; it only cannot be confirmed.
+                        if (!string.IsNullOrWhiteSpace(address) && this.ValidateNew(address).TryGetError(out var error))
+                        {
+                            context.AddFailure(error);
+                        }
+                    })
+                    .When(static x => x.IsEditing);
+            });
+    }
+
+    /// <summary>
+    /// Gets or sets the recipients listed.
+    /// </summary>
+    public IReadOnlyList<string> EmailAddresses
+    {
+        get;
+        set
+        {
+            if (this.SetProperty(ref field, value))
+            {
+                this.OnPropertyChanged(nameof(this.CanConfirm));
+            }
+        }
     }
 
     /// <summary>
@@ -124,5 +152,5 @@ public sealed class EmailAddressesEditorViewModel : ViewModelBase
     }
 
     private Result ValidateNew(string address)
-        => EmailAddressValidators.ValidateNew(address.Trim(), this.readAddresses());
+        => EmailAddressValidators.ValidateNew(address.Trim(), this.EmailAddresses);
 }

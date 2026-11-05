@@ -5,7 +5,7 @@
 @inherits Zat.Tests.Runner.WebApp.Components.MvvmComponentBase<EmailAddressesEditorViewModel>
 
 <DataContext Data="this.ViewModel">
-    <Validated Validity="this.Validity">
+    <Validated Validity="@(this.ViewModel.GetValidity(nameof(EmailAddressesEditorViewModel.EmailAddresses)) ?? Validity.Valid)">
         <ItemList TItem="string"
                   TCollection="List<string>"
                   Items="this.items"
@@ -57,16 +57,17 @@
     public EventCallback<IReadOnlyList<string>> EmailAddressesChanged { get; set; }
 
     /// <summary>
-    /// Gets or sets what is wrong with the recipients.
+    /// Gets or sets the view model the editor is drawn from, for whoever needs to know what is wrong with
+    /// the recipients; the editor makes its own when none is given.
     /// </summary>
     [Parameter]
-    public Validity Validity { get; set; } = Validity.Valid;
+    public EmailAddressesEditorViewModel? EditorViewModel { get; set; }
 
     protected override EmailAddressesEditorViewModel ViewModel { get; set; } = null!;
 
     protected override void OnInitialized()
     {
-        this.ViewModel = new EmailAddressesEditorViewModel(() => this.items);
+        this.ViewModel = this.EditorViewModel ?? new EmailAddressesEditorViewModel();
 
         base.OnInitialized();
     }
@@ -74,12 +75,17 @@
     protected override void OnParametersSet()
     {
         this.items = [.. this.EmailAddresses];
+        this.ViewModel.EmailAddresses = this.EmailAddresses;
 
         base.OnParametersSet();
     }
 
     private Task PublishAsync(string _)
-        => this.EmailAddressesChanged.InvokeAsync([.. this.items]);
+    {
+        // The list is edited in place, so the view model is told before anybody else reads it.
+        this.ViewModel.EmailAddresses = [.. this.items];
+        return this.EmailAddressesChanged.InvokeAsync(this.ViewModel.EmailAddresses);
+    }
 
     /// <inheritdoc/>
     public override ValueTask DisposeAsync()
