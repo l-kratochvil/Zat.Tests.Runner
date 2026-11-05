@@ -1,26 +1,26 @@
 @* Edits an email recipient list: removes recipients and adds new ones through a confirmed form. *@
 
-@using System.ComponentModel
-@using System.Linq.Expressions
-@using Zat.Tests.Runner.WebApp.Shared.ViewModel
-
-@typeparam TDataContext where TDataContext : class, INotifyPropertyChanged, INotifyDataInfo
+@using Zat.Tests.Runner.WebApp.Shared.Validation
 
 @inherits Zat.Tests.Runner.WebApp.Components.MvvmComponentBase<EmailAddressesEditorViewModel>
 
 <DataContext Data="this.ViewModel">
-    <BindingItemList TDataContext="TDataContext"
-                     Binding="this.EmailAddressesBinding"
-                     OnRemove="this.OnRemove"
-                     OnAdd="this.ViewModel.BeginAdd"
-                     IsAddEnabled="!this.ViewModel.IsEditing"
-                     IsRemoveEnabled="!this.ViewModel.IsEditing"/>
+    <Validated Validity="this.Validity">
+        <ItemList TItem="string"
+                  TCollection="List<string>"
+                  Items="this.items"
+                  CreateItem="this.ViewModel.BeginAdd"
+                  OnAdd="this.PublishAsync"
+                  OnRemove="this.PublishAsync"
+                  IsAddEnabled="!this.ViewModel.IsEditing"
+                  IsRemoveEnabled="!this.ViewModel.IsEditing" />
+    </Validated>
 
     @if (this.ViewModel.IsEditing)
     {
         <span class="d-flex align-items-start gap-1">
             <span class="flex-grow-1">
-                <BindingInput Class="input-email-address"
+                <BindingInput Class="input-email-address" 
                                 Binding="@(vm => vm.EmailAddress)"
                                 BindingEvent="BindingEvent.OnInput"
                                 aria-label="New email address"
@@ -30,7 +30,7 @@
             <button type="button"
                     class="btn btn-outline-primary btn-sm"
                     disabled="@(!this.ViewModel.CanConfirm)"
-                    @onclick="this.ConfirmAsync">OK</button>
+                    @onclick="this.ViewModel.Confirm">OK</button>
 
             <button type="button"
                     class="btn btn-outline-secondary btn-sm"
@@ -41,39 +41,51 @@
 </DataContext>
 
 @code {
-    private Func<TDataContext, IReadOnlyList<string>> readEmailAddresses = null!;
-
-    [Parameter, EditorRequired]
-    public required Expression<Func<TDataContext, IReadOnlyList<string>>> EmailAddressesBinding { get; set; }
+    // The working copy the list edits in place; every edit is handed back as a new list.
+    private List<string> items = [];
 
     /// <summary>
-    /// Gets or sets what receives a confirmed address.
+    /// Gets or sets the recipients edited.
     /// </summary>
     [Parameter, EditorRequired]
-    public EventCallback<string> OnAdd { get; set; }
+    public required IReadOnlyList<string> EmailAddresses { get; set; }
 
-    [Parameter, EditorRequired]
-    public EventCallback<string> OnRemove { get; set; }
+    /// <summary>
+    /// Gets or sets what is told the recipients once one has been added or removed.
+    /// </summary>
+    [Parameter]
+    public EventCallback<IReadOnlyList<string>> EmailAddressesChanged { get; set; }
 
-    [CascadingParameter]
-    public required TDataContext ParentDataContext { get; set; }
+    /// <summary>
+    /// Gets or sets what is wrong with the recipients.
+    /// </summary>
+    [Parameter]
+    public Validity Validity { get; set; } = Validity.Valid;
 
     protected override EmailAddressesEditorViewModel ViewModel { get; set; } = null!;
 
     protected override void OnInitialized()
     {
-        this.readEmailAddresses = this.EmailAddressesBinding.Compile();
-        this.ViewModel = new EmailAddressesEditorViewModel(
-            () => this.readEmailAddresses(this.ParentDataContext));
-            
+        this.ViewModel = new EmailAddressesEditorViewModel(() => this.items);
+
         base.OnInitialized();
     }
 
-    private async Task ConfirmAsync()
+    protected override void OnParametersSet()
     {
-        if (this.ViewModel.Confirm().TryGetValue(out var address))
-        {
-            await this.OnAdd.InvokeAsync(address);
-        }
+        this.items = [.. this.EmailAddresses];
+
+        base.OnParametersSet();
+    }
+
+    private Task PublishAsync(string _)
+        => this.EmailAddressesChanged.InvokeAsync([.. this.items]);
+
+    /// <inheritdoc/>
+    public override ValueTask DisposeAsync()
+    {
+        // Lets the list waiting for an address being added go on when the editor disappears mid-way.
+        this.ViewModel.Cancel();
+        return base.DisposeAsync();
     }
 }

@@ -1,5 +1,6 @@
 namespace Zat.Tests.Runner.WebApp.Tests.Components.Primitives;
 
+using AngleSharp.Dom;
 using Bunit;
 
 using Fluxor;
@@ -19,7 +20,7 @@ using Zat.Tests.Runner.WebApp.Components.Primitives;
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
 public class BindingCheckboxTests : Bunit.TestContext
 {
-    private const string CheckboxSelector = "input[type=checkbox]";
+    private static readonly string CheckboxSelector = Html.MakeInputSelector("[type=checkbox]");
 
     private readonly EditedViewModel viewModel = new();
 
@@ -45,7 +46,7 @@ public class BindingCheckboxTests : Bunit.TestContext
 
         // Then:
         Assert.That(
-            component.Find(CheckboxSelector).HasAttribute("checked"), Is.EqualTo(givenTick));
+            component.Find(CheckboxSelector).HasAttribute(AttributeNames.Checked), Is.EqualTo(givenTick));
     }
 
     [Test]

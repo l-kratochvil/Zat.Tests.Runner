@@ -18,6 +18,8 @@ public sealed class EmailAddressesEditorViewModel : ViewModelBase
 {
     private readonly Func<IReadOnlyList<string>> readAddresses;
 
+    private TaskCompletionSource<Maybe<string>>? pendingAdd;
+
     /// <param name="readAddresses">Reads the recipients currently listed.</param>
     public EmailAddressesEditorViewModel(Func<IReadOnlyList<string>> readAddresses)
     {
@@ -77,33 +79,48 @@ public sealed class EmailAddressesEditorViewModel : ViewModelBase
     /// <summary>
     /// Starts adding a new address.
     /// </summary>
-    public void BeginAdd()
+    /// <returns>
+    /// The trimmed address once <see cref="Confirm"/> finishes the adding, or none once <see cref="Cancel"/>
+    /// abandons it.
+    /// </returns>
+    public Task<Maybe<string>> BeginAdd()
     {
+        this.Complete(Maybe<string>.None);
+
+        this.pendingAdd = new TaskCompletionSource<Maybe<string>>(TaskCreationOptions.RunContinuationsAsynchronously);
         this.EmailAddress = string.Empty;
         this.IsEditing = true;
+
+        return this.pendingAdd.Task;
     }
 
     /// <summary>
     /// Abandons the address being added.
     /// </summary>
     public void Cancel()
-        => this.IsEditing = false;
+    {
+        this.IsEditing = false;
+        this.Complete(Maybe<string>.None);
+    }
 
     /// <summary>
-    /// Finishes adding the typed address.
+    /// Finishes adding the typed address, unless it cannot join the recipients.
     /// </summary>
-    /// <returns>The trimmed address, or none when it cannot join the recipients.</returns>
-    public Maybe<string> Confirm()
+    public void Confirm()
     {
         if (!this.CanConfirm)
         {
-            return Maybe<string>.None;
+            return;
         }
 
-        var address = this.EmailAddress.Trim();
         this.IsEditing = false;
+        this.Complete(this.EmailAddress.Trim());
+    }
 
-        return address;
+    private void Complete(Maybe<string> address)
+    {
+        this.pendingAdd?.TrySetResult(address);
+        this.pendingAdd = null;
     }
 
     private Result ValidateNew(string address)

@@ -1,5 +1,6 @@
 namespace Zat.Tests.Runner.WebApp.Tests.Components.Primitives;
 
+using AngleSharp.Dom;
 using Bunit;
 
 using Fluxor;
@@ -21,9 +22,6 @@ using Shade = EditedViewModel.Shade;
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
 public class BindingSelectTests : Bunit.TestContext
 {
-    private const string SelectSelector = "select";
-    private const string OptionSelector = "option";
-
     private const string GivenPlaceholder = "—";
 
     private static readonly Shade?[] GivenOffer = [Shade.Red, Shade.Green];
@@ -52,7 +50,7 @@ public class BindingSelectTests : Bunit.TestContext
         // Then:
         // The place among the offered values is the one name every value has, so it is what the
         // browser is pointed at rather than the value spelled out as text.
-        Assert.That(component.Find(SelectSelector).GetAttribute("value"), Is.EqualTo("1"));
+        Assert.That(component.Find(TagNames.Select).GetAttribute(AttributeNames.Value), Is.EqualTo("1"));
     }
 
     [Test]
@@ -65,7 +63,7 @@ public class BindingSelectTests : Bunit.TestContext
         var component = this.RenderSelect();
 
         // Then:
-        Assert.That(component.FindAll(OptionSelector)[0].HasAttribute("selected"), Is.True);
+        Assert.That(component.FindAll(TagNames.Option)[0].HasAttribute(AttributeNames.Selected), Is.True);
     }
 
     [Test]
@@ -75,7 +73,7 @@ public class BindingSelectTests : Bunit.TestContext
         var component = this.RenderSelect();
 
         // When:
-        component.Find(SelectSelector).Change("1");
+        component.Find(TagNames.Select).Change("1");
 
         // Then:
         Assert.That(this.viewModel.Shading, Is.EqualTo(Shade.Green));
@@ -90,7 +88,7 @@ public class BindingSelectTests : Bunit.TestContext
         var component = this.RenderSelect();
 
         // When:
-        component.Find(SelectSelector).Change(string.Empty);
+        component.Find(TagNames.Select).Change(string.Empty);
 
         // Then:
         Assert.That(this.viewModel.Shading, Is.Null);
@@ -104,7 +102,7 @@ public class BindingSelectTests : Bunit.TestContext
 
         // Then:
         Assert.That(
-            component.FindAll(OptionSelector).Select(option => option.TextContent.Trim()),
+            component.FindAll(TagNames.Option).Select(option => option.TextContent.Trim()),
             Is.EqualTo([GivenPlaceholder, nameof(Shade.Red), nameof(Shade.Green)]));
     }
 
@@ -118,7 +116,7 @@ public class BindingSelectTests : Bunit.TestContext
 
         // Then:
         Assert.That(
-            component.FindAll(OptionSelector).Select(option => option.TextContent.Trim()),
+            component.FindAll(TagNames.Option).Select(option => option.TextContent.Trim()),
             Is.EqualTo([GivenPlaceholder, "shade of Red", "shade of Green"]));
     }
 

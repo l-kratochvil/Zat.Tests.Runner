@@ -1,5 +1,6 @@
 namespace Zat.Tests.Runner.WebApp.Tests.Components.Primitives;
 
+using AngleSharp.Dom;
 using Bunit;
 
 using Microsoft.AspNetCore.Components;
@@ -19,9 +20,9 @@ using Zat.Tests.Runner.WebApp.Components.Primitives;
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
 public class PropertyGridRowTests : Bunit.TestContext
 {
-    private const string RowSelector = "label.property-grid-row";
+    private const string GivenLabel = "given-label";
 
-    private const string GivenLabel = "IDE version";
+    private static readonly string RowSelector = Html.MakeLabelSelector(".property-grid-row");
 
     [TearDown]
     public void TearDown()
@@ -43,7 +44,7 @@ public class PropertyGridRowTests : Bunit.TestContext
             Assert.That(
                 component.Find($"{RowSelector} .property-grid-row-label").TextContent.Trim(),
                 Is.EqualTo(GivenLabel));
-            Assert.That(component.FindAll($"{RowSelector} input"), Has.Exactly(1).Items);
+            Assert.That(component.FindAll($"{RowSelector} {TagNames.Input}"), Has.Exactly(1).Items);
         }
     }
 
@@ -54,12 +55,12 @@ public class PropertyGridRowTests : Bunit.TestContext
         // A label belongs to its first control only, so a click on the name would press that control.
 
         // When:
-        var component = this.RenderRowInGrid(useLabel: true);
+        var component = this.RenderRowInGrid(useLabel: false);
 
         // Then:
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(component.FindAll("label"), Is.Empty);
+            Assert.That(component.FindAll(TagNames.Label), Is.Empty);
             Assert.That(
                 component.Find(".property-grid-row .property-grid-row-label").TextContent.Trim(),
                 Is.EqualTo(GivenLabel));
@@ -78,11 +79,11 @@ public class PropertyGridRowTests : Bunit.TestContext
 
     private static void BuildInput(RenderTreeBuilder builder)
     {
-        builder.OpenElement(0, "input");
+        builder.OpenElement(0, TagNames.Input);
         builder.CloseElement();
     }
 
-    private IRenderedComponent<PropertyGrid> RenderRowInGrid(bool useLabel = false)
+    private IRenderedComponent<PropertyGrid> RenderRowInGrid(bool useLabel = true)
     {
         RenderFragment input = BuildInput;
 

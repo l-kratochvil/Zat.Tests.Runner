@@ -3,6 +3,7 @@
 
 @using System.Linq
 
+@using Zat.Tests.Runner.WebApp.Shared.Validation
 @using Zat.Z2xxTests.Common.Model
 
 @inherits Zat.Tests.Runner.WebApp.Components.MvvmComponentBase<TestConfigurationViewModel>
@@ -92,10 +93,8 @@
                 {
                     <PropertyGridRow Label="Email addresses" UseLabel="false">
                         <EmailAddressesEditor
-                            TDataContext="TestConfigurationViewModel"
-                            EmailAddressesBinding="@(vm => vm.EmailAddresses)"
-                            OnAdd="this.ViewModel.AddEmailAddress"
-                            OnRemove="this.ViewModel.RemoveEmailAddress" />
+                            @bind-EmailAddresses="this.ViewModel.EmailAddresses"
+                            Validity="@(this.ViewModel.GetValidity(nameof(TestConfigurationViewModel.EmailAddresses)) ?? Validity.Valid)"/>
                     </PropertyGridRow>
                 }
             </Group>

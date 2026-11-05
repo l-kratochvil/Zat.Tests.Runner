@@ -1,5 +1,6 @@
 namespace Zat.Tests.Runner.WebApp.Tests.TestExecution;
 
+using AngleSharp.Dom;
 using Bunit;
 
 using Fluxor;
@@ -32,8 +33,6 @@ using TestExecutionComponent = Zat.Tests.Runner.WebApp.Features.TestExecution.Co
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
 public class TestExecutionTests : Bunit.TestContext
 {
-    private const string ButtonSelector = "button";
-
     private const string StartLabel = TestExecutionViewModel.StartLabel;
     private const string StopLabel = TestExecutionViewModel.StopLabel;
     private const string StoppingLabel = TestExecutionViewModel.StoppingLabel;
@@ -171,13 +170,13 @@ public class TestExecutionTests : Bunit.TestContext
         => new() { HasErrors = false };
 
     private static string Label(IRenderedComponent<TestExecutionComponent> component)
-        => component.Find(ButtonSelector).TextContent.Trim();
+        => component.Find(TagNames.Button).TextContent.Trim();
 
     private static bool IsDisabled(IRenderedComponent<TestExecutionComponent> component)
-        => component.Find(ButtonSelector).HasAttribute("disabled");
+        => component.Find(TagNames.Button).HasAttribute(AttributeNames.Disabled);
 
     private static string? Reason(IRenderedComponent<TestExecutionComponent> component)
-        => component.Find(ButtonSelector).GetAttribute("title");
+        => component.Find(TagNames.Button).GetAttribute(AttributeNames.Title);
 
     private void SetUpRunnableConfiguration()
     {

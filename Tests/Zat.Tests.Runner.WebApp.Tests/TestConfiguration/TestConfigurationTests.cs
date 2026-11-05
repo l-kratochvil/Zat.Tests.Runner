@@ -3,6 +3,7 @@ namespace Zat.Tests.Runner.WebApp.Tests.TestConfiguration;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 
+using AngleSharp.Dom;
 using Bunit;
 
 using Fluxor;
@@ -67,7 +68,7 @@ public class TestConfigurationTests
 
         // Then:
         // The versions plus the empty choice standing for none of them.
-        Assert.That(unit.FindAll($"{RuntimeVersionSelector} option"), Has.Exactly(3).Items);
+        Assert.That(unit.FindAll($"{RuntimeVersionSelector} {TagNames.Option}"), Has.Exactly(3).Items);
     }
 
     [Test]
@@ -267,7 +268,7 @@ public class TestConfigurationTests
 
         // Then:
         unit.WaitForAssertion(() => Assert.That(
-            unit.FindAll($"{RuntimeVersionSelector} option").Select(option => option.TextContent.Trim()),
+            unit.FindAll($"{RuntimeVersionSelector} {TagNames.Option}").Select(option => option.TextContent.Trim()),
             Is.EqualTo([NoChoiceLabel, "9"])));
     }
 

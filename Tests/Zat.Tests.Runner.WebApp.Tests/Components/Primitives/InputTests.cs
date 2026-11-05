@@ -1,5 +1,6 @@
 namespace Zat.Tests.Runner.WebApp.Tests.Components.Primitives;
 
+using AngleSharp.Dom;
 using Bunit;
 
 using NUnit.Framework;
@@ -18,7 +19,6 @@ using Zat.Tests.Runner.WebApp.Shared.Validation;
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
 public class InputTests : Bunit.TestContext
 {
-    private const string InputSelector = "input";
     private const string MessageSelector = ".validity-message";
 
     private const string GivenVersion = "3.1.4";
@@ -35,7 +35,7 @@ public class InputTests : Bunit.TestContext
         var component = this.RenderInput(GivenVersion);
 
         // Then:
-        Assert.That(component.Find(InputSelector).GetAttribute("value"), Is.EqualTo(GivenVersion));
+        Assert.That(component.Find(TagNames.Input).GetAttribute(AttributeNames.Value), Is.EqualTo(GivenVersion));
     }
 
     [Test]
@@ -49,7 +49,7 @@ public class InputTests : Bunit.TestContext
             parameters => parameters.Add(input => input.ValueChanged, edited => told = edited));
 
         // When:
-        component.Find(InputSelector).Change(GivenVersion);
+        component.Find(TagNames.Input).Change(GivenVersion);
 
         // Then:
         Assert.That(told, Is.EqualTo(GivenVersion));
@@ -67,7 +67,7 @@ public class InputTests : Bunit.TestContext
                 .Add(input => input.ValueChanged, edited => told = edited));
 
         // When:
-        component.Find(InputSelector).Change("42");
+        component.Find(TagNames.Input).Change("42");
 
         // Then:
         Assert.That(told, Is.EqualTo(42));
@@ -86,7 +86,7 @@ public class InputTests : Bunit.TestContext
                 .Add(input => input.ValueChanged, _ => told = true));
 
         // When:
-        component.Find(InputSelector).Change("nonsense");
+        component.Find(TagNames.Input).Change("nonsense");
 
         // Then:
         Assert.That(told, Is.False);
@@ -101,7 +101,7 @@ public class InputTests : Bunit.TestContext
             parameters => parameters.Add(input => input.Validator, NothingIsEverRight));
 
         // When:
-        component.Find(InputSelector).Change("nonsense");
+        component.Find(TagNames.Input).Change("nonsense");
 
         // Then:
         // Turning an edit down without a word would leave the tester looking at a value that came
@@ -123,7 +123,7 @@ public class InputTests : Bunit.TestContext
                 .Add(input => input.ValueChanged, edited => told = edited));
 
         // When:
-        component.Find(InputSelector).Change("nonsense");
+        component.Find(TagNames.Input).Change("nonsense");
 
         // Then:
         Assert.That(told, Is.EqualTo("nonsense"));
@@ -142,7 +142,7 @@ public class InputTests : Bunit.TestContext
                 .Add(input => input.ValueChanged, edited => told = edited));
 
         // When:
-        component.Find(InputSelector).Change(GivenVersion);
+        component.Find(TagNames.Input).Change(GivenVersion);
 
         // Then:
         // A warning says the value can be used, so holding it back would be the input disagreeing
@@ -175,7 +175,7 @@ public class InputTests : Bunit.TestContext
                 .Add(input => input.ValueChanged, edited => told = edited));
 
         // When:
-        component.Find(InputSelector).Input(GivenVersion);
+        component.Find(TagNames.Input).Input(GivenVersion);
 
         // Then:
         Assert.That(told, Is.EqualTo(GivenVersion));

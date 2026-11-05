@@ -1,5 +1,6 @@
 namespace Zat.Tests.Runner.WebApp.Tests.Components.Primitives;
 
+using AngleSharp.Dom;
 using Bunit;
 
 using FluentValidation;
@@ -28,7 +29,6 @@ using Zat.Tests.Runner.WebApp.Shared.ViewModel;
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
 public class BindingInputTests : Bunit.TestContext
 {
-    private const string InputSelector = "input";
     private const string MessageSelector = ".validity-message";
 
     private const string GivenVersion = "3.1.4";
@@ -60,7 +60,7 @@ public class BindingInputTests : Bunit.TestContext
         var component = this.RenderTextInput();
 
         // Then:
-        Assert.That(component.Find(InputSelector).GetAttribute("value"), Is.EqualTo(GivenVersion));
+        Assert.That(component.Find(TagNames.Input).GetAttribute(AttributeNames.Value), Is.EqualTo(GivenVersion));
     }
 
     [Test]
@@ -70,13 +70,13 @@ public class BindingInputTests : Bunit.TestContext
         var component = this.RenderTextInput();
 
         // When:
-        component.Find(InputSelector).Change(GivenVersion);
+        component.Find(TagNames.Input).Change(GivenVersion);
 
         // Then:
         using (Assert.EnterMultipleScope())
         {
             Assert.That(this.viewModel.Text, Is.EqualTo(GivenVersion));
-            Assert.That(component.Find(InputSelector).GetAttribute("value"), Is.EqualTo(GivenVersion));
+            Assert.That(component.Find(TagNames.Input).GetAttribute(AttributeNames.Value), Is.EqualTo(GivenVersion));
         }
     }
 
@@ -90,7 +90,7 @@ public class BindingInputTests : Bunit.TestContext
             parameters => parameters.Add(input => input.OnChange, value => told = value));
 
         // When:
-        component.Find(InputSelector).Change(GivenVersion);
+        component.Find(TagNames.Input).Change(GivenVersion);
 
         // Then:
         Assert.That(told, Is.EqualTo(GivenVersion));
@@ -111,13 +111,13 @@ public class BindingInputTests : Bunit.TestContext
                     .Add(input => input.Binding, model => model.Number));
 
         // When:
-        component.Find(InputSelector).Change("not a number");
+        component.Find(TagNames.Input).Change("not a number");
 
         // Then:
         using (Assert.EnterMultipleScope())
         {
             Assert.That(this.viewModel.Number, Is.EqualTo(7));
-            Assert.That(component.Find(InputSelector).GetAttribute("value"), Is.EqualTo("7"));
+            Assert.That(component.Find(TagNames.Input).GetAttribute(AttributeNames.Value), Is.EqualTo("7"));
         }
     }
 
@@ -129,7 +129,7 @@ public class BindingInputTests : Bunit.TestContext
             parameters => parameters.Add(input => input.BindingEvent, BindingEvent.OnInput));
 
         // When:
-        component.Find(InputSelector).Input(GivenVersion);
+        component.Find(TagNames.Input).Input(GivenVersion);
 
         // Then:
         Assert.That(this.viewModel.Text, Is.EqualTo(GivenVersion));
@@ -145,7 +145,7 @@ public class BindingInputTests : Bunit.TestContext
         // Nothing is listening for the keystroke at all, which is what an edit heard only once it
         // is finished comes down to.
         Assert.That(
-            () => component.Find(InputSelector).Input(GivenVersion),
+            () => component.Find(TagNames.Input).Input(GivenVersion),
             Throws.InstanceOf<MissingEventHandlerException>());
     }
 
@@ -208,13 +208,13 @@ public class BindingInputTests : Bunit.TestContext
                     .Add(input => input.Binding, model => model.Name));
 
         // When:
-        component.Find(InputSelector).Change(GivenNonsense);
+        component.Find(TagNames.Input).Change(GivenNonsense);
 
         // Then:
         using (Assert.EnterMultipleScope())
         {
             Assert.That(validating.Name, Is.EqualTo(GivenNonsense));
-            Assert.That(component.Find(InputSelector).GetAttribute("value"), Is.EqualTo(GivenNonsense));
+            Assert.That(component.Find(TagNames.Input).GetAttribute(AttributeNames.Value), Is.EqualTo(GivenNonsense));
             Assert.That(component.Find(MessageSelector).TextContent.Trim(), Is.EqualTo(ValidationMessage));
         }
     }

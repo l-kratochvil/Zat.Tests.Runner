@@ -80,10 +80,13 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
     public IReadOnlyList<string> RuntimeVersions { get; private set; }
 
     /// <summary>
-    /// Gets the email notification recipients.
+    /// Gets or sets the email notification recipients.
     /// </summary>
     public IReadOnlyList<string> EmailAddresses
-        => this.EmailAddressesState.Value;
+    {
+        get => this.EmailAddressesState.Value;
+        set => this.EmailAddressesState.Value = value;
+    }
 
     /// <summary>
     /// Gets or sets a value indicating whether the TestLink report is enabled.
@@ -233,26 +236,6 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
             property: static vm => vm.IsDebugModeEnabled,
             writeValue: value => this.dispatcher.Dispatch(
                 new DataChangedAction(NewIsDebugModeEnabled: new ValueChange<bool>(value))));
-
-    /// <summary>
-    /// Appends one recipient; what is wrong with it is reported by the validation of <see cref="EmailAddresses"/>.
-    /// </summary>
-    /// <param name="address">The address to append.</param>
-    public void AddEmailAddress(string address)
-        => this.EmailAddressesState.Value = [.. this.EmailAddresses, address];
-
-    /// <summary>
-    /// Removes one recipient.
-    /// </summary>
-    /// <param name="address">The address to remove.</param>
-    public void RemoveEmailAddress(string address)
-    {
-        var addresses = this.EmailAddresses.ToList();
-        if (addresses.Remove(address))
-        {
-            this.EmailAddressesState.Value = addresses;
-        }
-    }
 
     /// <inheritdoc/>
     public void Dispose()

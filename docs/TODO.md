@@ -81,8 +81,7 @@
 - Offered se prejmenuje na Options
 - Bude mít volitelný param, pomocí kterého blokuje z dat získat display text pro option selectu: Pokud nebuď poskytnut, tak se display text získá Value.ToString()
 - Zbavit se pak TestStationLabels: TestConfiguration.razor předá BindingSelect kolekci KeyValueItem (sestavenou na viewmodelu)
-- Options budou IEnumerable:
-  - Pokud budou dodané options typu INotifyCollectionChanged, tak budou rerenderovat uvnitř ObservableCollection komponenty
+- Pro Options lze použít komponentu ListItems!
 
 ### Lokalizace textů
 

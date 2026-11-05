@@ -10,8 +10,8 @@ using Zat.Tests.Runner.WebApp.Components.Primitives;
 [TestFixture]
 public class BindingEventExtensionsTests
 {
-    [TestCase(BindingEvent.OnChange, "onchange")]
-    [TestCase(BindingEvent.OnInput, "oninput")]
+    [TestCase(BindingEvent.OnChange, Html.Events.OnChange)]
+    [TestCase(BindingEvent.OnInput, Html.Events.OnInput)]
     public void ToEventName__WhenOfferedEventIsNamed__ThenShouldSpellItAsBrowserDoes(
         BindingEvent givenEvent, string expectedName)
     {
