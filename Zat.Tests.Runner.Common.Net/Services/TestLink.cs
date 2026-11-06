@@ -10,7 +10,7 @@ using Zat.Tests.Runner.Common.Net.TestLinkApi.Model;
 // TODO: Review method summaries
 public class TestLink : ITestLink
 {
-    private readonly string devkey;
+    private readonly string devKey;
 
     private readonly ITestLinkXmlRpcProxy proxy;
 
@@ -28,15 +28,15 @@ public class TestLink : ITestLink
         if (string.IsNullOrEmpty(apiKey))
         {
             throw new TestLinkApiException(
-                $"API key wasn't provided. Provided devkey: {apiKey}");
+                $"API key wasn't provided. Provided dev key: {apiKey}");
         }
 
-        this.devkey = apiKey;
+        this.devKey = apiKey;
 
         if (string.IsNullOrEmpty(xmlRpcServerUrl))
         {
             throw new TestLinkApiException(
-                $"TestLink XML RPC server URL wasn't provided. Provided devkey: {this.devkey}");
+                $"TestLink XML RPC server URL wasn't provided. Provided dev key: {this.devKey}");
         }
 
         this.proxy = XmlRpcProxyGen.Create<ITestLinkXmlRpcProxy>();
@@ -53,12 +53,12 @@ public class TestLink : ITestLink
     }
 
     /// <summary>
-    /// Gets the last xmlrpc request sent to testlink. Only works when loggingEnabled=true the constructor.
+    /// Gets the last  XML RPC request sent to testlink. Only works when loggingEnabled=true the constructor.
     /// </summary>
     public string LastDebugRequest { get; private set; } = string.Empty;
 
     /// <summary>
-    /// Gets the last xmlrpc response received from testlink. Only works when loggingEnabled=true in the constructor.
+    /// Gets the last XML RPC response received from testlink. Only works when loggingEnabled=true in the constructor.
     /// </summary>
     public string LastDebugResponse { get; private set; } = string.Empty;
 
@@ -83,7 +83,7 @@ public class TestLink : ITestLink
     /// <returns>The builds.</returns>
     public Build[] GetBuildsForTestPlan(int testPlanId)
     {
-        var response = this.proxy.GetBuildsForTestPlan(this.devkey, testPlanId);
+        var response = this.proxy.GetBuildsForTestPlan(this.devKey, testPlanId);
 
         CheckErrorMessage(response);
 
@@ -109,7 +109,7 @@ public class TestLink : ITestLink
     /// <returns>General result.</returns>
     public GeneralResult CreateBuild(int testPlanId, string buildName, string buildNotes)
     {
-        var response = this.proxy.CreateBuild(this.devkey, testPlanId, buildName, buildNotes);
+        var response = this.proxy.CreateBuild(this.devKey, testPlanId, buildName, buildNotes);
 
         CheckErrorMessage(response);
 
@@ -150,16 +150,16 @@ public class TestLink : ITestLink
                 {
                     return buildId == 0
                         ? this.proxy.ReportTcResult(
-                            this.devkey, testCaseId, testplanid, status, platformName, overwrite, notes, guess)
+                            this.devKey, testCaseId, testplanid, status, platformName, overwrite, notes, guess)
                         : this.proxy.ReportTcResult(
-                            this.devkey, testCaseId, testplanid, status, platformName, overwrite, notes, guess, 0, buildId);
+                            this.devKey, testCaseId, testplanid, status, platformName, overwrite, notes, guess, 0, buildId);
                 }
 
                 return buildId == 0
                     ? this.proxy.ReportTcResult(
-                        this.devkey, testCaseId, testplanid, status, platformName, overwrite, notes, guess, bugId)
+                        this.devKey, testCaseId, testplanid, status, platformName, overwrite, notes, guess, bugId)
                     : this.proxy.ReportTcResult(
-                        this.devkey, testCaseId, testplanid, status, platformName, overwrite, notes, guess, bugId, buildId);
+                        this.devKey, testCaseId, testplanid, status, platformName, overwrite, notes, guess, bugId, buildId);
             }
 
             if (platformId == 0)
@@ -170,13 +170,13 @@ public class TestLink : ITestLink
             if (bugId == 0)
             {
                 return buildId == 0
-                    ? this.proxy.ReportTcResult(this.devkey, testCaseId, testplanid, status, platformId, overwrite, notes, guess)
-                    : this.proxy.ReportTcResult(this.devkey, testCaseId, testplanid, status, platformId, overwrite, notes, guess, 0, buildId);
+                    ? this.proxy.ReportTcResult(this.devKey, testCaseId, testplanid, status, platformId, overwrite, notes, guess)
+                    : this.proxy.ReportTcResult(this.devKey, testCaseId, testplanid, status, platformId, overwrite, notes, guess, 0, buildId);
             }
 
             return buildId == 0
-                ? this.proxy.ReportTcResult(this.devkey, testCaseId, testplanid, status, platformId, overwrite, notes, guess, bugId)
-                : this.proxy.ReportTcResult(this.devkey, testCaseId, testplanid, status, platformId, overwrite, notes, guess, bugId, buildId);
+                ? this.proxy.ReportTcResult(this.devKey, testCaseId, testplanid, status, platformId, overwrite, notes, guess, bugId)
+                : this.proxy.ReportTcResult(this.devKey, testCaseId, testplanid, status, platformId, overwrite, notes, guess, bugId, buildId);
         }
 
         var response = GetResponse();
@@ -213,7 +213,7 @@ public class TestLink : ITestLink
             base64String = string.Empty;
         }
 
-        var response = this.proxy.UploadExecutionAttachment(this.devkey, executionId, filename, fileType, base64String, title, description);
+        var response = this.proxy.UploadExecutionAttachment(this.devKey, executionId, filename, fileType, base64String, title, description);
 
         CheckErrorMessage(response);
 
@@ -223,7 +223,7 @@ public class TestLink : ITestLink
     /// <inheritdoc />
     public TestCase GetTestCaseById(int id)
     {
-        var response = this.proxy.GetTestCaseById(this.devkey, id);
+        var response = this.proxy.GetTestCaseById(this.devKey, id);
 
         CheckErrorMessage(response);
 
@@ -233,7 +233,7 @@ public class TestLink : ITestLink
     /// <inheritdoc />
     public TestCase GetTestCaseByExternalId(string externalId)
     {
-        var response = this.proxy.GetTestCaseByExternalId(this.devkey, externalId);
+        var response = this.proxy.GetTestCaseByExternalId(this.devKey, externalId);
 
         CheckErrorMessage(response);
 
@@ -248,7 +248,7 @@ public class TestLink : ITestLink
     /// <returns>The testcases.</returns>
     public TestCaseFromTestSuite[] GetTestCasesForTestSuite(int testSuiteId, bool deep)
     {
-        var response = this.proxy.GetTestCasesForTestSuite(this.devkey, testSuiteId, deep, "full");
+        var response = this.proxy.GetTestCasesForTestSuite(this.devKey, testSuiteId, deep, "full");
         if (response is string str && str == string.Empty)
         {
             return [];
@@ -272,7 +272,7 @@ public class TestLink : ITestLink
     /// <returns>The test platforms.</returns>
     public TestPlatform[] GetTestPlanPlatforms(int testplanid)
     {
-        var response = this.proxy.GetTestPlanPlatforms(this.devkey, testplanid);
+        var response = this.proxy.GetTestPlanPlatforms(this.devKey, testplanid);
 
         // 3041 means no platforms are assigned for this testplan
         return CheckErrorMessage(response, 3041)
@@ -292,7 +292,7 @@ public class TestLink : ITestLink
     /// <returns>The test suites.</returns>
     public TestSuite[] GetFirstLevelTestSuitesForTestProject(int testProjectId)
     {
-        var response = this.proxy.GetFirstLevelTestSuitesForTestProject(this.devkey, testProjectId);
+        var response = this.proxy.GetFirstLevelTestSuitesForTestProject(this.devKey, testProjectId);
         var errors = DecodeErrors(response);
         if (errors.Count > 0 && errors[0].Code != 7008) // 7008 means project has no test suites
         {
@@ -310,7 +310,7 @@ public class TestLink : ITestLink
     /// <inheritdoc/>
     public TestSuite[] GetTestSuitesForTestSuite(int testSuiteId)
     {
-        var response = this.proxy.GetTestSuitesForTestSuite(this.devkey, testSuiteId);
+        var response = this.proxy.GetTestSuitesForTestSuite(this.devKey, testSuiteId);
         if (response is string) // Testlink returns an empty string if a test suite has no child test suites
         {
             return [];
@@ -334,7 +334,7 @@ public class TestLink : ITestLink
     /// <returns>The test suite if found, otherwise null.</returns>
     public TestSuite? GetTestSuiteById(int id)
     {
-        var response = this.proxy.GetTestSuiteById(this.devkey, id);
+        var response = this.proxy.GetTestSuiteById(this.devKey, id);
         return CheckErrorMessage(response, 8000)
             ? null
             : XmlRpcStructConvertors.ToTestSuite((XmlRpcStruct)response);
@@ -361,7 +361,7 @@ public class TestLink : ITestLink
     /// <returns><see langword="true"/> if the user exists; otherwise <see langword="false"/>.</returns>
     public bool CheckUserExists(string username)
     {
-        var response = this.proxy.DoesUserExist(this.devkey, username);
+        var response = this.proxy.DoesUserExist(this.devKey, username);
         return !CheckErrorMessage(response, 10000) && (bool)response;
     }
 
