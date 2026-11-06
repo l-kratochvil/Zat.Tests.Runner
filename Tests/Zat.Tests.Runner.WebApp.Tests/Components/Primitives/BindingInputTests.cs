@@ -2,7 +2,7 @@ namespace Zat.Tests.Runner.WebApp.Tests.Components.Primitives;
 
 using AngleSharp.Dom;
 using Bunit;
-
+using CommunityToolkit.Mvvm.ComponentModel;
 using FluentValidation;
 
 using Fluxor;
@@ -27,7 +27,7 @@ using Zat.Tests.Runner.WebApp.Shared.ViewModel;
 /// </remarks>
 [TestFixture]
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
-public class BindingInputTests : Bunit.TestContext
+public partial class BindingInputTests : Bunit.TestContext
 {
     private const string MessageSelector = ".validity-message";
 
@@ -234,10 +234,8 @@ public class BindingInputTests : Bunit.TestContext
     /// <summary>
     /// A real view model, which says what is wrong with an edit.
     /// </summary>
-    private sealed class ValidatingViewModel : ViewModelBase
+    private sealed partial class ValidatingViewModel : ViewModelBase
     {
-        private string name = string.Empty;
-
         public ValidatingViewModel()
             => this.InitValidator(
                 this,
@@ -246,10 +244,8 @@ public class BindingInputTests : Bunit.TestContext
                     .Matches("^[a-z]+$")
                     .WithMessage(ValidationMessage));
 
-        public string Name
-        {
-            get => this.name;
-            set => this.SetProperty(ref this.name, value);
-        }
+        // ReSharper disable once PropertyCanBeMadeInitOnly.Local
+        [ObservableProperty]
+        public partial string Name { get; set; } = string.Empty;
     }
 }

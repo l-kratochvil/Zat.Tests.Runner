@@ -1,8 +1,8 @@
 namespace Zat.Tests.Runner.TuiApp.Screens;
 
-using Spectre.Console;
-
 using System;
+
+using Spectre.Console;
 
 using Zat.Tests.Runner.TuiApp.Stores;
 using Zat.Z2xxTests.Common.Model;
@@ -14,6 +14,10 @@ internal class HwAssemblyTypesSelectionScreen(
     Lazy<SettingsScreen> settingsScreen)
     : ScreenBase(homeScreen, exitScreen, settingsScreen)
 {
+    private static readonly HwAssemblyType[] HwAssemblyTypes = [.. Enum
+        .GetValues<HwAssemblyType>()
+        .Where(x => x is not (HwAssemblyType.Unknown or HwAssemblyType.HW00))];
+
     /// <inheritdoc/>
     protected override ScreenRenderer CreateRenderer()
         => new()
@@ -28,9 +32,7 @@ internal class HwAssemblyTypesSelectionScreen(
                             .MoreChoicesText(SharedTexts.MoreChoicesHelpText)
                             .PageSize(10)
                             .InstructionsText(SharedTexts.InstructionsHelpText)
-                            .AddChoices(Enum
-                                .GetValues<HwAssemblyType>()
-                                .Where(x => x is not HwAssemblyType.Unknown));
+                            .AddChoices(HwAssemblyTypes);
 
                         testRunConfigStore
                             .HwAssemblyTypes?
