@@ -60,10 +60,43 @@ public class ItemListTests : Bunit.TestContext
         }
     }
 
-    private IRenderedComponent<ItemList<string, TCollection>> RenderList<TCollection>(TCollection items)
+    [Test]
+    public void Render__WhenAddHidden__ThenShouldShowOnlyRemove()
+    {
+        // When:
+        var component = this.RenderList<List<string>>([.. GivenItems], isAddVisible: false);
+
+        // Then:
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(component.FindAll(Html.MakeButtonSelector("[aria-label^='Remove']")), Has.Exactly(GivenItems.Length).Items);
+            Assert.That(component.FindAll(Html.MakeButtonSelector(":not([aria-label])")), Is.Empty);
+        }
+    }
+
+    [Test]
+    public void Render__WhenRemoveHidden__ThenShouldShowOnlyAdd()
+    {
+        // When:
+        var component = this.RenderList<List<string>>([.. GivenItems], isRemoveVisible: false);
+
+        // Then:
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(component.FindAll(Html.MakeButtonSelector("[aria-label^='Remove']")), Is.Empty);
+            Assert.That(component.FindAll(Html.MakeButtonSelector(":not([aria-label])")), Has.Exactly(1).Items);
+        }
+    }
+
+    private IRenderedComponent<ItemList<string, TCollection>> RenderList<TCollection>(
+        TCollection items,
+        bool isAddVisible = true,
+        bool isRemoveVisible = true)
         where TCollection : IList<string>
         => this.RenderComponent<ItemList<string, TCollection>>(
             parameters => parameters
                 .Add(list => list.Items, items)
+                .Add(list => list.IsAddVisible, isAddVisible)
+                .Add(list => list.IsRemoveVisible, isRemoveVisible)
                 .Add(list => list.CreateItem, () => Task.FromResult(Maybe<string>.None)));
 }

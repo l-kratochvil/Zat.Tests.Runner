@@ -5,6 +5,7 @@ using System.IO.Abstractions;
 
 using CommunityToolkit.Mvvm.Messaging;
 
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -15,6 +16,8 @@ using Zat.Tests.Runner.Common.Net.Services;
 
 public static class InitSharedServicesExtensions
 {
+    private const string LaunchDebuggerConfigKey = "NUnitTestRunnerProxy:LaunchDebugger";
+
     extension(IServiceCollection services)
     {
         /// <summary>
@@ -43,7 +46,11 @@ public static class InitSharedServicesExtensions
                 .AddSingleton<GlobalWeakReferenceMessanger>()
                 .AddSingleton<ITestRunnerBridgeConnector, TestRunnerBridgeConnector>()
                 .AddSingleton<INUnitTestRunnerProxyConnector>(
-                    new NUnitTestRunnerProxyConnector(launchDebugger: !Debugger.IsAttached))
+                    static provider => new NUnitTestRunnerProxyConnector(
+                        launchDebugger: provider
+                                            .GetRequiredService<IConfiguration>()
+                                            .GetValue<bool>(LaunchDebuggerConfigKey)
+                                        && !Debugger.IsAttached))
                 .AddSingleton<ITestLink, TestLink>()
                 .AddSingleton(_ => ITestLink.Config.Default)
                 .AddSingleton<ITestRunnerEngine, TestRunnerEngine>()

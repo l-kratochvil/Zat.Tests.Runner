@@ -6,6 +6,10 @@ For basic information about the solution and an index of its docs see `README.md
 
 Domain knowledge lives in `GLOSSARY.md` and `docs/ADR/` at the repo root. Read `docs/agents/domain.md` before exploring the codebase, and when writing a glossary term or an ADR.
 
+## Running apps
+
+Always run `Zat.Tests.Runner.WebApp` and `Zat.Tests.Runner.TuiApp` with `--NUnitTestRunnerProxy:LaunchDebugger=false` (e.g. `dotnet run -- --NUnitTestRunnerProxy:LaunchDebugger=false`); otherwise the proxy process blocks on the Visual Studio debugger-attach dialog.
+
 ## Code changes
 
 ### Commit subject

@@ -82,8 +82,9 @@
     private Task PublishAsync(string _)
     {
         // The list is edited in place, so the view model is told before anybody else reads it.
-        this.ViewModel.EmailAddresses = [.. this.items];
-        return this.EmailAddressesChanged.InvokeAsync(this.ViewModel.EmailAddresses);
+        IReadOnlyList<string> addresses = [.. this.items];
+        this.ViewModel.EmailAddresses = addresses;
+        return this.EmailAddressesChanged.InvokeAsync(addresses);
     }
 
     /// <inheritdoc/>

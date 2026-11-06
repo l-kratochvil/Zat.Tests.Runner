@@ -5,6 +5,11 @@ using System.Globalization;
 using System.IO.Abstractions;
 using System.Text.RegularExpressions;
 
+using DevKit.Core.Extensions.Functional;
+using DevKit.Core.Extensions.Types;
+using DevKit.Core.UtilityObjects;
+using DevKit.Mvvm.ViewModel.Extensions;
+
 using FluentValidation;
 
 using Fluxor;
@@ -33,6 +38,7 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
     private readonly ILogger logger;
     private readonly IDispatcher dispatcher;
     private readonly StateBinder<TestConfigurationViewModel, TestConfigurationState> stateBinder;
+    private readonly IDisposable[] disposers;
 
     public TestConfigurationViewModel(
         IState<TestConfigurationState> state,
@@ -50,6 +56,8 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
         this.logger = logger;
         this.dispatcher = dispatcher;
 
+        var disposables = new List<IDisposable>();
+
         this.stateBinder = new StateBinder<TestConfigurationViewModel, TestConfigurationState>(this, state);
 
         this.RuntimeVersions = this.ReadRuntimeVersions(this.appSettingsStore.Current.IdeInstallFolderPath);
@@ -60,10 +68,22 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
                     NewHasErrors: new ValueChange<bool>(hasErrors)));
 
         this.appSettingsStore.Changed += this.OnAppSettingsChanged;
+        disposables.Add(
+            new Disposer(() => this.appSettingsStore.Changed -= this.OnAppSettingsChanged));
+
         this.testSelectionState.StateChanged += this.OnTestSelectionChanged;
+        disposables.Add(
+            new Disposer(() => this.testSelectionState.StateChanged -= this.OnTestSelectionChanged));
 
         this.EmailAddressesEditor.EmailAddresses = this.EmailAddresses;
-        this.EmailAddressesEditor.PropertyChanged += this.OnEmailAddressesEditorPropertyChanged;
+        this.EmailAddressesEditor
+            .SubscribeToPropertyChanged(
+                this,
+                static editor => editor.EmailAddresses,
+                static (vm, _) => vm.OnPropertyChanged(nameof(vm.EmailAddressesEditor)))
+            .Visit(disposables.Add);
+
+        this.disposers = [.. disposables];
 
         this.InitValidator();
     }
@@ -248,9 +268,7 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
     /// <inheritdoc/>
     public void Dispose()
     {
-        this.appSettingsStore.Changed -= this.OnAppSettingsChanged;
-        this.testSelectionState.StateChanged -= this.OnTestSelectionChanged;
-        this.EmailAddressesEditor.PropertyChanged -= this.OnEmailAddressesEditorPropertyChanged;
+        this.disposers.DisposeAllReversed();
         this.stateBinder.Dispose();
     }
 
@@ -400,12 +418,4 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
 
     private void OnTestSelectionChanged(object? sender, EventArgs e)
         => this.OnPropertyChanged(nameof(this.IsRuntimeTest));
-
-    private void OnEmailAddressesEditorPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(EmailAddressesEditorViewModel.EmailAddresses))
-        {
-            this.OnPropertyChanged(nameof(this.EmailAddressesEditor));
-        }
-    }
 }

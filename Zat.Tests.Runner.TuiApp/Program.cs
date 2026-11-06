@@ -5,7 +5,7 @@ using Zat.Tests.Runner.Common.Net.Application.DependencyInjection;
 using Zat.Tests.Runner.TuiApp;
 using Zat.Tests.Runner.TuiApp.Application.DependencyInjection;
 
-var hostBuilder = Host.CreateDefaultBuilder();
+var hostBuilder = Host.CreateDefaultBuilder(args);
 
 #if DEBUG
 if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")))

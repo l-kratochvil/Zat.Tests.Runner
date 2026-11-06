@@ -1,5 +1,5 @@
-@* A list of the items of a collection, with a remove action for each item and an optional add flow;
-   a read-only collection is only listed. *@
+@* A list of the items of a collection, optionally rendered by a template, with a remove action for each item and an optional add flow,
+   either of which can be hidden; a read-only collection is only listed. *@
 
 @using System.Collections.Specialized
 @using CSharpFunctionalExtensions
@@ -13,8 +13,15 @@
     @foreach (var item in this.Items)
     {
         <span class="d-flex align-items-center gap-2">
-            <span class="text-break">@item</span>
-            @if (!this.Items.IsReadOnly)
+            @if (this.ItemTemplate is not null)
+            {
+                @this.ItemTemplate(item)
+            }
+            else
+            {
+                <span class="text-break">@item</span>
+            }
+            @if (this.IsRemoveVisible && !this.Items.IsReadOnly)
             {
                 <button type="button"
                         class="btn btn-outline-secondary btn-sm"
@@ -25,7 +32,9 @@
         </span>
     }
 
-    @if (this.CreateItem is not null && !this.Items.IsReadOnly)
+    @if (this.IsAddVisible &&
+         this.CreateItem is not null && 
+         !this.Items.IsReadOnly)
     {
         <span>
             <button type="button"
@@ -41,14 +50,20 @@
 
     /// <summary>
     /// Gets or sets the collection listed; items are added to and removed from it in place, unless it is
-    /// read-only, when neither the Add nor the Remove buttons are shown.
+    /// read-only, when neither the Add nor the Remove buttons are shown, whatever the visibility flags say.
     /// </summary>
     [Parameter, EditorRequired]
     public required TCollection Items { get; set; }
 
     /// <summary>
+    /// Gets or sets how an item is rendered; the item's text is shown when not set.
+    /// </summary>
+    [Parameter]
+    public RenderFragment<TItem>? ItemTemplate { get; set; }
+
+    /// <summary>
     /// Gets or sets what supplies an item to add, or none when adding is abandoned; the Add button is shown
-    /// only when set and <see cref="Items"/> is not read-only.
+    /// only when set, <see cref="IsAddVisible"/> and <see cref="Items"/> is not read-only.
     /// </summary>
     [Parameter]
     public Func<Task<Maybe<TItem>>>? CreateItem { get; set; }
@@ -76,6 +91,18 @@
     /// </summary>
     [Parameter]
     public bool IsRemoveEnabled { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the Add button is shown.
+    /// </summary>
+    [Parameter]
+    public bool IsAddVisible { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the Remove buttons are shown.
+    /// </summary>
+    [Parameter]
+    public bool IsRemoveVisible { get; set; } = true;
 
     /// <inheritdoc/>
     public void Dispose()
