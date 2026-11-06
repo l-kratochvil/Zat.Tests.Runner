@@ -19,7 +19,7 @@ internal class App
         {
             // A test tree that can't be read at start ends the application, which is the only way the TUI tells why
             // there would be nothing to choose from. Later changes of the test assembly are followed on their own.
-            await host.Services.GetRequiredService<ITestTreeStore>().DiscoverAsync();
+            await host.Services.GetRequiredService<IExploredTestAssemblyStore>().DiscoverAsync();
 
             using var scope = host.Services.CreateScope();
             await MainRenderAsync(scope.ServiceProvider.GetRequiredService<HomeScreen>());

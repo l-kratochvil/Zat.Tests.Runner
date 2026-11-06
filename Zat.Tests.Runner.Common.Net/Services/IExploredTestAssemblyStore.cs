@@ -8,7 +8,7 @@ using Zat.Tests.Runner.Common.Model;
 /// <remarks>
 /// Shared by everyone who chooses tests, because the test assembly belongs to the test machine.
 /// </remarks>
-public interface ITestTreeStore
+public interface IExploredTestAssemblyStore
 {
     /// <summary>
     /// Raised whenever <see cref="TestSuites"/> is replaced, on whatever thread replaced it.

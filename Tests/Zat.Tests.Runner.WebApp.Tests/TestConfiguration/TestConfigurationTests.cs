@@ -78,13 +78,13 @@ public class TestConfigurationTests
         // Only a runtime test runs against hardware, so for anything else the field is not shown at
         // all rather than shown and ignored.
         var testSelectionState = SelectionOf(GivenTestCasePath);
-        var testTreeStore = TreeWithOneTestCase(TestType.Application);
+        var exploredTestAssemblyStore = TreeWithOneTestCase(TestType.Application);
 
         // When:
         using var disposer = CreateUnit(
             out var unit,
             testSelectionState: testSelectionState,
-            testTreeStore: testTreeStore);
+            exploredTestAssemblyStore: exploredTestAssemblyStore);
 
         // Then:
         Assert.That(unit.FindAll(TestStationSelector), Is.Empty);
@@ -95,13 +95,13 @@ public class TestConfigurationTests
     {
         // Given:
         var testSelectionState = SelectionOf(GivenTestCasePath);
-        var testTreeStore = TreeWithOneTestCase(TestType.Runtime);
+        var exploredTestAssemblyStore = TreeWithOneTestCase(TestType.Runtime);
 
         // When:
         using var disposer = CreateUnit(
             out var unit,
             testSelectionState: testSelectionState,
-            testTreeStore: testTreeStore);
+            exploredTestAssemblyStore: exploredTestAssemblyStore);
 
         // Then:
         Assert.That(unit.FindAll(TestStationSelector), Has.Exactly(1).Items);
@@ -118,7 +118,7 @@ public class TestConfigurationTests
         using var disposer = CreateUnit(
             out var unit,
             testSelectionState: testSelectionState.Object,
-            testTreeStore: TreeWithOneTestCase(TestType.Runtime));
+            exploredTestAssemblyStore: TreeWithOneTestCase(TestType.Runtime));
 
         // When:
         testSelection = new TestDiscoveryState([GivenTestCasePath]);
@@ -281,7 +281,7 @@ public class TestConfigurationTests
         IAppSettingsStore? appSettingsStore = null,
         IFileSystem? fileSystem = null,
         IState<TestDiscoveryState>? testSelectionState = null,
-        ITestTreeStore? testTreeStore = null)
+        IExploredTestAssemblyStore? exploredTestAssemblyStore = null)
     {
         // The store fake rather than a mock, so that a field switched on is shown switched on.
         store ??= new TestConfigurationStoreFake();
@@ -295,8 +295,8 @@ public class TestConfigurationTests
         context.Services.AddSingleton(fileSystem ?? new MockFileSystem());
         context.Services.AddSingleton(testSelectionState ?? SelectionOf());
         context.Services.AddSingleton(
-            testTreeStore
-            ?? Mock.Of<ITestTreeStore>(s => s.TestSuites == Array.Empty<TestSuiteEntity>()));
+            exploredTestAssemblyStore
+            ?? Mock.Of<IExploredTestAssemblyStore>(s => s.TestSuites == Array.Empty<TestSuiteEntity>()));
         context.Services.AddSingleton(Mock.Of<IActionSubscriber>());
         context.Services.InitLoggingAsApp();
         context.Services.AddScoped<TestConfigurationViewModel>();
@@ -309,8 +309,8 @@ public class TestConfigurationTests
     private static IState<TestDiscoveryState> SelectionOf(params string[] executionPaths)
         => Mock.Of<IState<TestDiscoveryState>>(s => s.Value == new TestDiscoveryState(executionPaths));
 
-    private static ITestTreeStore TreeWithOneTestCase(TestType testType)
-        => Mock.Of<ITestTreeStore>(
+    private static IExploredTestAssemblyStore TreeWithOneTestCase(TestType testType)
+        => Mock.Of<IExploredTestAssemblyStore>(
             s => s.TestSuites == new[] { TestSuites.WithOneTestCase(testType, GivenTestCasePath) });
 
     private static void AddInstalledRuntimeVersions(

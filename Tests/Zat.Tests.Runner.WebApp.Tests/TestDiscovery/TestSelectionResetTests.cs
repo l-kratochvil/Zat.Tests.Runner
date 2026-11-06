@@ -14,13 +14,13 @@ using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
 public class TestSelectionResetTests
 {
-    private readonly Mock<ITestTreeStore> testTreeStoreMock = new();
+    private readonly Mock<IExploredTestAssemblyStore> exploredTestAssemblyStoreMock = new();
     private readonly Mock<IDispatcher> dispatcherMock = new();
     private readonly TestSelectionReset unit;
 
     public TestSelectionResetTests()
     {
-        this.unit = new TestSelectionReset(this.testTreeStoreMock.Object, this.dispatcherMock.Object);
+        this.unit = new TestSelectionReset(this.exploredTestAssemblyStoreMock.Object, this.dispatcherMock.Object);
         this.unit.Initialize();
     }
 
@@ -62,7 +62,7 @@ public class TestSelectionResetTests
     }
 
     private void RaiseTestTreeChanged(bool executionPathsChanged)
-        => this.testTreeStoreMock.Raise(
+        => this.exploredTestAssemblyStoreMock.Raise(
             store => store.Changed += null,
             new TestTreeChange([], executionPathsChanged));
 }

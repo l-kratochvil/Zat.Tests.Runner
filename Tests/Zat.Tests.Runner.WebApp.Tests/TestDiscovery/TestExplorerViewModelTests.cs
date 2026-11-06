@@ -19,7 +19,7 @@ public class TestExplorerViewModelTests
     private const string GivenSecondCasePath = "Suite.FirstFixture.SecondCase";
     private const string GivenThirdCasePath = "Suite.SecondFixture.ThirdCase";
 
-    private Mock<ITestTreeStore> testTreeStore;
+    private Mock<IExploredTestAssemblyStore> exploredTestAssemblyStore;
     private TestDiscoveryStoreFake testSelection;
 
     private TestExplorerViewModel unit;
@@ -27,8 +27,8 @@ public class TestExplorerViewModelTests
     [SetUp]
     public void SetUp()
     {
-        this.testTreeStore = new Mock<ITestTreeStore>();
-        this.testTreeStore.SetupGet(store => store.TestSuites).Returns([CreateTestSuite()]);
+        this.exploredTestAssemblyStore = new Mock<IExploredTestAssemblyStore>();
+        this.exploredTestAssemblyStore.SetupGet(store => store.TestSuites).Returns([CreateTestSuite()]);
 
         this.testSelection = new TestDiscoveryStoreFake();
 
@@ -248,7 +248,7 @@ public class TestExplorerViewModelTests
         this.unit.PropertyChanged += (_, e) => announcedProperties.Add(e.PropertyName);
 
         // When:
-        this.testTreeStore.Raise(
+        this.exploredTestAssemblyStore.Raise(
             store => store.Changed += null,
             new TestTreeChange(givenTestSuites, ExecutionPathsChanged: true));
 
@@ -325,7 +325,7 @@ public class TestExplorerViewModelTests
             executionPath: executionPath);
 
     private TestExplorerViewModel CreateUnit()
-        => new(this.testTreeStore.Object, this.testSelection, this.testSelection.Dispatcher.Object);
+        => new(this.exploredTestAssemblyStore.Object, this.testSelection, this.testSelection.Dispatcher.Object);
 
     private TestTreeNodeData FindNode(string executionPath)
         => this.unit.Roots

@@ -9,11 +9,10 @@
         <ItemList TItem="string"
                   TCollection="List<string>"
                   Items="this.items"
-                  CreateItem="this.ViewModel.BeginAdd"
+                  AddCommand="new(this.ViewModel.BeginAdd) { IsEnabled = !this.ViewModel.IsEditing }"
+                  RemoveCommand="new() { IsEnabled = !this.ViewModel.IsEditing }"
                   OnAdd="this.PublishAsync"
-                  OnRemove="this.PublishAsync"
-                  IsAddEnabled="!this.ViewModel.IsEditing"
-                  IsRemoveEnabled="!this.ViewModel.IsEditing" />
+                  OnRemove="this.PublishAsync" />
     </Validated>
 
     @if (this.ViewModel.IsEditing)

@@ -53,8 +53,7 @@ selection of entities reported by the front-ends.
 
 ## The test tree follows the test assembly
 
-The test assembly may be deployed again while the application runs, so `ITestTreeStore` discovers
-the test tree again once its directory stays unchanged for a moment. When the new test tree holds
+The test assembly may be deployed again while the application runs, so `IExploredTestAssemblyStore` discovers the test tree again once its directory stays unchanged for a moment. When the new test tree holds
 other test entities, every test selection is cleared, as it may no longer be what the user chose.
 A test run still reads the test assembly on its own, and refuses to start when it no longer holds
 the test selection, because NUnit would quietly skip what is missing.

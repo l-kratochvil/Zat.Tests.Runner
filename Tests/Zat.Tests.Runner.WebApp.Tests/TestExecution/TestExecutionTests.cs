@@ -53,8 +53,8 @@ public class TestExecutionTests : Bunit.TestContext
         this.configurationState.SetupGet(state => state.Value).Returns(() => this.configuration);
         this.testSelectionState.SetupGet(state => state.Value).Returns(() => this.testSelection);
 
-        var testTreeStore = new Mock<ITestTreeStore>();
-        testTreeStore
+        var exploredTestAssemblyStore = new Mock<IExploredTestAssemblyStore>();
+        exploredTestAssemblyStore
             .SetupGet(store => store.TestSuites)
             .Returns([TestSuites.WithOneTestCase(TestType.Application, GivenTestCasePath)]);
 
@@ -62,7 +62,7 @@ public class TestExecutionTests : Bunit.TestContext
 
         this.Services.AddSingleton(this.configurationState.Object);
         this.Services.AddSingleton(this.testSelectionState.Object);
-        this.Services.AddSingleton(testTreeStore.Object);
+        this.Services.AddSingleton(exploredTestAssemblyStore.Object);
         this.Services.AddSingleton(new Mock<IAppPathsProvider>().Object);
         this.Services.AddSingleton(this.testRunnerEngine.Object);
         this.Services.AddScoped<TestExecutionViewModel>();

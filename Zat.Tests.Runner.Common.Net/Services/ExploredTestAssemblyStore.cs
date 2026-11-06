@@ -6,19 +6,19 @@ using Zat.Tests.Runner.Common.Model;
 using Zat.Tests.Runner.Common.Net.Application.Logging;
 using Zat.Tests.Runner.Common.Net.Application.Paths;
 
-/// <inheritdoc cref="ITestTreeStore"/>
+/// <inheritdoc cref="IExploredTestAssemblyStore"/>
 /// <param name="proxyConnector">Connects to the proxy the test assembly is discovered through.</param>
 /// <param name="directoryWatcher">Tells when the directory of the test assembly changes.</param>
 /// <param name="timeProvider">Measures the quiet period after a change.</param>
 /// <param name="appPathsProvider">Tells where the test assembly is.</param>
 /// <param name="logger">Log the discoveries are reported to.</param>
-public sealed class TestTreeStore(
+public sealed class ExploredTestAssemblyStore(
     INUnitTestRunnerProxyConnector proxyConnector,
     IDirectoryWatcher directoryWatcher,
     TimeProvider timeProvider,
     ISharedAppPathsProvider appPathsProvider,
     ILogger<LogSources.TestRun> logger)
-    : ITestTreeStore, IDisposable
+    : IExploredTestAssemblyStore, IDisposable
 {
     /// <summary>
     /// How long the directory of the test assembly has to stay unchanged before the test tree is discovered

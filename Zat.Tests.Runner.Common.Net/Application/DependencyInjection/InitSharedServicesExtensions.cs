@@ -57,7 +57,7 @@ public static class InitSharedServicesExtensions
                 .AddSingleton(TimeProvider.System)
                 .AddSingleton<IFileSystem, FileSystem>()
                 .AddSingleton<IDirectoryWatcher, FileSystemDirectoryWatcher>()
-                .AddSingleton<ITestTreeStore, TestTreeStore>();
+                .AddSingleton<IExploredTestAssemblyStore, ExploredTestAssemblyStore>();
 
         private IServiceCollection InitAppOptions<TOptions>(
             string sectionName)

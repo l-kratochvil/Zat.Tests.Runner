@@ -32,7 +32,7 @@ public sealed class TestExecutionViewModel : ViewModelBase, IDisposable
     private readonly IEnumerable<ITestResultHandler> testResultHandlers;
     private readonly IState<TestConfigurationState> configurationState;
     private readonly IState<TestDiscoveryState> testSelectionState;
-    private readonly ITestTreeStore testTreeStore;
+    private readonly IExploredTestAssemblyStore exploredTestAssemblyStore;
     private readonly IAppPathsProvider appPathsProvider;
 
     public TestExecutionViewModel(
@@ -41,13 +41,13 @@ public sealed class TestExecutionViewModel : ViewModelBase, IDisposable
         IState<TestConfigurationState> configurationState,
         IAppPathsProvider appPathsProvider,
         IState<TestDiscoveryState> testSelectionState,
-        ITestTreeStore testTreeStore)
+        IExploredTestAssemblyStore exploredTestAssemblyStore)
     {
         this.testRunnerEngine = testRunnerEngine;
         this.testResultHandlers = testResultHandlers;
         this.configurationState = configurationState;
         this.testSelectionState = testSelectionState;
-        this.testTreeStore = testTreeStore;
+        this.exploredTestAssemblyStore = exploredTestAssemblyStore;
         this.appPathsProvider = appPathsProvider;
 
         this.testRunnerEngine.StateChanged += this.OnTestRunnerEngineStateChanged;
@@ -166,7 +166,7 @@ public sealed class TestExecutionViewModel : ViewModelBase, IDisposable
     }
 
     private IReadOnlyList<TestCaseEntity> SelectedTestCases()
-        => this.testSelectionState.Value.GetSelectedTestCasesFromTestSuites(this.testTreeStore.TestSuites);
+        => this.testSelectionState.Value.GetSelectedTestCasesFromTestSuites(this.exploredTestAssemblyStore.TestSuites);
 
     private IEnumerable<string> GetExecutionBlockingReasons()
     {

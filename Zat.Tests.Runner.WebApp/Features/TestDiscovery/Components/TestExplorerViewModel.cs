@@ -20,22 +20,22 @@ using Zat.Tests.Runner.WebApp.Shared.ViewModel;
 /// </remarks>
 public sealed class TestExplorerViewModel : ViewModelBase, IDisposable
 {
-    private readonly ITestTreeStore testTreeStore;
+    private readonly IExploredTestAssemblyStore exploredTestAssemblyStore;
     private readonly IState<TestDiscoveryState> state;
     private readonly IDispatcher dispatcher;
 
     public TestExplorerViewModel(
-        ITestTreeStore testTreeStore,
+        IExploredTestAssemblyStore exploredTestAssemblyStore,
         IState<TestDiscoveryState> state,
         IDispatcher dispatcher)
     {
-        this.testTreeStore = testTreeStore;
+        this.exploredTestAssemblyStore = exploredTestAssemblyStore;
         this.state = state;
         this.dispatcher = dispatcher;
 
-        this.Roots = CreateRoots(testTreeStore.TestSuites);
+        this.Roots = CreateRoots(exploredTestAssemblyStore.TestSuites);
 
-        this.testTreeStore.Changed += this.OnTestTreeChanged;
+        this.exploredTestAssemblyStore.Changed += this.OnTestTreeChanged;
         this.state.StateChanged += this.OnStateChanged;
 
         this.ApplySelection(this.state.Value.SelectedExecutionPaths);
@@ -84,7 +84,7 @@ public sealed class TestExplorerViewModel : ViewModelBase, IDisposable
     /// <inheritdoc/>
     public void Dispose()
     {
-        this.testTreeStore.Changed -= this.OnTestTreeChanged;
+        this.exploredTestAssemblyStore.Changed -= this.OnTestTreeChanged;
         this.state.StateChanged -= this.OnStateChanged;
     }
 

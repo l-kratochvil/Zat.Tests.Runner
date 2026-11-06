@@ -34,7 +34,7 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
     private readonly IAppSettingsStore appSettingsStore;
     private readonly IFileSystem fileSystem;
     private readonly IState<TestDiscoveryState> testSelectionState;
-    private readonly ITestTreeStore testTreeStore;
+    private readonly IExploredTestAssemblyStore exploredTestAssemblyStore;
     private readonly ILogger logger;
     private readonly IDispatcher dispatcher;
     private readonly StateBinder<TestConfigurationViewModel, TestConfigurationState> stateBinder;
@@ -45,14 +45,14 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
         IAppSettingsStore appSettingsStore,
         IFileSystem fileSystem,
         IState<TestDiscoveryState> testSelectionState,
-        ITestTreeStore testTreeStore,
+        IExploredTestAssemblyStore exploredTestAssemblyStore,
         ILogger logger,
         IDispatcher dispatcher)
     {
         this.appSettingsStore = appSettingsStore;
         this.fileSystem = fileSystem;
         this.testSelectionState = testSelectionState;
-        this.testTreeStore = testTreeStore;
+        this.exploredTestAssemblyStore = exploredTestAssemblyStore;
         this.logger = logger;
         this.dispatcher = dispatcher;
 
@@ -99,7 +99,7 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
     /// </summary>
     public bool IsRuntimeTest
         => this.testSelectionState.Value
-            .GetSelectedTestCasesFromTestSuites(this.testTreeStore.TestSuites)
+            .GetSelectedTestCasesFromTestSuites(this.exploredTestAssemblyStore.TestSuites)
             .Any(static testCase => testCase.TestType == TestType.Runtime);
 
     /// <summary>
@@ -268,7 +268,7 @@ public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposa
     /// <inheritdoc/>
     public void Dispose()
     {
-        this.disposers.DisposeAllReversed();
+        this.disposers.DisposeAll();
         this.stateBinder.Dispose();
     }
 

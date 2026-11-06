@@ -32,7 +32,7 @@ public class TestExecutionViewModelTests
     private const string GivenTestCasePath = "Suite.Fixture.Test";
 
     private Mock<ITestRunnerEngine> testRunnerEngine;
-    private Mock<ITestTreeStore> testTreeStore;
+    private Mock<IExploredTestAssemblyStore> exploredTestAssemblyStore;
     private TestDiscoveryStoreFake testSelection;
     private TestConfigurationStoreFake configuration;
 
@@ -48,8 +48,8 @@ public class TestExecutionViewModelTests
         this.testRunnerEngine = new Mock<ITestRunnerEngine>();
         this.testRunnerEngine.SetupGet(engine => engine.State).Returns(() => this.testRunState);
 
-        this.testTreeStore = new Mock<ITestTreeStore>();
-        this.testTreeStore
+        this.exploredTestAssemblyStore = new Mock<IExploredTestAssemblyStore>();
+        this.exploredTestAssemblyStore
             .SetupGet(store => store.TestSuites)
             .Returns([TestSuites.WithOneTestCase(TestType.Application, GivenTestCasePath)]);
 
@@ -62,7 +62,7 @@ public class TestExecutionViewModelTests
             this.configuration,
             new Mock<IAppPathsProvider>().Object,
             this.testSelection,
-            this.testTreeStore.Object);
+            this.exploredTestAssemblyStore.Object);
     }
 
     [TearDown]

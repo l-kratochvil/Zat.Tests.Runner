@@ -14,12 +14,12 @@ using Zat.Tests.Runner.WebApp.Shared.Services;
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
 public class TestTreeDiscoveryTests
 {
-    private readonly Mock<ITestTreeStore> testTreeStoreMock = new();
+    private readonly Mock<IExploredTestAssemblyStore> exploredTestAssemblyStoreMock = new();
     private readonly Mock<ILogger<LogSources.TestRun>> loggerMock = new();
     private readonly TestTreeDiscovery unit;
 
     public TestTreeDiscoveryTests()
-        => this.unit = new TestTreeDiscovery(this.testTreeStoreMock.Object, this.loggerMock.Object);
+        => this.unit = new TestTreeDiscovery(this.exploredTestAssemblyStoreMock.Object, this.loggerMock.Object);
 
     [Test]
     public async Task StartAsync__WhenApplicationStarts__ThenShouldDiscoverTestTree()
@@ -28,7 +28,7 @@ public class TestTreeDiscoveryTests
         await this.unit.StartAsync(CancellationToken.None);
 
         // Then:
-        this.testTreeStoreMock.Verify(store => store.DiscoverAsync(It.IsAny<CancellationToken>()), Times.Once);
+        this.exploredTestAssemblyStoreMock.Verify(store => store.DiscoverAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]
@@ -65,7 +65,7 @@ public class TestTreeDiscoveryTests
     }
 
     private void SetUpDiscoveryFailure(Exception exception)
-        => this.testTreeStoreMock
+        => this.exploredTestAssemblyStoreMock
             .Setup(store => store.DiscoverAsync(It.IsAny<CancellationToken>()))
             .ThrowsAsync(exception);
 }

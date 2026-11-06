@@ -228,7 +228,7 @@ public class TestConfigurationViewModelTests
         using var unit = CreateUnit(
             store: StoreHolding(new TestConfigurationState { TestedHwAssembly = givenTestedHwAssembly }),
             testSelectionState: SelectionOf(GivenTestCasePath),
-            testTreeStore: TreeWithOneTestCase(TestType.Runtime));
+            exploredTestAssemblyStore: TreeWithOneTestCase(TestType.Runtime));
 
         // Then:
         return HasErrors(unit, nameof(TestConfigurationViewModel.TestedHwAssembly));
@@ -240,7 +240,7 @@ public class TestConfigurationViewModelTests
         // Given & When:
         using var unit = CreateUnit(
             testSelectionState: SelectionOf(GivenTestCasePath),
-            testTreeStore: TreeWithOneTestCase(TestType.Application));
+            exploredTestAssemblyStore: TreeWithOneTestCase(TestType.Application));
 
         // Then:
         Assert.That(HasErrors(unit, nameof(TestConfigurationViewModel.TestedHwAssembly)), Is.False);
@@ -407,7 +407,7 @@ public class TestConfigurationViewModelTests
         // Given:
         using var unit = CreateUnit(
             testSelectionState: SelectionOf(GivenTestCasePath),
-            testTreeStore: TreeWithOneTestCase(givenTestType));
+            exploredTestAssemblyStore: TreeWithOneTestCase(givenTestType));
 
         // When:
         return unit.IsRuntimeTest;
@@ -638,7 +638,7 @@ public class TestConfigurationViewModelTests
         IAppSettingsStore? appSettingsStore = null,
         IFileSystem? fileSystem = null,
         IState<TestDiscoveryState>? testSelectionState = null,
-        ITestTreeStore? testTreeStore = null,
+        IExploredTestAssemblyStore? exploredTestAssemblyStore = null,
         ILogger? logger = null)
     {
         // The store fake rather than a mock: what the view model shows is the rules applied to what
@@ -650,7 +650,7 @@ public class TestConfigurationViewModelTests
             appSettingsStore ?? AppSettingsStoreAt(GivenInstallFolderPath).Object,
             fileSystem ?? new MockFileSystem(),
             testSelectionState ?? SelectionOf(),
-            testTreeStore ?? Mock.Of<ITestTreeStore>(s => s.TestSuites == Array.Empty<TestSuiteEntity>()),
+            exploredTestAssemblyStore ?? Mock.Of<IExploredTestAssemblyStore>(s => s.TestSuites == Array.Empty<TestSuiteEntity>()),
             logger ?? Mock.Of<ILogger>(),
             store.Dispatcher.Object);
     }
@@ -678,8 +678,8 @@ public class TestConfigurationViewModelTests
     private static IState<TestDiscoveryState> SelectionOf(params string[] executionPaths)
         => Mock.Of<IState<TestDiscoveryState>>(s => s.Value == new TestDiscoveryState(executionPaths));
 
-    private static ITestTreeStore TreeWithOneTestCase(TestType testType)
-        => Mock.Of<ITestTreeStore>(
+    private static IExploredTestAssemblyStore TreeWithOneTestCase(TestType testType)
+        => Mock.Of<IExploredTestAssemblyStore>(
             s => s.TestSuites == new[] { TestSuites.WithOneTestCase(testType, GivenTestCasePath) });
 
     private static void AddInstalledRuntimeVersions(

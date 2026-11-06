@@ -8,25 +8,25 @@ using Zat.Z2xxTests.Common.Model;
 /// This is the store for test run config that is used by the running test.
 /// </summary>
 /// <remarks>
-/// The tests to choose from follow <see cref="ITestTreeStore"/>; once the test assembly holds other test entities,
+/// The tests to choose from follow <see cref="IExploredTestAssemblyStore"/>; once the test assembly holds other test entities,
 /// the test selection is cleared, as it may no longer be what the user selected.
 /// </remarks>
 internal class TestRunConfigStore
 {
     private readonly AppStateStore appStateStore;
-    private readonly ITestTreeStore testTreeStore;
+    private readonly IExploredTestAssemblyStore exploredTestAssemblyStore;
 
-    public TestRunConfigStore(AppStateStore appStateStore, ITestTreeStore testTreeStore)
+    public TestRunConfigStore(AppStateStore appStateStore, IExploredTestAssemblyStore exploredTestAssemblyStore)
     {
         this.appStateStore = appStateStore;
-        this.testTreeStore = testTreeStore;
+        this.exploredTestAssemblyStore = exploredTestAssemblyStore;
 
         // Both are singletons, so the subscription lasts as long as the application does.
-        this.testTreeStore.Changed += this.OnTestTreeChanged;
+        this.exploredTestAssemblyStore.Changed += this.OnTestTreeChanged;
     }
 
     public IEnumerable<TestSuiteEntity> LoadedTestSuites
-        => this.testTreeStore.TestSuites;
+        => this.exploredTestAssemblyStore.TestSuites;
 
     public IEnumerable<TestEntity> SelectedTestEntities { get; set; } = [];
 

@@ -1,6 +1,7 @@
 namespace Zat.Tests.Runner.WebApp.Tests.Components.Primitives;
 
 using AngleSharp.Dom;
+
 using Bunit;
 
 using CSharpFunctionalExtensions;
@@ -23,10 +24,13 @@ public class ItemListTests : Bunit.TestContext
         => this.Dispose();
 
     [Test]
-    public void Render__WhenItemsMutable__ThenShouldShowAddAndRemove()
+    public void Render__WhenCommandsConfigured__ThenShouldShowAddAndRemove()
     {
         // When:
-        var component = this.RenderList<List<string>>([.. GivenItems]);
+        var component = this.RenderComponent<List<string>>(
+            [.. GivenItems],
+            new ItemList.AddCommandConfig<string>(() => Task.FromResult(Maybe<string>.None)),
+            new ItemList.RemoveCommandConfig());
 
         // Then:
         using (Assert.EnterMultipleScope())
@@ -41,13 +45,10 @@ public class ItemListTests : Bunit.TestContext
     }
 
     [Test]
-    public void Render__WhenItemsImmutable__ThenShouldNotShowAddOrRemove()
+    public void Render__WhenNoCommandConfigured__ThenShouldOnlyList()
     {
-        // Given:
-        // An array takes no new items nor gives any up, so offering either would only end in an exception.
-
         // When:
-        var component = this.RenderList<string[]>([.. GivenItems]);
+        var component = this.RenderComponent<List<string>>([.. GivenItems]);
 
         // Then:
         using (Assert.EnterMultipleScope())
@@ -61,10 +62,50 @@ public class ItemListTests : Bunit.TestContext
     }
 
     [Test]
+    public void Render__WhenItemsImmutable__ThenShouldOnlyList()
+    {
+        // When:
+        var component = this.RenderComponent<string[]>([.. GivenItems]);
+
+        // Then:
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(component.FindAll(TagNames.Button), Is.Empty);
+            Assert.That(component.Markup, Does
+                .Contain(GivenItems[0])
+                .And.Contain(GivenItems[1])
+                .And.Contain(GivenItems[2]));
+        }
+    }
+
+    [Test]
+    public void Render__WhenItemsImmutableWithAddCommand__ThenShouldThrow()
+    {
+        Assert.That(
+            () => this.RenderComponent<string[]>(
+                [.. GivenItems],
+                addCommand: new ItemList.AddCommandConfig<string>(() => Task.FromResult(Maybe<string>.None))),
+            Throws.InvalidOperationException);
+    }
+
+    [Test]
+    public void Render__WhenItemsImmutableWithRemoveCommand__ThenShouldThrow()
+    {
+        Assert.That(
+            () => this.RenderComponent<string[]>(
+                [.. GivenItems],
+                removeCommand: new ItemList.RemoveCommandConfig()),
+            Throws.InvalidOperationException);
+    }
+
+    [Test]
     public void Render__WhenAddHidden__ThenShouldShowOnlyRemove()
     {
         // When:
-        var component = this.RenderList<List<string>>([.. GivenItems], isAddVisible: false);
+        var component = this.RenderComponent<List<string>>(
+            [.. GivenItems],
+            new ItemList.AddCommandConfig<string>(() => Task.FromResult(Maybe<string>.None)) { IsVisible = false },
+            new ItemList.RemoveCommandConfig());
 
         // Then:
         using (Assert.EnterMultipleScope())
@@ -78,7 +119,10 @@ public class ItemListTests : Bunit.TestContext
     public void Render__WhenRemoveHidden__ThenShouldShowOnlyAdd()
     {
         // When:
-        var component = this.RenderList<List<string>>([.. GivenItems], isRemoveVisible: false);
+        var component = this.RenderComponent<List<string>>(
+            [.. GivenItems],
+            new ItemList.AddCommandConfig<string>(() => Task.FromResult(Maybe<string>.None)),
+            new ItemList.RemoveCommandConfig { IsVisible = false });
 
         // Then:
         using (Assert.EnterMultipleScope())
@@ -88,15 +132,14 @@ public class ItemListTests : Bunit.TestContext
         }
     }
 
-    private IRenderedComponent<ItemList<string, TCollection>> RenderList<TCollection>(
+    private IRenderedComponent<ItemList<string, TCollection>> RenderComponent<TCollection>(
         TCollection items,
-        bool isAddVisible = true,
-        bool isRemoveVisible = true)
+        ItemList.AddCommandConfig<string>? addCommand = null,
+        ItemList.RemoveCommandConfig? removeCommand = null)
         where TCollection : IList<string>
         => this.RenderComponent<ItemList<string, TCollection>>(
             parameters => parameters
                 .Add(list => list.Items, items)
-                .Add(list => list.IsAddVisible, isAddVisible)
-                .Add(list => list.IsRemoveVisible, isRemoveVisible)
-                .Add(list => list.CreateItem, () => Task.FromResult(Maybe<string>.None)));
+                .Add(list => list.AddCommand, addCommand)
+                .Add(list => list.RemoveCommand, removeCommand));
 }

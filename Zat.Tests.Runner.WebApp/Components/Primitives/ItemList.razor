@@ -1,5 +1,5 @@
-@* A list of the items of a collection, optionally rendered by a template, with a remove action for each item and an optional add flow,
-   either of which can be hidden; a read-only collection is only listed. *@
+@* A list of the items of a collection, optionally rendered by a template, with a remove action for each item and an add flow,
+   each offered only when its command is configured; a read-only collection is only listed. *@
 
 @using System.Collections.Specialized
 @using CSharpFunctionalExtensions
@@ -21,26 +21,24 @@
             {
                 <span class="text-break">@item</span>
             }
-            @if (this.IsRemoveVisible && !this.Items.IsReadOnly)
+            @if (this.RemoveCommand is { IsVisible: true } removeCommand)
             {
                 <button type="button"
                         class="btn btn-outline-secondary btn-sm"
                         aria-label="@($"Remove {item}")"
-                        disabled="@(!this.IsRemoveEnabled)"
+                        disabled="@(!removeCommand.IsEnabled)"
                         @onclick="() => this.RemoveAsync(item)">Remove</button>
             }
         </span>
     }
 
-    @if (this.IsAddVisible &&
-         this.CreateItem is not null && 
-         !this.Items.IsReadOnly)
+    @if (this.AddCommand is { IsVisible: true } addCommand)
     {
         <span>
             <button type="button"
                     class="btn btn-outline-secondary btn-sm"
-                    disabled="@(!this.IsAddEnabled)"
-                    @onclick="this.AddAsync">Add</button>
+                    disabled="@(!addCommand.IsEnabled)"
+                    @onclick="() => this.AddAsync(addCommand.CreateItem)">Add</button>
         </span>
     }
 </span>
@@ -49,8 +47,8 @@
     private INotifyCollectionChanged? notifyCollectionChanged;
 
     /// <summary>
-    /// Gets or sets the collection listed; items are added to and removed from it in place, unless it is
-    /// read-only, when neither the Add nor the Remove buttons are shown, whatever the visibility flags say.
+    /// Gets or sets the collection listed; items are added to and removed from it in place, so a read-only
+    /// one is only listed and takes neither <see cref="AddCommand"/> nor <see cref="RemoveCommand"/>.
     /// </summary>
     [Parameter, EditorRequired]
     public required TCollection Items { get; set; }
@@ -62,11 +60,19 @@
     public RenderFragment<TItem>? ItemTemplate { get; set; }
 
     /// <summary>
-    /// Gets or sets what supplies an item to add, or none when adding is abandoned; the Add button is shown
-    /// only when set, <see cref="IsAddVisible"/> and <see cref="Items"/> is not read-only.
+    /// Gets or sets the Add button; it is offered only when set.
     /// </summary>
     [Parameter]
-    public Func<Task<Maybe<TItem>>>? CreateItem { get; set; }
+    public ItemList.AddCommandConfig<TItem>? AddCommand { get; set; }
+
+    /// <summary>
+    /// Gets or sets the Remove buttons; they are offered only when set.
+    /// </summary>
+    [Parameter]
+    public ItemList.RemoveCommandConfig? RemoveCommand { get; set; }
+
+    // Kept out of AddCommandConfig: Blazor ties an EventCallback to the component that sets it, and so
+    // re-renders that component once it is told, only when the callback is passed as a parameter.
 
     /// <summary>
     /// Gets or sets what is told about an item once it has been added to <see cref="Items"/>.
@@ -74,35 +80,13 @@
     [Parameter]
     public EventCallback<TItem> OnAdd { get; set; }
 
+    // Kept out of RemoveCommandConfig for the same reason as OnAdd.
+
     /// <summary>
     /// Gets or sets what is told about an item once it has been removed from <see cref="Items"/>.
     /// </summary>
     [Parameter]
     public EventCallback<TItem> OnRemove { get; set; }
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the Add button can be clicked.
-    /// </summary>
-    [Parameter]
-    public bool IsAddEnabled { get; set; } = true;
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the Remove buttons can be clicked.
-    /// </summary>
-    [Parameter]
-    public bool IsRemoveEnabled { get; set; } = true;
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the Add button is shown.
-    /// </summary>
-    [Parameter]
-    public bool IsAddVisible { get; set; } = true;
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the Remove buttons are shown.
-    /// </summary>
-    [Parameter]
-    public bool IsRemoveVisible { get; set; } = true;
 
     /// <inheritdoc/>
     public void Dispose()
@@ -114,6 +98,15 @@
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
+
+        // A configured command asks for a button the collection cannot honour, which would show up as a
+        // button quietly missing rather than as a mistake, so it is said out loud instead.
+        if (this.Items.IsReadOnly && (this.AddCommand is not null || this.RemoveCommand is not null))
+        {
+            throw new InvalidOperationException(
+                $"A read-only collection is only listed, so an {nameof(ItemList<TItem, TCollection>)} " +
+                $"given one takes neither {nameof(this.AddCommand)} nor {nameof(this.RemoveCommand)}.");
+        }
 
         if (ReferenceEquals(this.notifyCollectionChanged, this.Items))
         {
@@ -146,10 +139,9 @@
     private void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         => _ = this.InvokeAsync(this.StateHasChanged);
 
-    private async Task AddAsync()
+    private async Task AddAsync(Func<Task<Maybe<TItem>>> createItem)
     {
-        if (this.CreateItem is null
-            || !(await this.CreateItem()).TryGetValue(out var item))
+        if (!(await createItem()).TryGetValue(out var item))
         {
             return;
         }

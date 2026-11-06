@@ -21,7 +21,7 @@ using Zat.Tests.Runner.Common.Services;
 /// </summary>
 [TestFixture]
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
-public class TestTreeStoreTests
+public class ExploredTestAssemblyStoreTests
 {
     private const string TestLibsPath = @"C:\TestLibs";
     private const string TestAssemblyDllPath = TestLibsPath + @"\Zat.Z2xxTests.dll";
@@ -32,7 +32,7 @@ public class TestTreeStoreTests
     private readonly FakeTimeProvider timeProvider = new();
     private readonly List<TestTreeChange> reportedChanges = [];
 
-    private TestTreeStore unit = null!;
+    private ExploredTestAssemblyStore unit = null!;
 
     [SetUp]
     public void SetUp()
@@ -50,7 +50,7 @@ public class TestTreeStoreTests
             .SetupGet(x => x.Files)
             .Returns(new SharedAppFilePaths(UserSettings: "user-settings.json", MainAssemblyDll: TestAssemblyDllPath));
 
-        this.unit = new TestTreeStore(
+        this.unit = new ExploredTestAssemblyStore(
             connectorMock.Object,
             this.directoryWatcher,
             this.timeProvider,
@@ -100,7 +100,7 @@ public class TestTreeStoreTests
 
         // When:
         this.directoryWatcher.Change();
-        this.timeProvider.Advance(TestTreeStore.QuietPeriod);
+        this.timeProvider.Advance(ExploredTestAssemblyStore.QuietPeriod);
 
         // Then:
         using (Assert.EnterMultipleScope())
@@ -122,9 +122,9 @@ public class TestTreeStoreTests
 
         // When:
         this.directoryWatcher.Change();
-        this.timeProvider.Advance(TestTreeStore.QuietPeriod - TimeSpan.FromMilliseconds(1));
+        this.timeProvider.Advance(ExploredTestAssemblyStore.QuietPeriod - TimeSpan.FromMilliseconds(1));
         this.directoryWatcher.Change();
-        this.timeProvider.Advance(TestTreeStore.QuietPeriod - TimeSpan.FromMilliseconds(1));
+        this.timeProvider.Advance(ExploredTestAssemblyStore.QuietPeriod - TimeSpan.FromMilliseconds(1));
         var discoveriesWithinQuietPeriod = this.reportedChanges.Count;
         this.timeProvider.Advance(TimeSpan.FromMilliseconds(1));
 
@@ -146,7 +146,7 @@ public class TestTreeStoreTests
 
         // When:
         this.directoryWatcher.Change();
-        this.timeProvider.Advance(TestTreeStore.QuietPeriod);
+        this.timeProvider.Advance(ExploredTestAssemblyStore.QuietPeriod);
 
         // Then:
         Assert.That(
@@ -166,7 +166,7 @@ public class TestTreeStoreTests
 
         // When:
         this.directoryWatcher.Change();
-        this.timeProvider.Advance(TestTreeStore.QuietPeriod);
+        this.timeProvider.Advance(ExploredTestAssemblyStore.QuietPeriod);
 
         // Then:
         using (Assert.EnterMultipleScope())

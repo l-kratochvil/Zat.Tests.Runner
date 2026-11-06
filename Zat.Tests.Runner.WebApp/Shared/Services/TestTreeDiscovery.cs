@@ -8,10 +8,10 @@ using Zat.Tests.Runner.Common.Net.Services;
 /// <summary>
 /// Discovers the test tree when the application starts, so it is ready before the first browser connects.
 /// </summary>
-/// <param name="testTreeStore">Store the test tree is discovered into.</param>
+/// <param name="exploredTestAssemblyStore">Store the test tree is discovered into.</param>
 /// <param name="logger">Log a discovery failure is reported to.</param>
 public sealed class TestTreeDiscovery(
-    ITestTreeStore testTreeStore,
+    IExploredTestAssemblyStore exploredTestAssemblyStore,
     ILogger<LogSources.TestRun> logger)
     : IHostedService
 {
@@ -28,7 +28,7 @@ public sealed class TestTreeDiscovery(
     {
         try
         {
-            await testTreeStore.DiscoverAsync(cancellationToken);
+            await exploredTestAssemblyStore.DiscoverAsync(cancellationToken);
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {

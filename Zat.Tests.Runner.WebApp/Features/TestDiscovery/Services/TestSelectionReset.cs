@@ -14,20 +14,20 @@ using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
 /// <remarks>
 /// Scoped to a circuit and started when it opens, so every open browser tab is cleared, whatever it shows.
 /// </remarks>
-/// <param name="testTreeStore">Store whose changes are followed.</param>
+/// <param name="exploredTestAssemblyStore">Store whose changes are followed.</param>
 /// <param name="dispatcher">Dispatcher of the circuit's store.</param>
 public sealed class TestSelectionReset(
-    ITestTreeStore testTreeStore,
+    IExploredTestAssemblyStore exploredTestAssemblyStore,
     IDispatcher dispatcher)
     : IInitializable, IDisposable
 {
     /// <inheritdoc/>
     public void Initialize()
-        => testTreeStore.Changed += this.OnTestTreeChanged;
+        => exploredTestAssemblyStore.Changed += this.OnTestTreeChanged;
 
     /// <inheritdoc/>
     public void Dispose()
-        => testTreeStore.Changed -= this.OnTestTreeChanged;
+        => exploredTestAssemblyStore.Changed -= this.OnTestTreeChanged;
 
     private void OnTestTreeChanged(TestTreeChange change)
     {
