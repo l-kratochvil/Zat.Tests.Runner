@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net481</TargetFramework>
+		<!-- Zat.Z2xxTests.dll (and other runtime test assemblies) are x86. Because the
+         proxy loads test assemblies in-process (NUnitTestAssemblyRunner), the
+         test host must run as a 32-bit process; otherwise loading throws
+         BadImageFormatException and no tests are discovered. -->
+		<PlatformTarget>x86</PlatformTarget>
+		<IsTestProject>true</IsTestProject>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\..\DevKit.Core\DevKit.Core\DevKit.Core.csproj" />
+		<ProjectReference Include="..\..\Zat.Tests.Runner.Common\Zat.Tests.Runner.Common.csproj" />
+		<ProjectReference Include="..\..\Zat.Tests.Runner.NUnitTestRunnerProxy\Zat.Tests.Runner.NUnitTestRunnerProxy.csproj" />
+	</ItemGroup>
+
+	<!-- Reference the test assemblies to share fixture names and test-case paths with their discovery tests. -->
+	<ItemGroup>
+		<ProjectReference Include="..\NUnitTestAssembly.Common\NUnitTestAssembly.Common.csproj">
+			<ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+			<Private>false</Private>
+		</ProjectReference>
+		<ProjectReference Include="..\NUnitTestAssembly.Net481\NUnitTestAssembly.Net481.csproj">
+			<ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+			<Private>false</Private>
+		</ProjectReference>
+		<ProjectReference Include="..\NUnitTestAssembly.Net461\NUnitTestAssembly.Net461.csproj">
+			<ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+			<Private>false</Private>
+		</ProjectReference>
+	</ItemGroup>
+
+	<!-- Copy the staged NUnit test assemblies into this project's output directory. -->
+	<Target Name="IncludeNUnitTestAssemblies" BeforeTargets="AssignTargetPaths">
+		<ItemGroup>
+			<_NUnitTestAssemblyFile Include="$(NUnitTestAssembliesDir)**\*" />
+			<Content Include="@(_NUnitTestAssemblyFile)" Link="NUnitTestAssemblies\%(_NUnitTestAssemblyFile.RecursiveDir)%(_NUnitTestAssemblyFile.Filename)%(_NUnitTestAssemblyFile.Extension)" CopyToOutputDirectory="Always" />
+		</ItemGroup>
+	</Target>
+
+</Project>

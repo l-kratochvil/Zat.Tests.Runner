@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"name": "DevKit.Mvvm",
+			"path": "../DevKit.Mvvm/DevKit.Mvvm"
+		}
+	],
+	"settings": {}
+}

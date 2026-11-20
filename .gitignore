@@ -3,6 +3,11 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Solution-specific files
+agents.secrets.yaml
+[Ee]xchange/
+.artifacts/
+
 # User-specific files
 *.rsuser
 *.suo
@@ -10,10 +15,9 @@
 *.userosscache
 *.sln.docstates
 
-[Ee]xchange/**/*
-
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
+agents.secrets.yaml
 
 # Mono auto generated files
 mono_crash.*
@@ -44,7 +48,10 @@ bld/
 Generated\ Files/
 
 # MSTest test Results
-[Tt]est[Rr]esult*/
+# Named in full rather than with a wildcard: "TestResult*" also swallows source folders that merely
+# start the same way, such as a TestResultReporting feature.
+[Tt]est[Rr]esult/
+[Tt]est[Rr]esults/
 [Bb]uild[Ll]og.*
 
 # NUnit
@@ -286,6 +293,18 @@ FakesAssemblies/
 # Node.js Tools for Visual Studio
 .ntvs_analysis.dat
 node_modules/
+
+# Everything outside wwwroot in Zat.Tests.Runner.WebApp is authored in TypeScript and compiled in place
+# to a sibling .js by the CompileTypeScript MSBuild target (see Zat.Tests.Runner.WebApp.csproj), so any
+# such .js is a build output. wwwroot holds static/vendored assets whose .js is source, hence the
+# carve-out; author new scripts as .ts outside wwwroot, not as .js inside it.
+Zat.Tests.Runner.WebApp/**/*.js
+Zat.Tests.Runner.WebApp/**/*.js.map
+!Zat.Tests.Runner.WebApp/wwwroot/**
+
+# The one part of wwwroot that is generated: the shared modules built out of Zat.Tests.Runner.WebApp/
+# Browser, which have to land under wwwroot to be served at all. Edit them there, never here.
+Zat.Tests.Runner.WebApp/wwwroot/browser/
 
 # Visual Studio 6 build log
 *.plg

@@ -1,0 +1,253 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="PdpClientTests" xml:space="preserve">
+    <value>Testy PDP klient</value>
+  </data>
+  <data name="Pertinax6Tests" xml:space="preserve">
+    <value>Testy Pertinax6</value>
+  </data>
+  <data name="RuntimeTests" xml:space="preserve">
+    <value>Testy Runtime</value>
+  </data>
+  <data name="TestRun_Started" xml:space="preserve">
+    <value>Test run spuštěn</value>
+  </data>
+  <data name="TestRun_Stopped" xml:space="preserve">
+    <value>Test run zastaven</value>
+  </data>
+  <data name="TestRun_Stopping" xml:space="preserve">
+    <value>Test run se zastavuje</value>
+  </data>
+  <data name="TestRun_TestEntitiesMissing_Format" xml:space="preserve">
+    <value>Test run se nespustil: test assembly {0} se změnila a už neobsahuje tyto vybrané testy:
+{1}</value>
+  </data>
+  <data name="EmailResult_Subject_Format" xml:space="preserve">
+    <value>Test dokončen - shrnutí: prošlo {0}/{1} testovacích případů</value>
+  </data>
+  <data name="EmailResult_StoppedByUser" xml:space="preserve">
+    <value>(zastaveno uživatelem)</value>
+  </data>
+  <data name="EmailResult_NoSubRunResults" xml:space="preserve">
+    <value>Žádný sub-run nedoběhl</value>
+  </data>
+  <data name="EmailResult_ApplicationTests" xml:space="preserve">
+    <value>Testy aplikací</value>
+  </data>
+  <data name="EmailResult_TestsNotRun_SectionHeader" xml:space="preserve">
+    <value>Nespuštěné testy</value>
+  </data>
+  <data name="EmailResult_ErrorsFailuresWarnings_SectionHeader" xml:space="preserve">
+    <value>Chyby, selhání a varování</value>
+  </data>
+  <data name="EmailResult_Label_Ignored" xml:space="preserve">
+    <value>Ignorováno</value>
+  </data>
+  <data name="EmailResult_Label_Explicit" xml:space="preserve">
+    <value>Explicitní</value>
+  </data>
+  <data name="EmailResult_Label_Skipped" xml:space="preserve">
+    <value>Přeskočeno</value>
+  </data>
+  <data name="EmailResult_Label_Error" xml:space="preserve">
+    <value>Chyba</value>
+  </data>
+  <data name="EmailResult_Label_Invalid" xml:space="preserve">
+    <value>Neplatný</value>
+  </data>
+  <data name="EmailResult_Label_Failed" xml:space="preserve">
+    <value>Selhal</value>
+  </data>
+  <data name="EmailResult_Label_Warning" xml:space="preserve">
+    <value>Varování</value>
+  </data>
+  <data name="EmailResult_Summary_OverallResult" xml:space="preserve">
+    <value>Celkový výsledek</value>
+  </data>
+  <data name="EmailResult_Summary_TestCount" xml:space="preserve">
+    <value>Počet testů</value>
+  </data>
+  <data name="EmailResult_Summary_Passed" xml:space="preserve">
+    <value>Úspěšné</value>
+  </data>
+  <data name="EmailResult_Summary_Failed" xml:space="preserve">
+    <value>Neúspěšné</value>
+  </data>
+  <data name="EmailResult_Summary_Warnings" xml:space="preserve">
+    <value>Varování</value>
+  </data>
+  <data name="EmailResult_Summary_Inconclusive" xml:space="preserve">
+    <value>Neprůkazné</value>
+  </data>
+  <data name="EmailResult_Summary_Skipped" xml:space="preserve">
+    <value>Přeskočené</value>
+  </data>
+  <data name="EmailResult_Summary_FailedTests" xml:space="preserve">
+    <value>Neúspěšné testy</value>
+  </data>
+  <data name="EmailResult_Summary_Failures" xml:space="preserve">
+    <value>Selhání</value>
+  </data>
+  <data name="EmailResult_Summary_Errors" xml:space="preserve">
+    <value>Chyby</value>
+  </data>
+  <data name="EmailResult_Summary_Invalid" xml:space="preserve">
+    <value>Neplatné</value>
+  </data>
+  <data name="EmailResult_Summary_SkippedTests" xml:space="preserve">
+    <value>Přeskočené testy</value>
+  </data>
+  <data name="EmailResult_Summary_Ignored" xml:space="preserve">
+    <value>Ignorované</value>
+  </data>
+  <data name="EmailResult_Summary_Explicit" xml:space="preserve">
+    <value>Explicitní</value>
+  </data>
+  <data name="EmailResult_Summary_Other" xml:space="preserve">
+    <value>Ostatní</value>
+  </data>
+  <data name="EmailResult_Summary_Duration" xml:space="preserve">
+    <value>Doba trvání</value>
+  </data>
+  <data name="EmailResult_Status_Passed" xml:space="preserve">
+    <value>Úspěšné</value>
+  </data>
+  <data name="EmailResult_Status_Failed" xml:space="preserve">
+    <value>Neúspěšné</value>
+  </data>
+  <data name="EmailResult_Status_Skipped" xml:space="preserve">
+    <value>Přeskočené</value>
+  </data>
+  <data name="EmailResult_Status_Inconclusive" xml:space="preserve">
+    <value>Neprůkazné</value>
+  </data>
+  <data name="EmailResult_Status_Warning" xml:space="preserve">
+    <value>Varování</value>
+  </data>
+  <data name="EmailResult_Status_Unknown" xml:space="preserve">
+    <value>Neznámé</value>
+  </data>
+  <data name="EmailResult_FullResultsInTestLink" xml:space="preserve">
+    <value>Kompletní výsledky s detaily najdete v aplikaci TestLink.</value>
+  </data>
+  <data name="TestLinkResult_ConnectionFailed" xml:space="preserve">
+    <value>Nepodařilo se ověřit spojení s TestLinkem, zápis výsledku testu se přeskakuje</value>
+  </data>
+</root>

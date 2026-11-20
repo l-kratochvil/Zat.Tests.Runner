@@ -1,0 +1,11 @@
+{
+  "name": "Zat.Tests.Runner-webapp",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p Browser/tsconfig.json && tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

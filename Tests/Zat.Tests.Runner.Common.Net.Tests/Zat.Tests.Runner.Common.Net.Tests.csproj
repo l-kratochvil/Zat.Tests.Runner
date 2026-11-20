@@ -1,0 +1,46 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<IsTestProject>true</IsTestProject>
+		<IncludeNUnitTestRunnerProxyDirOutput>true</IncludeNUnitTestRunnerProxyDirOutput>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\Zat.Tests.Runner.Common.Net\Zat.Tests.Runner.Common.Net.csproj" />
+	  <ProjectReference Include="..\..\Zat.Tests.Runner.Common\Zat.Tests.Runner.Common.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\NUnitTestAssembly.Common\NUnitTestAssembly.Common.csproj">
+			<ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+			<Private>false</Private>
+		</ProjectReference>
+		<ProjectReference Include="..\NUnitTestAssembly.Net481\NUnitTestAssembly.Net481.csproj">
+			<ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+			<Private>false</Private>
+		</ProjectReference>
+		<ProjectReference Include="..\NUnitTestAssembly.Net461\NUnitTestAssembly.Net461.csproj">
+			<ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+			<Private>false</Private>
+		</ProjectReference>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="Microsoft.Extensions.Diagnostics.Testing" Version="10.10.0" />
+	  <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" Version="10.10.0" />
+	</ItemGroup>
+
+	<!-- Copy the staged NUnit test assemblies into this project's output directory. -->
+	<Target Name="IncludeNUnitTestAssemblies" BeforeTargets="AssignTargetPaths">
+		<ItemGroup>
+			<_NUnitTestAssemblyFile Include="$(NUnitTestAssembliesDir)**\*" />
+			<!-- ReSharper disable UnknownItemGroup -->
+			<Content Include="@(_NUnitTestAssemblyFile)" Link="NUnitTestAssemblies\%(_NUnitTestAssemblyFile.RecursiveDir)%(_NUnitTestAssemblyFile.Filename)%(_NUnitTestAssemblyFile.Extension)" CopyToOutputDirectory="Always" />
+			<!-- ReSharper restore UnknownItemGroup -->
+		</ItemGroup>
+	</Target>
+
+</Project>

@@ -1,0 +1,23 @@
+@* An input bound to one property of the view model cascaded to it.
+
+   What the tester types is text, so the input is what a value that is not text is converted through
+   on its way to the view model and back. What does not convert is not something the view model
+   could hold, so the input goes back to showing the value that is held rather than leaving the
+   tester reading one the view model never took. *@
+
+@using System.ComponentModel
+
+@using Zat.Tests.Runner.WebApp.Shared.ViewModel;
+
+@typeparam TDataContext where TDataContext : class, INotifyPropertyChanged, INotifyDataInfo
+@typeparam TBindingValue
+
+@inherits BindingComponentBase<TDataContext, TBindingValue>
+
+<Validated Validity="this.Validity">
+    <input @attributes="this.AdditionalAttributes"
+           class="@($"form-control form-control-sm {this.Class}")"
+           @bind:get="this.CurrentValue"
+           @bind:set="this.WriteAsync"
+           @bind:event="@this.BindingEventName" />
+</Validated>

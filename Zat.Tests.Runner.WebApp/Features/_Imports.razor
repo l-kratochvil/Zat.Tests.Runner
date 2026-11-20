@@ -1,0 +1,15 @@
+@* Feature components live outside Components/, so they need their own imports: without them
+   directive attributes such as @@onclick are silently rendered as plain HTML attributes. *@
+
+@using System.Net.Http
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.JSInterop
+@using Zat.Tests.Runner.WebApp
+@using Zat.Tests.Runner.WebApp.Components.Decorators
+@using Zat.Tests.Runner.WebApp.Components.Primitives
+@using Zat.Tests.Runner.WebApp.Shared
+@using Zat.Tests.Runner.WebApp.Shared.JsInterop
+@using Zat.Tests.Runner.Common.Net.Application.Logging

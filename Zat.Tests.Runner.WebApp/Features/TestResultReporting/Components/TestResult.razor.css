@@ -1,0 +1,62 @@
+.sub-run-report + .sub-run-report {
+  border-top: 1px solid #dee2e6;
+  margin-top: 1rem;
+  padding-top: 0.25rem;
+}
+
+.sub-run-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-top: 1rem;
+}
+
+.result-section-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.35rem;
+}
+
+.result-entries {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.8rem;
+}
+
+.entry-label {
+  font-weight: 600;
+}
+
+.label-skipped {
+  color: #997404;
+}
+
+.label-problem {
+  color: #b02a37;
+}
+
+/* Test names and stack traces are kept on one line on purpose: the part that tells two
+   tests apart sits at the end, so the pane scrolls sideways instead of wrapping them. */
+.entry-name {
+  white-space: nowrap;
+}
+
+.entry-detail {
+  margin: 0.15rem 0 0 0;
+  font-size: 0.75rem;
+  color: #495057;
+}
+
+.result-summary {
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.result-summary dt {
+  font-weight: 600;
+}
+
+.result-summary dd {
+  margin-left: 1rem;
+  margin-bottom: 0.25rem;
+}

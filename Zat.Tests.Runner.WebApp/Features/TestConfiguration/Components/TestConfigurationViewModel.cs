@@ -1,0 +1,421 @@
+namespace Zat.Tests.Runner.WebApp.Features.TestConfiguration.Components;
+
+using System.ComponentModel;
+using System.Globalization;
+using System.IO.Abstractions;
+using System.Text.RegularExpressions;
+
+using DevKit.Core.Extensions.Functional;
+using DevKit.Core.Extensions.Types;
+using DevKit.Core.UtilityObjects;
+using DevKit.Mvvm.ViewModel.Extensions;
+
+using FluentValidation;
+
+using Fluxor;
+
+using Zat.Tests.Runner.Common.Model;
+using Zat.Tests.Runner.Common.Net.Services;
+using Zat.Tests.Runner.WebApp.Shared.Stores.AppSettings;
+using Zat.Tests.Runner.WebApp.Shared.Stores.TestConfiguration;
+using Zat.Tests.Runner.WebApp.Shared.Stores.TestDiscovery;
+using Zat.Tests.Runner.WebApp.Shared.ViewModel;
+using Zat.Z2xxTests.Common.Model;
+
+/// <summary>
+/// The test configuration as the configurator shows it: the values being edited, which of them are
+/// asked for at all, and what is wrong with them.
+/// </summary>
+public sealed partial class TestConfigurationViewModel : ViewModelBase, IDisposable
+{
+    // How release dates are written down in TestLink, which takes them as they are typed.
+    private const string DateFormat = "d.M.yyyy";
+
+    private readonly IAppSettingsStore appSettingsStore;
+    private readonly IFileSystem fileSystem;
+    private readonly IState<TestDiscoveryState> testSelectionState;
+    private readonly IExploredTestAssemblyStore exploredTestAssemblyStore;
+    private readonly ILogger logger;
+    private readonly IDispatcher dispatcher;
+    private readonly StateBinder<TestConfigurationViewModel, TestConfigurationState> stateBinder;
+    private readonly IDisposable[] disposers;
+
+    public TestConfigurationViewModel(
+        IState<TestConfigurationState> state,
+        IAppSettingsStore appSettingsStore,
+        IFileSystem fileSystem,
+        IState<TestDiscoveryState> testSelectionState,
+        IExploredTestAssemblyStore exploredTestAssemblyStore,
+        ILogger logger,
+        IDispatcher dispatcher)
+    {
+        this.appSettingsStore = appSettingsStore;
+        this.fileSystem = fileSystem;
+        this.testSelectionState = testSelectionState;
+        this.exploredTestAssemblyStore = exploredTestAssemblyStore;
+        this.logger = logger;
+        this.dispatcher = dispatcher;
+
+        var disposables = new List<IDisposable>();
+
+        this.stateBinder = new StateBinder<TestConfigurationViewModel, TestConfigurationState>(this, state);
+
+        this.RuntimeVersions = this.ReadRuntimeVersions(this.appSettingsStore.Current.IdeInstallFolderPath);
+
+        this.HasErrorsChanged +=
+            hasErrors => this.dispatcher.Dispatch(
+                new StatusChangedAction(
+                    NewHasErrors: new ValueChange<bool>(hasErrors)));
+
+        this.appSettingsStore.Changed += this.OnAppSettingsChanged;
+        disposables.Add(
+            new Disposer(() => this.appSettingsStore.Changed -= this.OnAppSettingsChanged));
+
+        this.testSelectionState.StateChanged += this.OnTestSelectionChanged;
+        disposables.Add(
+            new Disposer(() => this.testSelectionState.StateChanged -= this.OnTestSelectionChanged));
+
+        this.EmailAddressesEditor.EmailAddresses = this.EmailAddresses;
+        this.EmailAddressesEditor
+            .SubscribeToPropertyChanged(
+                this,
+                static editor => editor.EmailAddresses,
+                static (vm, _) => vm.OnPropertyChanged(nameof(vm.EmailAddressesEditor)))
+            .Visit(disposables.Add);
+
+        this.disposers = [.. disposables];
+
+        this.InitValidator();
+    }
+
+    /// <summary>
+    /// Gets the editor of the email notification recipients, which tells what is wrong with them.
+    /// </summary>
+    public EmailAddressesEditorViewModel EmailAddressesEditor { get; } = new();
+
+    /// <summary>
+    /// Gets a value indicating whether a runtime test is selected, which is what runs against a
+    /// test station and so needs one chosen.
+    /// </summary>
+    public bool IsRuntimeTest
+        => this.testSelectionState.Value
+            .GetSelectedTestCasesFromTestSuites(this.exploredTestAssemblyStore.TestSuites)
+            .Any(static testCase => testCase.TestType == TestType.Runtime);
+
+    /// <summary>
+    /// Gets the runtime versions installed in the IDE install folder, newest first.
+    /// </summary>
+    public IReadOnlyList<string> RuntimeVersions { get; private set; }
+
+    /// <summary>
+    /// Gets or sets the email notification recipients.
+    /// </summary>
+    public IReadOnlyList<string> EmailAddresses
+    {
+        get => this.EmailAddressesState.Value;
+        set => this.EmailAddressesState.Value = value;
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the TestLink report is enabled.
+    /// </summary>
+    public bool IsTestLinkReportEnabled
+    {
+        get => this.IsTestLinkReportEnabledState.Value;
+        set => this.IsTestLinkReportEnabledState.Value = value;
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the test result is emailed.
+    /// </summary>
+    public bool IsEmailNotificationEnabled
+    {
+        get => this.IsEmailNotificationEnabledState.Value;
+        set => this.IsEmailNotificationEnabledState.Value = value;
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the debug mode is enabled.
+    /// </summary>
+    public bool IsDebugModeEnabled
+    {
+        get => this.IsDebugModeEnabledState.Value;
+        set => this.IsDebugModeEnabledState.Value = value;
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the versions are beta.
+    /// </summary>
+    public bool IsBetaVersion
+    {
+        get => this.IsBetaVersionState.Value;
+        set => this.IsBetaVersionState.Value = value;
+    }
+
+    public string? RuntimeVersion
+    {
+        get => this.RuntimeVersionState.Value;
+        set => this.RuntimeVersionState.Value = value;
+    }
+
+    public string? IdeReleaseDate
+    {
+        get => this.IdeReleaseDateState.Value;
+        set => this.IdeReleaseDateState.Value = value;
+    }
+
+    public string? RuntimeReleaseDate
+    {
+        get => this.RuntimeReleaseDateState.Value;
+        set => this.RuntimeReleaseDateState.Value = value;
+    }
+
+    public string? BetaVersion
+    {
+        get => this.BetaVersionState.Value;
+        set => this.BetaVersionState.Value = value;
+    }
+
+    public Version? IdeVersion
+    {
+        get => this.IdeVersionState.Value;
+        set => this.IdeVersionState.Value = value;
+    }
+
+    public HwAssemblyType? TestedHwAssembly
+    {
+        get => this.TestedHwAssemblyState.Value;
+        set => this.TestedHwAssemblyState.Value = value;
+    }
+
+    private StateBinding<string?> RuntimeVersionState
+        => field ??= this.stateBinder.Bind(
+            selectValue: static s => s.RuntimeVersion,
+            property: static vm => vm.RuntimeVersion,
+            writeValue: value => this.dispatcher.Dispatch(
+                new DataChangedAction(NewRuntimeVersion: new ValueChange<string?>(value))));
+
+    private StateBinding<Version?> IdeVersionState
+        => field ??= this.stateBinder.Bind(
+            selectValue: static s => s.IdeVersion,
+            property: static vm => vm.IdeVersion,
+            writeValue: value => this.dispatcher.Dispatch(
+                new DataChangedAction(NewIdeVersion: new ValueChange<Version?>(value))));
+
+    private StateBinding<HwAssemblyType?> TestedHwAssemblyState
+        => field ??= this.stateBinder.Bind(
+            selectValue: static s => s.TestedHwAssembly,
+            property: static vm => vm.TestedHwAssembly,
+            writeValue: value => this.dispatcher.Dispatch(
+                new DataChangedAction(NewTestedHwAssembly: new ValueChange<HwAssemblyType?>(value))));
+
+    private StateBinding<bool> IsTestLinkReportEnabledState
+        => field ??= this.stateBinder.Bind(
+            selectValue: static s => s.IsTestLinkReportEnabled,
+            property: static vm => vm.IsTestLinkReportEnabled,
+            writeValue: value => this.dispatcher.Dispatch(
+                new DataChangedAction(NewIsTestLinkReportEnabled: new ValueChange<bool>(value))));
+
+    private StateBinding<bool> IsEmailNotificationEnabledState
+        => field ??= this.stateBinder.Bind(
+            selectValue: static s => s.IsEmailNotificationEnabled,
+            property: static vm => vm.IsEmailNotificationEnabled,
+            writeValue: value => this.dispatcher.Dispatch(
+                new DataChangedAction(NewIsEmailNotificationEnabled: new ValueChange<bool>(value))));
+
+    private StateBinding<IReadOnlyList<string>> EmailAddressesState
+        => field ??= this.stateBinder.Bind(
+            selectValue: static s => s.EmailAddresses,
+            property: static vm => vm.EmailAddresses,
+            writeValue: value => this.dispatcher.Dispatch(
+                new DataChangedAction(NewEmailAddresses: new ValueChange<string[]>([.. value]))));
+
+    private StateBinding<string?> IdeReleaseDateState
+        => field ??= this.stateBinder.Bind(
+            selectValue: static s => s.IdeReleaseDate,
+            property: static vm => vm.IdeReleaseDate,
+            writeValue: value => this.dispatcher.Dispatch(
+                new DataChangedAction(NewIdeReleaseDate: new ValueChange<string?>(value))));
+
+    private StateBinding<string?> RuntimeReleaseDateState
+        => field ??= this.stateBinder.Bind(
+            selectValue: static s => s.RuntimeReleaseDate,
+            property: static vm => vm.RuntimeReleaseDate,
+            writeValue: value => this.dispatcher.Dispatch(
+                new DataChangedAction(NewRuntimeReleaseDate: new ValueChange<string?>(value))));
+
+    private StateBinding<bool> IsBetaVersionState
+        => field ??= this.stateBinder.Bind(
+            selectValue: static s => s.IsBetaVersion,
+            property: static vm => vm.IsBetaVersion,
+            writeValue: value => this.dispatcher.Dispatch(
+                new DataChangedAction(NewIsBetaVersion: new ValueChange<bool>(value))));
+
+    private StateBinding<string?> BetaVersionState
+        => field ??= this.stateBinder.Bind(
+            selectValue: static s => s.BetaVersion,
+            property: static vm => vm.BetaVersion,
+            writeValue: value => this.dispatcher.Dispatch(
+                new DataChangedAction(NewBetaVersion: new ValueChange<string?>(value))));
+
+    private StateBinding<bool> IsDebugModeEnabledState
+        => field ??= this.stateBinder.Bind(
+            selectValue: static s => s.IsDebugModeEnabled,
+            property: static vm => vm.IsDebugModeEnabled,
+            writeValue: value => this.dispatcher.Dispatch(
+                new DataChangedAction(NewIsDebugModeEnabled: new ValueChange<bool>(value))));
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        this.disposers.DisposeAll();
+        this.stateBinder.Dispose();
+    }
+
+    /// <inheritdoc/>
+    /// <remarks>
+    /// Hands the recipients to the editor before validating, so that what is wrong with them is known
+    /// by the time the change is announced.
+    /// </remarks>
+    protected override void OnPropertyChanged(PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(this.EmailAddresses))
+        {
+            this.EmailAddressesEditor.EmailAddresses = this.EmailAddresses;
+        }
+
+        base.OnPropertyChanged(e);
+    }
+
+    [GeneratedRegex(@"^\d+")]
+    private static partial Regex LeadingNumber();
+
+    /// <summary>
+    /// Puts the folder names found in the install folder in the order they are offered in: newest
+    /// first, leaving out anything that is not a version.
+    /// </summary>
+    private static IReadOnlyList<string> OrderRuntimeVersions(IEnumerable<string> folderNames)
+        =>
+        [
+            .. folderNames
+                .Where(static name => !string.IsNullOrEmpty(name) && LeadingNumber().IsMatch(name))
+                .OrderBy(static name => int.TryParse(name, out var parsed) ? parsed : char.MaxValue)
+                .ThenBy(static name =>
+                    int.TryParse(LeadingNumber().Match(name).Value, out var parsed)
+                        ? parsed
+                        : char.MaxValue)
+                .ThenBy(static name => name, StringComparer.Ordinal)
+                .Reverse()
+        ];
+
+    private static bool IsDateOrEmpty(string? text)
+        => string.IsNullOrEmpty(text)
+           || DateTime.TryParseExact(
+               text,
+               DateFormat,
+               CultureInfo.InvariantCulture,
+               DateTimeStyles.None,
+               out _);
+
+    // Semantic versioning with the patch left out, which is how the IDE versions are written down.
+    [GeneratedRegex(@"^\d+\.\d+(\.\d+)?$")]
+    private static partial Regex IdeVersionFormat();
+
+    private void InitValidator()
+        => this.InitValidator(
+            this,
+            validator =>
+            {
+                validator
+                    .RuleFor(static x => x.RuntimeVersion)
+                    .NotEmpty()
+                    .WithMessage("Runtime version is required.");
+
+                validator
+                    .RuleFor(static x => x.IdeVersion)
+                    .Cascade(CascadeMode.Stop)
+                    .NotNull()
+                    .WithMessage("IDE version required.")
+                    .Must(static x => x is not null && IdeVersionFormat().IsMatch(x.ToString()))
+                    .WithMessage("Write the IDE version as x.y or x.y.z, for example 6.1 or 6.1.4.")
+                    .When(static x => x.IsTestLinkReportEnabled);
+
+                validator
+                    .RuleFor(static x => x.TestedHwAssembly)
+                    .NotNull()
+                    .NotEqual(HwAssemblyType.Unknown)
+                    .WithMessage("Tested hardware assembly is required.")
+                    .When(static x => x.IsRuntimeTest);
+
+                validator
+                    .RuleFor(static x => x.IdeReleaseDate)
+                    .Must(IsDateOrEmpty)
+                    .When(static x => x.IsTestLinkReportEnabled)
+                    .WithMessage("Write the IDE release date as day.month.year, for example 1.10.2026.");
+
+                validator
+                    .RuleFor(static x => x.RuntimeReleaseDate)
+                    .Must(IsDateOrEmpty)
+                    .When(static x => x.IsTestLinkReportEnabled)
+                    .WithMessage("Write the runtime release date as day.month.year, for example 1.10.2026.");
+
+                validator
+                    .RuleFor(static x => x.BetaVersion)
+                    .Must(static x => string.IsNullOrEmpty(x) || int.TryParse(x, out _))
+                    .When(static x => x.IsTestLinkReportEnabled && x.IsBetaVersion)
+                    .WithMessage("Write the beta number as a whole number, for example 3.");
+
+                validator
+                    .RuleFor(static x => x.EmailAddressesEditor)
+                    .Must(static editor =>
+                        editor.GetValidity(nameof(EmailAddressesEditorViewModel.EmailAddresses))?.HasErrors is not true)
+                    .WithMessage("Fix the email addresses.")
+                    .When(static x => x.IsEmailNotificationEnabled);
+            });
+
+    private IReadOnlyList<string> ReadRuntimeVersions(string installFolderPath)
+    {
+        IReadOnlyList<string> folderNames;
+        try
+        {
+            folderNames =
+            [
+                .. this.fileSystem.Directory
+                    .GetDirectories(installFolderPath)
+                    .Select(this.fileSystem.Path.GetFileName)
+                    .OfType<string>()
+            ];
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            this.logger.Log(
+                LogLevel.Warning,
+                "Error while reading the IDE install folder {InstallFolderPath} - no runtime versions available." +
+                "\nException: {Exception}",
+                installFolderPath,
+                exception);
+
+            return [];
+        }
+
+        return OrderRuntimeVersions(folderNames);
+    }
+
+    // The settings are shared by every circuit, so this runs on the thread of whoever changed them.
+    private void OnAppSettingsChanged(AppSettingsState settings)
+    {
+        this.RuntimeVersions = this.ReadRuntimeVersions(settings.IdeInstallFolderPath);
+        this.OnPropertyChanged(nameof(this.RuntimeVersions));
+
+        // A version left behind by the old install folder would let a test run start against an
+        // installation that is not on the machine, while the combo box shows nothing chosen.
+        if (this.RuntimeVersion is not null
+            && !this.RuntimeVersions.Contains(this.RuntimeVersion, StringComparer.Ordinal))
+        {
+            this.RuntimeVersion = null;
+        }
+    }
+
+    private void OnTestSelectionChanged(object? sender, EventArgs e)
+        => this.OnPropertyChanged(nameof(this.IsRuntimeTest));
+}

@@ -1,0 +1,15 @@
+.property-grid-row {
+    display: contents;
+}
+
+.property-grid-row-label {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.property-grid-row-value {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+}

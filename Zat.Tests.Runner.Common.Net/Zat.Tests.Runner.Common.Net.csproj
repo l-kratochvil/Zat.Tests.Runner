@@ -1,0 +1,62 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<!-- The out-of-process NUnit proxy server is launched from this application, so its output
+         (Exchange) has to sit next to ours. -->
+		<IncludeNUnitTestRunnerProxyDirOutput>true</IncludeNUnitTestRunnerProxyDirOutput>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+		<PackageReference Include="Freemanke.Xmlrpc" Version="1.0.1" />
+		<PackageReference Include="HtmlAgilityPack" Version="1.11.69" />
+		<PackageReference Include="Serilog" Version="4.4.0" />
+		<PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0" />	
+		<PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
+		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+		<PackageReference Include="Serilog.Sinks.Map" Version="2.0.0" />
+		<PackageReference Include="StreamJsonRpc" Version="2.25.29" />
+		<PackageReference Include="System.IO.Abstractions" Version="22.3.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\DevKit.Core\DevKit.Core\DevKit.Core.csproj" />
+		<ProjectReference Include="..\Zat.Tests.Runner.Common\Zat.Tests.Runner.Common.csproj">
+			<PrivateAssets>all</PrivateAssets>
+		</ProjectReference>
+		<ProjectReference Include="..\Zat.Z2xxTests.Common\Zat.Z2xxTests.Common.csproj" />
+		<!-- Build-only reference: fills the Exchange with the proxy output even when a single
+         project (not the solution) is built, e.g. from VS Code or dotnet run. -->
+		<ProjectReference Include="..\Zat.Tests.Runner.NUnitTestRunnerProxy\Zat.Tests.Runner.NUnitTestRunnerProxy.csproj">
+			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+			<SkipGetTargetFrameworkProperties>true</SkipGetTargetFrameworkProperties>
+			<GlobalPropertiesToRemove>TargetFramework;RuntimeIdentifier;SelfContained</GlobalPropertiesToRemove>
+			<Private>false</Private>
+		</ProjectReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Update="Properties\Resources.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Resources.resx</DependentUpon>
+		</Compile>
+
+		<EmbeddedResource Update="Properties\Resources.resx">
+			<Generator>PublicResXFileCodeGenerator</Generator>
+			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+
+		<EmbeddedResource Update="Properties\Resources.cs.resx">
+			<DependentUpon>Resources.resx</DependentUpon>
+		</EmbeddedResource>
+	</ItemGroup>
+
+</Project>

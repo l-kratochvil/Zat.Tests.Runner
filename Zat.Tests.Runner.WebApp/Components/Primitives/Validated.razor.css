@@ -1,0 +1,18 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.validity-message {
+  font-size: 0.85em;
+}
+
+.validity-message.is-error {
+  color: #b02a37;
+}
+
+.validity-message.is-warning {
+  color: #8a6d3b;
+}

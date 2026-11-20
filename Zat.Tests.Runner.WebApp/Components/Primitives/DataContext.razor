@@ -1,0 +1,29 @@
+@* Provides a data context for child components, cascading the view model as both a type and a value. *@
+
+@using System.ComponentModel
+
+@* Cascaded as a type as well as a value, so a control inside names the property it binds to and
+   nothing else: the view model it belongs to is the one standing above it. *@
+@attribute [CascadingTypeParameter(nameof(TDataContext))]
+
+@typeparam TDataContext where TDataContext : class, INotifyPropertyChanged
+
+<CascadingValue TValue="TDataContext" Value="this.Data" IsFixed="true">
+    @this.ChildContent
+</CascadingValue>
+
+@code {
+    /// <summary>
+    /// Gets or sets the view model the content is drawn from.
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public required TDataContext Data { get; set; }
+
+    /// <summary>
+    /// Gets or sets the content drawn from <see cref="Data"/>.
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public required RenderFragment ChildContent { get; set; }
+}

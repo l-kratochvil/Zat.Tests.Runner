@@ -1,0 +1,35 @@
+.main-menu {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    padding: 0.5rem 1rem;
+    background-color: #1b2a4a;
+    color: #fff;
+}
+
+.main-menu-brand {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.main-menu-links {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.main-menu-links ::deep .main-menu-link {
+    color: #c9d4ea;
+    text-decoration: none;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.25rem;
+}
+
+.main-menu-links ::deep .main-menu-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.main-menu-links ::deep .main-menu-link.active {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}

@@ -1,0 +1,141 @@
+namespace Zat.Tests.Runner.TuiApp.Utils;
+
+using System.Threading;
+using System.Threading.Tasks;
+
+using Spectre.Console.Rendering;
+
+internal static class ConsoleUtils
+{
+    public delegate Task ShowLiveDataUpdator<in TUpdateTarget, in TData>(
+        TUpdateTarget updateTarget,
+        TData data,
+        LiveDisplayContext context,
+        CancellationToken cancellationToken);
+
+    public static async Task<bool> ShowLiveDataAsync<TUpdateTarget, TData>(
+        TUpdateTarget updateTarget,
+        TData data,
+        ShowLiveDataUpdator<TUpdateTarget, TData> updator,
+        CancellationToken cancellationToken)
+        where TUpdateTarget : IRenderable
+    {
+        bool completed;
+
+        try
+        {
+            await Live(updateTarget).StartAsync(
+                async ctx => await updator(
+                    updateTarget, data, ctx, cancellationToken));
+            completed = true;
+        }
+        catch (Exception ex) when (ex is OperationCanceledException ||
+                                   ex.InnerException is OperationCanceledException ||
+                                   ex is TaskCanceledException ||
+                                   ex.InnerException is TaskCanceledException)
+        {
+            completed = false;
+        }
+
+        return completed;
+    }
+
+    /// <summary>
+    /// Shows the prompt and returns the result.
+    /// </summary>
+    /// <typeparam name="TResult">Type of the result.</typeparam>
+    /// <param name="promptFactory">Factory function to create the prompt to show.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <param name="validator">Optional validator function to validate the result.</param>
+    /// <returns>False if the prompt was not sucessful (interrupted), true otherwise.</returns>
+    public static async Task<(bool Completed, TResult? Result)> ShowPromptAsync<TResult>(
+        Func<IPrompt<TResult>> promptFactory, CancellationToken ct, Func<TResult, ValidationResult>? validator = null)
+    {
+        var result = default(TResult?);
+
+        bool completed;
+
+        try
+        {
+            var validationResult = ValidationResult.Error();
+
+            while (!validationResult.Successful)
+            {
+                result = await promptFactory().ShowAsync(AnsiConsole.Console, ct)
+                         ?? throw new InvalidOperationException("Null prompt returned");
+                validationResult = validator?.Invoke(result) ?? ValidationResult.Success();
+
+                if (validationResult.Message is not null)
+                {
+                    MarkupLine($"[red]{validationResult.Message.EscapeMarkup()}[/]");
+                }
+            }
+
+            completed = true;
+        }
+        catch (Exception ex) when (ex is OperationCanceledException ||
+                                   ex.InnerException is OperationCanceledException ||
+                                   ex is TaskCanceledException ||
+                                   ex.InnerException is TaskCanceledException)
+        {
+            completed = false;
+        }
+
+        return (Completed: completed, Result: result);
+    }
+
+    /// <summary>
+    /// Shows the prompt and returns the result.
+    /// </summary>
+    /// <typeparam name="TResult">Type of the result.</typeparam>
+    /// <param name="prompt">Prompt to show.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <param name="validator">Optional validator function to validate the result.</param>
+    /// <returns>False if the prompt was not sucessful (interrupted), true otherwise.</returns>
+    public static async Task<(bool Completed, TResult? Result)> ShowPromptAsync<TResult>(
+        IPrompt<TResult> prompt, CancellationToken ct, Func<TResult, ValidationResult>? validator = null)
+        => await ShowPromptAsync(() => prompt, ct, validator);
+
+    public static void WaitForAnyKeyPress(string text)
+    {
+        WriteLine(text);
+        WriteLine(Resources.PressAnyKeyToContinue_Message);
+        AnsiConsole.Console.Input.ReadKey(true);
+    }
+
+    /// <summary>
+    /// Waits until the user presses Enter; keys pressed before the call and any other keys are ignored.
+    /// </summary>
+    /// <param name="key">Key to wait for.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>False if the wait was interrupted by <paramref name="ct"/>, true otherwise.</returns>
+    public static async Task<bool> WaitForKeyPressAsync(
+        ConsoleKey key,
+        CancellationToken ct)
+    {
+        var input = AnsiConsole.Console.Input;
+
+        // Clear any previously pressed keys.
+        while (input.IsKeyAvailable())
+        {
+            _ = await input.ReadKeyAsync(true, ct);
+        }
+
+        try
+        {
+            while (await input.ReadKeyAsync(true, ct) is { } pressedKey)
+            {
+                if (pressedKey.Key == key)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        catch (OperationCanceledException)
+        {
+            return false;
+        }
+    }
+}

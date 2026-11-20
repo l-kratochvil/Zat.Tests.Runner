@@ -1,0 +1,15 @@
+# The vs-threading analyzers arrive with StreamJsonRpc, which this project needs only as a
+# JSON-RPC client for the out-of-process NUnit runner. They are turned off because this project
+# has not adopted them: their advice contradicts decisions this code documents and defends — the
+# remembered JS module import in JsModuleInterop, and the bounded drain in
+# FileLoggerProvider.Dispose.
+# Adopting them is worth doing on its own terms, not as a side effect of picking up a library.
+[*.cs]
+dotnet_analyzer_diagnostic.category-VSTHRD.severity = none
+dotnet_diagnostic.VSTHRD002.severity = none
+dotnet_diagnostic.VSTHRD003.severity = none
+dotnet_diagnostic.VSTHRD011.severity = none
+dotnet_diagnostic.VSTHRD100.severity = none
+dotnet_diagnostic.VSTHRD101.severity = none
+dotnet_diagnostic.VSTHRD110.severity = none
+dotnet_diagnostic.VSTHRD200.severity = none

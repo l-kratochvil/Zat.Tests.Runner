@@ -1,0 +1,21 @@
+@* A tick box bound to one property of the view model cascaded to it.
+
+   A tick is either given or not, so there is nothing to convert and nothing the view model could
+   fail to hold — all the control has to say is which of the two the tester left it at. *@
+
+@using System.ComponentModel
+
+@using Zat.Tests.Runner.WebApp.Shared.ViewModel;
+
+@typeparam TDataContext where TDataContext : class, INotifyPropertyChanged, INotifyDataInfo
+
+@inherits BindingComponentBase<TDataContext, bool>
+
+<Validated Validity="this.Validity">
+    <input @attributes="this.AdditionalAttributes"
+           class="@($"form-check-input {this.Class}")"
+           type="checkbox"
+           @bind:get="this.CurrentValue"
+           @bind:set="this.WriteAsync"
+           @bind:event="@this.BindingEventName" />
+</Validated>

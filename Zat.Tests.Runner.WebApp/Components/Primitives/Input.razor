@@ -1,0 +1,109 @@
+@* An input bound to a value its caller owns, for a page that has no view model to bind to.
+
+   What the tester types is text, so the input is what a value that is not text is converted
+   through; what does not convert is not something the caller could hold, and the input goes back
+   to showing the value that is. What is wrong with an edit is said about the edit itself, even
+   where the edit is not handed on. *@
+
+@using Zat.Tests.Runner.WebApp.Shared.Validation
+@typeparam TValue
+
+<Validated Validity="this.Validity">
+    <input @attributes="this.AdditionalAttributes"
+           @bind:get="this.Value"
+           @bind:set="this.WriteAsync"
+           @bind:event="@this.BindingEvent.ToEventName()" />
+</Validated>
+
+@code {
+    // The value last looked at, so that one the caller changed is told apart from one this input
+    // wrote itself — and from an edit this input turned down, which left the value alone.
+    private TValue? shown;
+
+    private bool looked;
+
+    /// <summary>
+    /// Gets or sets the value shown and edited.
+    /// </summary>
+    [Parameter]
+    public TValue? Value { get; set; }
+
+    /// <summary>
+    /// Gets or sets what is told of an edit the input handed on.
+    /// </summary>
+    [Parameter]
+    public EventCallback<TValue?> ValueChanged { get; set; }
+
+    /// <summary>
+    /// Gets or sets what a value is asked about, or <see langword="null"/> where nothing can be
+    /// wrong with one.
+    /// </summary>
+    [Parameter]
+    public Func<TValue?, Validity>? Validator { get; set; }
+
+    /// <summary>
+    /// Gets or sets when an edit is handed to <see cref="ValueChanged"/>.
+    /// </summary>
+    [Parameter]
+    public BindingEvent BindingEvent { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether an edit the <see cref="Validator"/> found an error
+    /// in is handed on all the same.
+    /// </summary>
+    /// <remarks>
+    /// Left unset, the caller is never handed a value it has already been told is wrong. The tester
+    /// is shown what is wrong with it either way.
+    /// </remarks>
+    [Parameter]
+    public bool WriteOnError { get; set; }
+
+    /// <summary>
+    /// Gets or sets everything else written on the input in the markup.
+    /// </summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+    
+    private Validity Validity { get; set; } = Validity.Valid;
+
+    /// <inheritdoc/>
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        // A value the caller changed is looked at anew, so that what is wrong with it is shown
+        // before the tester has touched the input at all. An edit that was turned down leaves the
+        // value as it was, which is what keeps its verdict from being overwritten here.
+        if (this.looked && EqualityComparer<TValue>.Default.Equals(this.Value, this.shown))
+        {
+            return;
+        }
+
+        this.looked = true;
+        this.shown = this.Value;
+        this.Validity = this.Ask(this.Value);
+    }
+
+    // Read off the issues rather than off Validity.HasErrors, which reads the other way round
+    // throughout this application and would turn the gate below into one that lets errors alone
+    // through.
+    private static bool IsWrong(Validity validity)
+        => validity.Issues.Any(issue => issue.Severity is Validity.Severity.Error);
+
+    private Validity Ask(TValue? value)
+        => this.Validator?.Invoke(value) ?? Validity.Valid;
+
+    private async Task WriteAsync(TValue? value)
+    {
+        // Asked of the edit rather than of the value held, so that what is wrong is said about what
+        // the tester just did — including where that is the reason it goes no further.
+        this.Validity = this.Ask(value);
+
+        if (IsWrong(this.Validity) && !this.WriteOnError)
+        {
+            return;
+        }
+
+        await this.ValueChanged.InvokeAsync(value);
+    }
+}

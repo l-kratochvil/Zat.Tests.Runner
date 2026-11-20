@@ -1,0 +1,96 @@
+@* Edits an email recipient list: removes recipients and adds new ones through a confirmed form. *@
+
+@using Zat.Tests.Runner.WebApp.Shared.Validation
+
+@inherits Zat.Tests.Runner.WebApp.Components.MvvmComponentBase<EmailAddressesEditorViewModel>
+
+<DataContext Data="this.ViewModel">
+    <Validated Validity="@(this.ViewModel.GetValidity(nameof(EmailAddressesEditorViewModel.EmailAddresses)) ?? Validity.Valid)">
+        <ItemList TItem="string"
+                  TCollection="List<string>"
+                  Items="this.items"
+                  AddCommand="new(this.ViewModel.BeginAdd) { IsEnabled = !this.ViewModel.IsEditing }"
+                  RemoveCommand="new() { IsEnabled = !this.ViewModel.IsEditing }"
+                  OnAdd="this.PublishAsync"
+                  OnRemove="this.PublishAsync" />
+    </Validated>
+
+    @if (this.ViewModel.IsEditing)
+    {
+        <span class="d-flex align-items-start gap-1">
+            <span class="flex-grow-1">
+                <BindingInput Class="input-email-address" 
+                                Binding="@(vm => vm.EmailAddress)"
+                                BindingEvent="BindingEvent.OnInput"
+                                aria-label="New email address"
+                                Placeholder="name@zat.cz" />
+            </span>
+
+            <button type="button"
+                    class="btn btn-outline-primary btn-sm"
+                    disabled="@(!this.ViewModel.CanConfirm)"
+                    @onclick="this.ViewModel.Confirm">OK</button>
+
+            <button type="button"
+                    class="btn btn-outline-secondary btn-sm"
+                    @onclick="this.ViewModel.Cancel">Cancel</button>
+        </span>
+    }
+</DataContext>
+
+@code {
+    // The working copy the list edits in place; every edit is handed back as a new list.
+    private List<string> items = [];
+
+    /// <summary>
+    /// Gets or sets the recipients edited.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public required IReadOnlyList<string> EmailAddresses { get; set; }
+
+    /// <summary>
+    /// Gets or sets what is told the recipients once one has been added or removed.
+    /// </summary>
+    [Parameter]
+    public EventCallback<IReadOnlyList<string>> EmailAddressesChanged { get; set; }
+
+    /// <summary>
+    /// Gets or sets the view model the editor is drawn from, for whoever needs to know what is wrong with
+    /// the recipients; the editor makes its own when none is given.
+    /// </summary>
+    [Parameter]
+    public EmailAddressesEditorViewModel? ExternalViewModel { get; set; }
+
+    protected override EmailAddressesEditorViewModel ViewModel { get; set; } = null!;
+
+    protected override void OnInitialized()
+    {
+        this.ViewModel = this.ExternalViewModel ?? new EmailAddressesEditorViewModel();
+
+        base.OnInitialized();
+    }
+
+    protected override void OnParametersSet()
+    {
+        this.items = [.. this.EmailAddresses];
+        this.ViewModel.EmailAddresses = this.EmailAddresses;
+
+        base.OnParametersSet();
+    }
+
+    private Task PublishAsync(string _)
+    {
+        // The list is edited in place, so the view model is told before anybody else reads it.
+        IReadOnlyList<string> addresses = [.. this.items];
+        this.ViewModel.EmailAddresses = addresses;
+        return this.EmailAddressesChanged.InvokeAsync(addresses);
+    }
+
+    /// <inheritdoc/>
+    public override ValueTask DisposeAsync()
+    {
+        // Lets the list waiting for an address being added go on when the editor disappears mid-way.
+        this.ViewModel.Cancel();
+        return base.DisposeAsync();
+    }
+}

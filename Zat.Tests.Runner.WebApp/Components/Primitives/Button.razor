@@ -1,0 +1,10 @@
+@using System.Windows.Input
+
+<button/>
+
+@code {
+    // TODO: After migration to net11, use union type:
+    // { ICommand | ICommand<TValue> | Action | Action<TValue>  }
+    [Parameter, EditorRequired]
+    public required ICommand Command { get; set; }
+}

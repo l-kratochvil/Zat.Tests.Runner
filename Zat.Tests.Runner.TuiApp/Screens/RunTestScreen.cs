@@ -1,0 +1,319 @@
+﻿namespace Zat.Tests.Runner.TuiApp.Screens;
+
+using System.Diagnostics;
+using System.Globalization;
+using System.Text;
+
+using CSharpFunctionalExtensions;
+
+using DevKit.Core.Utils;
+
+using WindowsInput.Native;
+
+using Zat.Tests.Runner.Common.Model;
+using Zat.Tests.Runner.Common.Net.Model;
+using Zat.Tests.Runner.Common.Net.Services;
+using Zat.Tests.Runner.TuiApp.Application.Paths;
+using Zat.Tests.Runner.TuiApp.Common;
+using Zat.Tests.Runner.TuiApp.Stores;
+
+internal class RunTestScreen(
+    TestRunConfigStore testRunConfigStore,
+    ITestRunnerEngine testRunnerEngine,
+    IEnumerable<ITestResultHandler> testResultHandlers,
+    IAppPathsProvider appPathsProvider,
+    Lazy<HomeScreen> homeScreen,
+    Lazy<ExitScreen> exitScreen,
+    Lazy<SettingsScreen> settingsScreen)
+    : ScreenBase(homeScreen, exitScreen, settingsScreen),
+      ITestResultHandler
+{
+    private readonly List<TestResult> handledTestResults = [];
+    private State state = new();
+
+    /// <inheritdoc/>
+    protected override Configuration Config { get; init; } = new()
+    {
+        IsHomeCommandEnabled = false,
+        IsBackCommandEnabled = false,
+        IsSettingsCommandEnabled = false,
+    };
+
+    /// <inheritdoc/>
+    protected override ICommand[] AdditionalCommands
+        => field ??=
+        [
+            .. base.AdditionalCommands,
+            new ActionCommand(
+                Key: VirtualKeyCode.F2,
+                Text: Resources.StopTest_CommandText,
+                Action: testRunnerEngine.StopTestRun)
+        ];
+
+    /// <inheritdoc />
+    void ITestResultHandler.HandleSubRunResult(TestResult result)
+    {
+        this.handledTestResults.Add(result);
+        this.state.Stopwatch.Restart();
+    }
+
+    /// <inheritdoc/>
+    protected override ScreenRenderer CreateRenderer()
+        => new()
+        {
+            Main = async ct =>
+            {
+                this.handledTestResults.Clear();
+                var table = new Table()
+                    .HideHeaders()
+                    .AddColumn(string.Empty);
+                this.state = new State();
+                this.state = new State();
+                this.state.Stopwatch.Restart();
+
+                // ReSharper disable once MethodSupportsCancellation
+                var runTestTask = testRunnerEngine.RunTestAsync(
+                    testRunEntities: testRunConfigStore.SelectedTestEntities,
+                    config: new ITestRunnerEngine.Config(
+                        TestAssemblyDllPath: appPathsProvider.Files.MainAssemblyDll,
+                        IsDebug: testRunConfigStore.IsDebugModeEnabled ?? false,
+                        TestedRuntimeVersion: testRunConfigStore.RuntimeVersion,
+                        TestedHwAssemblyTypes: testRunConfigStore.HwAssemblyTypes,
+                        TestResultHandlers: [.. testResultHandlers, this]));
+
+                var promptResult = await ShowLiveDataAsync(
+                    table,
+                    this.state,
+                    async (table, data, ctx, ct) =>
+                    {
+                        while (true)
+                        {
+                            var sb = new StringBuilder();
+                            for (var i = 0; i < this.handledTestResults.Count; i++)
+                            {
+                                var testResult = this.handledTestResults[i];
+
+                                sb.AppendLine(string.Empty);
+                                var header = TextUtils.SafeFormat(
+                                    Resources.TestResultHeader_Format,
+                                    i + 1,
+                                    testResult.StartTime.UtcDateTime);
+                                var testType = testResult.TestedHwAssemblyType is { } testedHwAssemblyType
+                                    ? $"{testResult.TestType} · {testedHwAssemblyType}"
+                                    : testResult.TestType.ToString();
+                                sb.AppendLine(
+                                    $"[bold underline aqua]{$"{header} · {testType}".EscapeMarkup()}[/]");
+
+                                RenderNotRunSection(sb, testResult);
+                                RenderProblemsSection(sb, testResult);
+                                RenderSummarySection(sb, testResult);
+                            }
+
+                            table.Rows.Clear();
+                            table.AddRow(new Markup($@"{Resources.ElapsedTime}: {data.Stopwatch.Elapsed:hh\:mm\:ss}"));
+                            if (sb.Length > 0)
+                            {
+                                table.AddRow(new Markup(sb.ToString()));
+                            }
+
+                            ctx.Refresh();
+
+                            if (runTestTask.IsCompleted)
+                            {
+                                break;
+                            }
+
+                            await Task.Delay(100, ct);
+                        }
+                    },
+                    _ => RenderOutput.Default,
+                    ct);
+
+                if (promptResult is InterruptedShowPrompt interuptedShowPrompt)
+                {
+                    testRunnerEngine.StopTestRun();
+                    return interuptedShowPrompt;
+                }
+
+                await RenderTestRunOutcomeAsync(runTestTask);
+
+                this.state.Stopwatch.Stop();
+
+                MarkupLine($"[aqua]{Resources.PressEnterToContinue_Message.EscapeMarkup()}[/]");
+
+                return await ConsoleUtils.WaitForKeyPressAsync(ConsoleKey.Enter, ct)
+                    ? CompletedShowPrompt.Default
+                    : new InterruptedShowPrompt();
+            },
+        };
+
+    /// <summary>
+    /// Shows why the test run of <paramref name="runTestTask"/> did not run the selected tests, if it didn't. What
+    /// it ran is already shown by the time it ends.
+    /// </summary>
+    /// <remarks>
+    /// A failure of what runs the tests is shown on its own, so the tester can tell it from the tests failing, and
+    /// the application goes on rather than ending with it.
+    /// </remarks>
+    private static async Task RenderTestRunOutcomeAsync(Task<Result<TestResult[]>> runTestTask)
+    {
+        try
+        {
+            var result = await runTestTask;
+            if (result.IsFailure)
+            {
+                MarkupLine(string.Empty);
+                MarkupLine($"[red]{result.Error.EscapeMarkup()}[/]");
+            }
+        }
+        catch (Exception exception)
+        {
+            MarkupLine(string.Empty);
+            MarkupLine($"[red]{Resources.TestRunReport_RunnerErrors_SectionHeader.EscapeMarkup()}[/]");
+            MarkupLine(string.Empty);
+            WriteException(exception);
+        }
+    }
+
+    private static void RenderNotRunSection(StringBuilder sb, TestResult result)
+    {
+        var entries = new List<ReportEntry>();
+        entries.AddRange(result.ReportedNotRunResults.Where(x => x.Status is TestStatus.Ignored).Select(
+            x => new ReportEntry("yellow", Resources.TestRunReport_Label_Ignored, x)));
+        entries.AddRange(result.ReportedNotRunResults.Where(x => x.Status is TestStatus.Explicit).Select(
+            x => new ReportEntry("yellow", Resources.TestRunReport_Label_Explicit, x)));
+        entries.AddRange(result.ReportedNotRunResults.Where(x => x.Status is TestStatus.Skipped).Select(
+            x => new ReportEntry("yellow", Resources.TestRunReport_Label_Skipped, x)));
+        entries.AddRange(result.ReportedNotRunResults.Where(x => x.Status is TestStatus.Unknown).Select(
+            x => new ReportEntry("yellow", Resources.TestRunReport_Status_Unknown, x)));
+
+        RenderEntrySection(sb, Resources.TestRunReport_TestsNotRun_SectionHeader, entries, includeStackTrace: false);
+    }
+
+    private static void RenderProblemsSection(StringBuilder sb, TestResult result)
+    {
+        var entries = new List<ReportEntry>();
+        entries.AddRange(result.ReportedProblemResults.Where(x => x.Status is TestStatus.Error).Select(
+            x => new ReportEntry("red", Resources.TestRunReport_Label_Error, x)));
+        entries.AddRange(result.ReportedProblemResults.Where(x => x.Status is TestStatus.Invalid).Select(
+            x => new ReportEntry("red", Resources.TestRunReport_Label_Invalid, x)));
+        entries.AddRange(result.ReportedProblemResults.Where(x => x.Status is TestStatus.Failure).Select(
+            x => new ReportEntry("red", Resources.TestRunReport_Label_Failed, x)));
+        entries.AddRange(result.ReportedProblemResults.Where(x => x.Status is TestStatus.Warning).Select(
+            x => new ReportEntry("yellow", Resources.TestRunReport_Label_Warning, x)));
+
+        RenderEntrySection(sb, Resources.TestRunReport_ErrorsFailuresWarnings_SectionHeader, entries, includeStackTrace: true);
+    }
+
+    private static void RenderEntrySection(
+        StringBuilder sb, string header, IReadOnlyList<ReportEntry> entries, bool includeStackTrace)
+    {
+        if (entries.Count == 0)
+        {
+            return;
+        }
+
+        sb.AppendLine();
+        sb.AppendLine($"[aqua]{header.EscapeMarkup()}[/]");
+        sb.AppendLine();
+
+        for (var i = 0; i < entries.Count; i++)
+        {
+            if (i > 0)
+            {
+                sb.AppendLine();
+            }
+
+            var entry = entries[i];
+            var headerLine = $"{i + 1}) {entry.Label} : {entry.Result.EntityName}";
+
+            sb.AppendLine(entry.Color is null
+                ? headerLine.EscapeMarkup()
+                : $"[{entry.Color}]{headerLine.EscapeMarkup()}[/]");
+
+            var detail = entry.Result.Detail;
+
+            if (!string.IsNullOrEmpty(detail?.Message))
+            {
+                sb.AppendLine(detail.Message.ToConsoleSafeText().EscapeMarkup());
+            }
+
+            if (includeStackTrace && !string.IsNullOrEmpty(detail?.StackTrace))
+            {
+                sb.AppendLine(detail.StackTrace.ToConsoleSafeText().EscapeMarkup());
+            }
+        }
+    }
+
+    private static void RenderSummarySection(
+        StringBuilder sb,
+        TestResult result)
+    {
+        sb.AppendLine($"[aqua]{Resources.TestRunReport_Summary_SectionHeader.EscapeMarkup()}[/]");
+
+        sb.AppendLine(
+            $"  {MakeLabel(Resources.TestRunReport_Summary_OverallResult)} {MapStatus(result.OverallStatus).EscapeMarkup()}");
+
+        sb.AppendLine(
+            $"  {MakeLabel(Resources.TestRunReport_Summary_TestCount)} {result.TestCaseResults.Length}" +
+            $", {MakeLabel(Resources.TestRunReport_Summary_Passed)} {result.PassedResults.Length}" +
+            $", {MakeLabel(Resources.TestRunReport_Summary_Failed)} {result.FailedResults.Length}" +
+            $", {MakeLabel(Resources.TestRunReport_Summary_Warnings)} {result.WarningResults.Length}" +
+            $", {MakeLabel(Resources.TestRunReport_Summary_Inconclusive)} {result.InconclusiveResults.Length}" +
+            $", {MakeLabel(Resources.TestRunReport_Summary_Skipped)} {result.NotRunResults.Length}");
+
+        sb.AppendLine(
+            $"    [green]{Resources.TestRunReport_Summary_FailedTests.EscapeMarkup()} -[/]" +
+            $" {MakeLabel(Resources.TestRunReport_Summary_Failures)} {result.FailureResults.Length}" +
+            $", {MakeLabel(Resources.TestRunReport_Summary_Errors)} {result.ErrorResults.Length}" +
+            $", {MakeLabel(Resources.TestRunReport_Summary_Invalid)} {result.InvalidResults.Length}");
+
+        sb.AppendLine(
+            $"    [green]{Resources.TestRunReport_Summary_SkippedTests.EscapeMarkup()} -[/]" +
+            $" {MakeLabel(Resources.TestRunReport_Summary_Ignored)} {result.IgnoredResults.Length}" +
+            $", {MakeLabel(Resources.TestRunReport_Summary_Explicit)} {result.ExplicitResults.Length}" +
+            $", {MakeLabel(Resources.TestRunReport_Summary_Other)} " +
+            $"{result.OtherNotRunResults.Length}");
+
+        sb.AppendLine(
+            $"  {MakeLabel(Resources.TestRunReport_Summary_StartTime)} {FormatTimestamp(result.StartTime)}");
+        sb.AppendLine(
+            $"  {MakeLabel(Resources.TestRunReport_Summary_EndTime)} {FormatTimestamp(result.EndTime)}");
+        sb.AppendLine(
+            $"  {MakeLabel(Resources.TestRunReport_Summary_Duration)} " +
+            $"{result.Duration.TotalSeconds.ToString("F3", CultureInfo.InvariantCulture)} " +
+            $"{Resources.TestRunReport_Summary_Seconds.EscapeMarkup()}");
+    }
+
+    private static string MakeLabel(string text)
+        => $"[green]{text.EscapeMarkup()}:[/]";
+
+    private static string FormatTimestamp(DateTimeOffset utc)
+        => utc.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss'Z'", CultureInfo.InvariantCulture);
+
+    private static string MapStatus(TestStatus status)
+        => status switch
+        {
+            TestStatus.Passed => Resources.TestRunReport_Status_Passed,
+            TestStatus.Failure or
+                TestStatus.Error or
+                TestStatus.Invalid => Resources.TestRunReport_Status_Failed,
+            TestStatus.Skipped or
+                TestStatus.Ignored or
+                TestStatus.Explicit => Resources.TestRunReport_Status_Skipped,
+            TestStatus.Inconclusive => Resources.TestRunReport_Status_Inconclusive,
+            TestStatus.Warning => Resources.TestRunReport_Status_Warning,
+            _ => Resources.TestRunReport_Status_Unknown,
+        };
+
+    private record ReportEntry(
+        string? Color,
+        string Label,
+        TestEntityResult Result);
+
+    private class State
+    {
+        public Stopwatch Stopwatch { get; } = new();
+    }
+
+}

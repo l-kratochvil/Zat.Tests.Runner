@@ -1,0 +1,89 @@
+@* Feature: TestDiscovery — one node of the test tree.
+
+   The selector is a button rather than <input type="checkbox"> on purpose. A checkbox cannot show
+   a partial selection from markup (indeterminate is a DOM property, not an attribute), and the
+   browser toggles it on its own: completing a partly selected group leaves the model unchanged, so
+   the renderer emits no edit and the box stays where the browser put it. A button holds no state of
+   its own, takes aria-checked="mixed" as a plain attribute, and still answers space and enter. *@
+
+<li class="test-node">
+    <div class="node-row">
+        @if (this.Data.HasChildren)
+        {
+            <button type="button"
+                    class="expander"
+                    aria-expanded="@this.Data.IsExpanded"
+                    aria-label="@(this.Data.IsExpanded ? $"Collapse {this.Data.Name}" : $"Expand {this.Data.Name}")"
+                    @onclick="this.ToggleExpanded">
+                @(this.Data.IsExpanded ? "▾" : "▸")
+            </button>
+        }
+        else
+        {
+            @* Keeps the selectors of one level aligned under each other. *@
+            <span class="expander-placeholder" aria-hidden="true"></span>
+        }
+
+        <button type="button"
+                role="checkbox"
+                class="node-check @CheckStateCssClass"
+                aria-checked="@AriaChecked"
+                aria-label="@this.Data.Name"
+                disabled="@(!this.Data.CanCheck)"
+                @onclick="this.ToggleCheckedAsync">
+        </button>
+
+        <span class="node-name" @onclick="this.ToggleExpanded">@this.Data.Name</span>
+    </div>
+
+    @if (this.Data.HasChildren && this.Data.IsExpanded)
+    {
+        <ul class="node-children">
+            @foreach (var child in this.Data.Children)
+            {
+                @* Keyed by the path so that a rediscovered tree pairs nodes by identity and not by
+                   position, which would move expansion and focus onto a different test. *@
+                <TestTreeNode Data="child" @key="child.ExecutionPath" SelectionChanged="this.SelectionChanged" />
+            }
+        </ul>
+    }
+</li>
+
+@code {
+    /// <summary>
+    /// The node data.
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public TestTreeNodeData Data { get; set; } = null!;
+
+    /// <summary>
+    /// Raised after the user changed what is selected, anywhere beneath this node. Handled by the
+    /// explorer, which owns the tree and puts the selection into the state.
+    /// </summary>
+    [Parameter]
+    public EventCallback SelectionChanged { get; set; }
+
+    private string AriaChecked
+        => this.Data.CheckState switch
+        {
+            TestTreeNodeData.State.Checked => "true",
+            TestTreeNodeData.State.Mixed => "mixed",
+            _ => "false",
+        };
+
+    private string CheckStateCssClass
+        => $"is-{this.Data.CheckState.ToString().ToLowerInvariant()}";
+
+    private void ToggleExpanded()
+    {
+        this.Data.IsExpanded = !this.Data.IsExpanded;
+    }
+
+    private Task ToggleCheckedAsync()
+    {
+        this.Data.Toggle();
+
+        return this.SelectionChanged.InvokeAsync();
+    }
+}

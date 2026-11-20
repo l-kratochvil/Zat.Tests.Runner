@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022", "DOM"],
+    "strict": true,
+    "noEmitOnError": true,
+    "forceConsistentCasingInFileNames": true,
+    "sourceMap": false,
+    // A shared module is imported by the URL it is served under, so that every script spells it
+    // the same way and the browser keeps one instance of it. TypeScript would read that as a path
+    // on disk, so it is pointed at the declarations Browser/tsconfig.json emits alongside the .js.
+    "paths": {
+      "/browser/*": ["./obj/browser-types/*"]
+    }
+  },
+  // Any .ts anywhere in the project compiles in place to a .js next to it - for collocated Razor
+  // scripts ({Component}.razor.ts) that sibling location is where the Blazor SDK expects the .js.
+  // Browser holds the shared modules, which Browser/tsconfig.json builds into wwwroot/browser
+  // instead.
+  // wwwroot is vendored or generated code, bin/obj are build outputs.
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules", "bin", "obj", "wwwroot", "Browser"]
+}

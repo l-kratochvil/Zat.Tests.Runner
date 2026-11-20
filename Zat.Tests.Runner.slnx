@@ -1,0 +1,47 @@
+<Solution>
+  <Folder Name="/DevKit/">
+    <Project Path="../DevKit.Core/DevKit.Core/DevKit.Core.csproj" />
+    <Project Path="../DevKit.Mvvm/DevKit.Mvvm/DevKit.Mvvm.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path="AGENTS.md" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
+    <File Path="README.md" />
+    <File Path="StyleCop.json" />
+    <File Path="Zat.Tests.Runner.slnx.DotSettings" />
+  </Folder>
+  <Folder Name="/Solution Items/docs/">
+    <File Path="docs/DEV-NOTES.md" />
+    <File Path="docs/Issue-0002.docx" />
+    <File Path="docs/TODO.md" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/NUnitTestAssembly.Common/NUnitTestAssembly.Common.csproj" />
+    <Project Path="Tests/NUnitTestAssembly.Net461/NUnitTestAssembly.Net461.csproj" />
+    <Project Path="Tests/NUnitTestAssembly.Net481/NUnitTestAssembly.Net481.csproj" />
+    <Project Path="Tests/Zat.Tests.Runner.TuiApp.Tests/Zat.Tests.Runner.TuiApp.Tests.csproj" />
+    <Project Path="Tests/Zat.Tests.Runner.NUnitTestRunnerProxy.Tests/Zat.Tests.Runner.NUnitTestRunnerProxy.Tests.csproj" Id="82ad2fa9-69d8-4a6d-9b39-56276ff807bd" />
+    <Project Path="Tests/Zat.Tests.Runner.WebApp.Tests/Zat.Tests.Runner.WebApp.Tests.csproj" />
+    <Project Path="Tests/Zat.Tests.Runner.Common.Net.Tests/Zat.Tests.Runner.Common.Net.Tests.csproj" Id="5c296837-6016-4fca-9539-b9663d914ed6">
+      <BuildDependency Project="Zat.Tests.Runner.NUnitTestRunnerProxy/Zat.Tests.Runner.NUnitTestRunnerProxy.csproj" />
+    </Project>
+  </Folder>
+  <Project Path="Zat.Tests.Runner.TuiApp/Zat.Tests.Runner.TuiApp.csproj">
+    <BuildDependency Project="Zat.Tests.Runner.NUnitTestRunnerProxy/Zat.Tests.Runner.NUnitTestRunnerProxy.csproj" />
+  </Project>
+  <Project Path="Zat.Tests.Runner.WB/Zat.Tests.Runner.WB.csproj" Id="65f206e0-a6ec-49aa-a276-3a7f985adb5f">
+    <BuildDependency Project="Zat.Tests.Runner.NUnitTestRunnerProxy/Zat.Tests.Runner.NUnitTestRunnerProxy.csproj" />
+  </Project>
+  <Project Path="Zat.Tests.Runner.WebApp/Zat.Tests.Runner.WebApp.csproj">
+    <BuildDependency Project="Zat.Tests.Runner.NUnitTestRunnerProxy/Zat.Tests.Runner.NUnitTestRunnerProxy.csproj" />
+  </Project>
+  <Project Path="Zat.Tests.Runner.Common.Net/Zat.Tests.Runner.Common.Net.csproj" Id="f757f6df-f5db-46f2-b6e5-cda6a145a2a7">
+    <BuildDependency Project="Zat.Tests.Runner.NUnitTestRunnerProxy/Zat.Tests.Runner.NUnitTestRunnerProxy.csproj" />
+  </Project>
+  <Project Path="Zat.Tests.Runner.Common/Zat.Tests.Runner.Common.csproj" />
+  <Project Path="Zat.Tests.Runner.NUnitTestRunnerProxy/Zat.Tests.Runner.NUnitTestRunnerProxy.csproj" />
+  <Project Path="Zat.Z2xxTests.Common/Zat.Z2xxTests.Common.csproj" />
+</Solution>

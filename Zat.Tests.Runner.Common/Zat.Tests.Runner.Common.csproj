@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+	  <ProjectReference Include="..\Zat.Z2xxTests.Common\Zat.Z2xxTests.Common.csproj" >
+		  <PrivateAssets>all</PrivateAssets>
+	  </ProjectReference>
+
+    <PackageReference Include="StreamJsonRpc" Version="2.25.29" />
+  </ItemGroup>
+
+</Project>

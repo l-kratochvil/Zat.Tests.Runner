@@ -1,0 +1,44 @@
+.test-runner-page {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  gap: 0.5rem;
+  padding: 0.5rem;
+}
+
+.main-pane {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  gap: 0.5rem;
+}
+
+.explorer-pane,
+.configurator-pane,
+.result-pane {
+  min-width: 0;
+  border: 1px solid #dee2e6;
+  border-radius: 0.25rem;
+  padding: 0.75rem;
+}
+
+.configurator-pane,
+.result-pane {
+  overflow: auto;
+}
+
+/* The header row with the run button has to stay in sight, so the pane does not scroll as a whole
+   and the test tree inside it does the scrolling. */
+.explorer-pane {
+  overflow: hidden;
+  flex: 0 0 var(--test-explorer-width, 33.333%);
+}
+
+.configurator-pane {
+  flex: 1 1 0;
+}
+
+.result-pane {
+  flex: 0 0 var(--test-result-width, 33.333%);
+}

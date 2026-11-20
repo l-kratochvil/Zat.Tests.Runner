@@ -1,0 +1,64 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net10.0</TargetFramework>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
+		<PackageReference Include="Spectre.Console" Version="0.49.2-preview.0.44" />
+		<PackageReference Include="InputSimulatorPlus.NetStandard" Version="1.0.8" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.9" />
+		<PackageReference Include="Serilog" Version="4.4.0" />
+		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\DevKit.Core\DevKit.Core\DevKit.Core.csproj" />
+		<ProjectReference Include="..\Zat.Tests.Runner.Common.Net\Zat.Tests.Runner.Common.Net.csproj">
+			<PrivateAssets>all</PrivateAssets>
+		</ProjectReference>
+		<ProjectReference Include="..\Zat.Tests.Runner.Common\Zat.Tests.Runner.Common.csproj" />
+	</ItemGroup>
+
+	<!-- Other files -->
+	<ItemGroup>
+		<None Update="tools\test-runner.bat" TargetPath="test-runner.bat" CopyToOutputDirectory="Always" />
+	</ItemGroup>
+
+	<!-- AppSettings -->
+	<ItemGroup>
+		<None Update="appsettings.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		
+		<None Update="appsettings.Development.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<DependentUpon>appsettings.json</DependentUpon>
+		</None>
+
+		<None Update="appsettings.Production.json">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  <DependentUpon>appsettings.json</DependentUpon>
+		</None>
+	</ItemGroup>
+
+	<!-- Resources -->
+	<ItemGroup>
+		<Compile Update="Properties\Resources.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Resources.resx</DependentUpon>
+		</Compile>
+
+		<EmbeddedResource Update="Properties\Resources.resx">
+			<Generator>PublicResXFileCodeGenerator</Generator>
+			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+
+		<EmbeddedResource Update="Properties\Resources.cs.resx">
+			<DependentUpon>Resources.resx</DependentUpon>
+		</EmbeddedResource>
+	</ItemGroup>
+</Project>

@@ -1,0 +1,6 @@
+// The tests reach the per-feature registration methods so that each feature's wiring can be
+// exercised on its own, which is what makes a registration mistake point at the feature that made
+// it rather than at the application as a whole.
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo(
+    "Zat.Tests.Runner.WebApp.Tests, " +
+    "PublicKey=002400000480000094000000060200000024000052534131000400000100010035181ec1bf4d20e00b56b3bb324e3e8df85ba72858b078dafb28d5bf9e6d313faf2d90c609b6eaf3b333a2d9fabd9af61c3696af74ba2529607f72c47391f77d127adbdb3e88b9220059644766caf59a17e42da8401560a21ef70d14f179406c57b1a5ad5cf2797b10f42b63d06c2ec907aa4b49a59f5dda81aa973939a244ad")]

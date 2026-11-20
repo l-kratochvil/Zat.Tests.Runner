@@ -1,0 +1,23 @@
+@* A two-column list of properties: what each one is called, and what it is set to.
+
+   The grid lays the rows out and shows what is wrong with them; the input of a row is whatever the
+   feature puts there. Handing the grid a description of the fields instead would make it draw the
+   inputs too, and the first field with its own labels or its own visibility rule would need a way
+   around it — so the layout is shared and the controls are not. *@
+
+<div class="property-grid">
+    @* The rows need the columns of this grid to fall into, so the grid is cascaded for a row to
+       find — and to miss when it is placed anywhere else. *@
+    <CascadingValue Value="this" IsFixed="true">
+        @this.ChildContent
+    </CascadingValue>
+</div>
+
+@code {
+    /// <summary>
+    /// Gets or sets the <see cref="PropertyGridRow"/> content shown by the grid.
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public RenderFragment? ChildContent { get; set; }
+}

@@ -1,0 +1,76 @@
+@using Zat.Tests.Runner.WebApp.Features.AppLogging.Components;
+
+@inherits LayoutComponentBase
+@implements IDisposable
+
+<div class="app-shell">
+    @* Renders nothing; it is here so that the browser has one bridge back into .NET per circuit. *@
+    <JsBridge />
+
+    <header class="app-header">
+        <MainMenu />
+    </header>
+
+    <main class="app-content">
+        @Body
+    </main>
+
+    @* The application log belongs to the shell, not to a page: it must stay reachable from
+       every screen. *@
+    @if (!this.isLogCollapsed)
+    {
+        <SplitterBar CssVariable="--app-log-height"
+                     StorageKey="Zat.Tests.Runner.app-log-height"
+                     Label="Resize the log" />
+    }
+
+    <div class="app-log-pane @(this.isLogCollapsed ? "is-collapsed" : null)">
+        <AppLogger CollapsedChanged="this.OnLogCollapsedChanged" />
+    </div>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">X</span>
+</div>
+
+@code {
+    private bool isLogCollapsed;
+
+    /// <summary>
+    /// Gets or sets the logger navigation is reported to.
+    /// </summary>
+    [Inject]
+    private ILogger<MainLayout> Logger { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the navigation manager whose location changes are logged.
+    /// </summary>
+    [Inject]
+    private NavigationManager Navigation { get; set; } = null!;
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        this.Navigation.LocationChanged -= this.OnLocationChanged;
+    }
+
+    /// <inheritdoc/>
+    protected override void OnInitialized()
+    {
+        this.Navigation.LocationChanged += this.OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs args)
+    {
+        // Navigation is developer detail: it belongs to the log file, not to the panel the user
+        // reads.
+        this.Logger.LogDebug("Navigated to {Location}.", this.Navigation.ToBaseRelativePath(args.Location));
+    }
+
+    private void OnLogCollapsedChanged(bool collapsed)
+    {
+        this.isLogCollapsed = collapsed;
+    }
+}

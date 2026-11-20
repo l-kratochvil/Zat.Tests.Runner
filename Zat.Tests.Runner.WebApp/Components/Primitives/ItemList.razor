@@ -1,0 +1,161 @@
+@* A list of the items of a collection, optionally rendered by a template, with a remove action for each item and an add flow,
+   each offered only when its command is configured; a read-only collection is only listed. *@
+
+@using System.Collections.Specialized
+@using CSharpFunctionalExtensions
+
+@typeparam TItem
+@typeparam TCollection where TCollection : IList<TItem>
+
+@implements IDisposable
+
+<span class="d-flex flex-column gap-1">
+    @foreach (var item in this.Items)
+    {
+        <span class="d-flex align-items-center gap-2">
+            @if (this.ItemTemplate is not null)
+            {
+                @this.ItemTemplate(item)
+            }
+            else
+            {
+                <span class="text-break">@item</span>
+            }
+            @if (this.RemoveCommand is { IsVisible: true } removeCommand)
+            {
+                <button type="button"
+                        class="btn btn-outline-secondary btn-sm"
+                        aria-label="@($"Remove {item}")"
+                        disabled="@(!removeCommand.IsEnabled)"
+                        @onclick="() => this.RemoveAsync(item)">Remove</button>
+            }
+        </span>
+    }
+
+    @if (this.AddCommand is { IsVisible: true } addCommand)
+    {
+        <span>
+            <button type="button"
+                    class="btn btn-outline-secondary btn-sm"
+                    disabled="@(!addCommand.IsEnabled)"
+                    @onclick="() => this.AddAsync(addCommand.CreateItem)">Add</button>
+        </span>
+    }
+</span>
+
+@code {
+    private INotifyCollectionChanged? notifyCollectionChanged;
+
+    /// <summary>
+    /// Gets or sets the collection listed; items are added to and removed from it in place, so a read-only
+    /// one is only listed and takes neither <see cref="AddCommand"/> nor <see cref="RemoveCommand"/>.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public required TCollection Items { get; set; }
+
+    /// <summary>
+    /// Gets or sets how an item is rendered; the item's text is shown when not set.
+    /// </summary>
+    [Parameter]
+    public RenderFragment<TItem>? ItemTemplate { get; set; }
+
+    /// <summary>
+    /// Gets or sets the Add button; it is offered only when set.
+    /// </summary>
+    [Parameter]
+    public ItemList.AddCommandConfig<TItem>? AddCommand { get; set; }
+
+    /// <summary>
+    /// Gets or sets the Remove buttons; they are offered only when set.
+    /// </summary>
+    [Parameter]
+    public ItemList.RemoveCommandConfig? RemoveCommand { get; set; }
+
+    // Kept out of AddCommandConfig: Blazor ties an EventCallback to the component that sets it, and so
+    // re-renders that component once it is told, only when the callback is passed as a parameter.
+
+    /// <summary>
+    /// Gets or sets what is told about an item once it has been added to <see cref="Items"/>.
+    /// </summary>
+    [Parameter]
+    public EventCallback<TItem> OnAdd { get; set; }
+
+    // Kept out of RemoveCommandConfig for the same reason as OnAdd.
+
+    /// <summary>
+    /// Gets or sets what is told about an item once it has been removed from <see cref="Items"/>.
+    /// </summary>
+    [Parameter]
+    public EventCallback<TItem> OnRemove { get; set; }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        this.UnsubscribeNotifyCollectionChanged();
+    }
+
+    /// <inheritdoc/>
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        // A configured command asks for a button the collection cannot honour, which would show up as a
+        // button quietly missing rather than as a mistake, so it is said out loud instead.
+        if (this.Items.IsReadOnly && (this.AddCommand is not null || this.RemoveCommand is not null))
+        {
+            throw new InvalidOperationException(
+                $"A read-only collection is only listed, so an {nameof(ItemList<TItem, TCollection>)} " +
+                $"given one takes neither {nameof(this.AddCommand)} nor {nameof(this.RemoveCommand)}.");
+        }
+
+        if (ReferenceEquals(this.notifyCollectionChanged, this.Items))
+        {
+            return;
+        }
+
+        this.UnsubscribeNotifyCollectionChanged();
+
+        if (this.Items is not INotifyCollectionChanged notifyCollectionChanged)
+        {
+            return;
+        }
+
+        notifyCollectionChanged.CollectionChanged += this.OnCollectionChanged;
+        this.notifyCollectionChanged = notifyCollectionChanged;
+    }
+
+    private void UnsubscribeNotifyCollectionChanged()
+    {
+        if (this.notifyCollectionChanged is null)
+        {
+            return;
+        }
+
+        this.notifyCollectionChanged.CollectionChanged -= this.OnCollectionChanged;
+        this.notifyCollectionChanged = null;
+    }
+
+    // The collection may change off the renderer's thread.
+    private void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        => _ = this.InvokeAsync(this.StateHasChanged);
+
+    private async Task AddAsync(Func<Task<Maybe<TItem>>> createItem)
+    {
+        if (!(await createItem()).TryGetValue(out var item))
+        {
+            return;
+        }
+
+        this.Items.Add(item);
+
+        await this.OnAdd.InvokeAsync(item);
+    }
+
+    private async Task RemoveAsync(TItem item)
+    {
+        if (this.Items.Remove(item))
+        {
+            await this.OnRemove.InvokeAsync(item);
+        }
+    }
+}

@@ -1,0 +1,411 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="IdeInstallFolderPath_ChoiceText" xml:space="preserve">
+    <value>IDE install folder path</value>
+  </data>
+  <data name="MoveUpAndDownToReveal_HelpText" xml:space="preserve">
+    <value>Move up and down to reveal more choices</value>
+  </data>
+  <data name="NoRuntimesFoundUnderIdeInstallFolder_Message" xml:space="preserve">
+    <value>No runtimes found under IDE install folder</value>
+  </data>
+  <data name="PathCanNotBeEmpty_ErrorMessage" xml:space="preserve">
+    <value>Path cannot be empty or does not exist</value>
+  </data>
+  <data name="PathDoesNotExist_ErrorMessage" xml:space="preserve">
+    <value>Path doesn't exist</value>
+  </data>
+  <data name="PressAnyKeyToContinue_Message" xml:space="preserve">
+    <value>Press any key to continue ...</value>
+  </data>
+  <data name="PressEnterToContinue_Message" xml:space="preserve">
+    <value>Press Enter to continue ...</value>
+  </data>
+  <data name="RuntimeVersion_ChoiceText" xml:space="preserve">
+    <value>Runtime version</value>
+  </data>
+  <data name="IdeVersion_ChoiceText" xml:space="preserve">
+    <value>IDE version</value>
+  </data>
+  <data name="SelectTestSuites_ChoiceText" xml:space="preserve">
+    <value>Select test suites</value>
+  </data>
+  <data name="SelectTestCases_ChoiceText" xml:space="preserve">
+    <value>Select test cases</value>
+  </data>
+  <data name="RunTest_ChoiceText" xml:space="preserve">
+    <value>Run test</value>
+  </data>
+  <data name="StopTest_CommandText" xml:space="preserve">
+    <value>Stop test</value>
+  </data>
+  <data name="Back_CommandText" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="Exit_CommandText" xml:space="preserve">
+    <value>Exit</value>
+  </data>
+  <data name="Settings_CommandText" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="ElapsedTime" xml:space="preserve">
+    <value>Elapsed time</value>
+  </data>
+  <data name="EnterIdeVersion_PromptText" xml:space="preserve">
+    <value>Enter IDE version: </value>
+  </data>
+  <data name="EnterIdeInstallFolderPath_PromptText" xml:space="preserve">
+    <value>Enter IDE install folder path: </value>
+  </data>
+  <data name="Home_CommandText" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="TestRunReport_TestsNotRun_SectionHeader" xml:space="preserve">
+    <value>Tests Not Run</value>
+  </data>
+  <data name="TestRunReport_ErrorsFailuresWarnings_SectionHeader" xml:space="preserve">
+    <value>Errors, Failures and Warnings</value>
+  </data>
+  <data name="TestRunReport_RunnerErrors_SectionHeader" xml:space="preserve">
+    <value>Runner Errors</value>
+  </data>
+  <data name="TestRunReport_Summary_SectionHeader" xml:space="preserve">
+    <value>Test Run Summary</value>
+  </data>
+  <data name="TestRunReport_Label_Ignored" xml:space="preserve">
+    <value>Ignored</value>
+  </data>
+  <data name="TestRunReport_Label_Explicit" xml:space="preserve">
+    <value>Explicit</value>
+  </data>
+  <data name="TestRunReport_Label_Skipped" xml:space="preserve">
+    <value>Skipped</value>
+  </data>
+  <data name="TestRunReport_Label_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="TestRunReport_Label_Invalid" xml:space="preserve">
+    <value>Invalid</value>
+  </data>
+  <data name="TestRunReport_Label_Failed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="TestRunReport_Label_Warning" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+  <data name="TestRunReport_Summary_OverallResult" xml:space="preserve">
+    <value>Overall result</value>
+  </data>
+  <data name="TestRunReport_Summary_TestCount" xml:space="preserve">
+    <value>Test Count</value>
+  </data>
+  <data name="TestRunReport_Summary_Passed" xml:space="preserve">
+    <value>Passed</value>
+  </data>
+  <data name="TestRunReport_Summary_Failed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="TestRunReport_Summary_Warnings" xml:space="preserve">
+    <value>Warnings</value>
+  </data>
+  <data name="TestRunReport_Summary_Inconclusive" xml:space="preserve">
+    <value>Inconclusive</value>
+  </data>
+  <data name="TestRunReport_Summary_Skipped" xml:space="preserve">
+    <value>Skipped</value>
+  </data>
+  <data name="TestRunReport_Summary_FailedTests" xml:space="preserve">
+    <value>Failed Tests</value>
+  </data>
+  <data name="TestRunReport_Summary_Failures" xml:space="preserve">
+    <value>Failures</value>
+  </data>
+  <data name="TestRunReport_Summary_Errors" xml:space="preserve">
+    <value>Errors</value>
+  </data>
+  <data name="TestRunReport_Summary_Invalid" xml:space="preserve">
+    <value>Invalid</value>
+  </data>
+  <data name="TestRunReport_Summary_SkippedTests" xml:space="preserve">
+    <value>Skipped Tests</value>
+  </data>
+  <data name="TestRunReport_Summary_Ignored" xml:space="preserve">
+    <value>Ignored</value>
+  </data>
+  <data name="TestRunReport_Summary_Explicit" xml:space="preserve">
+    <value>Explicit</value>
+  </data>
+  <data name="TestRunReport_Summary_Other" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="TestRunReport_Summary_StartTime" xml:space="preserve">
+    <value>Start time</value>
+  </data>
+  <data name="TestRunReport_Summary_EndTime" xml:space="preserve">
+    <value>End time</value>
+  </data>
+  <data name="TestRunReport_Summary_Duration" xml:space="preserve">
+    <value>Duration</value>
+  </data>
+  <data name="TestRunReport_Summary_Seconds" xml:space="preserve">
+    <value>seconds</value>
+  </data>
+  <data name="TestRunReport_Status_Passed" xml:space="preserve">
+    <value>Passed</value>
+  </data>
+  <data name="TestRunReport_Status_Failed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="TestRunReport_Status_Skipped" xml:space="preserve">
+    <value>Skipped</value>
+  </data>
+  <data name="TestRunReport_Status_Inconclusive" xml:space="preserve">
+    <value>Inconclusive</value>
+  </data>
+  <data name="TestRunReport_Status_Warning" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+  <data name="TestRunReport_Status_Unknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="SelectedEntitiesCount" xml:space="preserve">
+    <value>Selected entities</value>
+  </data>
+  <data name="SelectedEntities" xml:space="preserve">
+    <value>Selected entities count</value>
+  </data>
+  <data name="TestEntities" xml:space="preserve">
+    <value>Test entities</value>
+  </data>
+  <data name="Selected" xml:space="preserve">
+    <value>Selected</value>
+  </data>
+  <data name="Unselected" xml:space="preserve">
+    <value>Unselected</value>
+  </data>
+  <data name="ExitApp" xml:space="preserve">
+    <value>Exit app</value>
+  </data>
+  <data name="PressSpaceToSelectItem" xml:space="preserve">
+    <value>Press [blue]&lt;space&gt;[/] to select an item, [green]&lt;enter&gt;[/] to accept</value>
+  </data>
+  <data name="EnableTestLinkReporting_PromptText" xml:space="preserve">
+    <value>Report result to TestLink</value>
+  </data>
+  <data name="EnableDebugMode_PromptText" xml:space="preserve">
+    <value>Enable debug mode</value>
+  </data>
+  <data name="YesShorten" xml:space="preserve">
+    <value>y</value>
+  </data>
+  <data name="NoShorten" xml:space="preserve">
+    <value>n</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="SelectHwAssemblyType_PromptText" xml:space="preserve">
+    <value>Select HW assembly types</value>
+  </data>
+  <data name="SelectRuntimeVersion_PromptText" xml:space="preserve">
+    <value>Select runtime version</value>
+  </data>
+  <data name="SelectTestSuites_PromptText" xml:space="preserve">
+    <value>Select testsuites</value>
+  </data>
+  <data name="SelectTestCases_PromptText" xml:space="preserve">
+    <value>Select test cases</value>
+  </data>
+  <data name="SelectTestSuitesToSelectTestCases_PromptText" xml:space="preserve">
+    <value>Select testsuites to select testcases from</value>
+  </data>
+  <data name="EnterIdeReleaseDate_PromptText" xml:space="preserve">
+    <value>Enter IDE release date:</value>
+  </data>
+  <data name="EnterRuntimeReleaseDate_PromptText" xml:space="preserve">
+    <value>Enter runtime release date:</value>
+  </data>
+  <data name="IdeReleaseDate_ChoiceText" xml:space="preserve">
+    <value>IDE release date</value>
+  </data>
+  <data name="RuntimeReleaseDate_ChoiceText" xml:space="preserve">
+    <value>Runtim release date</value>
+  </data>
+  <data name="HwAssemblyTypes_ChoiceText" xml:space="preserve">
+    <value>HW assembly types</value>
+  </data>
+  <data name="ValueRequired" xml:space="preserve">
+    <value>Value required</value>
+  </data>
+  <data name="MustBeDateFormat" xml:space="preserve">
+    <value>Must be in a date format</value>
+  </data>
+  <data name="TestResultHeader_Format" xml:space="preserve">
+    <value>Test result #{0} ({1})</value>
+  </data>
+  <data name="SelectingMultipleHw02OptionsNotAllowed" xml:space="preserve">
+    <value>Selecting multiple HW02 options is not allowed</value>
+  </data>
+  <data name="IsBetaVersion_PromptText" xml:space="preserve">
+    <value>Is beta version</value>
+  </data>
+  <data name="EnterBetaVersion_PromptText" xml:space="preserve">
+    <value>Enter beta version: </value>
+  </data>
+  <data name="MustBeInteger" xml:space="preserve">
+    <value>Must be an integer</value>
+  </data>
+  <data name="BetaVersion_ChoiceText" xml:space="preserve">
+    <value>Beta version</value>
+  </data>
+  <data name="EnableEmailNotification_PromptText" xml:space="preserve">
+    <value>Send result by email</value>
+  </data>
+  <data name="EmailAddresses_ChoiceText" xml:space="preserve">
+    <value>Email addresses</value>
+  </data>
+  <data name="EmailAddresses_Count_Format" xml:space="preserve">
+    <value>{0} addresses</value>
+  </data>
+  <data name="AddEmailAddress_ChoiceText" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="RemoveEmailAddresses_ChoiceText" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="EnterEmailAddress_PromptText" xml:space="preserve">
+    <value>Enter email address: </value>
+  </data>
+  <data name="SelectEmailAddressesToRemove_PromptText" xml:space="preserve">
+    <value>Select email addresses to remove</value>
+  </data>
+  <data name="EmailAddressInvalid_ErrorMessage" xml:space="preserve">
+    <value>Not a valid email address</value>
+  </data>
+  <data name="EmailAddressNotInZatDomain_ErrorMessage" xml:space="preserve">
+    <value>Email address must be in the zat.cz domain</value>
+  </data>
+  <data name="EmailAddressDuplicate_ErrorMessage" xml:space="preserve">
+    <value>Email address is already in the list</value>
+  </data>
+</root>

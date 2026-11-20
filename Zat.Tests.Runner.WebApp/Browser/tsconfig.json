@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022", "DOM"],
+    "strict": true,
+    "noEmitOnError": true,
+    "forceConsistentCasingInFileNames": true,
+    "sourceMap": false,
+    "rootDir": ".",
+    "outDir": "../wwwroot/browser",
+    // One shared module importing another spells it the way every other script does, by the URL it
+    // is served under, so that all of them name the same instance. Here that path points back at
+    // the sources this same build compiles - unlike the collocated build, which has to be sent to
+    // the declarations instead.
+    "paths": {
+      "/browser/*": ["./*"]
+    },
+    // The collocated build resolves "/browser/*.js" against these declarations instead of against
+    // the sources, so it treats a shared module as something already built rather than compiling a
+    // second copy of it next to the .ts. They are intermediate output and stay out of wwwroot,
+    // which is published as it stands and would serve them to the browser.
+    "declaration": true,
+    "declarationDir": "../obj/browser-types"
+  },
+  // Shared modules, imported by other scripts rather than loaded for a component of their own.
+  // Only *.razor.js becomes a static web asset (see Zat.Tests.Runner.WebApp.csproj), so these cannot
+  // compile in place the way the collocated scripts do: they are emitted into wwwroot, which is
+  // served as it stands. That is also why they are authored here and not in wwwroot directly - a
+  // .ts under wwwroot would be published and served as source.
+  //
+  // This config sits in the folder it builds, and is named tsconfig.json, because that is the only
+  // name the editor's language service looks for: a config the project root excludes would leave
+  // these files in no project at all, and the "/browser/*" imports below unresolved while editing
+  // them.
+  "include": ["**/*.ts"]
+}

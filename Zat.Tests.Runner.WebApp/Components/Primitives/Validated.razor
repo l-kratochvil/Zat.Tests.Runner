@@ -1,0 +1,21 @@
+@using Zat.Tests.Runner.WebApp.Shared.Validation;
+
+<span class="root">
+    @this.ChildContent
+
+    @foreach (var issue in this.Validity.Issues)
+    {
+        <span class="validity-message @(issue.Severity is Validity.Severity.Warning ? "is-warning" : "is-error")"
+                role="@(issue.Severity is Validity.Severity.Warning ? "status" : "alert")">
+            @issue.Message
+        </span>
+    }
+</span>
+
+@code {
+    [Parameter, EditorRequired]
+    public required Validity Validity { get; set; } 
+
+    [Parameter, EditorRequired]
+    public required RenderFragment ChildContent { get; set; }
+}

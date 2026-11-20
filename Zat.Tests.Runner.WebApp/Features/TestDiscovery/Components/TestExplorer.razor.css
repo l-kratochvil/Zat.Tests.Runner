@@ -1,0 +1,28 @@
+.test-explorer {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+}
+
+/* The title and whatever the caller puts beside it share one row, at opposite ends. The row stays
+   put while the tree below it scrolls. */
+.pane-header {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.pane-header .pane-title {
+    margin-bottom: 0;
+}
+
+.test-tree {
+    flex: 1 1 auto;
+    margin: 0;
+    padding: 0 0.5rem 0.5rem;
+    overflow: auto;
+}

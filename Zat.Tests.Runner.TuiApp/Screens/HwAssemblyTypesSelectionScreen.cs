@@ -1,0 +1,56 @@
+namespace Zat.Tests.Runner.TuiApp.Screens;
+
+using System;
+
+using Spectre.Console;
+
+using Zat.Tests.Runner.TuiApp.Stores;
+using Zat.Z2xxTests.Common.Model;
+
+internal class HwAssemblyTypesSelectionScreen(
+    TestRunConfigStore testRunConfigStore,
+    Lazy<HomeScreen> homeScreen,
+    Lazy<ExitScreen> exitScreen,
+    Lazy<SettingsScreen> settingsScreen)
+    : ScreenBase(homeScreen, exitScreen, settingsScreen)
+{
+    private static readonly HwAssemblyType[] HwAssemblyTypes = [.. Enum
+        .GetValues<HwAssemblyType>()
+        .Where(x => x is not (HwAssemblyType.Unknown or HwAssemblyType.HW00))];
+
+    /// <inheritdoc/>
+    protected override ScreenRenderer CreateRenderer()
+        => new()
+        {
+            Main = ct =>
+            {
+                return ShowPromptAsync(
+                    () =>
+                    {
+                        var prompt = new MultiSelectionPrompt<HwAssemblyType>()
+                            .Title(Resources.HwAssemblyTypes_ChoiceText.AsPromptTitle())
+                            .MoreChoicesText(SharedTexts.MoreChoicesHelpText)
+                            .PageSize(10)
+                            .InstructionsText(SharedTexts.InstructionsHelpText)
+                            .AddChoices(HwAssemblyTypes);
+
+                        testRunConfigStore
+                            .HwAssemblyTypes?
+                            .ForEach(entity => prompt.Select(entity));
+
+                        return prompt;
+                    },
+                    selectedHwAssemblyType =>
+                    {
+                        testRunConfigStore.HwAssemblyTypes = [.. selectedHwAssemblyType];
+                        return RenderOutput.Default;
+                    },
+                    ct,
+                    validator: static selected =>
+                        selected.Contains(HwAssemblyType.HW02_BB1M) &&
+                        selected.Contains(HwAssemblyType.HW02_BB37M)
+                            ? ValidationResult.Error(Resources.SelectingMultipleHw02OptionsNotAllowed)
+                            : ValidationResult.Success());
+            },
+        };
+}

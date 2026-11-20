@@ -1,0 +1,49 @@
+﻿@page "/"
+
+@* Composition root of the main screen: it only arranges feature components
+   (the menu and the log pane live in MainLayout around this page). *@
+
+@using Zat.Tests.Runner.WebApp.Features.TestConfiguration.Components
+@using Zat.Tests.Runner.WebApp.Features.TestDiscovery.Components
+@using Zat.Tests.Runner.WebApp.Features.TestExecution.Components
+@using Zat.Tests.Runner.WebApp.Features.TestResultReporting.Components
+
+<PageTitle>Test Runner</PageTitle>
+
+<div class="test-runner-page">
+    <div class="main-pane">
+        <div class="explorer-pane">
+            @* Starting a run belongs to the tests it is started for, so the button is handed to
+               the explorer and drawn in its header row rather than in a bar of its own. *@
+            <TestExplorer>
+                <HeaderActions>
+                    <TestExecution />
+                </HeaderActions>
+            </TestExplorer>
+        </div>
+
+        @* The outer panes are the sized ones and the configurator takes what is left, so each
+           handle only moves the boundary the user grabbed. *@
+        <SplitterBar CssVariable="--test-explorer-width"
+                     StorageKey="Zat.Tests.Runner.test-explorer-width"
+                     MinSize="180"
+                     IsHorizontal="true"
+                     DefaultSizeRatio="0.333"
+                     Label="Resize the test explorer" />
+
+        <div class="configurator-pane">
+            <TestConfiguration />
+        </div>
+
+        <SplitterBar CssVariable="--test-result-width"
+                     StorageKey="Zat.Tests.Runner.test-result-width"
+                     MinSize="180"
+                     IsHorizontal="true"
+                     DefaultSizeRatio="0.333"
+                     Label="Resize the test result" />
+
+        <div class="result-pane">
+            <TestResult />
+        </div>
+    </div>
+</div>

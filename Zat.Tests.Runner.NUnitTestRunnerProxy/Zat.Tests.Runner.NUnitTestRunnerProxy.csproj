@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net481</TargetFramework>
+		<!-- Zat.Z2xxTests.dll (and other runtime test assemblies) are x86. Because the
+         proxy loads test assemblies into its own process (an AppDomain per test assembly), the
+         test host must run as a 32-bit process; otherwise loading throws
+         BadImageFormatException and no tests are discovered. -->
+		<PlatformTarget>x86</PlatformTarget>
+	</PropertyGroup>
+	
+	<ItemGroup>
+		<!-- NUnit should be at the same version the test assemblies reference. See docs/internals/common.md. -->
+		<PackageReference Include="NUnit" Version="3.14.0" />
+		<PackageReference Include="StreamJsonRpc" Version="2.25.29" />
+	</ItemGroup>
+	
+	<ItemGroup>
+		<ProjectReference Include="..\..\DevKit.Core\DevKit.Core\DevKit.Core.csproj" />
+		<ProjectReference Include="..\Zat.Tests.Runner.Common\Zat.Tests.Runner.Common.csproj" >
+			<PrivateAssets>all</PrivateAssets>
+		</ProjectReference>
+	</ItemGroup>
+	
+	<Target Name="CopyExchangeFiles" AfterTargets="Build">
+		<PropertyGroup>
+			<DestinationDir>$(NUnitTestRunnerProxyDir)$(AssemblyName)\</DestinationDir>
+		</PropertyGroup>
+		
+		<ItemGroup>
+			<OutFile Include="$(TargetDir)\**\*" />
+		</ItemGroup>
+		<RemoveDir Directories="$(DestinationDir)" />
+		<Copy SourceFiles="@(OutFile)" DestinationFiles="$(DestinationDir)%(OutFile.RecursiveDir)%(OutFile.Filename)%(OutFile.Extension)" />
+	</Target>
+	
+</Project>

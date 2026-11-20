@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<IsTestProject>true</IsTestProject>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="bunit" Version="1.35.3" />
+		<PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="22.3.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\Zat.Tests.Runner.WebApp\Zat.Tests.Runner.WebApp.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- The shipped settings are what the application reads at startup, so they are tested rather
+         than described a second time here. -->
+		<None Include="..\..\Zat.Tests.Runner.WebApp\appsettings.json" Link="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
+
+</Project>

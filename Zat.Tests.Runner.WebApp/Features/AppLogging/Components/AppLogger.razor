@@ -1,0 +1,122 @@
+@* Feature: AppLogging — "the user can see and filter what the application is doing".
+   Shown in MainLayout, so the log is reachable from every screen. *@
+
+@inherits Zat.Tests.Runner.WebApp.Components.MvvmComponentBase<AppLoggerViewModel>
+
+<section class="app-log-panel @(this.ViewModel.IsCollapsed ? "is-collapsed" : "is-expanded")">
+    <header class="app-log-header">
+        <button type="button"
+                class="btn btn-sm btn-outline-secondary toggle-button"
+                title="@(this.ViewModel.IsCollapsed ? "Expand the log" : "Collapse the log")"
+                @onclick="this.ToggleCollapsedAsync">
+            @(this.ViewModel.IsCollapsed ? "▲" : "▼")
+        </button>
+
+        <span class="pane-title">Log</span>
+
+        @if (this.ViewModel.IsCollapsed)
+        {
+            @* Collapsed means "no log content" — only the error count stays as a summary indicator. *@
+            <span class="error-count @(this.ViewModel.ErrorCount > 0 ? "has-errors" : null)">
+                @this.ViewModel.ErrorCount error(s)
+            </span>
+        }
+        else
+        {
+            <div class="filters">
+                <span class="filter-group">
+                    @foreach (var severity in Enum.GetValues<LogLevel>())
+                    {
+                        <label class="form-check-label filter-option">
+                            <input type="checkbox"
+                                   class="form-check-input"
+                                   checked="@this.ViewModel.IsSelected(severity)"
+                                   @onchange="args => this.ViewModel.SetSelected(severity, (bool)args.Value!)" />
+                            @severity
+                        </label>
+                    }
+                </span>
+            </div>
+
+            <button type="button"
+                    class="btn btn-sm btn-outline-secondary jump-button"
+                    @onclick="this.ScrollToNewestAsync">
+                Jump to newest
+            </button>
+        }
+    </header>
+
+    @if (!this.ViewModel.IsCollapsed)
+    {
+        <div class="app-log-entries" @ref="this.entriesElement">
+            @foreach (var entry in this.ViewModel.Entries)
+            {
+                <div class="log-entry severity-@entry.LogLevel.ToString().ToLowerInvariant()">
+                    <span class="entry-time">@entry.Timestamp.ToString("HH:mm:ss.fff")</span>
+                    <span class="entry-severity">@entry.LogLevel</span>
+                    <span class="entry-message">@entry.Message</span>
+                </div>
+
+                if (!string.IsNullOrEmpty(entry.Detail))
+                {
+                    <pre class="entry-detail">@entry.Detail</pre>
+                }
+            }
+        </div>
+    }
+</section>
+
+@code {
+    private const string ModulePath = "./Features/AppLogging/Components/AppLogger.razor.js";
+
+    private ElementReference entriesElement;
+    private JsModuleInterop? jsModuleInterop;
+
+    [Inject]
+    protected override AppLoggerViewModel ViewModel { get; set; } = null!;
+
+    /// <summary>
+    /// Raised after the panel collapse state changes.
+    /// </summary>
+    [Parameter]
+    public EventCallback<bool> CollapsedChanged { get; set; }
+
+    /// <inheritdoc/>
+    /// <remarks>
+    /// The log can grow faster than anybody reads it, and every entry would otherwise be a render.
+    /// </remarks>
+    protected override byte MaxRendersPerSecond
+        => 6;
+
+    /// <summary>
+    /// Gets or sets the factory the JS module interop is created through.
+    /// </summary>
+    [Inject]
+    private IJsModuleInteropFactory JsModuleInteropFactory { get; set; } = null!;
+
+    private JsModuleInterop JsModuleInterop
+        => this.jsModuleInterop ??= this.JsModuleInteropFactory.Create(ModulePath);
+
+    /// <inheritdoc/>
+    public override async ValueTask DisposeAsync()
+    {
+        // The module is only imported when the user jumps to the newest entry, so a panel nobody
+        // scrolled has nothing to release.
+        if (this.jsModuleInterop is not null)
+        {
+            await this.jsModuleInterop.DisposeAsync();
+        }
+
+        await base.DisposeAsync();
+    }
+
+    private Task ToggleCollapsedAsync()
+    {
+        this.ViewModel.ToggleCollapsed();
+
+        return this.CollapsedChanged.InvokeAsync(this.ViewModel.IsCollapsed);
+    }
+
+    private Task ScrollToNewestAsync()
+        => this.JsModuleInterop.InvokeVoidSafeAsync("scrollToEnd", this.entriesElement);
+}

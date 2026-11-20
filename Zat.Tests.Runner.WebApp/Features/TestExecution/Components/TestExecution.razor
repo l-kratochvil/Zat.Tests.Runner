@@ -1,0 +1,18 @@
+@* Feature: TestExecution — "the user can execute a test". *@
+
+@using Zat.Tests.Runner.Common.Net.Model
+
+@inherits Zat.Tests.Runner.WebApp.Components.MvvmComponentBase<TestExecutionViewModel>
+
+<button type="button"
+        class="@(this.ViewModel.TestRunState is TestRunState.Stopped ? "btn btn-sm btn-success" : "btn btn-sm btn-danger")"
+        disabled="@(!this.ViewModel.CurrentCommand.CanExecute(null))"
+        title="@(string.Join(Environment.NewLine, this.ViewModel.ExecutionBlockingReasons))"
+        @onclick="@(() => this.ViewModel.CurrentCommand.Execute(null))">
+    @(this.ViewModel.CurrentCommand.DisplayText)
+</button>
+
+@code {
+    [Inject]
+    protected override TestExecutionViewModel ViewModel { get; set; } = null!;
+}

@@ -1,0 +1,113 @@
+
+@* Feature: TestConfiguration — "the user can configure a test run". *@
+
+@using System.Linq
+
+@using Zat.Z2xxTests.Common.Model
+
+@inherits Zat.Tests.Runner.WebApp.Components.MvvmComponentBase<TestConfigurationViewModel>
+
+<section class="test-configurator">
+    <h2 class="pane-title">Configuration</h2>
+
+    <DataContext Data="@this.ViewModel">
+        <PropertyGrid>
+            <PropertyGridRow Label="Runtime version">
+                <BindingSelect
+                    Class="input-runtime-version"
+                    Binding="@(vm => vm.RuntimeVersion)"
+                    Options="this.ViewModel.RuntimeVersions"
+                    Placeholder="—" />
+            </PropertyGridRow>
+
+            @if (this.ViewModel.IsRuntimeTest)
+            {
+                <PropertyGridRow Label="HW assembly type">
+                    <BindingSelect
+                        Class="input-hw-assembly-type"
+                        Binding="@(vm => vm.TestedHwAssembly)"
+                        Options="TestStationLabels.Offered.Cast<HwAssemblyType?>()"
+                        Placeholder="—" />
+                </PropertyGridRow>
+            }
+
+            <Border>
+                <PropertyGridRow Label="Report to TestLink">
+                    <BindingCheckbox
+                        Class="input-report-to-testlink"
+                        Binding="@(vm => vm.IsTestLinkReportEnabled)" />
+                </PropertyGridRow>
+
+                @if (this.ViewModel.IsTestLinkReportEnabled)
+                {
+                    <PropertyGridRow Label="IDE version">
+                        <BindingInput
+                            Class="input-ide-version"
+                            Binding="@(vm => vm.IdeVersion)"
+                            Placeholder="X.Y.Z" />
+                    </PropertyGridRow>
+
+                    <PropertyGridRow Label="IDE release date">
+                        <BindingInput
+                            Class="input-ide-release-date"
+                            Binding="@(vm => vm.IdeReleaseDate)"
+                            Placeholder="DD.MM.YYYY" />
+                    </PropertyGridRow>
+
+                    <PropertyGridRow Label="Runtime release date">
+                        <BindingInput
+                            Class="input-runtime-release-date"
+                            Binding="@(vm => vm.RuntimeReleaseDate)"
+                            Placeholder="DD.MM.YYYY" />
+                    </PropertyGridRow>
+
+                    <Border>
+                        <PropertyGridRow Label="Beta version">
+                            <BindingCheckbox
+                                Class="input-is-beta-version"
+                                Binding="@(vm => vm.IsBetaVersion)" />
+                        </PropertyGridRow>
+
+                        @if (this.ViewModel.IsBetaVersion)
+                        {
+                            <PropertyGridRow Label="Beta number">
+                                <BindingInput
+                                    Class="input-beta-version"
+                                    Binding="@(vm => vm.BetaVersion)"
+                                    Placeholder="N" />
+                            </PropertyGridRow>
+                        }
+                    </Border>
+                }
+            </Border>
+
+            <Border>
+                <PropertyGridRow Label="Report by email">
+                    <BindingCheckbox
+                        Class="input-report-by-email"
+                        Binding="@(vm => vm.IsEmailNotificationEnabled)" />
+                </PropertyGridRow>
+
+                @if (this.ViewModel.IsEmailNotificationEnabled)
+                {
+                    <PropertyGridRow Label="Email addresses" UseLabel="false">
+                        <EmailAddressesEditor
+                            @bind-EmailAddresses="this.ViewModel.EmailAddresses"
+                            ExternalViewModel="this.ViewModel.EmailAddressesEditor" />
+                    </PropertyGridRow>
+                }
+            </Border>
+
+            <PropertyGridRow Label="Debug mode">
+                <BindingCheckbox
+                    Class="input-debug-mode"
+                    Binding="@(vm => vm.IsDebugModeEnabled)" />
+            </PropertyGridRow>
+        </PropertyGrid>
+    </DataContext>
+</section>
+
+@code {
+    [Inject]
+    protected override TestConfigurationViewModel ViewModel { get; set; } = null!;
+}

@@ -1,0 +1,83 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      // Run on the server + app opened in the VS Code Integrated Browser
+      // (workbench.action.browser.open), which the agent can access at runtime.
+      "name": "[ Debug ] WebApp: Integrated Browser",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-webapp-debug",
+      "program": "${workspaceFolder}/Zat.Tests.Runner.WebApp/bin/Debug/net10.0/Zat.Tests.Runner.WebApp.dll",
+      "cwd": "${workspaceFolder}/Zat.Tests.Runner.WebApp",
+      "serverReadyAction": {
+        "action": "openIntegratedBrowser",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+        "uriFormat": "%s"
+      }
+    },
+    {
+      "name": "[ Release ] WebApp: Integrated Browser",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-webapp-release",
+      "program": "${workspaceFolder}/Zat.Tests.Runner.WebApp/bin/Release/net10.0/Zat.Tests.Runner.WebApp.dll",
+      "cwd": "${workspaceFolder}/Zat.Tests.Runner.WebApp",
+      "serverReadyAction": {
+        "action": "openIntegratedBrowser",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+        "uriFormat": "%s"
+      }
+    },
+    {
+      // Run on the server + external Edge with DevTools (DOM inspection,
+      // network tab for the SignalR websocket, console). Attaches the JS debugger too.
+      "name": "[ Debug ] WebApp: Edge + DevTools",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-webapp-debug",
+      "program": "${workspaceFolder}/Zat.Tests.Runner.WebApp/bin/Debug/net10.0/Zat.Tests.Runner.WebApp.dll",
+      "cwd": "${workspaceFolder}/Zat.Tests.Runner.WebApp",
+      "serverReadyAction": {
+        "action": "debugWithEdge",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+        "uriFormat": "%s",
+        "webRoot": "${workspaceFolder}/Zat.Tests.Runner.WebApp/wwwroot"
+      }
+    },
+    {
+      "name": "[ Release ] WebApp: Edge + DevTools",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-webapp-release",
+      "program": "${workspaceFolder}/Zat.Tests.Runner.WebApp/bin/Release/net10.0/Zat.Tests.Runner.WebApp.dll",
+      "cwd": "${workspaceFolder}/Zat.Tests.Runner.WebApp",
+      "serverReadyAction": {
+        "action": "debugWithEdge",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+        "uriFormat": "%s",
+        "webRoot": "${workspaceFolder}/Zat.Tests.Runner.WebApp/wwwroot"
+      }
+    },
+    {
+      "console": "externalTerminal",
+      "cwd": "${workspaceFolder}/Zat.Tests.Runner.TuiApp/bin/Debug/net10.0",
+      // Spectre.Console needs a real console handle; the Debug Console (internalConsole) has none.
+      "name": "[ Debug ] TuiApp",
+      "preLaunchTask": "build-tuiapp-debug",
+      "program": "${workspaceFolder}/Zat.Tests.Runner.TuiApp/bin/Debug/net10.0/Zat.Tests.Runner.TuiApp.dll",
+      "request": "launch",
+      "type": "coreclr"
+    },
+    {
+      "console": "externalTerminal",
+      "cwd": "${workspaceFolder}/Zat.Tests.Runner.TuiApp/bin/Release/net10.0",
+      // Spectre.Console needs a real console handle; the Debug Console (internalConsole) has none.
+      "name": "[ Release ] TuiApp",
+      "preLaunchTask": "build-tuiapp-release",
+      "program": "${workspaceFolder}/Zat.Tests.Runner.TuiApp/bin/Release/net10.0/Zat.Tests.Runner.TuiApp.dll",
+      "request": "launch",
+      "type": "coreclr"
+    }
+  ]
+}

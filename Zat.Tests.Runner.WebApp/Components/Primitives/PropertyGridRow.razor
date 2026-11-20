@@ -1,0 +1,67 @@
+@* One property of a property grid: its name, its input, and what is wrong with it.
+
+   The name and the input are wrapped in one label element so that the label belongs to the input
+   without anybody writing an identifier for the two to agree on; the wrapper is laid out as if it
+   were not there, which is what keeps every label in one column and every input in the other.
+   A group of controls is never wrapped: a label belongs to its first control only, so a click on
+   the name would press whichever button happens to come first. *@
+
+@if (this.UseLabel)
+{
+    <label class="property-grid-row">@this.Cells</label>
+}
+else
+{
+    <span class="property-grid-row">@this.Cells</span>
+}
+
+@code {
+    /// <summary>
+    /// Gets or sets the property label.
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public string Label { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the row is wrapped in a label element; turn it off for a group of controls.
+    /// </summary>
+    [Parameter]
+    public bool UseLabel { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets the input shown for the property.
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>
+    /// Gets or sets the grid the row is laid out by.
+    /// </summary>
+    [CascadingParameter]
+    private PropertyGrid? Grid { get; set; }
+
+    private RenderFragment Cells =>
+        @<text>
+            <span class="property-grid-row-label">@this.Label</span>
+
+            <span class="property-grid-row-value">
+                @this.ChildContent
+            </span>
+        </text>;
+
+    /// <inheritdoc/>
+    protected override void OnParametersSet()
+    {
+        // Outside a grid the row has no columns to fall into, which shows up as a quietly broken
+        // layout rather than as a mistake, so it is said out loud instead.
+        if (this.Grid is null)
+        {
+            throw new InvalidOperationException(
+                $"{nameof(PropertyGridRow)} must be placed inside a {nameof(PropertyGrid)}.");
+        }
+
+        base.OnParametersSet();
+    }
+}

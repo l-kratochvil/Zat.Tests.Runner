@@ -1,0 +1,25 @@
+.splitter-bar {
+  flex: 0 0 auto;
+  height: 6px;
+  background-color: #dee2e6;
+  cursor: row-resize;
+  /* Keeps a touch drag from being turned into a page scroll. */
+  touch-action: none;
+}
+
+.splitter-bar:hover,
+.splitter-bar.is-dragging {
+  background-color: #adb5bd;
+}
+
+.splitter-bar:focus-visible {
+  outline: 2px solid #0d6efd;
+  outline-offset: -2px;
+}
+
+.splitter-bar.is-horizontal {
+  align-self: stretch;
+  width: 6px;
+  height: auto;
+  cursor: col-resize;
+}

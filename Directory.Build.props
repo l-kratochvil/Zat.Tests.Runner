@@ -1,13 +1,22 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-	<PropertyGroup>			 
+	<PropertyGroup>
 		<!-- Common props -->
-		<LangVersion>latest</LangVersion>
+		<LangVersion>preview</LangVersion>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<SignAssembly>true</SignAssembly>
+		<AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)\Key.snk</AssemblyOriginatorKeyFile>
+		<!-- Shared by the applications, so one set of user secrets serves them all. Only projects
+		     with the user secrets build targets (the applications) stamp it into their assembly. -->
+		<UserSecretsId>Zat.Tests.Runner</UserSecretsId>
 		<!-- Output exchange props -->
-		<ExchangeDir>$(SolutionDir)Exchange\</ExchangeDir>
+		<!-- Anchored to this file rather than to $(SolutionDir), which is only defined when the
+		     build was started from the solution: a project built on its own (dotnet run or dotnet
+		     watch against a single project) would otherwise look for the exchange next to itself
+		     and silently copy nothing. -->
+		<ExchangeDir>$(MSBuildThisFileDirectory)Exchange\</ExchangeDir>
 		<NUnitTestRunnerProxyDir>$(ExchangeDir)NUnitTestRunnerProxy\</NUnitTestRunnerProxyDir>
-		<IncludeNUnitTestRunnerProxyDirOutput Condition="'$(IncludeNUnitTestRunnerProxyDirOutput)' == ''">false</IncludeNUnitTestRunnerProxyDirOutput>
+		<NUnitTestAssembliesDir>$(ExchangeDir)NUnitTestAssemblies\</NUnitTestAssembliesDir>
 	</PropertyGroup>
 </Project>

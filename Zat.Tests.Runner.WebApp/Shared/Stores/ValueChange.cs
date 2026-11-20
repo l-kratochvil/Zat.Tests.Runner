@@ -1,0 +1,1 @@
+public record ValueChange<TValue>(TValue Value);

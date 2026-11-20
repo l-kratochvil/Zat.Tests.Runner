@@ -1,0 +1,115 @@
+@* A drag handle that resizes the pane on one side of it. The size is written to a CSS variable on
+   the document root, so the resized element only has to read that variable. *@
+
+@implements IAsyncDisposable
+
+<div class="@(this.IsHorizontal ? "splitter-bar is-horizontal" : "splitter-bar")"
+     role="separator"
+    aria-orientation="@(this.IsHorizontal ? "vertical" : "horizontal")"
+     aria-label="@this.Label"
+     title="@this.Label"
+     tabindex="0"
+     @ref="this.handle">
+</div>
+
+@code {
+    private const string ModulePath = "./Components/Layout/SplitterBar.razor.js";
+
+    private ElementReference handle;
+    private bool isInitialized;
+    private JsModuleInterop? jsModuleInterop;
+
+    /// <summary>
+    /// Gets or sets the factory the JS module interop is created through.
+    /// </summary>
+    [Inject]
+    private IJsModuleInteropFactory JsModuleInteropFactory { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the CSS custom property that stores the pane size, for example
+    /// <c>--app-log-height</c>.
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public string CssVariable { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the local-storage key that remembers the pane size.
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public string StorageKey { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the minimum pane size in pixels.
+    /// </summary>
+    [Parameter]
+    public int MinSize { get; set; } = 120;
+
+    /// <summary>
+    /// Gets or sets whether the splitter resizes panes horizontally.
+    /// </summary>
+    [Parameter]
+    public bool IsHorizontal { get; set; }
+
+    /// <summary>
+    /// Gets or sets the largest pane size as a fraction of the relevant window dimension.
+    /// </summary>
+    [Parameter]
+    public double MaxSizeRatio { get; set; } = 0.7;
+
+    /// <summary>
+    /// Gets or sets the pane size used before <see cref="StorageKey"/> has a value.
+    /// </summary>
+    [Parameter]
+    public double DefaultSizeRatio { get; set; } = 0.25;
+
+    /// <summary>
+    /// Gets or sets the label of the resized pane for screen readers and the tooltip.
+    /// </summary>
+    [Parameter]
+    public string Label { get; set; } = "Resize";
+
+    private JsModuleInterop JsModuleInterop
+        => this.jsModuleInterop ??= this.JsModuleInteropFactory.Create(ModulePath);
+
+    /// <inheritdoc/>
+    public async ValueTask DisposeAsync()
+    {
+        if (this.isInitialized)
+        {
+            await this.JsModuleInterop.InvokeVoidSafeAsync("dispose", this.handle);
+        }
+
+        // A component that never reached the browser never asked for the module either, and
+        // creating a wrapper only to dispose it would need a factory it was never given.
+        if (this.jsModuleInterop is not null)
+        {
+            await this.jsModuleInterop.DisposeAsync();
+        }
+    }
+
+    /// <inheritdoc/>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        await this.JsModuleInterop.InvokeVoidSafeAsync(
+            "initialize",
+            this.handle,
+            new
+            {
+                this.CssVariable,
+                this.StorageKey,
+                this.MinSize,
+                this.IsHorizontal,
+                this.MaxSizeRatio,
+                this.DefaultSizeRatio,
+            });
+
+        this.isInitialized = true;
+    }
+}

@@ -1,0 +1,64 @@
+# Zat.Tests.Runner 2.0
+
+A tool for running automated NUnit test suites against a test station and reporting the results to
+TestLink.
+
+The solution contains two applications with the same purpose: `Zat.Tests.Runner.TuiApp`, a
+text-based application run in a terminal, and `Zat.Tests.Runner.WebApp`, a Blazor Server front-end.
+Both run the tests through the shared NUnit test runner proxy.
+
+## Setup
+
+The solution uses submodules that need to me initialized by running command 'git submodule update --init --recursive'.
+
+### Setting up DevKit.Core
+
+**A sibling clone of DevKit.Core is required.** The solution references it by relative path, so the
+two repositories must sit side by side:
+
+```text
+<parent>
+├── Zat.Tests.Runner2.0
+└── DevKit.Core
+```
+
+Without it the build fails on an unresolvable project reference.
+
+### Setting up the TestLink
+
+Uploading test results to TestLink **requires an API key** generated for a user. A dedicated `runner` user is available for this purpose. Generate a **new key** whenever the key owner's **permissions change**.
+
+### Setting up the secrets
+
+Both applications read the SMTP credentials and the TestLink API key from their configuration, see
+[how the secrets are read](docs/internals/common.md#secrets).
+
+- **Development**: store them as user secrets. User secrets are configured through a project
+  (`--project`); the shared ones, read by both applications, through `Zat.Tests.Runner.Common.Net`, e.g.
+  `dotnet user-secrets set "TestLinkApi:ApiKey" "<key>" --project Zat.Tests.Runner.Common.Net`.
+  An application project (e.g. `--project Zat.Tests.Runner.WebApp`) works too, as all projects share
+  one `UserSecretsId`.
+- **Production**: user secrets are not read there, so **set them as environment variables**:
+
+| Environment variable                | Value            |
+| ----------------------------------- | ---------------- |
+| `ZatTestsRunner_SmtpAuth__UserName` | SMTP user name   |
+| `ZatTestsRunner_SmtpAuth__Password` | SMTP password    |
+| `ZatTestsRunner_TestLink__ApiKey`   | TestLink API key |
+
+## Running the applications
+
+In VS Code, launch both applications through the `.vscode/launch.json` profiles, which configure the
+matching build task, working directory, external console (`TuiApp`), and browser integration
+(`WebApp`). Every profile comes in a `[ Debug ]` and a `[ Release ]` variant for the respective
+MSBuild configuration (`Debug` runs in `Development`, `Release` in `Production`).
+
+## Where to read on
+
+| Document                                  | What it is for                                                         |
+| ----------------------------------------- | ---------------------------------------------------------------------- |
+| [docs/ADR](docs/ADR/)                     | Decisions, why they were taken, and what they cost. Dated, not edited. |
+| [docs/internals](docs/internals/index.md) | How the non-obvious mechanisms actually work today, per application.   |
+| [docs/rules](docs/rules/index.md)         | Rules that code in this repository must follow, and why.               |
+| [AGENTS.md](AGENTS.md)                    | Working agreements for agents contributing to this repository.         |
+| [GLOSSARY.md](GLOSSARY.md)                | The vocabulary of this repository: what each domain term means here.   |
