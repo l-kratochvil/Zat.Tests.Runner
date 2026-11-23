@@ -25,6 +25,24 @@ internal sealed record Choice<TValue>
 
 internal static class Choice
 {
+    /// <summary>
+    /// Treats choices as equal when their values are of the same type, so a choice is recognised across rebuilt choice
+    /// lists regardless of its display text or the value's instance.
+    /// </summary>
+    /// <typeparam name="TValue">The choice value type.</typeparam>
+    internal sealed class ValueTypeComparer<TValue> : IEqualityComparer<Choice<TValue>>
+    {
+        public static ValueTypeComparer<TValue> Instance { get; } = new();
+
+        /// <inheritdoc/>
+        public bool Equals(Choice<TValue>? x, Choice<TValue>? y)
+            => x?.Value?.GetType() == y?.Value?.GetType();
+
+        /// <inheritdoc/>
+        public int GetHashCode(Choice<TValue> obj)
+            => obj.Value?.GetType().GetHashCode() ?? 0;
+    }
+
     public static Maybe<Choice<TChoiceValue>> InitChoice<TChoiceValue>(
         TChoiceValue choiceValue,
         string choiceDisplayText,

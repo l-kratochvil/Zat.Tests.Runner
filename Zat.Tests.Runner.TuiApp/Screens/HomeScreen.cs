@@ -30,6 +30,8 @@ internal sealed class HomeScreen(
     RunTestScreen runTestScreen)
     : ScreenBase(homeScreen, exitScreen, settingsScreen)
 {
+    private Choice<IScreen>? lastSelectedChoice;
+
     /// <inheritdoc/>
     protected override Configuration Config { get; init; } = new()
     {
@@ -44,7 +46,7 @@ internal sealed class HomeScreen(
             Main = ct =>
             {
                 var choices = this.GetChoices();
-                var prompt = new SelectionPrompt<Choice<IScreen>>()
+                var prompt = new SelectionPrompt<Choice<IScreen>>(Choice.ValueTypeComparer<IScreen>.Instance)
                     .Title(string.Empty) // The console is buggy if no title is set
                     .PageSize(10)
                     .MoreChoicesText(SharedTexts.MoreChoicesHelpText)
@@ -54,9 +56,18 @@ internal sealed class HomeScreen(
                         foreground: Color.Aqua,
                         decoration: Spectre.Console.Decoration.Bold));
 
+                if (this.lastSelectedChoice is not null)
+                {
+                    prompt.DefaultValue(this.lastSelectedChoice);
+                }
+
                 return ShowPromptAsync(
                     prompt,
-                    choice => new RenderOutput(NextScreen: choice.Value),
+                    choice =>
+                    {
+                        this.lastSelectedChoice = choice;
+                        return new RenderOutput(NextScreen: choice.Value);
+                    },
                     ct);
             },
             Info = () =>
