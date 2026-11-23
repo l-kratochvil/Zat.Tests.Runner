@@ -26,7 +26,8 @@ internal record AppState(
     [property: JsonPropertyName("isEmailNotificationEnabled")]
     bool? IsEmailNotificationEnabled)
 {
-    public AppState() : this(null, null, null, null, null, null, null, null, null, null)
+    public AppState()
+        : this(null, null, null, null, null, null, null, null, null, null)
     {
     }
 
@@ -35,4 +36,10 @@ internal record AppState(
     /// </summary>
     [JsonPropertyName("emailAddresses")]
     public string[] EmailAddresses { get; init; } = [];
+
+    /// <summary>
+    /// Gets the execution paths of the selected test entities; empty also when the state file predates them.
+    /// </summary>
+    [JsonPropertyName("selectedExecutionPaths")]
+    public string[] SelectedExecutionPaths { get; init; } = [];
 }

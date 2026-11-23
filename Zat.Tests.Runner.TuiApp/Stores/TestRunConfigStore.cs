@@ -10,6 +10,8 @@ using Zat.Z2xxTests.Common.Model;
 /// <remarks>
 /// The tests to choose from follow <see cref="IExploredTestAssemblyStore"/>; once the test assembly holds other test entities,
 /// the test selection is cleared, as it may no longer be what the user selected.
+/// The test selection is kept as execution paths in the application state, so it survives a restart; those the test
+/// tree no longer holds are skipped.
 /// </remarks>
 internal class TestRunConfigStore
 {
@@ -28,7 +30,12 @@ internal class TestRunConfigStore
     public IEnumerable<TestSuiteEntity> LoadedTestSuites
         => this.exploredTestAssemblyStore.TestSuites;
 
-    public IEnumerable<TestEntity> SelectedTestEntities { get; set; } = [];
+    public IEnumerable<TestEntity> SelectedTestEntities
+    {
+        get => FindTestEntities(this.LoadedTestSuites, this.appStateStore.Current.SelectedExecutionPaths);
+        set => this.appStateStore.Update(
+            current => current with { SelectedExecutionPaths = [.. value.Select(entity => entity.ExecutionPath)] });
+    }
 
     public bool RuntimeTestEntitiesSelected
         => this.SelectedTestEntities.Any(x => x.TestType is TestType.Runtime);
@@ -108,6 +115,14 @@ internal class TestRunConfigStore
         get => this.appStateStore.Current.HwAssemblyTypes;
         set => this.appStateStore.Update(
             current => current with { HwAssemblyTypes = value });
+    }
+
+    private static TestEntity[] FindTestEntities(IEnumerable<TestSuiteEntity> testSuites, string[] executionPaths)
+    {
+        var searchedExecutionPaths = executionPaths.ToHashSet(StringComparer.Ordinal);
+        return [.. testSuites
+            .AllTestEntities()
+            .Where(entity => searchedExecutionPaths.Contains(entity.ExecutionPath))];
     }
 
     private void OnTestTreeChanged(ExploredTestAssemblyStoreChange change)
