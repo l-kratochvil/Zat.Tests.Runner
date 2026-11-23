@@ -286,10 +286,10 @@
     <value>Unknown</value>
   </data>
   <data name="SelectedEntitiesCount" xml:space="preserve">
-    <value>Selected entities</value>
+    <value>Selected entities count</value>
   </data>
   <data name="SelectedEntities" xml:space="preserve">
-    <value>Selected entities count</value>
+    <value>Selected entities</value>
   </data>
   <data name="TestEntities" xml:space="preserve">
     <value>Test entities</value>

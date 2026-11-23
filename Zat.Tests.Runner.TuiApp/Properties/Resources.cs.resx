@@ -286,10 +286,10 @@
     <value>Neznámé</value>
   </data>
   <data name="SelectedEntitiesCount" xml:space="preserve">
-    <value>Navolené entity</value>
+    <value>Počet navolených entity</value>
   </data>
   <data name="SelectedEntities" xml:space="preserve">
-    <value>Počet navolených entity</value>
+    <value>Navolené entity</value>
   </data>
   <data name="TestEntities" xml:space="preserve">
     <value>Testovací entity</value>
