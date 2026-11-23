@@ -108,6 +108,7 @@ internal class EmailAddressesScreen(
             {
                 Main = ct => ShowPromptAsync(
                     () => new MultiSelectionPrompt<string>()
+                        .ApplyDefaultStyle()
                         .Title(Resources.SelectEmailAddressesToRemove_PromptText.AsPromptTitle())
                         .MoreChoicesText(SharedTexts.MoreChoicesHelpText)
                         .PageSize(10)

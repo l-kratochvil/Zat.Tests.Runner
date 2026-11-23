@@ -14,7 +14,6 @@ internal class EmptyScreen(
             {
                 var table = new Table()
                     .AddColumn(new TableColumn("*** EMPTY SCREEN ***"))
-                    .LeftAligned()
                     .AddRow("*** (PRESS ANY KEY TO RETURN TO THE HOME SCREEN) ***");
                 table.Columns[0].Alignment = Justify.Center;
 

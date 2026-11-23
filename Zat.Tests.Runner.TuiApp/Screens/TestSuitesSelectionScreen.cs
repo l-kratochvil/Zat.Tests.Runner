@@ -24,6 +24,7 @@ internal class TestSuitesSelectionScreen(
                 var testSuites = testRunConfigStore.LoadedTestSuites.ToArray();
 
                 var prompt = new MultiSelectionPrompt<TestEntity>(TestEntityEqualityComparer)
+                    .ApplyDefaultStyle()
                     .Title(Resources.SelectTestSuites_PromptText.AsPromptTitle())
                     .MoreChoicesText(SharedTexts.MoreChoicesHelpText)
                     .InstructionsText(SharedTexts.InstructionsHelpText)

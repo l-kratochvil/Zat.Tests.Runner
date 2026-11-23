@@ -28,6 +28,7 @@ internal class HwAssemblyTypesSelectionScreen(
                     () =>
                     {
                         var prompt = new MultiSelectionPrompt<HwAssemblyType>()
+                            .ApplyDefaultStyle()
                             .Title(Resources.HwAssemblyTypes_ChoiceText.AsPromptTitle())
                             .MoreChoicesText(SharedTexts.MoreChoicesHelpText)
                             .PageSize(10)

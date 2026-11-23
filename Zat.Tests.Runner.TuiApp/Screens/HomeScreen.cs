@@ -50,7 +50,9 @@ internal sealed class HomeScreen(
                     .MoreChoicesText(SharedTexts.MoreChoicesHelpText)
                     .AddChoiceTree(choices)
                     .UseConverter(choice => choice.Text)
-                    .HighlightStyle(new Style(foreground: Color.Aqua, decoration: Spectre.Console.Decoration.Bold));
+                    .HighlightStyle(new Style(
+                        foreground: Color.Aqua,
+                        decoration: Spectre.Console.Decoration.Bold));
 
                 return ShowPromptAsync(
                     prompt,

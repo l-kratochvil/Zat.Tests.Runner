@@ -29,6 +29,7 @@ internal class TestCasesSelectionScreen(
                 var testSuites = testRunConfigStore.LoadedTestSuites.ToArray();
                 var selectedTestEntities = testRunConfigStore.SelectedTestEntities.ToArray();
                 var prompt = new MultiSelectionPrompt<TestEntity>(TestEntityEqualityComparer)
+                    .ApplyDefaultStyle()
                     .Title(Resources.SelectTestSuitesToSelectTestCases_PromptText.AsPromptTitle())
                     .MoreChoicesText(SharedTexts.MoreChoicesHelpText)
                     .InstructionsText(SharedTexts.InstructionsHelpText)
@@ -91,6 +92,7 @@ internal class TestCasesSelectionScreen(
                 Main = async ct =>
                 {
                     var prompt = new MultiSelectionPrompt<TestEntity>(TestEntityEqualityComparer)
+                        .ApplyDefaultStyle()
                         .Title(Resources.SelectTestCases_PromptText.AsPromptTitle())
                         .MoreChoicesText(SharedTexts.MoreChoicesHelpText)
                         .InstructionsText(SharedTexts.InstructionsHelpText)
